@@ -33,14 +33,6 @@ export const DeskDisplay = ({ spotlight, deskLamp, monitorLight }: DeskDisplayPr
   const containerRef = useRef<HTMLDivElement>(null);
   const [currentState, setCurrentState] = useState("000");
   const [isTransitioning, setIsTransitioning] = useState(false);
-  
-  // Mouse position tracking
-  const mouseX = useMotionValue(0);
-  const mouseY = useMotionValue(0);
-  
-  // Smooth spring animation for parallax
-  const smoothX = useSpring(mouseX, { stiffness: 150, damping: 30 });
-  const smoothY = useSpring(mouseY, { stiffness: 150, damping: 30 });
 
   // Calculate current lighting state
   const getCurrentState = () => {
@@ -64,27 +56,6 @@ export const DeskDisplay = ({ spotlight, deskLamp, monitorLight }: DeskDisplayPr
     }
   }, [spotlight, deskLamp, monitorLight, currentState]);
 
-  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (!containerRef.current) return;
-
-    const rect = containerRef.current.getBoundingClientRect();
-    const centerX = rect.left + rect.width / 2;
-    const centerY = rect.top + rect.height / 2;
-
-    // Calculate offset from center (-1 to 1)
-    const offsetX = (e.clientX - centerX) / (rect.width / 2);
-    const offsetY = (e.clientY - centerY) / (rect.height / 2);
-
-    // Apply parallax (movement in opposite direction)
-    mouseX.set(offsetX * -15);
-    mouseY.set(offsetY * -10);
-  };
-
-  const handleMouseLeave = () => {
-    mouseX.set(0);
-    mouseY.set(0);
-  };
-
   // Calculate glow intensity based on number of lights on
   const lightsOn = [spotlight, deskLamp, monitorLight].filter(Boolean).length;
   const glowIntensity = lightsOn / 3;
@@ -99,8 +70,6 @@ export const DeskDisplay = ({ spotlight, deskLamp, monitorLight }: DeskDisplayPr
              0 20px 60px rgba(0, 0, 0, 0.5)`
           : '0 20px 60px rgba(0, 0, 0, 0.5)'
       }}
-      onMouseMove={handleMouseMove}
-      onMouseLeave={handleMouseLeave}
     >
       {/* Ambient glow overlay */}
       <motion.div
@@ -117,13 +86,7 @@ export const DeskDisplay = ({ spotlight, deskLamp, monitorLight }: DeskDisplayPr
         }}
       />
       
-      <motion.div
-        className="relative w-full h-full"
-        style={{
-          x: smoothX,
-          y: smoothY,
-        }}
-      >
+      <div className="relative w-full h-full">
         {/* Stack all 8 images with smooth crossfade */}
         {Object.entries(lightingStates).map(([state, image]) => {
           const isActive = state === currentState;
@@ -154,7 +117,7 @@ export const DeskDisplay = ({ spotlight, deskLamp, monitorLight }: DeskDisplayPr
             />
           );
         })}
-      </motion.div>
+      </div>
       
       {/* Transition overlay for extra smoothness */}
       <motion.div
