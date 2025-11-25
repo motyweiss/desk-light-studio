@@ -92,20 +92,25 @@ export const LightHotspot = ({
             viewBox="0 0 60 60"
             className="overflow-visible"
           >
-            {/* Outer glow ring - visible on hover/active */}
+            {/* Outer glow ring - frosted glass style */}
             <motion.circle
               cx="30"
               cy="30"
               r="20"
               fill="none"
-              stroke={glowColor}
-              strokeWidth="2"
+              stroke="rgba(255, 255, 255, 0.3)"
+              strokeWidth="1.5"
               initial={{ opacity: 0, scale: 0.8 }}
               animate={{
-                opacity: isHovered || isOn ? 0.4 : 0,
+                opacity: isHovered || isOn ? 0.5 : 0,
                 scale: isHovered ? 1.2 : 1,
               }}
               transition={{ duration: 0.3 }}
+              style={{
+                filter: isOn 
+                  ? `drop-shadow(0 0 4px rgba(251, 191, 36, ${intensityRatio * 0.4}))`
+                  : 'none'
+              }}
             />
 
             {/* Pulse ring - infinite subtle animation */}
@@ -128,29 +133,31 @@ export const LightHotspot = ({
               }}
             />
 
-            {/* Main dot with glow */}
+            {/* Main dot with frosted glass effect */}
             <motion.g>
-              {/* Glow effect */}
+              {/* Outer glow - amber halo */}
               <motion.circle
                 cx="30"
                 cy="30"
                 r="12"
-                fill={glowColor}
+                fill={isOn ? "rgba(251, 191, 36, 0.3)" : "rgba(255, 255, 255, 0.1)"}
                 initial={{ opacity: 0 }}
                 animate={{
-                  opacity: isOn ? 0.5 : 0.2,
+                  opacity: isOn ? (0.4 + intensityRatio * 0.3) : 0.2,
                   scale: isPressed ? 0.9 : isHovered ? 1.2 : 1,
                 }}
                 transition={{ duration: 0.2 }}
                 style={{ filter: 'blur(8px)' }}
               />
               
-              {/* Solid dot */}
+              {/* Frosted glass dot - main element */}
               <motion.circle
                 cx="30"
                 cy="30"
                 r="8"
-                fill={dotColor}
+                fill="rgba(255, 255, 255, 0.2)"
+                stroke="rgba(255, 255, 255, 0.4)"
+                strokeWidth="1"
                 animate={{
                   scale: isPressed ? 0.85 : isHovered ? 1.15 : 1,
                 }}
@@ -159,15 +166,36 @@ export const LightHotspot = ({
                   stiffness: 500,
                   damping: 30,
                 }}
+                style={{
+                  filter: isOn 
+                    ? `drop-shadow(0 0 6px rgba(251, 191, 36, ${intensityRatio * 0.6}))`
+                    : 'none'
+                }}
               />
 
-              {/* Inner highlight */}
+              {/* Inner warm glow when on */}
+              {isOn && (
+                <motion.circle
+                  cx="30"
+                  cy="30"
+                  r="6"
+                  fill={`rgba(251, 191, 36, ${intensityRatio * 0.4})`}
+                  initial={{ opacity: 0, scale: 0.5 }}
+                  animate={{ 
+                    opacity: 1,
+                    scale: 1,
+                  }}
+                  transition={{ duration: 0.3 }}
+                />
+              )}
+
+              {/* Inner highlight - glass reflection */}
               <motion.circle
                 cx="28"
                 cy="28"
-                r="3"
+                r="2.5"
                 fill="white"
-                opacity={isOn ? 0.8 : 0.4}
+                opacity={0.6}
                 animate={{
                   scale: isPressed ? 0.8 : 1,
                 }}
