@@ -59,11 +59,11 @@ export const DeskDisplay = ({
     const newState = getCurrentState();
     if (newState !== currentState) {
       setIsTransitioning(true);
-      // Small delay to create natural lighting transition feel
+      // Gentle delay for natural lighting transition
       const timer = setTimeout(() => {
         setCurrentState(newState);
         setIsTransitioning(false);
-      }, 50);
+      }, 150);
       return () => clearTimeout(timer);
     }
   }, [spotlight, deskLamp, monitorLight, currentState]);
@@ -144,16 +144,16 @@ export const DeskDisplay = ({
               initial={{ opacity: 0 }}
               animate={{ 
                 opacity: isActive ? 1 : 0,
-                filter: isActive ? 'brightness(1)' : 'brightness(0.95)',
+                filter: isActive ? 'brightness(1) blur(0px)' : 'brightness(0.98) blur(1px)',
               }}
               transition={{ 
                 opacity: {
-                  duration: 0.6,
-                  ease: [0.4, 0, 0.2, 1], // Smooth cubic-bezier easing
+                  duration: 1.2,
+                  ease: [0.25, 0.1, 0.25, 1], // Gentle ease-in-out
                 },
                 filter: {
-                  duration: 0.5,
-                  ease: [0.4, 0, 0.2, 1],
+                  duration: 1,
+                  ease: [0.25, 0.1, 0.25, 1],
                 }
               }}
               style={{
@@ -168,11 +168,11 @@ export const DeskDisplay = ({
       <motion.div
         className="absolute inset-0 bg-black pointer-events-none z-20"
         animate={{
-          opacity: isTransitioning ? 0.1 : 0,
+          opacity: isTransitioning ? 0.05 : 0,
         }}
         transition={{
-          duration: 0.3,
-          ease: [0.4, 0, 0.2, 1]
+          duration: 0.6,
+          ease: [0.25, 0.1, 0.25, 1]
         }}
       />
 
