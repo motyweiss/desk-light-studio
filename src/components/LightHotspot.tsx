@@ -171,14 +171,13 @@ export const LightHotspot = ({
           <AnimatePresence>
             {isHovered && (
               <motion.div
-                className="absolute -top-10 left-1/2 -translate-x-1/2 bg-background/90 backdrop-blur-sm px-3 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap shadow-lg border border-border"
-                initial={{ opacity: 0, y: 5 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: 5 }}
+                className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-background/90 backdrop-blur-sm px-3 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap shadow-lg border border-border pointer-events-none"
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.9 }}
                 transition={{ duration: 0.2 }}
               >
                 {label}
-                <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-background/90 rotate-45 border-r border-b border-border" />
               </motion.div>
             )}
           </AnimatePresence>
