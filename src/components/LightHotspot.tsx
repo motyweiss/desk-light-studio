@@ -302,7 +302,7 @@ export const LightHotspot = ({
                     : '-bottom-16 left-1/2 -translate-x-1/2'
                   }
                   bg-white/8 backdrop-blur-xl
-                  px-7 py-5 rounded-full 
+                  px-8 py-5 rounded-full
                   shadow-[0_8px_32px_rgba(0,0,0,0.4),0_2px_8px_rgba(0,0,0,0.2),inset_0_1px_1px_rgba(255,255,255,0.1)]
                   border border-white/20
                   min-w-[240px]
