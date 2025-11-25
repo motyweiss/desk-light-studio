@@ -3,15 +3,15 @@ import { motion } from "framer-motion";
 import { DeskDisplay } from "@/components/DeskDisplay";
 
 const Index = () => {
-  const [spotlight, setSpotlight] = useState(false);
-  const [deskLamp, setDeskLamp] = useState(false);
-  const [monitorLight, setMonitorLight] = useState(false);
+  const [spotlightIntensity, setSpotlightIntensity] = useState(0); // 0-100
+  const [deskLampIntensity, setDeskLampIntensity] = useState(0);
+  const [monitorLightIntensity, setMonitorLightIntensity] = useState(0);
 
-  // Calculate page background color based on current lighting state
+  // Calculate page background color based on light intensities
   const getPageBackgroundColor = () => {
-    const spotlightBit = spotlight ? "1" : "0";
-    const deskLampBit = deskLamp ? "1" : "0";
-    const monitorLightBit = monitorLight ? "1" : "0";
+    const spotlightBit = spotlightIntensity > 0 ? "1" : "0";
+    const deskLampBit = deskLampIntensity > 0 ? "1" : "0";
+    const monitorLightBit = monitorLightIntensity > 0 ? "1" : "0";
     const state = `${spotlightBit}${deskLampBit}${monitorLightBit}`;
     
     // Base dark color
@@ -50,7 +50,7 @@ const Index = () => {
           background: `radial-gradient(ellipse 60% 60% at 65% 35%, hsla(var(--spotlight-glow) / 0.08) 0%, transparent 50%)`,
         }}
         animate={{
-          opacity: spotlight ? 1 : 0,
+          opacity: spotlightIntensity / 100,
         }}
         transition={{
           duration: 1.2,
@@ -64,7 +64,7 @@ const Index = () => {
           background: `radial-gradient(ellipse 55% 55% at 35% 60%, hsla(var(--lamp-glow) / 0.06) 0%, transparent 50%)`,
         }}
         animate={{
-          opacity: deskLamp ? 1 : 0,
+          opacity: deskLampIntensity / 100,
         }}
         transition={{
           duration: 1.2,
@@ -78,7 +78,7 @@ const Index = () => {
           background: `radial-gradient(ellipse 65% 65% at 50% 45%, hsla(var(--monitor-glow) / 0.05) 0%, transparent 55%)`,
         }}
         animate={{
-          opacity: monitorLight ? 1 : 0,
+          opacity: monitorLightIntensity / 100,
         }}
         transition={{
           duration: 1.2,
@@ -88,14 +88,14 @@ const Index = () => {
 
       {/* Main Display */}
       <div className="w-full max-w-4xl mx-auto relative z-10">
-        <DeskDisplay 
-          spotlight={spotlight}
-          deskLamp={deskLamp}
-          monitorLight={monitorLight}
-          onSpotlightToggle={() => setSpotlight(!spotlight)}
-          onDeskLampToggle={() => setDeskLamp(!deskLamp)}
-          onMonitorLightToggle={() => setMonitorLight(!monitorLight)}
-        />
+      <DeskDisplay 
+        spotlightIntensity={spotlightIntensity}
+        deskLampIntensity={deskLampIntensity}
+        monitorLightIntensity={monitorLightIntensity}
+        onSpotlightChange={setSpotlightIntensity}
+        onDeskLampChange={setDeskLampIntensity}
+        onMonitorLightChange={setMonitorLightIntensity}
+      />
       </div>
     </motion.div>
   );

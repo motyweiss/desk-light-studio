@@ -14,12 +14,12 @@ import desk110 from "@/assets/desk-110.png"; // Spotlight + Desk Lamp ON
 import desk111 from "@/assets/desk-111-correct.png"; // All lights ON - CORRECTED
 
 interface DeskDisplayProps {
-  spotlight: boolean;
-  deskLamp: boolean;
-  monitorLight: boolean;
-  onSpotlightToggle: () => void;
-  onDeskLampToggle: () => void;
-  onMonitorLightToggle: () => void;
+  spotlightIntensity: number;
+  deskLampIntensity: number;
+  monitorLightIntensity: number;
+  onSpotlightChange: (intensity: number) => void;
+  onDeskLampChange: (intensity: number) => void;
+  onMonitorLightChange: (intensity: number) => void;
 }
 
 const lightingStates: Record<string, string> = {
@@ -34,23 +34,23 @@ const lightingStates: Record<string, string> = {
 };
 
 export const DeskDisplay = ({ 
-  spotlight, 
-  deskLamp, 
-  monitorLight,
-  onSpotlightToggle,
-  onDeskLampToggle,
-  onMonitorLightToggle 
+  spotlightIntensity, 
+  deskLampIntensity, 
+  monitorLightIntensity,
+  onSpotlightChange,
+  onDeskLampChange,
+  onMonitorLightChange 
 }: DeskDisplayProps) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const [currentState, setCurrentState] = useState("000");
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
 
-  // Calculate current lighting state
+  // Calculate current lighting state based on intensity
   const getCurrentState = () => {
-    const spotlightBit = spotlight ? "1" : "0";
-    const deskLampBit = deskLamp ? "1" : "0";
-    const monitorLightBit = monitorLight ? "1" : "0";
+    const spotlightBit = spotlightIntensity > 0 ? "1" : "0";
+    const deskLampBit = deskLampIntensity > 0 ? "1" : "0";
+    const monitorLightBit = monitorLightIntensity > 0 ? "1" : "0";
     return `${spotlightBit}${deskLampBit}${monitorLightBit}`;
   };
 
@@ -66,11 +66,11 @@ export const DeskDisplay = ({
       }, 150);
       return () => clearTimeout(timer);
     }
-  }, [spotlight, deskLamp, monitorLight, currentState]);
+  }, [spotlightIntensity, deskLampIntensity, monitorLightIntensity, currentState]);
 
-  // Calculate glow intensity based on number of lights on
-  const lightsOn = [spotlight, deskLamp, monitorLight].filter(Boolean).length;
-  const glowIntensity = lightsOn / 3;
+  // Calculate glow intensity based on average intensity
+  const totalIntensity = spotlightIntensity + deskLampIntensity + monitorLightIntensity;
+  const glowIntensity = totalIntensity / 300; // 0-1 scale
 
   // Calculate background color based on current lighting state
   const getBackgroundColor = () => {
@@ -116,7 +116,7 @@ export const DeskDisplay = ({
           background: `radial-gradient(ellipse 45% 45% at 85% 15%, hsla(var(--spotlight-glow) / 0.25) 0%, hsla(var(--spotlight-glow) / 0.12) 30%, transparent 65%)`,
         }}
         animate={{
-          opacity: spotlight ? 1 : 0,
+          opacity: spotlightIntensity / 100,
         }}
         transition={{
           duration: 0.8,
@@ -131,7 +131,7 @@ export const DeskDisplay = ({
           background: `radial-gradient(ellipse 40% 40% at 15% 65%, hsla(var(--lamp-glow) / 0.28) 0%, hsla(var(--lamp-glow) / 0.14) 30%, transparent 60%)`,
         }}
         animate={{
-          opacity: deskLamp ? 1 : 0,
+          opacity: deskLampIntensity / 100,
         }}
         transition={{
           duration: 0.8,
@@ -146,7 +146,7 @@ export const DeskDisplay = ({
           background: `radial-gradient(ellipse 50% 50% at 50% 40%, hsla(var(--monitor-glow) / 0.22) 0%, hsla(var(--monitor-glow) / 0.1) 35%, transparent 70%)`,
         }}
         animate={{
-          opacity: monitorLight ? 1 : 0,
+          opacity: monitorLightIntensity / 100,
         }}
         transition={{
           duration: 0.8,
@@ -187,6 +187,52 @@ export const DeskDisplay = ({
         })}
       </div>
       
+      {/* Dimming overlays based on intensity */}
+      {/* Spotlight dimming - darkens when intensity is low */}
+      <motion.div
+        className="absolute inset-0 pointer-events-none z-[15]"
+        animate={{
+          opacity: spotlightIntensity > 0 ? (1 - spotlightIntensity / 100) * 0.5 : 0
+        }}
+        style={{
+          background: `radial-gradient(ellipse 35% 35% at 85% 15%, rgba(0,0,0,0.8) 0%, transparent 70%)`
+        }}
+        transition={{
+          duration: 0.8,
+          ease: [0.4, 0, 0.2, 1]
+        }}
+      />
+      
+      {/* Desk lamp dimming */}
+      <motion.div
+        className="absolute inset-0 pointer-events-none z-[15]"
+        animate={{
+          opacity: deskLampIntensity > 0 ? (1 - deskLampIntensity / 100) * 0.5 : 0
+        }}
+        style={{
+          background: `radial-gradient(ellipse 30% 30% at 15% 65%, rgba(0,0,0,0.8) 0%, transparent 65%)`
+        }}
+        transition={{
+          duration: 0.8,
+          ease: [0.4, 0, 0.2, 1]
+        }}
+      />
+      
+      {/* Monitor dimming */}
+      <motion.div
+        className="absolute inset-0 pointer-events-none z-[15]"
+        animate={{
+          opacity: monitorLightIntensity > 0 ? (1 - monitorLightIntensity / 100) * 0.5 : 0
+        }}
+        style={{
+          background: `radial-gradient(ellipse 40% 40% at 50% 40%, rgba(0,0,0,0.8) 0%, transparent 75%)`
+        }}
+        transition={{
+          duration: 0.8,
+          ease: [0.4, 0, 0.2, 1]
+        }}
+      />
+      
       {/* Transition overlay for extra smoothness */}
       <motion.div
         className="absolute inset-0 bg-black pointer-events-none z-20"
@@ -205,25 +251,25 @@ export const DeskDisplay = ({
           <LightHotspot
             id="spotlight"
             label="Spotlight"
-            isOn={spotlight}
+            intensity={spotlightIntensity}
             position={{ x: 86, y: 18 }}
-            onToggle={onSpotlightToggle}
+            onIntensityChange={onSpotlightChange}
             isContainerHovered={isHovered}
           />
           <LightHotspot
             id="deskLamp"
             label="Desk Lamp"
-            isOn={deskLamp}
+            intensity={deskLampIntensity}
             position={{ x: 20, y: 62 }}
-            onToggle={onDeskLampToggle}
+            onIntensityChange={onDeskLampChange}
             isContainerHovered={isHovered}
           />
           <LightHotspot
             id="monitorLight"
             label="Monitor Light"
-            isOn={monitorLight}
+            intensity={monitorLightIntensity}
             position={{ x: 48, y: 42 }}
-            onToggle={onMonitorLightToggle}
+            onIntensityChange={onMonitorLightChange}
             isContainerHovered={isHovered}
           />
         </div>
