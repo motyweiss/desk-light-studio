@@ -195,26 +195,42 @@ export const LightHotspot = ({
           <AnimatePresence>
             {isHovered && (
               <motion.div
-                className="intensity-tooltip absolute -bottom-24 left-1/2 -translate-x-1/2 bg-background/95 backdrop-blur-md px-4 py-3 rounded-xl shadow-xl border border-border min-w-[180px] z-50"
+                className="intensity-tooltip absolute -bottom-20 left-1/2 -translate-x-1/2 
+                  bg-white/10 backdrop-blur-xl 
+                  px-5 py-4 rounded-2xl 
+                  shadow-[0_8px_32px_rgba(0,0,0,0.4),inset_0_1px_1px_rgba(255,255,255,0.1)]
+                  border border-white/15
+                  min-w-[160px] z-50
+                  overflow-hidden"
                 initial={{ opacity: 0, scale: 0.9, y: -10 }}
                 animate={{ opacity: 1, scale: 1, y: 0 }}
                 exit={{ opacity: 0, scale: 0.9, y: -10 }}
-                transition={{ duration: 0.2 }}
+                transition={{ duration: 0.25, ease: [0.4, 0, 0.2, 1] }}
                 onClick={(e) => e.stopPropagation()}
                 onMouseDown={(e) => e.stopPropagation()}
               >
-                <div className="text-xs font-medium text-center mb-2 text-foreground">
-                  {label}
-                </div>
-                <Slider
-                  value={[intensity]}
-                  onValueChange={([value]) => onIntensityChange(value)}
-                  max={100}
-                  step={1}
-                  className="w-full cursor-pointer"
+                {/* שכבת זוהר פנימית */}
+                <div 
+                  className="absolute inset-0 rounded-2xl pointer-events-none transition-opacity duration-500"
+                  style={{
+                    background: isOn 
+                      ? `radial-gradient(ellipse 100% 80% at 50% 100%, ${glowColor.replace(')', `, ${intensityRatio * 0.25})`)}  0%, transparent 60%)`
+                      : 'none',
+                  }}
                 />
-                <div className="text-[10px] text-muted-foreground text-center mt-2 font-mono">
-                  {intensity}%
+                
+                {/* תוכן */}
+                <div className="relative z-10">
+                  <div className="text-sm font-medium text-left mb-3 text-white/90 tracking-wide">
+                    {label}
+                  </div>
+                  <Slider
+                    value={[intensity]}
+                    onValueChange={([value]) => onIntensityChange(value)}
+                    max={100}
+                    step={1}
+                    className="w-full cursor-pointer"
+                  />
                 </div>
               </motion.div>
             )}
