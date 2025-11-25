@@ -85,14 +85,45 @@ export const DeskDisplay = ({
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
-      {/* Ambient glow overlay */}
+      {/* Dynamic background glow layers */}
+      {/* Spotlight glow - top right */}
       <motion.div
-        className="absolute inset-0 pointer-events-none z-10"
+        className="absolute inset-0 pointer-events-none z-[5]"
         style={{
-          background: `radial-gradient(circle at 50% 50%, rgba(251, 191, 36, ${glowIntensity * 0.1}) 0%, transparent 70%)`,
+          background: `radial-gradient(ellipse 45% 45% at 85% 15%, hsla(var(--spotlight-glow) / 0.25) 0%, hsla(var(--spotlight-glow) / 0.12) 30%, transparent 65%)`,
         }}
         animate={{
-          opacity: glowIntensity > 0 ? 1 : 0,
+          opacity: spotlight ? 1 : 0,
+        }}
+        transition={{
+          duration: 0.8,
+          ease: [0.4, 0, 0.2, 1]
+        }}
+      />
+      
+      {/* Desk lamp glow - bottom left */}
+      <motion.div
+        className="absolute inset-0 pointer-events-none z-[5]"
+        style={{
+          background: `radial-gradient(ellipse 40% 40% at 15% 65%, hsla(var(--lamp-glow) / 0.28) 0%, hsla(var(--lamp-glow) / 0.14) 30%, transparent 60%)`,
+        }}
+        animate={{
+          opacity: deskLamp ? 1 : 0,
+        }}
+        transition={{
+          duration: 0.8,
+          ease: [0.4, 0, 0.2, 1]
+        }}
+      />
+      
+      {/* Monitor light glow - center */}
+      <motion.div
+        className="absolute inset-0 pointer-events-none z-[5]"
+        style={{
+          background: `radial-gradient(ellipse 50% 50% at 50% 40%, hsla(var(--monitor-glow) / 0.22) 0%, hsla(var(--monitor-glow) / 0.1) 35%, transparent 70%)`,
+        }}
+        animate={{
+          opacity: monitorLight ? 1 : 0,
         }}
         transition={{
           duration: 0.8,

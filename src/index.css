@@ -42,6 +42,11 @@ All colors MUST be HSL.
     --warm-glow-soft: 35 100% 70%;
     --shadow-warm: 40 100% 50%;
     --container-bg: 220 18% 14%;
+    
+    /* Dynamic lighting glow colors */
+    --spotlight-glow: 35 100% 55%;
+    --lamp-glow: 40 100% 50%;
+    --monitor-glow: 200 80% 60%;
 
     --sidebar-background: 0 0% 98%;
 
