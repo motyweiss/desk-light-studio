@@ -23,6 +23,8 @@ export const LightHotspot = ({
   const [isPressed, setIsPressed] = useState(false);
 
   const handleClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    
     // Don't toggle if clicking inside tooltip
     if ((e.target as HTMLElement).closest('.intensity-tooltip')) {
       return;
@@ -61,8 +63,14 @@ export const LightHotspot = ({
             duration: 0.4, 
             ease: [0.4, 0, 0.2, 1] 
           }}
-          onMouseEnter={() => setIsHovered(true)}
-          onMouseLeave={() => setIsHovered(false)}
+          onMouseEnter={(e) => {
+            e.stopPropagation();
+            setIsHovered(true);
+          }}
+          onMouseLeave={(e) => {
+            e.stopPropagation();
+            setIsHovered(false);
+          }}
           onClick={handleClick}
           role="button"
           aria-label={`Toggle ${label}`}
@@ -71,6 +79,7 @@ export const LightHotspot = ({
           onKeyDown={(e) => {
             if (e.key === 'Enter' || e.key === ' ') {
               e.preventDefault();
+              e.stopPropagation();
               setIsPressed(true);
               onIntensityChange(intensity > 0 ? 0 : 100);
               setTimeout(() => setIsPressed(false), 300);
