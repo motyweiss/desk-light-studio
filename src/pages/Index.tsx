@@ -79,7 +79,7 @@ const Index = () => {
 
       {/* Footer hint */}
       <div className="mt-8 text-center text-sm text-muted-foreground">
-        <p>Hover over the display for an immersive parallax effect</p>
+        <p>Control the lighting with the switches above</p>
       </div>
     </div>
   );
