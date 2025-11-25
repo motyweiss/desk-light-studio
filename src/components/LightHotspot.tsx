@@ -293,25 +293,24 @@ export const LightHotspot = ({
                   overflow-hidden"
                 initial={{ 
                   opacity: 0, 
-                  scale: 0.85,
-                  y: 10
+                  scale: 0.92,
+                  y: 8
                 }}
                 animate={{ 
                   opacity: 1, 
                   scale: 1,
                   y: 0,
                   transition: {
-                    duration: 0.3,
-                    ease: [0.4, 0, 0.2, 1],
-                    staggerChildren: 0.05
+                    duration: 0.25,
+                    ease: [0.16, 1, 0.3, 1]
                   }
                 }}
                 exit={{ 
                   opacity: 0, 
-                  scale: 0.9,
-                  y: 5,
+                  scale: 0.95,
+                  y: 4,
                   transition: {
-                    duration: 0.2,
+                    duration: 0.18,
                     ease: [0.4, 0, 1, 1]
                   }
                 }}
@@ -323,7 +322,11 @@ export const LightHotspot = ({
                   initial={{ opacity: 0 }}
                   animate={{ 
                     opacity: 1,
-                    transition: { delay: 0.25, duration: 0.3 }
+                    transition: { 
+                      delay: 0.12, 
+                      duration: 0.25,
+                      ease: [0.16, 1, 0.3, 1]
+                    }
                   }}
                   style={{
                     background: intensity > 0
@@ -347,14 +350,14 @@ export const LightHotspot = ({
                           : 'bg-white/15'
                         }
                       `}
-                      initial={{ opacity: 0, scale: 0.5 }}
+                      initial={{ opacity: 0, scale: 0.85 }}
                       animate={{ 
                         opacity: 1, 
                         scale: 1,
                         transition: {
-                          delay: 0.05,
-                          duration: 0.25,
-                          ease: [0.34, 1.56, 0.64, 1]
+                          delay: 0.04,
+                          duration: 0.22,
+                          ease: [0.16, 1, 0.3, 1]
                         }
                       }}
                     >
@@ -368,13 +371,14 @@ export const LightHotspot = ({
                     {/* Text content - left aligned - מופיע שני */}
                     <motion.div 
                       className="flex flex-col items-start flex-1"
-                      initial={{ opacity: 0, x: -8 }}
+                      initial={{ opacity: 0, y: 4 }}
                       animate={{ 
                         opacity: 1, 
-                        x: 0,
+                        y: 0,
                         transition: {
-                          delay: 0.1,
-                          duration: 0.25
+                          delay: 0.06,
+                          duration: 0.22,
+                          ease: [0.16, 1, 0.3, 1]
                         }
                       }}
                     >
@@ -389,14 +393,14 @@ export const LightHotspot = ({
                   
                   {/* Slider - מופיע אחרון */}
                   <motion.div
-                    initial={{ opacity: 0, scaleX: 0.8 }}
+                    initial={{ opacity: 0, scaleX: 0.9 }}
                     animate={{ 
                       opacity: 1, 
                       scaleX: 1,
                       transition: {
-                        delay: 0.15,
-                        duration: 0.3,
-                        ease: [0.34, 1.56, 0.64, 1]
+                        delay: 0.08,
+                        duration: 0.25,
+                        ease: [0.16, 1, 0.3, 1]
                       }
                     }}
                   >
