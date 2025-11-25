@@ -15,18 +15,18 @@ const Index = () => {
     const state = `${spotlightBit}${deskLampBit}${monitorLightBit}`;
     
     // Base dark color
-    const baseDark = "220 20% 8%";
+    const baseDark = "25 15% 6%";
     
     // Specific colors for each lighting state - subtle shifts
     const stateColors: Record<string, string> = {
-      "000": baseDark, // All off - pure dark blue
-      "001": "210 22% 9%", // Monitor only - cool blue tint
-      "010": "38 20% 10%", // Lamp only - warm yellow tint
-      "011": "35 21% 9.5%", // Lamp + Monitor - balanced warm-cool
-      "100": "30 22% 10%", // Spotlight only - warm orange tint
-      "101": "25 21% 9.5%", // Spotlight + Monitor - orange-blue mix
-      "110": "35 24% 11%", // Spotlight + Lamp - brighter warm
-      "111": "32 26% 12%", // All on - brightest warm glow
+      "000": baseDark, // All off - warm dark
+      "001": "220 15% 7%", // Monitor only - cool blue tint (subtle)
+      "010": "35 20% 8%", // Lamp only - warm yellow tint
+      "011": "30 18% 8%", // Lamp + Monitor - balanced warm-cool
+      "100": "30 25% 8%", // Spotlight only - warm orange tint
+      "101": "28 20% 8%", // Spotlight + Monitor - orange-blue mix
+      "110": "32 28% 9%", // Spotlight + Lamp - brighter warm
+      "111": "30 30% 10%", // All on - brightest warm glow
     };
     
     return stateColors[state] || baseDark;
