@@ -1,35 +1,48 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { useState } from "react";
+import { Slider } from "@/components/ui/slider";
 
 interface LightHotspotProps {
   id: 'spotlight' | 'deskLamp' | 'monitorLight';
   label: string;
-  isOn: boolean;
+  intensity: number; // 0-100
   position: { x: number; y: number }; // Percentages from container
-  onToggle: () => void;
+  onIntensityChange: (value: number) => void;
   isContainerHovered: boolean;
 }
 
 export const LightHotspot = ({ 
   id, 
   label, 
-  isOn, 
+  intensity, 
   position, 
-  onToggle, 
+  onIntensityChange, 
   isContainerHovered 
 }: LightHotspotProps) => {
   const [isHovered, setIsHovered] = useState(false);
   const [isPressed, setIsPressed] = useState(false);
 
-  const handleClick = () => {
+  const handleClick = (e: React.MouseEvent) => {
+    // Don't toggle if clicking inside tooltip
+    if ((e.target as HTMLElement).closest('.intensity-tooltip')) {
+      return;
+    }
     setIsPressed(true);
-    onToggle();
+    // Quick toggle: if off, set to 100%, if on, set to 0
+    onIntensityChange(intensity > 0 ? 0 : 100);
     setTimeout(() => setIsPressed(false), 300);
   };
 
-  // Color scheme based on light state
-  const dotColor = isOn ? "hsl(var(--warm-glow))" : "hsl(var(--foreground))";
-  const glowColor = isOn ? "rgba(251, 191, 36, 0.6)" : "rgba(255, 255, 255, 0.3)";
+  // Dynamic color scheme based on intensity
+  const isOn = intensity > 0;
+  const intensityRatio = intensity / 100;
+  const dotOpacity = 0.4 + intensityRatio * 0.6;
+  const dotColor = isOn 
+    ? `hsla(var(--warm-glow) / ${dotOpacity})` 
+    : "hsl(var(--foreground) / 0.6)";
+  const glowColor = isOn 
+    ? `rgba(251, 191, 36, ${0.3 + intensityRatio * 0.4})` 
+    : "rgba(255, 255, 255, 0.3)";
 
   return (
     <AnimatePresence>
@@ -58,7 +71,9 @@ export const LightHotspot = ({
           onKeyDown={(e) => {
             if (e.key === 'Enter' || e.key === ' ') {
               e.preventDefault();
-              handleClick();
+              setIsPressed(true);
+              onIntensityChange(intensity > 0 ? 0 : 100);
+              setTimeout(() => setIsPressed(false), 300);
             }
           }}
         >
@@ -167,17 +182,31 @@ export const LightHotspot = ({
             )}
           </svg>
 
-          {/* Tooltip on hover */}
+          {/* Interactive tooltip with slider */}
           <AnimatePresence>
             {isHovered && (
               <motion.div
-                className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-background/90 backdrop-blur-sm px-3 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap shadow-lg border border-border pointer-events-none"
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.9 }}
+                className="intensity-tooltip absolute -bottom-24 left-1/2 -translate-x-1/2 bg-background/95 backdrop-blur-md px-4 py-3 rounded-xl shadow-xl border border-border min-w-[180px] z-50"
+                initial={{ opacity: 0, scale: 0.9, y: -10 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.9, y: -10 }}
                 transition={{ duration: 0.2 }}
+                onClick={(e) => e.stopPropagation()}
+                onMouseDown={(e) => e.stopPropagation()}
               >
-                {label}
+                <div className="text-xs font-medium text-center mb-2 text-foreground">
+                  {label}
+                </div>
+                <Slider
+                  value={[intensity]}
+                  onValueChange={([value]) => onIntensityChange(value)}
+                  max={100}
+                  step={1}
+                  className="w-full cursor-pointer"
+                />
+                <div className="text-[10px] text-muted-foreground text-center mt-2 font-mono">
+                  {intensity}%
+                </div>
               </motion.div>
             )}
           </AnimatePresence>
