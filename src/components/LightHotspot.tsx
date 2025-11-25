@@ -364,12 +364,16 @@ export const LightHotspot = ({
                     <div 
                       className={`
                         w-10 h-10 rounded-full flex items-center justify-center
-                        transition-all duration-300
+                        transition-all duration-300 cursor-pointer
                         ${intensity > 0 
-                          ? 'bg-amber-400/30' 
-                          : 'bg-white/15'
+                          ? 'bg-amber-400/30 hover:bg-amber-400/40' 
+                          : 'bg-white/15 hover:bg-white/20'
                         }
                       `}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onIntensityChange(intensity > 0 ? 0 : 100);
+                      }}
                     >
                       <Lightbulb 
                         className={`w-5 h-5 transition-colors duration-300 ${
