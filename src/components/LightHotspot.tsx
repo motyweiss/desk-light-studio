@@ -286,10 +286,10 @@ export const LightHotspot = ({
               <motion.div
                 className="intensity-tooltip absolute -bottom-24 left-1/2 -translate-x-1/2 
                   bg-white/8 backdrop-blur-xl 
-                  px-4 py-4 rounded-2xl 
+                  px-7 py-5 rounded-full 
                   shadow-[0_8px_32px_rgba(0,0,0,0.4),0_2px_8px_rgba(0,0,0,0.2),inset_0_1px_1px_rgba(255,255,255,0.1)]
                   border border-white/20
-                  min-w-[220px] z-50
+                  min-w-[240px] z-50
                   overflow-hidden"
                 initial={{ 
                   opacity: 0, 
@@ -319,7 +319,7 @@ export const LightHotspot = ({
               >
                 {/* שכבת זוהר פנימית - מופיעה אחרונה */}
                 <motion.div 
-                  className="absolute inset-0 rounded-2xl pointer-events-none"
+                  className="absolute inset-0 rounded-full pointer-events-none"
                   initial={{ opacity: 0 }}
                   animate={{ 
                     opacity: 1,
