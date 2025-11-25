@@ -382,7 +382,7 @@ export const LightHotspot = ({
                 />
 
                 <motion.div 
-                  className="relative z-10 flex flex-col gap-3"
+                  className="relative z-10 flex flex-col gap-4"
                   initial="hidden"
                   animate="visible"
                   variants={{
