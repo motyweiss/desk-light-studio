@@ -43,6 +43,9 @@ const Index = () => {
           spotlight={spotlight}
           deskLamp={deskLamp}
           monitorLight={monitorLight}
+          onSpotlightToggle={() => setSpotlight(!spotlight)}
+          onDeskLampToggle={() => setDeskLamp(!deskLamp)}
+          onMonitorLightToggle={() => setMonitorLight(!monitorLight)}
         />
       </div>
 
@@ -79,7 +82,7 @@ const Index = () => {
 
       {/* Footer hint */}
       <div className="mt-8 text-center text-sm text-muted-foreground">
-        <p>Control the lighting with the switches above</p>
+        <p>Hover over the display and click on the light indicators</p>
       </div>
     </div>
   );
