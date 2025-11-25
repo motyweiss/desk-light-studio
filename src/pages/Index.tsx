@@ -11,12 +11,14 @@ const Index = () => {
   // Calculate master state based on individual lights
   const allLightsOn = spotlight && deskLamp && monitorLight;
   const anyLightOn = spotlight || deskLamp || monitorLight;
+  const allLightsOff = !spotlight && !deskLamp && !monitorLight;
   
-  // Master switch reflects if all lights are on
-  const masterChecked = allLightsOn;
+  // Master switch: ON when any light is on, OFF when all are off
+  const masterChecked = anyLightOn;
 
   const handleMasterToggle = (checked: boolean) => {
-    // When master is toggled, set all lights to the same state
+    // When toggling Master ON - turn all lights ON
+    // When toggling Master OFF - turn all lights OFF
     setSpotlight(checked);
     setDeskLamp(checked);
     setMonitorLight(checked);
