@@ -293,24 +293,24 @@ export const LightHotspot = ({
                   overflow-hidden"
                 initial={{ 
                   opacity: 0, 
-                  scale: 0.92,
-                  y: 8
+                  scale: 0.94,
+                  y: 6
                 }}
                 animate={{ 
                   opacity: 1, 
                   scale: 1,
                   y: 0,
                   transition: {
-                    duration: 0.25,
+                    duration: 0.22,
                     ease: [0.16, 1, 0.3, 1]
                   }
                 }}
                 exit={{ 
                   opacity: 0, 
-                  scale: 0.95,
-                  y: 4,
+                  scale: 0.96,
+                  y: 3,
                   transition: {
-                    duration: 0.18,
+                    duration: 0.15,
                     ease: [0.4, 0, 1, 1]
                   }
                 }}
@@ -323,8 +323,7 @@ export const LightHotspot = ({
                   animate={{ 
                     opacity: 1,
                     transition: { 
-                      delay: 0.12, 
-                      duration: 0.25,
+                      duration: 0.22,
                       ease: [0.16, 1, 0.3, 1]
                     }
                   }}
@@ -340,8 +339,8 @@ export const LightHotspot = ({
                 <div className="relative z-10 flex flex-col gap-3">
                   {/* Top row: Icon + Text */}
                   <div className="flex items-center gap-3">
-                    {/* Lamp icon circle - מופיע ראשון */}
-                    <motion.div 
+                    {/* Lamp icon circle */}
+                    <div 
                       className={`
                         w-10 h-10 rounded-full flex items-center justify-center
                         transition-all duration-300
@@ -350,60 +349,27 @@ export const LightHotspot = ({
                           : 'bg-white/15'
                         }
                       `}
-                      initial={{ opacity: 0, scale: 0.85 }}
-                      animate={{ 
-                        opacity: 1, 
-                        scale: 1,
-                        transition: {
-                          delay: 0.04,
-                          duration: 0.22,
-                          ease: [0.16, 1, 0.3, 1]
-                        }
-                      }}
                     >
                       <Lightbulb 
                         className={`w-5 h-5 transition-colors duration-300 ${
                           intensity > 0 ? 'text-amber-300' : 'text-white/40'
                         }`}
                       />
-                    </motion.div>
+                    </div>
                     
-                    {/* Text content - left aligned - מופיע שני */}
-                    <motion.div 
-                      className="flex flex-col items-start flex-1"
-                      initial={{ opacity: 0, y: 4 }}
-                      animate={{ 
-                        opacity: 1, 
-                        y: 0,
-                        transition: {
-                          delay: 0.06,
-                          duration: 0.22,
-                          ease: [0.16, 1, 0.3, 1]
-                        }
-                      }}
-                    >
+                    {/* Text content - left aligned */}
+                    <div className="flex flex-col items-start flex-1">
                       <span className="font-medium text-white text-base leading-tight">
                         {label}
                       </span>
                       <span className="text-sm text-white/60 leading-tight mt-0.5">
                         {intensity > 0 ? `${Math.round(intensity)}%` : 'Off'}
                       </span>
-                    </motion.div>
+                    </div>
                   </div>
                   
-                  {/* Slider - מופיע אחרון */}
-                  <motion.div
-                    initial={{ opacity: 0, scaleX: 0.9 }}
-                    animate={{ 
-                      opacity: 1, 
-                      scaleX: 1,
-                      transition: {
-                        delay: 0.08,
-                        duration: 0.25,
-                        ease: [0.16, 1, 0.3, 1]
-                      }
-                    }}
-                  >
+                  {/* Slider */}
+                  <div>
                     <Slider
                       value={[intensity]}
                       onValueChange={(value) => {
@@ -413,7 +379,7 @@ export const LightHotspot = ({
                       step={1}
                       className="cursor-pointer"
                     />
-                  </motion.div>
+                  </div>
                 </div>
               </motion.div>
             )}
