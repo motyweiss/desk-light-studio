@@ -9,7 +9,7 @@ import desk001 from "@/assets/desk-001.png"; // Only Monitor Light ON
 import desk010 from "@/assets/desk-010.png"; // Only Desk Lamp ON
 import desk011 from "@/assets/desk-011.png"; // Desk Lamp + Monitor Light ON
 import desk100 from "@/assets/desk-100-correct.png"; // Only Spotlight ON
-import desk101 from "@/assets/desk-101.png"; // Spotlight + Monitor Light ON
+import desk101 from "@/assets/desk-101.png"; // Spotlight + Monitor Light ON - NEEDS CHECK
 import desk110 from "@/assets/desk-110.png"; // Spotlight + Desk Lamp ON
 import desk111 from "@/assets/desk-111-correct.png"; // All lights ON - CORRECTED
 
@@ -252,7 +252,7 @@ export const DeskDisplay = ({
             id="spotlight"
             label="Spotlight"
             intensity={spotlightIntensity}
-            position={{ x: 86, y: 18 }}
+            position={{ x: 88, y: 12 }}
             onIntensityChange={onSpotlightChange}
             isContainerHovered={isHovered}
           />
@@ -260,7 +260,7 @@ export const DeskDisplay = ({
             id="deskLamp"
             label="Desk Lamp"
             intensity={deskLampIntensity}
-            position={{ x: 20, y: 62 }}
+            position={{ x: 18, y: 65 }}
             onIntensityChange={onDeskLampChange}
             isContainerHovered={isHovered}
           />
@@ -268,7 +268,7 @@ export const DeskDisplay = ({
             id="monitorLight"
             label="Monitor Light"
             intensity={monitorLightIntensity}
-            position={{ x: 48, y: 42 }}
+            position={{ x: 50, y: 50 }}
             onIntensityChange={onMonitorLightChange}
             isContainerHovered={isHovered}
           />
