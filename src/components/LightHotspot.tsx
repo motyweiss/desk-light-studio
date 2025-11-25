@@ -378,18 +378,34 @@ export const LightHotspot = ({
 
                 <motion.div 
                   className="relative z-10 flex flex-col gap-3"
-                  initial={{ opacity: 0 }}
-                  animate={{ 
-                    opacity: 1,
-                    transition: {
-                      delay: 0.35,
-                      duration: 0.25,
-                      ease: [0.16, 1, 0.3, 1]
+                  initial="hidden"
+                  animate="visible"
+                  variants={{
+                    hidden: { opacity: 0 },
+                    visible: {
+                      opacity: 1,
+                      transition: {
+                        delayChildren: 0.35,
+                        staggerChildren: 0.1
+                      }
                     }
                   }}
                 >
                   {/* Top row: Icon + Text */}
-                  <div className="flex items-center gap-3">
+                  <motion.div 
+                    className="flex items-center gap-3"
+                    variants={{
+                      hidden: { opacity: 0, y: 6 },
+                      visible: { 
+                        opacity: 1, 
+                        y: 0,
+                        transition: {
+                          duration: 0.35,
+                          ease: [0.16, 1, 0.3, 1]
+                        }
+                      }
+                    }}
+                  >
                     {/* Lamp icon circle */}
                     <div
                       className={`
@@ -421,10 +437,22 @@ export const LightHotspot = ({
                         {intensity > 0 ? `${Math.round(intensity)}%` : 'Off'}
                       </span>
                     </div>
-                  </div>
+                  </motion.div>
                   
                   {/* Slider */}
-                  <div>
+                  <motion.div
+                    variants={{
+                      hidden: { opacity: 0, y: 6 },
+                      visible: { 
+                        opacity: 1, 
+                        y: 0,
+                        transition: {
+                          duration: 0.35,
+                          ease: [0.16, 1, 0.3, 1]
+                        }
+                      }
+                    }}
+                  >
                     <Slider
                       value={[intensity]}
                       onValueChange={(value) => {
@@ -434,7 +462,7 @@ export const LightHotspot = ({
                       step={1}
                       className="cursor-pointer"
                     />
-                  </div>
+                  </motion.div>
                 </motion.div>
               </motion.div>
             )}
