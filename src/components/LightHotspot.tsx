@@ -22,6 +22,16 @@ export const LightHotspot = ({
 }: LightHotspotProps) => {
   const [isHovered, setIsHovered] = useState(false);
   const [isPressed, setIsPressed] = useState(false);
+  const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
+
+  const handleMouseMove = (e: React.MouseEvent) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    const centerX = rect.left + rect.width / 2;
+    const centerY = rect.top + rect.height / 2;
+    const deltaX = (e.clientX - centerX) / 30; // Reduced sensitivity for subtlety
+    const deltaY = (e.clientY - centerY) / 30;
+    setMousePos({ x: deltaX, y: deltaY });
+  };
 
   const handleClick = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -71,7 +81,9 @@ export const LightHotspot = ({
           onMouseLeave={(e) => {
             e.stopPropagation();
             setIsHovered(false);
+            setMousePos({ x: 0, y: 0 });
           }}
+          onMouseMove={handleMouseMove}
           onClick={handleClick}
           role="button"
           aria-label={`Toggle ${label}`}
@@ -300,9 +312,15 @@ export const LightHotspot = ({
                   opacity: 1, 
                   scale: 1,
                   y: 0,
+                  x: mousePos.x,
                   transition: {
                     duration: 0.22,
-                    ease: [0.16, 1, 0.3, 1]
+                    ease: [0.16, 1, 0.3, 1],
+                    x: {
+                      type: "spring",
+                      stiffness: 150,
+                      damping: 20
+                    }
                   }
                 }}
                 exit={{ 
@@ -313,6 +331,9 @@ export const LightHotspot = ({
                     duration: 0.15,
                     ease: [0.4, 0, 1, 1]
                   }
+                }}
+                style={{
+                  transform: `translateY(${mousePos.y}px)`
                 }}
                 onClick={(e) => e.stopPropagation()}
               >
