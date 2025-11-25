@@ -1,6 +1,7 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { useState } from "react";
 import { Slider } from "@/components/ui/slider";
+import { Lightbulb } from "lucide-react";
 
 interface LightHotspotProps {
   id: 'spotlight' | 'deskLamp' | 'monitorLight';
@@ -283,113 +284,130 @@ export const LightHotspot = ({
           <AnimatePresence>
             {isHovered && (
               <motion.div
-                className="intensity-tooltip absolute -bottom-20 left-1/2 -translate-x-1/2 
-                  bg-white/10 backdrop-blur-xl 
-                  px-6 py-5 rounded-full 
-                  shadow-[0_8px_32px_rgba(0,0,0,0.4),inset_0_1px_1px_rgba(255,255,255,0.1)]
-                  border border-white/15
-                  min-w-[180px] z-50
+                className="intensity-tooltip absolute -bottom-24 left-1/2 -translate-x-1/2 
+                  bg-white/8 backdrop-blur-xl 
+                  px-4 py-4 rounded-2xl 
+                  shadow-[0_8px_32px_rgba(0,0,0,0.4),0_2px_8px_rgba(0,0,0,0.2),inset_0_1px_1px_rgba(255,255,255,0.1)]
+                  border border-white/20
+                  min-w-[220px] z-50
                   overflow-hidden"
                 initial={{ 
                   opacity: 0, 
-                  scale: 0.85, 
-                  y: -5,
+                  scale: 0.85,
+                  y: 10
                 }}
                 animate={{ 
                   opacity: 1, 
-                  scale: 1, 
+                  scale: 1,
                   y: 0,
                   transition: {
                     duration: 0.3,
                     ease: [0.4, 0, 0.2, 1],
-                    staggerChildren: 0.08,
-                    delayChildren: 0.05
+                    staggerChildren: 0.05
                   }
                 }}
                 exit={{ 
                   opacity: 0, 
-                  scale: 0.9, 
-                  y: -5,
-                  transition: { 
+                  scale: 0.9,
+                  y: 5,
+                  transition: {
                     duration: 0.2,
-                    staggerChildren: 0.03,
-                    staggerDirection: -1
+                    ease: [0.4, 0, 1, 1]
                   }
                 }}
                 onClick={(e) => e.stopPropagation()}
-                onMouseDown={(e) => e.stopPropagation()}
               >
                 {/* שכבת זוהר פנימית - מופיעה אחרונה */}
                 <motion.div 
-                  className="absolute inset-0 rounded-full pointer-events-none"
+                  className="absolute inset-0 rounded-2xl pointer-events-none"
                   initial={{ opacity: 0 }}
                   animate={{ 
                     opacity: 1,
-                    transition: { 
-                      duration: 0.4,
-                      delay: 0.25,
-                      ease: "easeOut"
-                    }
-                  }}
-                  exit={{ 
-                    opacity: 0,
-                    transition: { duration: 0.15 }
+                    transition: { delay: 0.25, duration: 0.3 }
                   }}
                   style={{
-                    background: isOn 
-                      ? `radial-gradient(ellipse 100% 80% at 50% 100%, ${glowColor.replace(')', `, ${intensityRatio * 0.25})`)}  0%, transparent 60%)`
+                    background: intensity > 0
+                      ? `radial-gradient(circle at 50% 50%, 
+                          rgba(251, 191, 36, ${0.08 * (intensity / 100)}) 0%, 
+                          transparent 70%)`
                       : 'none',
                   }}
                 />
-                
-                {/* תוכן */}
-                <div className="relative z-10">
-                  {/* Label - מופיע שני */}
-                  <motion.div 
-                    className="text-sm font-light text-center mb-4 text-white/90 tracking-wider"
-                    initial={{ opacity: 0, y: 8 }}
-                    animate={{ 
-                      opacity: 1, 
-                      y: 0,
-                      transition: { 
-                        duration: 0.25, 
-                        ease: "easeOut",
-                        delay: 0.1
-                      }
-                    }}
-                    exit={{ 
-                      opacity: 0, 
-                      y: 4,
-                      transition: { duration: 0.15 }
-                    }}
-                  >
-                    {label}
-                  </motion.div>
+
+                <div className="relative z-10 flex flex-col gap-3">
+                  {/* Top row: Icon + Text */}
+                  <div className="flex items-center gap-3">
+                    {/* Lamp icon circle - מופיע ראשון */}
+                    <motion.div 
+                      className={`
+                        w-10 h-10 rounded-full flex items-center justify-center
+                        transition-all duration-300
+                        ${intensity > 0 
+                          ? 'bg-amber-400/30 shadow-[0_0_12px_rgba(251,191,36,0.4)]' 
+                          : 'bg-white/15'
+                        }
+                      `}
+                      initial={{ opacity: 0, scale: 0.5 }}
+                      animate={{ 
+                        opacity: 1, 
+                        scale: 1,
+                        transition: {
+                          delay: 0.05,
+                          duration: 0.25,
+                          ease: [0.34, 1.56, 0.64, 1]
+                        }
+                      }}
+                    >
+                      <Lightbulb 
+                        className={`w-5 h-5 transition-colors duration-300 ${
+                          intensity > 0 ? 'text-amber-300' : 'text-white/40'
+                        }`}
+                      />
+                    </motion.div>
+                    
+                    {/* Text content - left aligned - מופיע שני */}
+                    <motion.div 
+                      className="flex flex-col items-start flex-1"
+                      initial={{ opacity: 0, x: -8 }}
+                      animate={{ 
+                        opacity: 1, 
+                        x: 0,
+                        transition: {
+                          delay: 0.1,
+                          duration: 0.25
+                        }
+                      }}
+                    >
+                      <span className="font-medium text-white text-base leading-tight">
+                        {label}
+                      </span>
+                      <span className="text-sm text-white/60 leading-tight mt-0.5">
+                        {intensity > 0 ? `${Math.round(intensity)}%` : 'Off'}
+                      </span>
+                    </motion.div>
+                  </div>
                   
-                  {/* Slider - מופיע שלישי */}
+                  {/* Slider - מופיע אחרון */}
                   <motion.div
                     initial={{ opacity: 0, scaleX: 0.8 }}
                     animate={{ 
                       opacity: 1, 
                       scaleX: 1,
-                      transition: { 
-                        duration: 0.3, 
-                        ease: [0.4, 0, 0.2, 1],
-                        delay: 0.15
+                      transition: {
+                        delay: 0.15,
+                        duration: 0.3,
+                        ease: [0.34, 1.56, 0.64, 1]
                       }
-                    }}
-                    exit={{ 
-                      opacity: 0, 
-                      scaleX: 0.9,
-                      transition: { duration: 0.15 }
                     }}
                   >
                     <Slider
                       value={[intensity]}
-                      onValueChange={([value]) => onIntensityChange(value)}
+                      onValueChange={(value) => {
+                        onIntensityChange(value[0]);
+                      }}
                       max={100}
                       step={1}
-                      className="w-full cursor-pointer"
+                      className="cursor-pointer"
                     />
                   </motion.div>
                 </div>
