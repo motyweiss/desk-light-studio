@@ -343,7 +343,7 @@ export const LightHotspot = ({
                         w-10 h-10 rounded-full flex items-center justify-center
                         transition-all duration-300
                         ${intensity > 0 
-                          ? 'bg-amber-400/30 shadow-[0_0_12px_rgba(251,191,36,0.4)]' 
+                          ? 'bg-amber-400/30' 
                           : 'bg-white/15'
                         }
                       `}
