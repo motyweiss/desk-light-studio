@@ -286,7 +286,7 @@ export const LightHotspot = ({
                 <div className="relative z-10">
                   {/* Label - מופיע שני */}
                   <motion.div 
-                    className="text-sm font-medium text-left mb-3 text-white/90 tracking-wide"
+                    className="text-sm font-light text-left mb-3 text-white/90 tracking-wider"
                     initial={{ opacity: 0, y: 8 }}
                     animate={{ 
                       opacity: 1, 
