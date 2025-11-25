@@ -50,7 +50,7 @@ export const LightHotspot = ({
     <AnimatePresence>
       {isContainerHovered && (
         <motion.div
-          className="absolute cursor-pointer"
+          className="absolute cursor-pointer pointer-events-auto"
           style={{
             left: `${position.x}%`,
             top: `${position.y}%`,

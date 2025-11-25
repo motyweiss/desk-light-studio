@@ -247,7 +247,7 @@ export const DeskDisplay = ({
 
       {/* Interactive Light Hotspots Layer */}
       <div className="absolute inset-0 z-30 pointer-events-none">
-        <div className="relative w-full h-full pointer-events-auto">
+        <div className="relative w-full h-full pointer-events-none">
           <LightHotspot
             id="spotlight"
             label="Spotlight"
