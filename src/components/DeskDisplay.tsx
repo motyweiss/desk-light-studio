@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from "react";
-import { motion, useMotionValue, useSpring } from "framer-motion";
+import { motion } from "framer-motion";
+import { LightHotspot } from "./LightHotspot";
 
 // Import all 8 lighting state images
 // Naming: desk-XYZ where X=Spotlight, Y=DeskLamp, Z=MonitorLight (1=on, 0=off)
@@ -16,6 +17,9 @@ interface DeskDisplayProps {
   spotlight: boolean;
   deskLamp: boolean;
   monitorLight: boolean;
+  onSpotlightToggle: () => void;
+  onDeskLampToggle: () => void;
+  onMonitorLightToggle: () => void;
 }
 
 const lightingStates: Record<string, string> = {
@@ -29,10 +33,18 @@ const lightingStates: Record<string, string> = {
   "111": desk111,
 };
 
-export const DeskDisplay = ({ spotlight, deskLamp, monitorLight }: DeskDisplayProps) => {
+export const DeskDisplay = ({ 
+  spotlight, 
+  deskLamp, 
+  monitorLight,
+  onSpotlightToggle,
+  onDeskLampToggle,
+  onMonitorLightToggle 
+}: DeskDisplayProps) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const [currentState, setCurrentState] = useState("000");
   const [isTransitioning, setIsTransitioning] = useState(false);
+  const [isHovered, setIsHovered] = useState(false);
 
   // Calculate current lighting state
   const getCurrentState = () => {
@@ -70,6 +82,8 @@ export const DeskDisplay = ({ spotlight, deskLamp, monitorLight }: DeskDisplayPr
              0 20px 60px rgba(0, 0, 0, 0.5)`
           : '0 20px 60px rgba(0, 0, 0, 0.5)'
       }}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
     >
       {/* Ambient glow overlay */}
       <motion.div
@@ -130,9 +144,39 @@ export const DeskDisplay = ({ spotlight, deskLamp, monitorLight }: DeskDisplayPr
           ease: [0.4, 0, 0.2, 1]
         }}
       />
+
+      {/* Interactive Light Hotspots Layer */}
+      <div className="absolute inset-0 z-30 pointer-events-none">
+        <div className="relative w-full h-full pointer-events-auto">
+          <LightHotspot
+            id="spotlight"
+            label="Spotlight"
+            isOn={spotlight}
+            position={{ x: 85, y: 25 }}
+            onToggle={onSpotlightToggle}
+            isContainerHovered={isHovered}
+          />
+          <LightHotspot
+            id="deskLamp"
+            label="Desk Lamp"
+            isOn={deskLamp}
+            position={{ x: 20, y: 55 }}
+            onToggle={onDeskLampToggle}
+            isContainerHovered={isHovered}
+          />
+          <LightHotspot
+            id="monitorLight"
+            label="Monitor Light"
+            isOn={monitorLight}
+            position={{ x: 50, y: 40 }}
+            onToggle={onMonitorLightToggle}
+            isContainerHovered={isHovered}
+          />
+        </div>
+      </div>
       
       {/* Debug info - remove in production */}
-      <div className="absolute bottom-4 left-4 bg-black/70 text-white px-3 py-2 rounded text-xs font-mono z-30">
+      <div className="absolute bottom-4 left-4 bg-black/70 text-white px-3 py-2 rounded text-xs font-mono z-40">
         State: {currentState} | S:{spotlight?'1':'0'} D:{deskLamp?'1':'0'} M:{monitorLight?'1':'0'}
       </div>
     </div>
