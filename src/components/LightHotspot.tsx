@@ -9,6 +9,7 @@ interface LightHotspotProps {
   intensity: number; // 0-100
   position: { x: number; y: number }; // Percentages from container
   onIntensityChange: (value: number) => void;
+  onHoverChange?: (lightId: string | null) => void;
   isContainerHovered: boolean;
 }
 
@@ -17,7 +18,8 @@ export const LightHotspot = ({
   label, 
   intensity, 
   position, 
-  onIntensityChange, 
+  onIntensityChange,
+  onHoverChange,
   isContainerHovered 
 }: LightHotspotProps) => {
   const [isHovered, setIsHovered] = useState(false);
@@ -77,11 +79,13 @@ export const LightHotspot = ({
           onMouseEnter={(e) => {
             e.stopPropagation();
             setIsHovered(true);
+            onHoverChange?.(id);
           }}
           onMouseLeave={(e) => {
             e.stopPropagation();
             setIsHovered(false);
             setMousePos({ x: 0, y: 0 });
+            onHoverChange?.(null);
           }}
           onMouseMove={handleMouseMove}
           onClick={handleClick}
