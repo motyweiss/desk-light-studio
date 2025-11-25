@@ -73,7 +73,7 @@ export const DeskDisplay = ({ spotlight, deskLamp, monitorLight }: DeskDisplayPr
   return (
     <div
       ref={containerRef}
-      className="relative w-full max-w-4xl aspect-square rounded-[3rem] overflow-hidden bg-container-bg shadow-2xl"
+      className="relative w-full aspect-square rounded-[3rem] overflow-hidden bg-container-bg shadow-2xl"
       onMouseMove={handleMouseMove}
       onMouseLeave={handleMouseLeave}
     >
@@ -86,18 +86,14 @@ export const DeskDisplay = ({ spotlight, deskLamp, monitorLight }: DeskDisplayPr
       >
         {/* Stack all 8 images and control visibility via opacity */}
         {Object.entries(lightingStates).map(([state, image]) => (
-          <motion.img
+          <img
             key={state}
             src={image}
             alt={`Desk lighting state ${state}`}
-            className="absolute inset-0 w-full h-full object-cover"
-            initial={{ opacity: 0 }}
-            animate={{ 
-              opacity: state === currentState ? 1 : 0 
-            }}
-            transition={{ 
-              duration: 0.4,
-              ease: "easeInOut"
+            className="absolute inset-0 w-full h-full object-cover transition-opacity duration-400 ease-in-out"
+            style={{ 
+              opacity: state === currentState ? 1 : 0,
+              pointerEvents: state === currentState ? 'auto' : 'none'
             }}
           />
         ))}
