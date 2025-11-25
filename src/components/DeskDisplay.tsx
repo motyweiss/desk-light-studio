@@ -1,15 +1,16 @@
 import { useState, useEffect, useRef } from "react";
-import { motion, useMotionValue, useSpring, AnimatePresence } from "framer-motion";
+import { motion, useMotionValue, useSpring } from "framer-motion";
 
 // Import all 8 lighting state images
-import desk000 from "@/assets/desk-000.png";
-import desk001 from "@/assets/desk-001.png";
-import desk010 from "@/assets/desk-010.png";
-import desk011 from "@/assets/desk-011.png";
-import desk100 from "@/assets/desk-100.png";
-import desk101 from "@/assets/desk-101.png";
-import desk110 from "@/assets/desk-110.png";
-import desk111 from "@/assets/desk-111.png";
+// Naming: desk-XYZ where X=Spotlight, Y=DeskLamp, Z=MonitorLight (1=on, 0=off)
+import desk000 from "@/assets/desk-000.png"; // All lights OFF
+import desk001 from "@/assets/desk-001.png"; // Only Monitor Light ON
+import desk010 from "@/assets/desk-010.png"; // Only Desk Lamp ON
+import desk011 from "@/assets/desk-011.png"; // Desk Lamp + Monitor Light ON
+import desk100 from "@/assets/desk-100.png"; // Only Spotlight ON
+import desk101 from "@/assets/desk-101.png"; // Spotlight + Monitor Light ON
+import desk110 from "@/assets/desk-110.png"; // Spotlight + Desk Lamp ON
+import desk111 from "@/assets/desk-111.png"; // All lights ON
 
 interface DeskDisplayProps {
   spotlight: boolean;
@@ -17,7 +18,7 @@ interface DeskDisplayProps {
   monitorLight: boolean;
 }
 
-const lightingStates = {
+const lightingStates: Record<string, string> = {
   "000": desk000,
   "001": desk001,
   "010": desk010,
@@ -61,7 +62,7 @@ export const DeskDisplay = ({ spotlight, deskLamp, monitorLight }: DeskDisplayPr
       }, 50);
       return () => clearTimeout(timer);
     }
-  }, [spotlight, deskLamp, monitorLight]);
+  }, [spotlight, deskLamp, monitorLight, currentState]);
 
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
     if (!containerRef.current) return;
@@ -166,6 +167,11 @@ export const DeskDisplay = ({ spotlight, deskLamp, monitorLight }: DeskDisplayPr
           ease: [0.4, 0, 0.2, 1]
         }}
       />
+      
+      {/* Debug info - remove in production */}
+      <div className="absolute bottom-4 left-4 bg-black/70 text-white px-3 py-2 rounded text-xs font-mono z-30">
+        State: {currentState} | S:{spotlight?'1':'0'} D:{deskLamp?'1':'0'} M:{monitorLight?'1':'0'}
+      </div>
     </div>
   );
 };
