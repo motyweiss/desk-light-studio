@@ -219,7 +219,7 @@ export const LightHotspot = ({
             )}
           </svg>
 
-          {/* Interactive tooltip with slider */}
+          {/* Interactive tooltip with slider - micro-animations */}
           <AnimatePresence>
             {isHovered && (
               <motion.div
@@ -230,16 +230,51 @@ export const LightHotspot = ({
                   border border-white/15
                   min-w-[160px] z-50
                   overflow-hidden"
-                initial={{ opacity: 0, scale: 0.9, y: -10 }}
-                animate={{ opacity: 1, scale: 1, y: 0 }}
-                exit={{ opacity: 0, scale: 0.9, y: -10 }}
-                transition={{ duration: 0.25, ease: [0.4, 0, 0.2, 1] }}
+                initial={{ 
+                  opacity: 0, 
+                  scale: 0.85, 
+                  y: -5,
+                }}
+                animate={{ 
+                  opacity: 1, 
+                  scale: 1, 
+                  y: 0,
+                  transition: {
+                    duration: 0.3,
+                    ease: [0.4, 0, 0.2, 1],
+                    staggerChildren: 0.08,
+                    delayChildren: 0.05
+                  }
+                }}
+                exit={{ 
+                  opacity: 0, 
+                  scale: 0.9, 
+                  y: -5,
+                  transition: { 
+                    duration: 0.2,
+                    staggerChildren: 0.03,
+                    staggerDirection: -1
+                  }
+                }}
                 onClick={(e) => e.stopPropagation()}
                 onMouseDown={(e) => e.stopPropagation()}
               >
-                {/* שכבת זוהר פנימית */}
-                <div 
-                  className="absolute inset-0 rounded-2xl pointer-events-none transition-opacity duration-500"
+                {/* שכבת זוהר פנימית - מופיעה אחרונה */}
+                <motion.div 
+                  className="absolute inset-0 rounded-2xl pointer-events-none"
+                  initial={{ opacity: 0 }}
+                  animate={{ 
+                    opacity: 1,
+                    transition: { 
+                      duration: 0.4,
+                      delay: 0.25,
+                      ease: "easeOut"
+                    }
+                  }}
+                  exit={{ 
+                    opacity: 0,
+                    transition: { duration: 0.15 }
+                  }}
                   style={{
                     background: isOn 
                       ? `radial-gradient(ellipse 100% 80% at 50% 100%, ${glowColor.replace(')', `, ${intensityRatio * 0.25})`)}  0%, transparent 60%)`
@@ -249,16 +284,54 @@ export const LightHotspot = ({
                 
                 {/* תוכן */}
                 <div className="relative z-10">
-                  <div className="text-sm font-medium text-left mb-3 text-white/90 tracking-wide">
+                  {/* Label - מופיע שני */}
+                  <motion.div 
+                    className="text-sm font-medium text-left mb-3 text-white/90 tracking-wide"
+                    initial={{ opacity: 0, y: 8 }}
+                    animate={{ 
+                      opacity: 1, 
+                      y: 0,
+                      transition: { 
+                        duration: 0.25, 
+                        ease: "easeOut",
+                        delay: 0.1
+                      }
+                    }}
+                    exit={{ 
+                      opacity: 0, 
+                      y: 4,
+                      transition: { duration: 0.15 }
+                    }}
+                  >
                     {label}
-                  </div>
-                  <Slider
-                    value={[intensity]}
-                    onValueChange={([value]) => onIntensityChange(value)}
-                    max={100}
-                    step={1}
-                    className="w-full cursor-pointer"
-                  />
+                  </motion.div>
+                  
+                  {/* Slider - מופיע שלישי */}
+                  <motion.div
+                    initial={{ opacity: 0, scaleX: 0.8 }}
+                    animate={{ 
+                      opacity: 1, 
+                      scaleX: 1,
+                      transition: { 
+                        duration: 0.3, 
+                        ease: [0.4, 0, 0.2, 1],
+                        delay: 0.15
+                      }
+                    }}
+                    exit={{ 
+                      opacity: 0, 
+                      scaleX: 0.9,
+                      transition: { duration: 0.15 }
+                    }}
+                  >
+                    <Slider
+                      value={[intensity]}
+                      onValueChange={([value]) => onIntensityChange(value)}
+                      max={100}
+                      step={1}
+                      className="w-full cursor-pointer"
+                    />
+                  </motion.div>
                 </div>
               </motion.div>
             )}
