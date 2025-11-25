@@ -12,15 +12,15 @@ export const LightSwitch = ({ label, checked, onChange, isMaster = false }: Ligh
     <div className="flex flex-col items-center gap-3">
       <button
         onClick={() => onChange(!checked)}
-        className={`relative w-20 h-10 rounded-full transition-all duration-300 ${
+        className={`relative w-20 h-10 rounded-full transition-all duration-500 ease-out ${
           checked 
             ? 'bg-gradient-to-r from-warm-glow to-accent shadow-[0_0_20px_rgba(251,191,36,0.5)]' 
-            : 'bg-secondary'
+            : 'bg-secondary shadow-inner'
         }`}
         aria-label={`Toggle ${label}`}
       >
         <motion.div
-          className={`absolute top-1 left-1 w-8 h-8 rounded-full shadow-lg ${
+          className={`absolute top-1 left-1 w-8 h-8 rounded-full shadow-lg transition-colors duration-300 ${
             checked ? 'bg-background' : 'bg-muted-foreground'
           }`}
           animate={{
@@ -28,16 +28,32 @@ export const LightSwitch = ({ label, checked, onChange, isMaster = false }: Ligh
           }}
           transition={{
             type: "spring",
-            stiffness: 500,
-            damping: 30
+            stiffness: 700,
+            damping: 35
           }}
-        />
+        >
+          {/* Inner glow when active */}
+          {checked && (
+            <motion.div
+              className="absolute inset-0 rounded-full bg-warm-glow"
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={{ opacity: 0.3, scale: 1 }}
+              transition={{ duration: 0.3 }}
+            />
+          )}
+        </motion.div>
       </button>
-      <span className={`text-sm font-medium transition-colors ${
-        checked ? 'text-warm-glow-soft' : 'text-muted-foreground'
-      } ${isMaster ? 'text-base font-semibold' : ''}`}>
+      <motion.span 
+        className={`text-sm font-medium ${
+          isMaster ? 'text-base font-semibold' : ''
+        }`}
+        animate={{
+          color: checked ? 'hsl(var(--warm-glow-soft))' : 'hsl(var(--muted-foreground))'
+        }}
+        transition={{ duration: 0.4 }}
+      >
         {label}
-      </span>
+      </motion.span>
     </div>
   );
 };
