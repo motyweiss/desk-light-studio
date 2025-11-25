@@ -296,7 +296,7 @@ export const LightHotspot = ({
           <AnimatePresence>
             {isHovered && (
               <motion.div
-                className="intensity-tooltip absolute -bottom-24 left-1/2 -translate-x-1/2 
+                className="intensity-tooltip absolute -bottom-16 left-1/2 -translate-x-1/2
                   bg-white/8 backdrop-blur-xl 
                   px-7 py-5 rounded-full 
                   shadow-[0_8px_32px_rgba(0,0,0,0.4),0_2px_8px_rgba(0,0,0,0.2),inset_0_1px_1px_rgba(255,255,255,0.1)]
