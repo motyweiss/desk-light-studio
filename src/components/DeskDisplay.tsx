@@ -72,13 +72,36 @@ export const DeskDisplay = ({
   const lightsOn = [spotlight, deskLamp, monitorLight].filter(Boolean).length;
   const glowIntensity = lightsOn / 3;
 
+  // Calculate background color based on current lighting state
+  const getBackgroundColor = () => {
+    const state = getCurrentState();
+    
+    // Base dark color
+    const baseDark = "220 18% 10%";
+    
+    // Specific colors for each state
+    const stateColors: Record<string, string> = {
+      "000": baseDark, // All off - pure dark
+      "001": "210 25% 12%", // Monitor only - cool blue tint
+      "010": "38 30% 14%", // Lamp only - warm yellow tint
+      "011": "35 28% 13%", // Lamp + Monitor - balanced warm
+      "100": "30 35% 13%", // Spotlight only - warm orange tint
+      "101": "25 32% 12%", // Spotlight + Monitor - orange-blue mix
+      "110": "35 38% 15%", // Spotlight + Lamp - bright warm
+      "111": "32 40% 16%", // All on - brightest warm glow
+    };
+    
+    return stateColors[state] || baseDark;
+  };
+
   return (
     <div
       ref={containerRef}
-      className="relative w-full aspect-square rounded-[3rem] overflow-hidden bg-container-bg shadow-2xl transition-shadow duration-700"
+      className="relative w-full aspect-square rounded-[3rem] overflow-hidden shadow-2xl transition-all duration-1000"
       style={{
+        backgroundColor: `hsl(${getBackgroundColor()})`,
         boxShadow: glowIntensity > 0 
-          ? `0 0 ${40 + glowIntensity * 40}px rgba(251, 191, 36, ${0.1 + glowIntensity * 0.3}),
+          ? `0 0 ${40 + glowIntensity * 40}px hsla(var(--warm-glow) / ${0.1 + glowIntensity * 0.3}),
              0 20px 60px rgba(0, 0, 0, 0.5)`
           : '0 20px 60px rgba(0, 0, 0, 0.5)'
       }}
@@ -183,7 +206,7 @@ export const DeskDisplay = ({
             id="spotlight"
             label="Spotlight"
             isOn={spotlight}
-            position={{ x: 88, y: 16 }}
+            position={{ x: 86, y: 18 }}
             onToggle={onSpotlightToggle}
             isContainerHovered={isHovered}
           />
@@ -191,7 +214,7 @@ export const DeskDisplay = ({
             id="deskLamp"
             label="Desk Lamp"
             isOn={deskLamp}
-            position={{ x: 18, y: 58 }}
+            position={{ x: 20, y: 62 }}
             onToggle={onDeskLampToggle}
             isContainerHovered={isHovered}
           />
@@ -199,7 +222,7 @@ export const DeskDisplay = ({
             id="monitorLight"
             label="Monitor Light"
             isOn={monitorLight}
-            position={{ x: 50, y: 38 }}
+            position={{ x: 48, y: 42 }}
             onToggle={onMonitorLightToggle}
             isContainerHovered={isHovered}
           />
