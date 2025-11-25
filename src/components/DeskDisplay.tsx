@@ -7,7 +7,7 @@ import desk000 from "@/assets/desk-000.png"; // All lights OFF
 import desk001 from "@/assets/desk-001.png"; // Only Monitor Light ON
 import desk010 from "@/assets/desk-010.png"; // Only Desk Lamp ON
 import desk011 from "@/assets/desk-011.png"; // Desk Lamp + Monitor Light ON
-import desk100 from "@/assets/desk-100.png"; // Only Spotlight ON
+import desk100 from "@/assets/desk-100-correct.png"; // Only Spotlight ON - CORRECTED
 import desk101 from "@/assets/desk-101.png"; // Spotlight + Monitor Light ON
 import desk110 from "@/assets/desk-110.png"; // Spotlight + Desk Lamp ON
 import desk111 from "@/assets/desk-111.png"; // All lights ON
