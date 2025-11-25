@@ -319,6 +319,7 @@ export const LightHotspot = ({
                   scaleX: 1,
                   scaleY: 1,
                   x: mousePos.x,
+                  y: mousePos.y,
                   transition: {
                     opacity: {
                       duration: 0.15,
@@ -337,6 +338,11 @@ export const LightHotspot = ({
                       type: "spring",
                       stiffness: 150,
                       damping: 20
+                    },
+                    y: {
+                      type: "spring",
+                      stiffness: 150,
+                      damping: 20
                     }
                   }
                 }}
@@ -350,7 +356,6 @@ export const LightHotspot = ({
                   }
                 }}
                 style={{
-                  transform: `translateY(${mousePos.y}px)`,
                   transformOrigin: id === 'spotlight' ? 'right center' : 'center top'
                 }}
                 onClick={(e) => e.stopPropagation()}
