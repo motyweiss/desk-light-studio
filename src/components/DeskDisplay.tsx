@@ -205,11 +205,6 @@ export const DeskDisplay = ({
           />
         </div>
       </div>
-      
-      {/* Debug info - remove in production */}
-      <div className="absolute bottom-4 left-4 bg-black/70 text-white px-3 py-2 rounded text-xs font-mono z-40">
-        State: {currentState} | S:{spotlight?'1':'0'} D:{deskLamp?'1':'0'} M:{monitorLight?'1':'0'}
-      </div>
     </div>
   );
 };
