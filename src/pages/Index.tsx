@@ -46,7 +46,7 @@ const Index = () => {
       </div>
 
       {/* Main Display */}
-      <div className="mb-12">
+      <div className="w-full max-w-2xl md:max-w-3xl mb-12 px-4">
         <DeskDisplay 
           spotlight={spotlight}
           deskLamp={deskLamp}
