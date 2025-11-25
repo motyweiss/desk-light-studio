@@ -307,19 +307,32 @@ export const LightHotspot = ({
                   border border-white/20
                   min-w-[240px]
                   overflow-hidden`}
-                initial={{
-                  opacity: 0, 
-                  scale: 0.94,
-                  y: 6
+                initial={{ 
+                  opacity: 0,
+                  scaleX: 0,
+                  scaleY: 0,
+                  originX: id === 'spotlight' ? 1 : 0.5,
+                  originY: id === 'spotlight' ? 0.5 : 0
                 }}
                 animate={{ 
-                  opacity: 1, 
-                  scale: 1,
-                  y: 0,
+                  opacity: 1,
+                  scaleX: 1,
+                  scaleY: 1,
                   x: mousePos.x,
                   transition: {
-                    duration: 0.22,
-                    ease: [0.16, 1, 0.3, 1],
+                    opacity: {
+                      duration: 0.15,
+                      ease: [0.16, 1, 0.3, 1]
+                    },
+                    scaleX: {
+                      duration: 0.25,
+                      ease: [0.16, 1, 0.3, 1]
+                    },
+                    scaleY: {
+                      duration: 0.25,
+                      ease: [0.16, 1, 0.3, 1],
+                      delay: 0.08
+                    },
                     x: {
                       type: "spring",
                       stiffness: 150,
@@ -328,27 +341,29 @@ export const LightHotspot = ({
                   }
                 }}
                 exit={{ 
-                  opacity: 0, 
-                  scale: 0.96,
-                  y: 3,
+                  opacity: 0,
+                  scaleX: 0.7,
+                  scaleY: 0.7,
                   transition: {
                     duration: 0.15,
                     ease: [0.4, 0, 1, 1]
                   }
                 }}
                 style={{
-                  transform: `translateY(${mousePos.y}px)`
+                  transform: `translateY(${mousePos.y}px)`,
+                  transformOrigin: id === 'spotlight' ? 'right center' : 'center top'
                 }}
                 onClick={(e) => e.stopPropagation()}
               >
-                {/* שכבת זוהר פנימית - מופיעה אחרונה */}
+                {/* שכבת זוהר פנימית */}
                 <motion.div 
                   className="absolute inset-0 rounded-full pointer-events-none"
                   initial={{ opacity: 0 }}
                   animate={{ 
                     opacity: 1,
                     transition: { 
-                      duration: 0.22,
+                      delay: 0.35,
+                      duration: 0.3,
                       ease: [0.16, 1, 0.3, 1]
                     }
                   }}
@@ -361,11 +376,22 @@ export const LightHotspot = ({
                   }}
                 />
 
-                <div className="relative z-10 flex flex-col gap-3">
+                <motion.div 
+                  className="relative z-10 flex flex-col gap-3"
+                  initial={{ opacity: 0 }}
+                  animate={{ 
+                    opacity: 1,
+                    transition: {
+                      delay: 0.35,
+                      duration: 0.25,
+                      ease: [0.16, 1, 0.3, 1]
+                    }
+                  }}
+                >
                   {/* Top row: Icon + Text */}
                   <div className="flex items-center gap-3">
                     {/* Lamp icon circle */}
-                    <div 
+                    <div
                       className={`
                         w-10 h-10 rounded-full flex items-center justify-center
                         transition-all duration-300 cursor-pointer
@@ -409,7 +435,7 @@ export const LightHotspot = ({
                       className="cursor-pointer"
                     />
                   </div>
-                </div>
+                </motion.div>
               </motion.div>
             )}
           </AnimatePresence>
