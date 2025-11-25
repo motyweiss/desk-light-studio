@@ -7,24 +7,16 @@ const Index = () => {
   const [spotlight, setSpotlight] = useState(false);
   const [deskLamp, setDeskLamp] = useState(false);
   const [monitorLight, setMonitorLight] = useState(false);
-  const [master, setMaster] = useState(false);
 
-  // Sync master switch with individual lights
-  useEffect(() => {
-    const anyLightOn = spotlight || deskLamp || monitorLight;
-    const allLightsOn = spotlight && deskLamp && monitorLight;
-    
-    if (master && !anyLightOn) {
-      // Master was on, but all lights manually turned off
-      setMaster(false);
-    } else if (!master && anyLightOn) {
-      // Master was off, but at least one light manually turned on
-      setMaster(true);
-    }
-  }, [spotlight, deskLamp, monitorLight]);
+  // Calculate master state based on individual lights
+  const allLightsOn = spotlight && deskLamp && monitorLight;
+  const anyLightOn = spotlight || deskLamp || monitorLight;
+  
+  // Master switch reflects if all lights are on
+  const masterChecked = allLightsOn;
 
   const handleMasterToggle = (checked: boolean) => {
-    setMaster(checked);
+    // When master is toggled, set all lights to the same state
     setSpotlight(checked);
     setDeskLamp(checked);
     setMonitorLight(checked);
@@ -63,7 +55,7 @@ const Index = () => {
         <div className="grid grid-cols-2 md:grid-cols-4 gap-8 md:gap-12 justify-items-center">
           <LightSwitch
             label="Master"
-            checked={master}
+            checked={masterChecked}
             onChange={handleMasterToggle}
             isMaster={true}
           />
