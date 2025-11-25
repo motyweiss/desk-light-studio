@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { LightHotspot } from "./LightHotspot";
 
 // Import all 8 lighting state images
@@ -45,6 +45,7 @@ export const DeskDisplay = ({
   const [currentState, setCurrentState] = useState("000");
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
+  const [hoveredLight, setHoveredLight] = useState<string | null>(null);
 
   // Calculate current lighting state based on intensity
   const getCurrentState = () => {
@@ -245,6 +246,75 @@ export const DeskDisplay = ({
         }}
       />
 
+      {/* Shimmer effects when hovering over OFF lights */}
+      <AnimatePresence>
+        {/* Spotlight shimmer - only when off and hovered */}
+        {hoveredLight === 'spotlight' && spotlightIntensity === 0 && (
+          <motion.div
+            className="absolute inset-0 pointer-events-none z-[25]"
+            style={{
+              background: `radial-gradient(ellipse 20% 20% at 78% 18%, 
+                rgba(251, 191, 36, 0.25) 0%, 
+                transparent 70%)`
+            }}
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{ 
+              opacity: [0, 0.6, 0, 0.5, 0],
+              scale: [0.8, 1.1, 0.9, 1.05, 0.95]
+            }}
+            transition={{
+              duration: 1.2,
+              ease: "easeInOut",
+              times: [0, 0.25, 0.5, 0.75, 1]
+            }}
+          />
+        )}
+
+        {/* Desk Lamp shimmer - only when off and hovered */}
+        {hoveredLight === 'deskLamp' && deskLampIntensity === 0 && (
+          <motion.div
+            className="absolute inset-0 pointer-events-none z-[25]"
+            style={{
+              background: `radial-gradient(ellipse 20% 20% at 25% 58%, 
+                rgba(251, 191, 36, 0.28) 0%, 
+                transparent 70%)`
+            }}
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{ 
+              opacity: [0, 0.6, 0, 0.5, 0],
+              scale: [0.8, 1.1, 0.9, 1.05, 0.95]
+            }}
+            transition={{
+              duration: 1.2,
+              ease: "easeInOut",
+              times: [0, 0.25, 0.5, 0.75, 1]
+            }}
+          />
+        )}
+
+        {/* Monitor Light shimmer - only when off and hovered */}
+        {hoveredLight === 'monitorLight' && monitorLightIntensity === 0 && (
+          <motion.div
+            className="absolute inset-0 pointer-events-none z-[25]"
+            style={{
+              background: `radial-gradient(ellipse 22% 22% at 55% 42%, 
+                rgba(139, 211, 230, 0.22) 0%, 
+                transparent 70%)`
+            }}
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{ 
+              opacity: [0, 0.55, 0, 0.45, 0],
+              scale: [0.8, 1.1, 0.9, 1.05, 0.95]
+            }}
+            transition={{
+              duration: 1.2,
+              ease: "easeInOut",
+              times: [0, 0.25, 0.5, 0.75, 1]
+            }}
+          />
+        )}
+      </AnimatePresence>
+
       {/* Interactive Light Hotspots Layer */}
       <div className="absolute inset-0 z-30 pointer-events-none">
         <div className="relative w-full h-full pointer-events-none">
@@ -254,6 +324,7 @@ export const DeskDisplay = ({
             intensity={spotlightIntensity}
             position={{ x: 78, y: 18 }}
             onIntensityChange={onSpotlightChange}
+            onHoverChange={setHoveredLight}
             isContainerHovered={isHovered}
           />
           <LightHotspot
@@ -262,6 +333,7 @@ export const DeskDisplay = ({
             intensity={deskLampIntensity}
             position={{ x: 25, y: 58 }}
             onIntensityChange={onDeskLampChange}
+            onHoverChange={setHoveredLight}
             isContainerHovered={isHovered}
           />
           <LightHotspot
@@ -270,6 +342,7 @@ export const DeskDisplay = ({
             intensity={monitorLightIntensity}
             position={{ x: 55, y: 42 }}
             onIntensityChange={onMonitorLightChange}
+            onHoverChange={setHoveredLight}
             isContainerHovered={isHovered}
           />
         </div>
