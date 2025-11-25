@@ -152,7 +152,7 @@ export const DeskDisplay = ({
             id="spotlight"
             label="Spotlight"
             isOn={spotlight}
-            position={{ x: 78, y: 18 }}
+            position={{ x: 50, y: 40 }}
             onToggle={onSpotlightToggle}
             isContainerHovered={isHovered}
           />
@@ -168,7 +168,7 @@ export const DeskDisplay = ({
             id="monitorLight"
             label="Monitor Light"
             isOn={monitorLight}
-            position={{ x: 50, y: 40 }}
+            position={{ x: 78, y: 18 }}
             onToggle={onMonitorLightToggle}
             isContainerHovered={isHovered}
           />
