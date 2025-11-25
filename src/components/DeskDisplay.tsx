@@ -113,7 +113,7 @@ export const DeskDisplay = ({
       <motion.div
         className="absolute inset-0 pointer-events-none z-[5]"
         style={{
-          background: `radial-gradient(ellipse 45% 45% at 83% 22%, hsla(var(--spotlight-glow) / 0.25) 0%, hsla(var(--spotlight-glow) / 0.12) 30%, transparent 65%)`,
+          background: `radial-gradient(ellipse 45% 45% at 88% 32%, hsla(var(--spotlight-glow) / 0.25) 0%, hsla(var(--spotlight-glow) / 0.12) 30%, transparent 65%)`,
         }}
         animate={{
           opacity: spotlightIntensity / 100,
@@ -128,7 +128,7 @@ export const DeskDisplay = ({
       <motion.div
         className="absolute inset-0 pointer-events-none z-[5]"
         style={{
-          background: `radial-gradient(ellipse 40% 40% at 32% 38%, hsla(var(--lamp-glow) / 0.28) 0%, hsla(var(--lamp-glow) / 0.14) 30%, transparent 60%)`,
+          background: `radial-gradient(ellipse 40% 40% at 18% 58%, hsla(var(--lamp-glow) / 0.28) 0%, hsla(var(--lamp-glow) / 0.14) 30%, transparent 60%)`,
         }}
         animate={{
           opacity: deskLampIntensity / 100,
@@ -143,7 +143,7 @@ export const DeskDisplay = ({
       <motion.div
         className="absolute inset-0 pointer-events-none z-[5]"
         style={{
-          background: `radial-gradient(ellipse 50% 50% at 50% 35%, hsla(var(--monitor-glow) / 0.22) 0%, hsla(var(--monitor-glow) / 0.1) 35%, transparent 70%)`,
+          background: `radial-gradient(ellipse 50% 50% at 50% 32%, hsla(var(--monitor-glow) / 0.22) 0%, hsla(var(--monitor-glow) / 0.1) 35%, transparent 70%)`,
         }}
         animate={{
           opacity: monitorLightIntensity / 100,
@@ -195,7 +195,7 @@ export const DeskDisplay = ({
           opacity: spotlightIntensity > 0 ? (1 - spotlightIntensity / 100) * 0.5 : 0
         }}
         style={{
-          background: `radial-gradient(ellipse 35% 35% at 83% 22%, rgba(0,0,0,0.8) 0%, transparent 70%)`
+          background: `radial-gradient(ellipse 35% 35% at 88% 32%, rgba(0,0,0,0.8) 0%, transparent 70%)`
         }}
         transition={{
           duration: 0.8,
@@ -210,7 +210,7 @@ export const DeskDisplay = ({
           opacity: deskLampIntensity > 0 ? (1 - deskLampIntensity / 100) * 0.5 : 0
         }}
         style={{
-          background: `radial-gradient(ellipse 30% 30% at 32% 38%, rgba(0,0,0,0.8) 0%, transparent 65%)`
+          background: `radial-gradient(ellipse 30% 30% at 18% 58%, rgba(0,0,0,0.8) 0%, transparent 65%)`
         }}
         transition={{
           duration: 0.8,
@@ -225,7 +225,7 @@ export const DeskDisplay = ({
           opacity: monitorLightIntensity > 0 ? (1 - monitorLightIntensity / 100) * 0.5 : 0
         }}
         style={{
-          background: `radial-gradient(ellipse 40% 40% at 50% 35%, rgba(0,0,0,0.8) 0%, transparent 75%)`
+          background: `radial-gradient(ellipse 40% 40% at 50% 32%, rgba(0,0,0,0.8) 0%, transparent 75%)`
         }}
         transition={{
           duration: 0.8,
@@ -252,7 +252,7 @@ export const DeskDisplay = ({
             id="spotlight"
             label="Spotlight"
             intensity={spotlightIntensity}
-            position={{ x: 83, y: 22 }}
+            position={{ x: 88, y: 32 }}
             onIntensityChange={onSpotlightChange}
             isContainerHovered={isHovered}
           />
@@ -260,7 +260,7 @@ export const DeskDisplay = ({
             id="deskLamp"
             label="Desk Lamp"
             intensity={deskLampIntensity}
-            position={{ x: 32, y: 38 }}
+            position={{ x: 18, y: 58 }}
             onIntensityChange={onDeskLampChange}
             isContainerHovered={isHovered}
           />
@@ -268,7 +268,7 @@ export const DeskDisplay = ({
             id="monitorLight"
             label="Monitor Light"
             intensity={monitorLightIntensity}
-            position={{ x: 50, y: 35 }}
+            position={{ x: 50, y: 32 }}
             onIntensityChange={onMonitorLightChange}
             isContainerHovered={isHovered}
           />
