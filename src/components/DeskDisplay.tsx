@@ -260,7 +260,7 @@ export const DeskDisplay = ({
             id="deskLamp"
             label="Desk Lamp"
             intensity={deskLampIntensity}
-            position={{ x: 38, y: 52 }}
+            position={{ x: 38, y: 65 }}
             onIntensityChange={onDeskLampChange}
             isContainerHovered={isHovered}
           />
