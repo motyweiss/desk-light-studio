@@ -28,17 +28,17 @@ const Index = () => {
     
     // Harmonized colors derived from desk images - each state creates unique atmosphere
     const stateColors: Record<string, string> = {
-      "000": "215 22% 12%", // All off - deep rich blue-gray, matches dark ambient scene
-      "001": "208 20% 14%", // Monitor only - cool blue tone, screen glow harmony
-      "010": "28 18% 15%", // Desk lamp only - warm amber undertone from lamp glow
-      "011": "25 16% 16%", // Lamp + Monitor - balanced warm-cool, mixed lighting
-      "100": "32 15% 16%", // Spotlight only - warm ceiling light ambiance
-      "101": "22 14% 17%", // Spotlight + Monitor - warm with cool accent
-      "110": "30 14% 18%", // Spotlight + Lamp - double warm sources, golden hour feel
-      "111": "26 12% 19%", // All on - brightest, neutral warm-cool balance, fully lit workspace
+      "000": "25 18% 10%", // All off - deep warm brown-gray, cozy darkness
+      "001": "30 16% 12%", // Monitor only - warm slate with subtle cool accent
+      "010": "28 20% 13%", // Desk lamp only - warm amber-brown undertone from lamp glow
+      "011": "32 18% 14%", // Lamp + Monitor - balanced warm with hint of cool
+      "100": "35 17% 15%", // Spotlight only - warm ceiling light ambiance
+      "101": "33 16% 16%", // Spotlight + Monitor - warm with cool accent
+      "110": "36 19% 17%", // Spotlight + Lamp - double warm sources, golden hour feel
+      "111": "34 17% 18%", // All on - brightest, warm neutral balance, fully lit workspace
     };
     
-    return stateColors[state] || "215 22% 12%";
+    return stateColors[state] || "25 18% 10%";
   };
 
   return (
