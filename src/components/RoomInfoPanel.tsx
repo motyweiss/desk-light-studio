@@ -57,7 +57,7 @@ export const RoomInfoPanel = ({ roomName, temperature, humidity, masterSwitchOn,
       </div>
 
       {/* Climate Info */}
-      <div className="flex gap-8">
+      <div className="flex gap-6">
         {/* Temperature */}
         <div className="flex-1 py-4">
           <div className="flex items-center gap-2 mb-2">
