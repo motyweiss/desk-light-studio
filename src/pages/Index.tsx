@@ -92,14 +92,22 @@ const Index = () => {
 
       {/* Main Display */}
       <div className="w-[40%] mx-auto relative z-10">
-      <DeskDisplay
-        spotlightIntensity={spotlightIntensity}
-        deskLampIntensity={deskLampIntensity}
-        monitorLightIntensity={monitorLightIntensity}
-        onSpotlightChange={setSpotlightIntensity}
-        onDeskLampChange={setDeskLampIntensity}
-        onMonitorLightChange={setMonitorLightIntensity}
-      />
+        {/* Soft shadow layer underneath image */}
+        <div 
+          className="absolute -bottom-8 left-1/2 -translate-x-1/2 w-[85%] h-[12%] pointer-events-none z-0"
+          style={{
+            background: 'radial-gradient(ellipse 100% 100% at 50% 50%, rgba(0,0,0,0.25) 0%, rgba(0,0,0,0.08) 50%, transparent 80%)',
+            filter: 'blur(20px)',
+          }}
+        />
+        <DeskDisplay
+          spotlightIntensity={spotlightIntensity}
+          deskLampIntensity={deskLampIntensity}
+          monitorLightIntensity={monitorLightIntensity}
+          onSpotlightChange={setSpotlightIntensity}
+          onDeskLampChange={setDeskLampIntensity}
+          onMonitorLightChange={setMonitorLightIntensity}
+        />
       </div>
     </motion.div>
   );
