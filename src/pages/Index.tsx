@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { DeskDisplay } from "@/components/DeskDisplay";
+import { RoomInfoPanel } from "@/components/RoomInfoPanel";
 
 const Index = () => {
   const [spotlightIntensity, setSpotlightIntensity] = useState(0); // 0-100
@@ -31,7 +32,7 @@ const Index = () => {
 
   return (
     <motion.div 
-      className="min-h-screen flex flex-col items-center justify-center p-6 md:p-12 relative overflow-hidden"
+      className="min-h-screen flex items-center justify-center p-8 relative overflow-hidden"
       animate={{
         backgroundColor: `hsl(${getPageBackgroundColor()})`,
       }}
@@ -90,24 +91,56 @@ const Index = () => {
         }}
       />
 
-      {/* Main Display */}
-      <div className="w-[40%] mx-auto relative z-10">
-        {/* Soft shadow layer underneath image */}
-        <div 
-          className="absolute -bottom-8 left-1/2 -translate-x-1/2 w-[85%] h-[12%] pointer-events-none z-0"
-          style={{
-            background: 'radial-gradient(ellipse 100% 100% at 50% 50%, rgba(0,0,0,0.25) 0%, rgba(0,0,0,0.08) 50%, transparent 80%)',
-            filter: 'blur(20px)',
-          }}
-        />
-        <DeskDisplay
-          spotlightIntensity={spotlightIntensity}
-          deskLampIntensity={deskLampIntensity}
-          monitorLightIntensity={monitorLightIntensity}
-          onSpotlightChange={setSpotlightIntensity}
-          onDeskLampChange={setDeskLampIntensity}
-          onMonitorLightChange={setMonitorLightIntensity}
-        />
+      {/* Two-Column Layout Container */}
+      <div className="flex items-center gap-12 max-w-7xl w-full relative z-10">
+        {/* Left Panel - Room Info */}
+        <div className="w-[40%]">
+          <RoomInfoPanel
+            roomName="חדר עבודה"
+            temperature={24.4}
+            humidity={49}
+            lights={[
+              { 
+                id: 'deskLamp', 
+                label: 'Desk Lamp', 
+                intensity: deskLampIntensity, 
+                onChange: setDeskLampIntensity 
+              },
+              { 
+                id: 'monitorLight', 
+                label: 'Monitor Light', 
+                intensity: monitorLightIntensity, 
+                onChange: setMonitorLightIntensity 
+              },
+              { 
+                id: 'spotlight', 
+                label: 'Spotlight', 
+                intensity: spotlightIntensity, 
+                onChange: setSpotlightIntensity 
+              },
+            ]}
+          />
+        </div>
+
+        {/* Right Panel - Desk Display */}
+        <div className="w-[55%] relative">
+          {/* Soft shadow layer underneath image */}
+          <div 
+            className="absolute -bottom-8 left-1/2 -translate-x-1/2 w-[85%] h-[12%] pointer-events-none z-0"
+            style={{
+              background: 'radial-gradient(ellipse 100% 100% at 50% 50%, rgba(0,0,0,0.25) 0%, rgba(0,0,0,0.08) 50%, transparent 80%)',
+              filter: 'blur(20px)',
+            }}
+          />
+          <DeskDisplay
+            spotlightIntensity={spotlightIntensity}
+            deskLampIntensity={deskLampIntensity}
+            monitorLightIntensity={monitorLightIntensity}
+            onSpotlightChange={setSpotlightIntensity}
+            onDeskLampChange={setDeskLampIntensity}
+            onMonitorLightChange={setMonitorLightIntensity}
+          />
+        </div>
       </div>
     </motion.div>
   );
