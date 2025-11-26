@@ -1,4 +1,4 @@
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import { Lightbulb } from "lucide-react";
 import { Slider } from "@/components/ui/slider";
 
@@ -12,7 +12,11 @@ interface LightControlCardProps {
 export const LightControlCard = ({ id, label, intensity, onChange }: LightControlCardProps) => {
   const isOn = intensity > 0;
   
-  const handleCardClick = () => {
+  const handleCardClick = (e: React.MouseEvent) => {
+    // Only toggle if clicking outside the slider
+    if ((e.target as HTMLElement).closest('[data-slider]')) {
+      return;
+    }
     onChange(isOn ? 0 : 100);
   };
 
@@ -27,7 +31,7 @@ export const LightControlCard = ({ id, label, intensity, onChange }: LightContro
       <div className="flex items-center gap-4">
         {/* Icon Circle */}
         <motion.div
-          className={`w-8 h-8 rounded-full flex items-center justify-center transition-colors duration-300 pointer-events-none ${
+          className={`w-8 h-8 rounded-full flex items-center justify-center transition-colors duration-300 pointer-events-none flex-shrink-0 ${
             isOn 
               ? 'bg-[hsl(38_70%_58%/0.2)] text-[hsl(38_70%_58%)]' 
               : 'bg-white/10 text-white/40'
@@ -37,7 +41,7 @@ export const LightControlCard = ({ id, label, intensity, onChange }: LightContro
         </motion.div>
 
         {/* Text Info */}
-        <div className="flex-1 text-left">
+        <div className="flex-1 text-left min-w-0">
           <div className="font-light text-base text-foreground tracking-wide">{label}</div>
           <motion.div 
             className="text-xs font-light tracking-wider"
@@ -48,33 +52,23 @@ export const LightControlCard = ({ id, label, intensity, onChange }: LightContro
             {isOn ? `${intensity}%` : 'Off'}
           </motion.div>
         </div>
-      </div>
 
-      {/* Conditional Slider - Only When On */}
-      <AnimatePresence>
-        {isOn && (
-          <motion.div
-            initial={{ height: 0, opacity: 0, marginTop: 0 }}
-            animate={{ height: 'auto', opacity: 1, marginTop: 12 }}
-            exit={{ height: 0, opacity: 0, marginTop: 0 }}
-            transition={{
-              duration: 0.3,
-              ease: [0.22, 0.03, 0.26, 1]
-            }}
-            className="overflow-hidden"
-          >
-            <Slider
-              value={[intensity]}
-              onValueChange={(values) => onChange(values[0])}
-              max={100}
-              step={1}
-              className="w-full pointer-events-auto"
-              onClick={(e: React.MouseEvent) => e.stopPropagation()}
-              onPointerDown={(e: React.PointerEvent) => e.stopPropagation()}
-            />
-          </motion.div>
-        )}
-      </AnimatePresence>
+        {/* Slider - Always Visible on Right */}
+        <div 
+          className="w-32 flex-shrink-0"
+          data-slider
+          onClick={(e) => e.stopPropagation()}
+          onPointerDown={(e) => e.stopPropagation()}
+        >
+          <Slider
+            value={[intensity]}
+            onValueChange={(values) => onChange(values[0])}
+            max={100}
+            step={1}
+            className="w-full"
+          />
+        </div>
+      </div>
     </motion.button>
   );
 };
