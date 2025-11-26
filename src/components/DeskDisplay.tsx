@@ -45,6 +45,22 @@ export const DeskDisplay = ({
   const [currentState, setCurrentState] = useState("000");
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
+  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
+
+  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (!containerRef.current) return;
+    
+    const rect = containerRef.current.getBoundingClientRect();
+    const x = (e.clientX - rect.left) / rect.width - 0.5; // -0.5 to 0.5
+    const y = (e.clientY - rect.top) / rect.height - 0.5; // -0.5 to 0.5
+    
+    setMousePosition({ x, y });
+  };
+
+  const handleMouseLeave = () => {
+    setIsHovered(false);
+    setMousePosition({ x: 0, y: 0 });
+  };
 
   // Calculate current lighting state based on intensity
   const getCurrentState = () => {
@@ -75,21 +91,22 @@ export const DeskDisplay = ({
       ref={containerRef}
       className="relative w-full aspect-square"
       onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
+      onMouseLeave={handleMouseLeave}
+      onMouseMove={handleMouseMove}
       style={{
-        perspective: '1200px',
+        perspective: '1000px',
       }}
     >
       <motion.div 
         className="relative w-full h-full"
         animate={{
-          rotateY: [-1.5, 1.5, -1.5],
-          rotateX: [-0.5, 0.5, -0.5],
+          rotateY: mousePosition.x * 8,
+          rotateX: mousePosition.y * -8,
         }}
         transition={{
-          duration: 8,
-          repeat: Infinity,
-          ease: "easeInOut",
+          type: "spring",
+          stiffness: 150,
+          damping: 20,
         }}
         style={{
           transformStyle: 'preserve-3d',
