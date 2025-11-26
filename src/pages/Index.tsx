@@ -21,7 +21,7 @@ const Index = () => {
       setTimeout(() => {
         setIsLoaded(true);
       }, 100);
-    }, 1200); // Loading phase duration
+    }, 2000); // Loading phase duration
 
     return () => clearTimeout(loadingTimer);
   }, []);
@@ -222,8 +222,8 @@ const Index = () => {
             initial={{ opacity: 0 }}
             animate={{ opacity: isLoaded ? 1 : 0 }}
             transition={{ 
-              duration: 0.8,
-              delay: 0.6,
+              duration: 1.2,
+              delay: 1.0,
               ease: [0.22, 0.03, 0.26, 1]
             }}
             style={{
