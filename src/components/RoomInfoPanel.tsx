@@ -17,24 +17,42 @@ interface RoomInfoPanelProps {
   onMasterToggle: (checked: boolean) => void;
   onLightHover: (lightId: string | null) => void;
   lights: Light[];
+  isLoaded: boolean;
 }
 
-export const RoomInfoPanel = ({ roomName, temperature, humidity, masterSwitchOn, onMasterToggle, onLightHover, lights }: RoomInfoPanelProps) => {
+export const RoomInfoPanel = ({ roomName, temperature, humidity, masterSwitchOn, onMasterToggle, onLightHover, lights, isLoaded }: RoomInfoPanelProps) => {
   return (
-    <motion.div
-      className="space-y-6"
-      initial={{ opacity: 0, x: -20 }}
-      animate={{ opacity: 1, x: 0 }}
-      transition={{ duration: 0.6, ease: [0.22, 0.03, 0.26, 1] }}
-    >
+    <div className="space-y-6">
       {/* Room Title with Master Switch */}
-      <div className="flex items-center justify-between">
+      <motion.div 
+        className="flex items-center justify-between"
+        initial={{ opacity: 0, x: -20 }}
+        animate={{ 
+          opacity: isLoaded ? 1 : 0,
+          x: isLoaded ? 0 : -20
+        }}
+        transition={{ 
+          duration: 0.8,
+          delay: 0,
+          ease: [0.22, 0.03, 0.26, 1]
+        }}
+      >
         <h1 className="text-5xl font-display font-light tracking-wide text-foreground">
           {roomName}
         </h1>
         
         {/* Master Switch - Circular Frosted Glass Button */}
         <motion.button
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ 
+            opacity: isLoaded ? 1 : 0,
+            scale: isLoaded ? 1 : 0.9
+          }}
+          transition={{ 
+            duration: 0.6,
+            delay: 0.15,
+            ease: [0.22, 0.03, 0.26, 1]
+          }}
           onClick={() => onMasterToggle(!masterSwitchOn)}
           className={`w-12 h-12 rounded-full backdrop-blur-xl border transition-all duration-500 ${
             masterSwitchOn 
@@ -54,10 +72,22 @@ export const RoomInfoPanel = ({ roomName, temperature, humidity, masterSwitchOn,
             <Power size={20} strokeWidth={2.5} />
           </motion.div>
         </motion.button>
-      </div>
+      </motion.div>
 
       {/* Climate Info */}
-      <div className="flex gap-6 py-6">
+      <motion.div 
+        className="flex gap-6 py-6"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ 
+          opacity: isLoaded ? 1 : 0,
+          y: isLoaded ? 0 : 20
+        }}
+        transition={{ 
+          duration: 0.8,
+          delay: 0.3,
+          ease: [0.22, 0.03, 0.26, 1]
+        }}
+      >
         {/* Temperature */}
         <div className="flex-1 py-3">
           <div className="flex items-center gap-2 mb-2">
@@ -83,12 +113,25 @@ export const RoomInfoPanel = ({ roomName, temperature, humidity, masterSwitchOn,
             {humidity}%
           </div>
         </div>
-      </div>
+      </motion.div>
 
       {/* Light Controls Section */}
       <div>
         {/* Separator */}
-        <div className="h-px bg-white/10 mb-5" />
+        <motion.div 
+          className="h-px bg-white/10 mb-5"
+          initial={{ scaleX: 0, opacity: 0 }}
+          animate={{ 
+            scaleX: isLoaded ? 1 : 0,
+            opacity: isLoaded ? 1 : 0
+          }}
+          transition={{ 
+            duration: 0.8,
+            delay: 1.2,
+            ease: [0.22, 0.03, 0.26, 1]
+          }}
+          style={{ originX: 0 }}
+        />
         
         <motion.div 
           className="space-y-3 -ml-5"
@@ -97,21 +140,22 @@ export const RoomInfoPanel = ({ roomName, temperature, humidity, masterSwitchOn,
             show: {
               opacity: 1,
               transition: {
-                staggerChildren: 0.08
+                delayChildren: 1.4,
+                staggerChildren: 0.12
               }
             }
           }}
           initial="hidden"
-          animate="show"
+          animate={isLoaded ? "show" : "hidden"}
         >
           {lights.map((light, index) => (
             <motion.div
               key={light.id}
               variants={{
-                hidden: { opacity: 0, y: 10 },
-                show: { opacity: 1, y: 0 }
+                hidden: { opacity: 0, y: 20, scale: 0.97 },
+                show: { opacity: 1, y: 0, scale: 1 }
               }}
-              transition={{ duration: 0.4, ease: [0.22, 0.03, 0.26, 1] }}
+              transition={{ duration: 0.6, ease: [0.22, 0.03, 0.26, 1] }}
             >
               {index > 0 && (
                 <div className="h-px bg-white/10 mb-3" />
@@ -127,6 +171,6 @@ export const RoomInfoPanel = ({ roomName, temperature, humidity, masterSwitchOn,
           ))}
         </motion.div>
       </div>
-    </motion.div>
+    </div>
   );
 };

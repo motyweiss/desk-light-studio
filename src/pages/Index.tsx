@@ -1,15 +1,21 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { DeskDisplay } from "@/components/DeskDisplay";
 import { RoomInfoPanel } from "@/components/RoomInfoPanel";
 
 const Index = () => {
+  const [isLoaded, setIsLoaded] = useState(false);
   const [spotlightIntensity, setSpotlightIntensity] = useState(0); // 0-100
   const [deskLampIntensity, setDeskLampIntensity] = useState(0);
   const [monitorLightIntensity, setMonitorLightIntensity] = useState(0);
 
   // Hover states for coordinated UI
   const [hoveredLight, setHoveredLight] = useState<string | null>(null);
+
+  // Trigger loading animation
+  useEffect(() => {
+    setIsLoaded(true);
+  }, []);
 
   // Master switch logic - bidirectional synchronization
   const allLightsOn = spotlightIntensity > 0 || deskLampIntensity > 0 || monitorLightIntensity > 0;
@@ -108,7 +114,19 @@ const Index = () => {
       {/* Two-Column Layout Container */}
       <div className="flex items-center gap-12 max-w-7xl w-full relative z-10">
         {/* Left Panel - Room Info */}
-        <div className="w-[40%]">
+        <motion.div 
+          className="w-[40%]"
+          initial={{ opacity: 0, x: -30 }}
+          animate={{ 
+            opacity: isLoaded ? 1 : 0,
+            x: isLoaded ? 0 : -30
+          }}
+          transition={{ 
+            duration: 1,
+            delay: 0.8,
+            ease: [0.22, 0.03, 0.26, 1]
+          }}
+        >
           <RoomInfoPanel
             roomName="Office Desk"
             temperature={24.4}
@@ -136,14 +154,36 @@ const Index = () => {
                 onChange: setSpotlightIntensity 
               },
             ]}
+            isLoaded={isLoaded}
           />
-        </div>
+        </motion.div>
 
         {/* Right Panel - Desk Display */}
-        <div className="w-[55%] relative">
+        <motion.div 
+          className="w-[55%] relative"
+          initial={{ opacity: 0, y: 30, scale: 0.95, filter: "blur(8px)" }}
+          animate={{ 
+            opacity: isLoaded ? 1 : 0,
+            y: isLoaded ? 0 : 30,
+            scale: isLoaded ? 1 : 0.95,
+            filter: isLoaded ? "blur(0px)" : "blur(8px)"
+          }}
+          transition={{ 
+            duration: 1,
+            delay: 0.4,
+            ease: [0.22, 0.03, 0.26, 1]
+          }}
+        >
           {/* Soft shadow layer underneath image */}
-          <div 
+          <motion.div 
             className="absolute -bottom-8 left-1/2 -translate-x-1/2 w-[85%] h-[12%] pointer-events-none z-0"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: isLoaded ? 1 : 0 }}
+            transition={{ 
+              duration: 0.8,
+              delay: 0.6,
+              ease: [0.22, 0.03, 0.26, 1]
+            }}
             style={{
               background: 'radial-gradient(ellipse 100% 100% at 50% 50%, rgba(0,0,0,0.4) 0%, rgba(0,0,0,0.15) 50%, transparent 80%)',
               filter: 'blur(25px)',
@@ -157,8 +197,9 @@ const Index = () => {
             onDeskLampChange={setDeskLampIntensity}
             onMonitorLightChange={setMonitorLightIntensity}
             hoveredLightId={hoveredLight}
+            isLoaded={isLoaded}
           />
-        </div>
+        </motion.div>
       </div>
     </motion.div>
   );
