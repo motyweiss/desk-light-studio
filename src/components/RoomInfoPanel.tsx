@@ -88,8 +88,8 @@ export const RoomInfoPanel = ({ roomName, temperature, humidity, masterSwitchOn,
           onClick={() => onMasterToggle(!masterSwitchOn)}
           className={`w-12 h-12 rounded-full backdrop-blur-xl border transition-all duration-500 ${
             masterSwitchOn 
-              ? 'bg-[hsl(38_70%_58%/0.25)] border-[hsl(38_70%_58%/0.4)]' 
-              : 'bg-white/8 border-white/15 hover:bg-white/12'
+              ? 'border-[hsl(38_70%_58%/0.6)]' 
+              : 'border-white/20 hover:border-white/30'
           }`}
           whileTap={{ scale: 0.92 }}
           aria-label="Toggle all lights"
