@@ -19,51 +19,51 @@ interface RoomInfoPanelProps {
 export const RoomInfoPanel = ({ roomName, temperature, humidity, lights }: RoomInfoPanelProps) => {
   return (
     <motion.div
-      className="space-y-8"
+      className="space-y-6"
       initial={{ opacity: 0, x: -20 }}
       animate={{ opacity: 1, x: 0 }}
       transition={{ duration: 0.6, ease: [0.22, 0.03, 0.26, 1] }}
     >
       {/* Room Title */}
       <div>
-        <h1 className="text-4xl font-light tracking-wide text-foreground mb-2">
+        <h1 className="text-5xl font-light tracking-wide text-foreground mb-1">
           {roomName}
         </h1>
-        <div className="h-px bg-gradient-to-r from-white/20 via-white/10 to-transparent" />
+        <div className="h-px bg-gradient-to-r from-white/30 via-white/10 to-transparent" />
       </div>
 
       {/* Climate Info */}
-      <div className="flex gap-6">
+      <div className="flex gap-4">
         {/* Temperature */}
         <motion.div 
-          className="flex-1 bg-white/8 backdrop-blur-xl rounded-2xl p-5 border border-white/15"
-          whileHover={{ scale: 1.02 }}
+          className="flex-1 bg-white/10 backdrop-blur-xl rounded-3xl p-5 border border-white/20"
+          whileHover={{ backgroundColor: 'rgba(255, 255, 255, 0.12)' }}
           transition={{ duration: 0.2 }}
         >
-          <div className="flex items-center gap-3 mb-2">
-            <Thermometer size={20} className="text-warm-glow-soft" />
-            <span className="text-sm text-muted-foreground font-light tracking-wider">
-              TEMPERATURE
+          <div className="flex items-center gap-2 mb-2">
+            <Thermometer size={16} className="text-white/40" />
+            <span className="text-xs text-white/40 font-light tracking-widest uppercase">
+              Temperature
             </span>
           </div>
-          <div className="text-3xl font-light text-foreground">
-            {temperature}°C
+          <div className="text-3xl font-light text-foreground tabular-nums">
+            {temperature}°
           </div>
         </motion.div>
 
         {/* Humidity */}
         <motion.div 
-          className="flex-1 bg-white/8 backdrop-blur-xl rounded-2xl p-5 border border-white/15"
-          whileHover={{ scale: 1.02 }}
+          className="flex-1 bg-white/10 backdrop-blur-xl rounded-3xl p-5 border border-white/20"
+          whileHover={{ backgroundColor: 'rgba(255, 255, 255, 0.12)' }}
           transition={{ duration: 0.2 }}
         >
-          <div className="flex items-center gap-3 mb-2">
-            <Droplets size={20} className="text-blue-400" />
-            <span className="text-sm text-muted-foreground font-light tracking-wider">
-              HUMIDITY
+          <div className="flex items-center gap-2 mb-2">
+            <Droplets size={16} className="text-white/40" />
+            <span className="text-xs text-white/40 font-light tracking-widest uppercase">
+              Humidity
             </span>
           </div>
-          <div className="text-3xl font-light text-foreground">
+          <div className="text-3xl font-light text-foreground tabular-nums">
             {humidity}%
           </div>
         </motion.div>
@@ -71,28 +71,28 @@ export const RoomInfoPanel = ({ roomName, temperature, humidity, lights }: RoomI
 
       {/* Light Controls Section */}
       <div>
-        <h2 className="text-lg font-medium text-foreground mb-4 tracking-wide">
-          Light Controls
+        <h2 className="text-xs font-light text-white/40 mb-3 tracking-widest uppercase">
+          Lighting
         </h2>
         <motion.div 
-          className="space-y-3"
+          className="space-y-2"
           variants={{
             hidden: { opacity: 0 },
             show: {
               opacity: 1,
               transition: {
-                staggerChildren: 0.1
+                staggerChildren: 0.08
               }
             }
           }}
           initial="hidden"
           animate="show"
         >
-          {lights.map((light, index) => (
+          {lights.map((light) => (
             <motion.div
               key={light.id}
               variants={{
-                hidden: { opacity: 0, y: 20 },
+                hidden: { opacity: 0, y: 10 },
                 show: { opacity: 1, y: 0 }
               }}
               transition={{ duration: 0.4, ease: [0.22, 0.03, 0.26, 1] }}

@@ -18,33 +18,30 @@ export const LightControlCard = ({ id, label, intensity, onChange }: LightContro
   return (
     <motion.button
       onClick={handleToggle}
-      className="w-full bg-white/8 backdrop-blur-xl rounded-3xl p-6 border border-white/15 text-left transition-all duration-300 hover:bg-white/12 hover:scale-[1.02]"
+      className="w-full bg-white/10 backdrop-blur-xl rounded-full px-6 py-4 border border-white/20 text-left"
+      whileHover={{ backgroundColor: 'rgba(255, 255, 255, 0.12)' }}
       whileTap={{ scale: 0.98 }}
+      transition={{ duration: 0.2 }}
     >
       <div className="flex items-center gap-4">
         {/* Icon Circle */}
         <motion.div
-          className={`w-12 h-12 rounded-full flex items-center justify-center transition-colors duration-300 ${
+          className={`w-10 h-10 rounded-full flex items-center justify-center transition-colors duration-300 ${
             isOn 
               ? 'bg-warm-glow/20 text-warm-glow' 
-              : 'bg-white/5 text-muted-foreground'
+              : 'bg-white/10 text-white/40'
           }`}
-          animate={{
-            boxShadow: isOn 
-              ? '0 0 20px rgba(251, 191, 36, 0.3)' 
-              : '0 0 0px rgba(251, 191, 36, 0)'
-          }}
         >
-          <Lightbulb size={24} />
+          <Lightbulb size={20} />
         </motion.div>
 
         {/* Text Info */}
         <div className="flex-1">
-          <div className="font-medium text-foreground">{label}</div>
+          <div className="font-light text-base text-foreground tracking-wide">{label}</div>
           <motion.div 
-            className="text-sm text-muted-foreground"
+            className="text-xs font-light tracking-wider"
             animate={{
-              color: isOn ? 'hsl(var(--warm-glow-soft))' : 'hsl(var(--muted-foreground))'
+              color: isOn ? 'hsl(var(--warm-glow-soft))' : 'rgba(255, 255, 255, 0.3)'
             }}
           >
             {isOn ? `${intensity}%` : 'Off'}
@@ -53,11 +50,12 @@ export const LightControlCard = ({ id, label, intensity, onChange }: LightContro
 
         {/* Status Indicator */}
         <motion.div
-          className={`w-2 h-2 rounded-full ${
+          className={`w-1.5 h-1.5 rounded-full ${
             isOn ? 'bg-warm-glow' : 'bg-white/20'
           }`}
           animate={{
-            scale: isOn ? [1, 1.2, 1] : 1,
+            scale: isOn ? [1, 1.3, 1] : 1,
+            opacity: isOn ? [1, 0.6, 1] : 0.3,
           }}
           transition={{
             duration: 2,
