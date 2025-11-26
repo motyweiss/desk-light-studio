@@ -57,9 +57,9 @@ export const RoomInfoPanel = ({ roomName, temperature, humidity, masterSwitchOn,
       </div>
 
       {/* Climate Info */}
-      <div className="flex gap-6">
+      <div className="flex gap-6 py-6">
         {/* Temperature */}
-        <div className="flex-1 py-4">
+        <div className="flex-1 py-3">
           <div className="flex items-center gap-2 mb-2">
             <Thermometer size={16} className="text-white/40" />
             <span className="text-xs text-white/40 font-light tracking-widest uppercase">
@@ -72,7 +72,7 @@ export const RoomInfoPanel = ({ roomName, temperature, humidity, masterSwitchOn,
         </div>
 
         {/* Humidity */}
-        <div className="flex-1 py-4">
+        <div className="flex-1 py-3">
           <div className="flex items-center gap-2 mb-2">
             <Droplets size={16} className="text-white/40" />
             <span className="text-xs text-white/40 font-light tracking-widest uppercase">
