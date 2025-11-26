@@ -2,10 +2,8 @@ import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { DeskDisplay } from "@/components/DeskDisplay";
 import { RoomInfoPanel } from "@/components/RoomInfoPanel";
-import { useIsMobile } from "@/hooks/use-mobile";
 
 const Index = () => {
-  const isMobile = useIsMobile();
   const [isLoading, setIsLoading] = useState(true);
   const [isLoaded, setIsLoaded] = useState(false);
   const [spotlightIntensity, setSpotlightIntensity] = useState(0); // 0-100
@@ -129,7 +127,7 @@ const Index = () => {
       </AnimatePresence>
 
       <motion.div 
-        className="min-h-[100dvh] flex items-center justify-center p-4 md:p-8 relative overflow-hidden"
+        className="min-h-screen flex items-center justify-center p-8 relative overflow-hidden"
         animate={{
           backgroundColor: `hsl(${getPageBackgroundColor()})`,
         }}
@@ -197,11 +195,11 @@ const Index = () => {
         }}
       />
 
-      {/* Two-Column Layout Container - Responsive */}
-      <div className={`flex ${isMobile ? 'flex-col gap-8' : 'flex-row items-center gap-12'} max-w-7xl w-full relative z-10`}>
+      {/* Two-Column Layout Container */}
+      <div className="flex items-center gap-16 max-w-7xl w-full relative z-10">
         {/* Left Panel - Desk Display */}
         <motion.div 
-          className={`${isMobile ? 'w-full' : 'w-[55%]'} relative`}
+          className="w-[50%] relative"
           initial={{ opacity: 0, y: 30, scale: 0.95, filter: "blur(8px)" }}
           animate={{ 
             opacity: isLoaded ? 1 : 0,
@@ -290,13 +288,12 @@ const Index = () => {
             onMonitorLightChange={setMonitorLightIntensity}
             hoveredLightId={hoveredLight}
             isLoaded={isLoaded}
-            isMobile={isMobile}
           />
         </motion.div>
 
         {/* Right Panel - Room Info */}
         <motion.div 
-          className={`${isMobile ? 'w-full' : 'w-[40%]'}`}
+          className="w-[42%] pl-6"
           initial={{ opacity: 0, x: 30 }}
           animate={{ 
             opacity: isLoaded ? 1 : 0,
@@ -336,7 +333,6 @@ const Index = () => {
               },
             ]}
             isLoaded={isLoaded}
-            isMobile={isMobile}
           />
         </motion.div>
       </div>

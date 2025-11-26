@@ -9,10 +9,9 @@ interface LightControlCardProps {
   intensity: number;
   onChange: (intensity: number) => void;
   onHover: (isHovered: boolean) => void;
-  isMobile: boolean;
 }
 
-export const LightControlCard = ({ id, label, intensity, onChange, onHover, isMobile }: LightControlCardProps) => {
+export const LightControlCard = ({ id, label, intensity, onChange, onHover }: LightControlCardProps) => {
   const isOn = intensity > 0;
   const displayValue = useMotionValue(intensity);
   const [displayNumber, setDisplayNumber] = useState(intensity);
@@ -65,7 +64,7 @@ export const LightControlCard = ({ id, label, intensity, onChange, onHover, isMo
       onClick={handleCardClick}
       onMouseEnter={() => onHover(true)}
       onMouseLeave={() => onHover(false)}
-      className={`w-full bg-white/8 backdrop-blur-xl rounded-2xl ${isMobile ? 'px-4 py-4 min-h-[56px]' : 'px-5 py-3.5'} hover:bg-white/12 transition-all duration-300 cursor-pointer text-left`}
+      className="w-full bg-white/8 backdrop-blur-xl rounded-2xl px-5 py-3.5 hover:bg-white/12 transition-all duration-300 cursor-pointer text-left"
       transition={{ layout: { duration: 0.3, ease: [0.22, 0.03, 0.26, 1] } }}
       whileTap={{ scale: 0.98 }}
     >
@@ -105,7 +104,7 @@ export const LightControlCard = ({ id, label, intensity, onChange, onHover, isMo
 
         {/* Slider - Always Visible on Right */}
         <div 
-          className={`${isMobile ? 'w-24' : 'w-32'} flex-shrink-0`}
+          className="w-32 flex-shrink-0"
           data-slider
           onClick={(e) => e.stopPropagation()}
           onPointerDown={(e) => e.stopPropagation()}
