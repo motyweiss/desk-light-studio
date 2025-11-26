@@ -1,6 +1,7 @@
-import { motion } from "framer-motion";
+import { motion, useMotionValue, animate, useMotionValueEvent } from "framer-motion";
 import { Lightbulb } from "lucide-react";
 import { Slider } from "@/components/ui/slider";
+import { useEffect, useState } from "react";
 
 interface LightControlCardProps {
   id: string;
@@ -11,13 +12,38 @@ interface LightControlCardProps {
 
 export const LightControlCard = ({ id, label, intensity, onChange }: LightControlCardProps) => {
   const isOn = intensity > 0;
+  const displayValue = useMotionValue(intensity);
+  const [displayNumber, setDisplayNumber] = useState(intensity);
+  
+  useMotionValueEvent(displayValue, "change", (latest) => {
+    setDisplayNumber(Math.round(latest));
+  });
+  
+  useEffect(() => {
+    const controls = animate(displayValue, intensity, {
+      duration: 1.2,
+      ease: [0.22, 0.03, 0.26, 1]
+    });
+    
+    return controls.stop;
+  }, [intensity, displayValue]);
   
   const handleCardClick = (e: React.MouseEvent) => {
     // Only toggle if clicking outside the slider
     if ((e.target as HTMLElement).closest('[data-slider]')) {
       return;
     }
-    onChange(isOn ? 0 : 100);
+    
+    const targetIntensity = isOn ? 0 : 100;
+    
+    // Animate from current to target
+    animate(displayValue, targetIntensity, {
+      duration: 1.2,
+      ease: [0.22, 0.03, 0.26, 1],
+      onUpdate: (latest) => {
+        onChange(Math.round(latest));
+      }
+    });
   };
 
   return (
@@ -44,12 +70,13 @@ export const LightControlCard = ({ id, label, intensity, onChange }: LightContro
         <div className="flex-1 text-left min-w-0">
           <div className="font-light text-base text-foreground tracking-wide">{label}</div>
           <motion.div 
-            className="text-xs font-light tracking-wider"
+            className="text-xs font-light tracking-wider tabular-nums"
             animate={{
               color: isOn ? 'hsl(42 65% 65%)' : 'rgba(255, 255, 255, 0.3)'
             }}
+            transition={{ duration: 0.3 }}
           >
-            {isOn ? `${intensity}%` : 'Off'}
+            {isOn ? `${displayNumber}%` : 'Off'}
           </motion.div>
         </div>
 
