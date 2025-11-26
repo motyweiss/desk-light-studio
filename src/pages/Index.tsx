@@ -187,10 +187,10 @@ const Index = () => {
       />
 
       {/* Two-Column Layout Container */}
-      <div className="flex items-center gap-12 max-w-7xl w-full relative z-10">
+      <div className="flex items-center gap-16 max-w-7xl w-full relative z-10">
         {/* Left Panel - Desk Display */}
         <motion.div 
-          className="w-[55%] relative"
+          className="w-[50%] relative"
           initial={{ opacity: 0, y: 30, scale: 0.95, filter: "blur(8px)" }}
           animate={{ 
             opacity: isLoaded ? 1 : 0,
@@ -284,7 +284,7 @@ const Index = () => {
 
         {/* Right Panel - Room Info */}
         <motion.div 
-          className="w-[40%]"
+          className="w-[45%] pl-8"
           initial={{ opacity: 0, x: 30 }}
           animate={{ 
             opacity: isLoaded ? 1 : 0,
