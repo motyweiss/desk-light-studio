@@ -268,7 +268,7 @@ export const DeskDisplay = ({
             id="monitorLight"
             label="Monitor Light"
             intensity={monitorLightIntensity}
-            position={{ x: 55, y: 29 }}
+            position={{ x: 55, y: 30 }}
             onIntensityChange={onMonitorLightChange}
             isContainerHovered={isHovered}
           />
