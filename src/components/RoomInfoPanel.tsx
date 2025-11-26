@@ -1,6 +1,7 @@
 import { motion } from "framer-motion";
 import { Thermometer, Droplets } from "lucide-react";
 import { LightControlCard } from "./LightControlCard";
+import { LightSwitch } from "./LightSwitch";
 
 interface Light {
   id: string;
@@ -13,10 +14,12 @@ interface RoomInfoPanelProps {
   roomName: string;
   temperature: number;
   humidity: number;
+  masterSwitchOn: boolean;
+  onMasterToggle: (checked: boolean) => void;
   lights: Light[];
 }
 
-export const RoomInfoPanel = ({ roomName, temperature, humidity, lights }: RoomInfoPanelProps) => {
+export const RoomInfoPanel = ({ roomName, temperature, humidity, masterSwitchOn, onMasterToggle, lights }: RoomInfoPanelProps) => {
   return (
     <motion.div
       className="space-y-6"
@@ -62,9 +65,17 @@ export const RoomInfoPanel = ({ roomName, temperature, humidity, lights }: RoomI
 
       {/* Light Controls Section */}
       <div>
-        <h2 className="text-xs font-light text-white/40 mb-3 tracking-widest uppercase">
-          Lighting
-        </h2>
+        <div className="flex items-center justify-between mb-6">
+          <h2 className="text-xs font-light text-white/40 tracking-widest uppercase">
+            Lighting
+          </h2>
+          <LightSwitch 
+            label="Master"
+            checked={masterSwitchOn}
+            onChange={onMasterToggle}
+            isMaster={true}
+          />
+        </div>
         <motion.div 
           className="space-y-3"
           variants={{
