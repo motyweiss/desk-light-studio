@@ -252,7 +252,7 @@ export const DeskDisplay = ({
             id="spotlight"
             label="Spotlight"
             intensity={spotlightIntensity}
-            position={{ x: 78, y: 5 }}
+            position={{ x: 78, y: 11 }}
             onIntensityChange={onSpotlightChange}
             isContainerHovered={isHovered}
           />
@@ -260,7 +260,7 @@ export const DeskDisplay = ({
             id="deskLamp"
             label="Desk Lamp"
             intensity={deskLampIntensity}
-            position={{ x: 25, y: 45 }}
+            position={{ x: 25, y: 51 }}
             onIntensityChange={onDeskLampChange}
             isContainerHovered={isHovered}
           />
@@ -268,7 +268,7 @@ export const DeskDisplay = ({
             id="monitorLight"
             label="Monitor Light"
             intensity={monitorLightIntensity}
-            position={{ x: 55, y: 30 }}
+            position={{ x: 55, y: 36 }}
             onIntensityChange={onMonitorLightChange}
             isContainerHovered={isHovered}
           />
