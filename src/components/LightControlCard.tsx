@@ -1,7 +1,7 @@
 import { motion, useMotionValue, animate, useMotionValueEvent } from "framer-motion";
 import { Slider } from "@/components/ui/slider";
 import { useEffect, useState } from "react";
-import lightIcon from "@/assets/light-icon.svg";
+import { Lightbulb } from "lucide-react";
 
 interface LightControlCardProps {
   id: string;
@@ -71,19 +71,17 @@ export const LightControlCard = ({ id, label, intensity, onChange, onHover }: Li
       <div className="flex items-center gap-4">
         {/* Icon Circle */}
         <motion.div
-          className={`w-10 h-10 rounded-full flex items-center justify-center transition-colors duration-300 pointer-events-none flex-shrink-0 ${
+          className={`w-8 h-8 rounded-full flex items-center justify-center transition-colors duration-300 pointer-events-none flex-shrink-0 ${
             isOn 
               ? 'bg-[hsl(38_70%_58%/0.2)]' 
               : 'bg-white/10'
           }`}
         >
-          <img 
-            src={lightIcon} 
-            alt="Light" 
-            className={`w-5 h-5 transition-all duration-300 ${
+          <Lightbulb 
+            className={`w-4 h-4 transition-all duration-300 ${
               isOn 
-                ? 'brightness-125 saturate-150 [filter:brightness(1.3)_sepia(1)_saturate(3)_hue-rotate(-10deg)]' 
-                : 'opacity-40'
+                ? 'text-[hsl(38_70%_58%)]' 
+                : 'text-white/40'
             }`}
           />
         </motion.div>
