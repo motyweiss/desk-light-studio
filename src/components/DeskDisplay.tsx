@@ -59,11 +59,11 @@ export const DeskDisplay = ({
     const newState = getCurrentState();
     if (newState !== currentState) {
       setIsTransitioning(true);
-      // Gentle delay for natural lighting transition
+      // Smooth delay for natural lighting transition
       const timer = setTimeout(() => {
         setCurrentState(newState);
         setIsTransitioning(false);
-      }, 150);
+      }, 50);
       return () => clearTimeout(timer);
     }
   }, [spotlightIntensity, deskLampIntensity, monitorLightIntensity, currentState]);
