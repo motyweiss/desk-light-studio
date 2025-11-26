@@ -108,13 +108,9 @@ export const DeskDisplay = ({
   return (
     <div
       ref={containerRef}
-      className="relative w-full aspect-square rounded-[3rem] overflow-hidden shadow-2xl"
+      className="relative w-full aspect-square overflow-hidden"
       style={{
         backgroundColor: `hsl(${getBackgroundColor()})`,
-        boxShadow: glowIntensity > 0 
-          ? `0 0 ${40 + glowIntensity * 50}px hsla(var(--warm-glow) / ${0.15 + glowIntensity * 0.35}),
-             0 20px 60px rgba(0, 0, 0, 0.5)`
-          : '0 20px 60px rgba(0, 0, 0, 0.5)',
         transition: `background-color ${transitionDuration.slow}s cubic-bezier(${lightEasing.join(',')})`,
       }}
       onMouseEnter={() => setIsHovered(true)}
