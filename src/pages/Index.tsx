@@ -14,22 +14,19 @@ const Index = () => {
     const monitorLightBit = monitorLightIntensity > 0 ? "1" : "0";
     const state = `${spotlightBit}${deskLampBit}${monitorLightBit}`;
     
-    // Base dark color
-    const baseDark = "25 15% 6%";
-    
-    // Specific colors for each lighting state - subtle shifts
+    // Harmonious colors matching each lighting state
     const stateColors: Record<string, string> = {
-      "000": baseDark, // All off - warm dark
-      "001": "220 15% 7%", // Monitor only - cool blue tint (subtle)
-      "010": "35 20% 8%", // Lamp only - warm yellow tint
-      "011": "30 18% 8%", // Lamp + Monitor - balanced warm-cool
-      "100": "30 25% 8%", // Spotlight only - warm orange tint
-      "101": "28 20% 8%", // Spotlight + Monitor - orange-blue mix
-      "110": "32 28% 9%", // Spotlight + Lamp - brighter warm
-      "111": "30 30% 10%", // All on - brightest warm glow
+      "000": "240 8% 8%", // All off - deep cool dark navy
+      "001": "220 25% 12%", // Monitor only - cool cyan-blue glow
+      "010": "45 35% 15%", // Desk lamp only - warm golden amber
+      "011": "180 20% 14%", // Lamp + Monitor - cyan-gold balance, teal undertone
+      "100": "30 40% 16%", // Spotlight only - rich warm orange
+      "101": "210 30% 14%", // Spotlight + Monitor - orange meets blue, balanced
+      "110": "40 45% 18%", // Spotlight + Lamp - intense warm amber-orange
+      "111": "35 50% 20%", // All on - brightest warm golden glow
     };
     
-    return stateColors[state] || baseDark;
+    return stateColors[state] || "240 8% 8%";
   };
 
   return (
@@ -45,50 +42,50 @@ const Index = () => {
     >
       {/* Enhanced ambient page glow layers - synchronized positions with soft spill */}
       
-      {/* Spotlight ambient glow - extends from container position */}
+      {/* Spotlight ambient glow - warm orange radiance */}
       <motion.div
         className="fixed inset-0 pointer-events-none z-0"
         style={{
-          background: `radial-gradient(ellipse 70% 70% at 62% 30%, hsla(var(--spotlight-glow) / 0.12) 0%, hsla(var(--spotlight-glow) / 0.04) 35%, transparent 55%)`,
-          filter: 'blur(40px)',
+          background: `radial-gradient(ellipse 75% 75% at 50% 35%, hsl(25 85% 55% / 0.18) 0%, hsl(30 80% 50% / 0.08) 30%, transparent 60%)`,
+          filter: 'blur(60px)',
         }}
         animate={{
-          opacity: Math.pow(spotlightIntensity / 100, 0.7),
+          opacity: Math.pow(spotlightIntensity / 100, 0.8),
         }}
         transition={{
-          duration: 1.2,
+          duration: 1.4,
           ease: [0.4, 0, 0.2, 1]
         }}
       />
       
-      {/* Desk lamp ambient glow */}
+      {/* Desk lamp ambient glow - warm golden yellow */}
       <motion.div
         className="fixed inset-0 pointer-events-none z-0"
         style={{
-          background: `radial-gradient(ellipse 65% 65% at 35% 58%, hsla(var(--lamp-glow) / 0.1) 0%, hsla(var(--lamp-glow) / 0.03) 35%, transparent 55%)`,
-          filter: 'blur(40px)',
+          background: `radial-gradient(ellipse 70% 70% at 30% 55%, hsl(45 90% 60% / 0.16) 0%, hsl(42 85% 55% / 0.06) 35%, transparent 58%)`,
+          filter: 'blur(55px)',
         }}
         animate={{
-          opacity: Math.pow(deskLampIntensity / 100, 0.7),
+          opacity: Math.pow(deskLampIntensity / 100, 0.8),
         }}
         transition={{
-          duration: 1.2,
+          duration: 1.4,
           ease: [0.4, 0, 0.2, 1]
         }}
       />
       
-      {/* Monitor light ambient glow */}
+      {/* Monitor light ambient glow - cool cyan-blue */}
       <motion.div
         className="fixed inset-0 pointer-events-none z-0"
         style={{
-          background: `radial-gradient(ellipse 75% 75% at 50% 42%, hsla(var(--monitor-glow) / 0.08) 0%, hsla(var(--monitor-glow) / 0.02) 40%, transparent 60%)`,
-          filter: 'blur(40px)',
+          background: `radial-gradient(ellipse 80% 80% at 50% 40%, hsl(200 80% 65% / 0.14) 0%, hsl(210 75% 60% / 0.05) 38%, transparent 62%)`,
+          filter: 'blur(50px)',
         }}
         animate={{
-          opacity: Math.pow(monitorLightIntensity / 100, 0.7),
+          opacity: Math.pow(monitorLightIntensity / 100, 0.8),
         }}
         transition={{
-          duration: 1.2,
+          duration: 1.4,
           ease: [0.4, 0, 0.2, 1]
         }}
       />

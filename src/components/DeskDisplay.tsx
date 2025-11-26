@@ -76,35 +76,6 @@ export const DeskDisplay = ({
     slow: 1.2
   };
 
-  // Calculate glow intensity with non-linear curve for natural feel
-  const getGlowOpacity = (intensity: number) => Math.pow(intensity / 100, 0.7);
-  const getDimmingOpacity = (intensity: number) => Math.pow(1 - intensity / 100, 1.5) * 0.35;
-
-  const totalIntensity = spotlightIntensity + deskLampIntensity + monitorLightIntensity;
-  const glowIntensity = totalIntensity / 300; // 0-1 scale
-
-  // Calculate background color based on current lighting state
-  const getBackgroundColor = () => {
-    const state = getCurrentState();
-    
-    // Base dark color
-    const baseDark = "220 18% 10%";
-    
-    // Specific colors for each state
-    const stateColors: Record<string, string> = {
-      "000": baseDark, // All off - pure dark
-      "001": "210 25% 12%", // Monitor only - cool blue tint
-      "010": "38 30% 14%", // Lamp only - warm yellow tint
-      "011": "35 28% 13%", // Lamp + Monitor - balanced warm
-      "100": "30 35% 13%", // Spotlight only - warm orange tint
-      "101": "25 32% 12%", // Spotlight + Monitor - orange-blue mix
-      "110": "35 38% 15%", // Spotlight + Lamp - bright warm
-      "111": "32 40% 16%", // All on - brightest warm glow
-    };
-    
-    return stateColors[state] || baseDark;
-  };
-
   return (
     <div
       ref={containerRef}
