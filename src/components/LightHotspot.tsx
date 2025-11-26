@@ -1,7 +1,7 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { useState } from "react";
 import { Slider } from "@/components/ui/slider";
-import lightIcon from "@/assets/light-icon.svg";
+import { Lightbulb } from "lucide-react";
 
 interface LightHotspotProps {
   id: 'spotlight' | 'deskLamp' | 'monitorLight';
@@ -433,13 +433,11 @@ export const LightHotspot = ({
                         onIntensityChange(intensity > 0 ? 0 : 100);
                       }}
                     >
-                      <img 
-                        src={lightIcon} 
-                        alt="Light" 
+                      <Lightbulb 
                         className={`w-5 h-5 transition-all duration-300 ${
                           intensity > 0 
-                            ? '[filter:brightness(1.3)_sepia(1)_saturate(3)_hue-rotate(-10deg)]' 
-                            : 'opacity-40'
+                            ? 'text-[hsl(38_70%_58%)]' 
+                            : 'text-white/40'
                         }`}
                       />
                     </div>
