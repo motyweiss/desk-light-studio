@@ -43,7 +43,6 @@ export const DeskDisplay = ({
 }: DeskDisplayProps) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const [currentState, setCurrentState] = useState("000");
-  const [isTransitioning, setIsTransitioning] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
 
   // Calculate current lighting state based on intensity
@@ -54,17 +53,11 @@ export const DeskDisplay = ({
     return `${spotlightBit}${deskLampBit}${monitorLightBit}`;
   };
 
-  // Update state with smooth transition
+  // Update state immediately
   useEffect(() => {
     const newState = getCurrentState();
     if (newState !== currentState) {
-      setIsTransitioning(true);
-      // Gentle delay for natural lighting transition
-      const timer = setTimeout(() => {
-        setCurrentState(newState);
-        setIsTransitioning(false);
-      }, 150);
-      return () => clearTimeout(timer);
+      setCurrentState(newState);
     }
   }, [spotlightIntensity, deskLampIntensity, monitorLightIntensity, currentState]);
 
