@@ -1,6 +1,7 @@
-import { motion } from "framer-motion";
+import { motion, useMotionValue, useTransform, animate } from "framer-motion";
 import { Thermometer, Droplets, Power } from "lucide-react";
 import { LightControlCard } from "./LightControlCard";
+import { useEffect } from "react";
 
 interface Light {
   id: string;
@@ -21,6 +22,37 @@ interface RoomInfoPanelProps {
 }
 
 export const RoomInfoPanel = ({ roomName, temperature, humidity, masterSwitchOn, onMasterToggle, onLightHover, lights, isLoaded }: RoomInfoPanelProps) => {
+  // Animated counter for temperature
+  const tempCount = useMotionValue(0);
+  const tempDisplay = useTransform(tempCount, (latest) => latest.toFixed(1));
+
+  // Animated counter for humidity
+  const humidityCount = useMotionValue(0);
+  const humidityDisplay = useTransform(humidityCount, (latest) => Math.round(latest));
+
+  useEffect(() => {
+    if (isLoaded) {
+      // Animate temperature counter
+      const tempControls = animate(tempCount, temperature, {
+        duration: 2,
+        delay: 0.5,
+        ease: [0.22, 0.03, 0.26, 1]
+      });
+
+      // Animate humidity counter
+      const humidityControls = animate(humidityCount, humidity, {
+        duration: 2,
+        delay: 0.5,
+        ease: [0.22, 0.03, 0.26, 1]
+      });
+
+      return () => {
+        tempControls.stop();
+        humidityControls.stop();
+      };
+    }
+  }, [isLoaded, temperature, humidity, tempCount, humidityCount]);
+
   return (
     <div className="space-y-6">
       {/* Room Title with Master Switch */}
@@ -97,7 +129,7 @@ export const RoomInfoPanel = ({ roomName, temperature, humidity, masterSwitchOn,
             </span>
           </div>
           <div className="text-xl font-light text-white/90 tabular-nums">
-            {temperature}°
+            <motion.span>{tempDisplay}</motion.span>°
           </div>
         </div>
 
@@ -110,7 +142,7 @@ export const RoomInfoPanel = ({ roomName, temperature, humidity, masterSwitchOn,
             </span>
           </div>
           <div className="text-xl font-light text-white/90 tabular-nums">
-            {humidity}%
+            <motion.span>{humidityDisplay}</motion.span>%
           </div>
         </div>
       </motion.div>
