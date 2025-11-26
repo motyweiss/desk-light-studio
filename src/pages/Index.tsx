@@ -35,8 +35,12 @@ const Index = () => {
   return (
     <motion.div 
       className="min-h-screen flex flex-col items-center justify-center p-6 md:p-12 relative overflow-hidden"
-      style={{
-        backgroundColor: 'hsl(43 13% 64%)',
+      animate={{
+        backgroundColor: `hsl(${getPageBackgroundColor()})`,
+      }}
+      transition={{
+        duration: 1.2,
+        ease: [0.25, 0.1, 0.25, 1]
       }}
     >
       {/* Enhanced ambient page glow layers - synchronized positions with soft spill */}
@@ -90,7 +94,7 @@ const Index = () => {
       />
 
       {/* Main Display */}
-      <div className="w-full max-w-2xl mx-auto relative z-10">
+      <div className="w-full max-w-4xl mx-auto relative z-10">
       <DeskDisplay 
         spotlightIntensity={spotlightIntensity}
         deskLampIntensity={deskLampIntensity}
