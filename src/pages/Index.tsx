@@ -42,50 +42,50 @@ const Index = () => {
     >
       {/* Enhanced ambient page glow layers - synchronized positions with soft spill */}
       
-      {/* Spotlight ambient glow - warm orange radiance */}
+      {/* Spotlight ambient glow - warm subtle orange */}
       <motion.div
         className="fixed inset-0 pointer-events-none z-0"
         style={{
-          background: `radial-gradient(ellipse 75% 75% at 50% 35%, hsl(25 85% 55% / 0.18) 0%, hsl(30 80% 50% / 0.08) 30%, transparent 60%)`,
-          filter: 'blur(60px)',
+          background: `radial-gradient(ellipse 70% 70% at 50% 35%, hsl(25 60% 50% / 0.12) 0%, hsl(30 55% 45% / 0.05) 30%, transparent 60%)`,
+          filter: 'blur(70px)',
         }}
         animate={{
           opacity: Math.pow(spotlightIntensity / 100, 0.8),
         }}
         transition={{
-          duration: 1.4,
+          duration: 1.6,
           ease: [0.4, 0, 0.2, 1]
         }}
       />
       
-      {/* Desk lamp ambient glow - warm golden yellow */}
+      {/* Desk lamp ambient glow - soft warm gold */}
       <motion.div
         className="fixed inset-0 pointer-events-none z-0"
         style={{
-          background: `radial-gradient(ellipse 70% 70% at 30% 55%, hsl(45 90% 60% / 0.16) 0%, hsl(42 85% 55% / 0.06) 35%, transparent 58%)`,
-          filter: 'blur(55px)',
+          background: `radial-gradient(ellipse 65% 65% at 30% 55%, hsl(42 70% 55% / 0.11) 0%, hsl(40 65% 50% / 0.04) 35%, transparent 58%)`,
+          filter: 'blur(65px)',
         }}
         animate={{
           opacity: Math.pow(deskLampIntensity / 100, 0.8),
         }}
         transition={{
-          duration: 1.4,
+          duration: 1.6,
           ease: [0.4, 0, 0.2, 1]
         }}
       />
       
-      {/* Monitor light ambient glow - cool cyan-blue */}
+      {/* Monitor light ambient glow - cool blue harmony */}
       <motion.div
         className="fixed inset-0 pointer-events-none z-0"
         style={{
-          background: `radial-gradient(ellipse 80% 80% at 50% 40%, hsl(200 80% 65% / 0.14) 0%, hsl(210 75% 60% / 0.05) 38%, transparent 62%)`,
-          filter: 'blur(50px)',
+          background: `radial-gradient(ellipse 75% 75% at 50% 40%, hsl(205 50% 60% / 0.10) 0%, hsl(210 45% 55% / 0.04) 38%, transparent 62%)`,
+          filter: 'blur(60px)',
         }}
         animate={{
           opacity: Math.pow(monitorLightIntensity / 100, 0.8),
         }}
         transition={{
-          duration: 1.4,
+          duration: 1.6,
           ease: [0.4, 0, 0.2, 1]
         }}
       />
