@@ -96,6 +96,9 @@ const Index = () => {
         {/* Left Panel - Room Info */}
         <div className="w-[40%]">
           <RoomInfoPanel
+            roomName="Office Desk"
+            temperature={24.4}
+            humidity={49}
             lights={[
               { 
                 id: 'deskLamp', 
