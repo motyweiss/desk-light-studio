@@ -28,7 +28,7 @@ export const LightControlCard = ({ id, label, intensity, onChange }: LightContro
           onClick={handleToggle}
           className={`w-8 h-8 rounded-full flex items-center justify-center transition-colors duration-300 ${
             isOn 
-              ? 'bg-warm-glow/20 text-warm-glow' 
+              ? 'bg-[hsl(38_70%_58%/0.2)] text-[hsl(38_70%_58%)]' 
               : 'bg-white/10 text-white/40'
           }`}
           whileTap={{ scale: 0.92 }}
@@ -37,12 +37,12 @@ export const LightControlCard = ({ id, label, intensity, onChange }: LightContro
         </motion.button>
 
         {/* Text Info */}
-        <div className="flex-1">
+        <div className="flex-1 text-left">
           <div className="font-light text-base text-foreground tracking-wide">{label}</div>
           <motion.div 
             className="text-xs font-light tracking-wider"
             animate={{
-              color: isOn ? 'hsl(var(--warm-glow-soft))' : 'rgba(255, 255, 255, 0.3)'
+              color: isOn ? 'hsl(42 65% 65%)' : 'rgba(255, 255, 255, 0.3)'
             }}
           >
             {isOn ? `${intensity}%` : 'Off'}
@@ -52,7 +52,7 @@ export const LightControlCard = ({ id, label, intensity, onChange }: LightContro
         {/* Status Indicator */}
         <motion.div
           className={`w-1.5 h-1.5 rounded-full ${
-            isOn ? 'bg-warm-glow' : 'bg-white/20'
+            isOn ? 'bg-[hsl(38_70%_58%)]' : 'bg-white/20'
           }`}
           animate={{
             scale: isOn ? [1, 1.3, 1] : 1,

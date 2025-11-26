@@ -52,10 +52,10 @@ export const LightHotspot = ({
   const intensityCurve = Math.pow(intensityRatio, 0.7); // Non-linear for stronger high-intensity glow
   const dotOpacity = 0.35 + intensityCurve * 0.65;
   const dotColor = isOn 
-    ? `hsla(var(--warm-glow) / ${dotOpacity})` 
+    ? `hsla(38, 70%, 58%, ${dotOpacity})` 
     : "hsl(var(--foreground) / 0.5)";
   const glowColor = isOn 
-    ? `rgba(251, 191, 36, ${0.25 + intensityCurve * 0.5})` 
+    ? `rgba(200, 160, 80, ${0.25 + intensityCurve * 0.5})` 
     : "rgba(255, 255, 255, 0.25)";
   
   // Breathing animation adapts to intensity
@@ -115,7 +115,7 @@ export const LightHotspot = ({
               cx="30"
               cy="30"
               r="22"
-              fill={isOn ? `rgba(251, 191, 36, ${0.12 + intensityCurve * 0.15})` : "rgba(255, 255, 255, 0.06)"}
+              fill={isOn ? `rgba(200, 160, 80, ${0.12 + intensityCurve * 0.15})` : "rgba(255, 255, 255, 0.06)"}
               animate={{
                 opacity: isOn ? [0.4 + intensityRatio * 0.2, 0.7 + intensityRatio * 0.2, 0.4 + intensityRatio * 0.2] : [0.25, 0.4, 0.25],
                 scale: breathingScale,
@@ -177,7 +177,7 @@ export const LightHotspot = ({
                 cx="30"
                 cy="30"
                 r="11"
-                fill={isOn ? `rgba(251, 191, 36, ${0.2 + intensityCurve * 0.25})` : "rgba(255, 255, 255, 0.07)"}
+                fill={isOn ? `rgba(200, 160, 80, ${0.2 + intensityCurve * 0.25})` : "rgba(255, 255, 255, 0.07)"}
                 animate={{
                   opacity: isOn ? (0.6 + intensityCurve * 0.35) : 0.28,
                   scale: isPressed ? 0.88 : isHovered ? 1.15 : 1,
@@ -207,7 +207,7 @@ export const LightHotspot = ({
                 }}
                 style={{
                   filter: isOn 
-                    ? `drop-shadow(0 0 ${6 + intensityCurve * 8}px rgba(251, 191, 36, ${0.4 + intensityCurve * 0.5})) drop-shadow(0 2px 6px rgba(0, 0, 0, 0.25))`
+                    ? `drop-shadow(0 0 ${6 + intensityCurve * 8}px rgba(200, 160, 80, ${0.4 + intensityCurve * 0.5})) drop-shadow(0 2px 6px rgba(0, 0, 0, 0.25))`
                     : 'drop-shadow(0 2px 4px rgba(0, 0, 0, 0.15))'
                 }}
               />
@@ -218,7 +218,7 @@ export const LightHotspot = ({
                   cx="30"
                   cy="30"
                   r="7"
-                  fill={`rgba(251, 191, 36, ${0.25 + intensityCurve * 0.3})`}
+                  fill={`rgba(200, 160, 80, ${0.25 + intensityCurve * 0.3})`}
                   initial={{ opacity: 0, scale: 0.4 }}
                   animate={{ 
                     opacity: [0.65 + intensityRatio * 0.15, 0.95 + intensityRatio * 0.05, 0.65 + intensityRatio * 0.15],
@@ -380,7 +380,7 @@ export const LightHotspot = ({
                   style={{
                     background: intensity > 0
                       ? `radial-gradient(circle at 50% 50%, 
-                          rgba(251, 191, 36, ${0.08 * (intensity / 100)}) 0%, 
+                          rgba(200, 160, 80, ${0.08 * (intensity / 100)}) 0%, 
                           transparent 70%)`
                       : 'none',
                   }}
@@ -422,7 +422,7 @@ export const LightHotspot = ({
                         w-10 h-10 rounded-full flex items-center justify-center
                         transition-all duration-300 cursor-pointer
                         ${intensity > 0 
-                          ? 'bg-amber-400/30 hover:bg-amber-400/40' 
+                          ? 'bg-[hsl(40_65%_55%/0.3)] hover:bg-[hsl(40_65%_55%/0.4)]' 
                           : 'bg-white/15 hover:bg-white/20'
                         }
                       `}
@@ -433,7 +433,7 @@ export const LightHotspot = ({
                     >
                       <Lightbulb 
                         className={`w-5 h-5 transition-colors duration-300 ${
-                          intensity > 0 ? 'text-amber-300' : 'text-white/40'
+                          intensity > 0 ? 'text-[hsl(42_75%_60%)]' : 'text-white/40'
                         }`}
                       />
                     </div>
