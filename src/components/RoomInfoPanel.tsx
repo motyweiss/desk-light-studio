@@ -1,7 +1,6 @@
 import { motion } from "framer-motion";
-import { Thermometer, Droplets } from "lucide-react";
+import { Thermometer, Droplets, Power } from "lucide-react";
 import { LightControlCard } from "./LightControlCard";
-import { LightSwitch } from "./LightSwitch";
 
 interface Light {
   id: string;
@@ -27,11 +26,34 @@ export const RoomInfoPanel = ({ roomName, temperature, humidity, masterSwitchOn,
       animate={{ opacity: 1, x: 0 }}
       transition={{ duration: 0.6, ease: [0.22, 0.03, 0.26, 1] }}
     >
-      {/* Room Title */}
-      <div>
+      {/* Room Title with Master Switch */}
+      <div className="flex items-center justify-between">
         <h1 className="text-4xl font-display font-light tracking-wide text-foreground">
           {roomName}
         </h1>
+        
+        {/* Master Switch - Circular Frosted Glass Button */}
+        <motion.button
+          onClick={() => onMasterToggle(!masterSwitchOn)}
+          className={`w-12 h-12 rounded-full backdrop-blur-xl border transition-all duration-500 ${
+            masterSwitchOn 
+              ? 'bg-[hsl(38_70%_58%/0.25)] border-[hsl(38_70%_58%/0.4)] shadow-[0_0_20px_rgba(200,160,80,0.4)]' 
+              : 'bg-white/8 border-white/15 hover:bg-white/12'
+          }`}
+          whileTap={{ scale: 0.92 }}
+          aria-label="Toggle all lights"
+        >
+          <motion.div
+            animate={{
+              color: masterSwitchOn ? 'hsl(42 75% 60%)' : 'rgba(255, 255, 255, 0.4)',
+              rotate: masterSwitchOn ? 0 : 180,
+            }}
+            transition={{ duration: 0.5, ease: [0.22, 0.03, 0.26, 1] }}
+            className="flex items-center justify-center"
+          >
+            <Power size={20} strokeWidth={2.5} />
+          </motion.div>
+        </motion.button>
       </div>
 
       {/* Climate Info */}
@@ -65,18 +87,7 @@ export const RoomInfoPanel = ({ roomName, temperature, humidity, masterSwitchOn,
 
       {/* Light Controls Section */}
       <div>
-        <div className="flex items-center justify-between mb-6">
-          <h2 className="text-xs font-light text-white/40 tracking-widest uppercase">
-            Lighting
-          </h2>
-          <LightSwitch 
-            label="Master"
-            checked={masterSwitchOn}
-            onChange={onMasterToggle}
-            isMaster={true}
-          />
-        </div>
-        <motion.div 
+        <motion.div
           className="space-y-3"
           variants={{
             hidden: { opacity: 0 },
