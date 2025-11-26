@@ -58,13 +58,7 @@ export const DeskDisplay = ({
   useEffect(() => {
     const newState = getCurrentState();
     if (newState !== currentState) {
-      setIsTransitioning(true);
-      // Smooth delay for natural lighting transition
-      const timer = setTimeout(() => {
-        setCurrentState(newState);
-        setIsTransitioning(false);
-      }, 50);
-      return () => clearTimeout(timer);
+      setCurrentState(newState);
     }
   }, [spotlightIntensity, deskLampIntensity, monitorLightIntensity, currentState]);
 
