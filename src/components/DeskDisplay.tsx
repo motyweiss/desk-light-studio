@@ -20,6 +20,7 @@ interface DeskDisplayProps {
   onSpotlightChange: (intensity: number) => void;
   onDeskLampChange: (intensity: number) => void;
   onMonitorLightChange: (intensity: number) => void;
+  hoveredLightId: string | null;
 }
 
 const lightingStates: Record<string, string> = {
@@ -39,7 +40,8 @@ export const DeskDisplay = ({
   monitorLightIntensity,
   onSpotlightChange,
   onDeskLampChange,
-  onMonitorLightChange 
+  onMonitorLightChange,
+  hoveredLightId
 }: DeskDisplayProps) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const [currentState, setCurrentState] = useState("000");
@@ -154,6 +156,7 @@ export const DeskDisplay = ({
             position={{ x: 79, y: 11 }}
             onIntensityChange={onSpotlightChange}
             isContainerHovered={isHovered}
+            isExternallyHovered={hoveredLightId === 'spotlight'}
           />
           <LightHotspot
             id="deskLamp"
@@ -162,6 +165,7 @@ export const DeskDisplay = ({
             position={{ x: 25, y: 53 }}
             onIntensityChange={onDeskLampChange}
             isContainerHovered={isHovered}
+            isExternallyHovered={hoveredLightId === 'deskLamp'}
           />
           <LightHotspot
             id="monitorLight"
@@ -170,6 +174,7 @@ export const DeskDisplay = ({
             position={{ x: 55, y: 38 }}
             onIntensityChange={onMonitorLightChange}
             isContainerHovered={isHovered}
+            isExternallyHovered={hoveredLightId === 'monitorLight'}
           />
         </div>
       </div>

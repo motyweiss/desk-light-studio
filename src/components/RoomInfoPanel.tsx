@@ -15,10 +15,11 @@ interface RoomInfoPanelProps {
   humidity: number;
   masterSwitchOn: boolean;
   onMasterToggle: (checked: boolean) => void;
+  onLightHover: (lightId: string | null) => void;
   lights: Light[];
 }
 
-export const RoomInfoPanel = ({ roomName, temperature, humidity, masterSwitchOn, onMasterToggle, lights }: RoomInfoPanelProps) => {
+export const RoomInfoPanel = ({ roomName, temperature, humidity, masterSwitchOn, onMasterToggle, onLightHover, lights }: RoomInfoPanelProps) => {
   return (
     <motion.div
       className="space-y-6"
@@ -120,6 +121,7 @@ export const RoomInfoPanel = ({ roomName, temperature, humidity, masterSwitchOn,
                 label={light.label}
                 intensity={light.intensity}
                 onChange={light.onChange}
+                onHover={(isHovered) => onLightHover(isHovered ? light.id : null)}
               />
             </motion.div>
           ))}

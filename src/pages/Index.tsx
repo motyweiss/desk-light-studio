@@ -8,6 +8,9 @@ const Index = () => {
   const [deskLampIntensity, setDeskLampIntensity] = useState(0);
   const [monitorLightIntensity, setMonitorLightIntensity] = useState(0);
 
+  // Hover states for coordinated UI
+  const [hoveredLight, setHoveredLight] = useState<string | null>(null);
+
   // Master switch logic - bidirectional synchronization
   const allLightsOn = spotlightIntensity > 0 || deskLampIntensity > 0 || monitorLightIntensity > 0;
   const masterSwitchOn = allLightsOn;
@@ -112,6 +115,7 @@ const Index = () => {
             humidity={49}
             masterSwitchOn={masterSwitchOn}
             onMasterToggle={handleMasterToggle}
+            onLightHover={setHoveredLight}
             lights={[
               { 
                 id: 'deskLamp', 
@@ -152,6 +156,7 @@ const Index = () => {
             onSpotlightChange={setSpotlightIntensity}
             onDeskLampChange={setDeskLampIntensity}
             onMonitorLightChange={setMonitorLightIntensity}
+            hoveredLightId={hoveredLight}
           />
         </div>
       </div>
