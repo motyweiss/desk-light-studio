@@ -118,8 +118,9 @@ export const DeskDisplay = ({
         }}
         transition={{
           type: "spring",
-          stiffness: 150,
-          damping: 20,
+          stiffness: 80,
+          damping: 25,
+          mass: 0.5,
         }}
         style={{
           transformStyle: 'preserve-3d',
