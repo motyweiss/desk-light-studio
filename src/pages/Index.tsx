@@ -155,52 +155,7 @@ const Index = () => {
 
       {/* Two-Column Layout Container */}
       <div className="flex items-center gap-12 max-w-7xl w-full relative z-10">
-        {/* Left Panel - Room Info */}
-        <motion.div 
-          className="w-[40%]"
-          initial={{ opacity: 0, x: -30 }}
-          animate={{ 
-            opacity: isLoaded ? 1 : 0,
-            x: isLoaded ? 0 : -30
-          }}
-          transition={{ 
-            duration: 1,
-            delay: 0.8,
-            ease: [0.22, 0.03, 0.26, 1]
-          }}
-        >
-          <RoomInfoPanel
-            roomName="Office Desk"
-            temperature={24.4}
-            humidity={49}
-            masterSwitchOn={masterSwitchOn}
-            onMasterToggle={handleMasterToggle}
-            onLightHover={setHoveredLight}
-            lights={[
-              { 
-                id: 'deskLamp', 
-                label: 'Desk Lamp', 
-                intensity: deskLampIntensity, 
-                onChange: setDeskLampIntensity 
-              },
-              { 
-                id: 'monitorLight', 
-                label: 'Monitor Light', 
-                intensity: monitorLightIntensity, 
-                onChange: setMonitorLightIntensity 
-              },
-              { 
-                id: 'spotlight', 
-                label: 'Spotlight', 
-                intensity: spotlightIntensity, 
-                onChange: setSpotlightIntensity 
-              },
-            ]}
-            isLoaded={isLoaded}
-          />
-        </motion.div>
-
-        {/* Right Panel - Desk Display */}
+        {/* Left Panel - Desk Display */}
         <motion.div 
           className="w-[55%] relative"
           initial={{ opacity: 0, y: 30, scale: 0.95, filter: "blur(8px)" }}
@@ -239,6 +194,51 @@ const Index = () => {
             onDeskLampChange={setDeskLampIntensity}
             onMonitorLightChange={setMonitorLightIntensity}
             hoveredLightId={hoveredLight}
+            isLoaded={isLoaded}
+          />
+        </motion.div>
+
+        {/* Right Panel - Room Info */}
+        <motion.div 
+          className="w-[40%]"
+          initial={{ opacity: 0, x: 30 }}
+          animate={{ 
+            opacity: isLoaded ? 1 : 0,
+            x: isLoaded ? 0 : 30
+          }}
+          transition={{ 
+            duration: 1,
+            delay: 0.8,
+            ease: [0.22, 0.03, 0.26, 1]
+          }}
+        >
+          <RoomInfoPanel
+            roomName="Office Desk"
+            temperature={24.4}
+            humidity={49}
+            masterSwitchOn={masterSwitchOn}
+            onMasterToggle={handleMasterToggle}
+            onLightHover={setHoveredLight}
+            lights={[
+              { 
+                id: 'deskLamp', 
+                label: 'Desk Lamp', 
+                intensity: deskLampIntensity, 
+                onChange: setDeskLampIntensity 
+              },
+              { 
+                id: 'monitorLight', 
+                label: 'Monitor Light', 
+                intensity: monitorLightIntensity, 
+                onChange: setMonitorLightIntensity 
+              },
+              { 
+                id: 'spotlight', 
+                label: 'Spotlight', 
+                intensity: spotlightIntensity, 
+                onChange: setSpotlightIntensity 
+              },
+            ]}
             isLoaded={isLoaded}
           />
         </motion.div>
