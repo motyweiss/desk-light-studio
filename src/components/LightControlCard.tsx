@@ -40,12 +40,13 @@ export const LightControlCard = ({ id, label, intensity, onChange }: LightContro
     
     const currentValue = displayValue.get();
     const targetIntensity = isOn ? 0 : 100;
+    const isTurningOff = targetIntensity === 0;
     
     setIsAnimating(true);
     
-    // Animate from current to target
+    // Animate from current to target - faster when turning off
     animate(displayValue, targetIntensity, {
-      duration: 1.2,
+      duration: isTurningOff ? 0.6 : 1.2,
       ease: [0.22, 0.03, 0.26, 1],
       onUpdate: (latest) => {
         onChange(Math.round(latest));
