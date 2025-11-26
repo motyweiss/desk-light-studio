@@ -86,6 +86,9 @@ export const RoomInfoPanel = ({ roomName, temperature, humidity, masterSwitchOn,
 
       {/* Light Controls Section */}
       <div>
+        {/* Separator */}
+        <div className="h-px bg-gradient-to-r from-transparent via-white/10 to-transparent mb-5" />
+        
         <motion.div 
           className="space-y-3 -ml-5"
           variants={{
