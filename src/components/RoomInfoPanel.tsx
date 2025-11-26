@@ -26,47 +26,38 @@ export const RoomInfoPanel = ({ roomName, temperature, humidity, lights }: RoomI
     >
       {/* Room Title */}
       <div>
-        <h1 className="text-5xl font-light tracking-wide text-foreground mb-1">
+        <h1 className="text-4xl font-display font-light tracking-wide text-foreground">
           {roomName}
         </h1>
-        <div className="h-px bg-gradient-to-r from-white/30 via-white/10 to-transparent" />
       </div>
 
       {/* Climate Info */}
-      <div className="flex gap-4">
+      <div className="flex gap-8">
         {/* Temperature */}
-        <motion.div 
-          className="flex-1 bg-white/10 backdrop-blur-xl rounded-3xl p-5 border border-white/20"
-          whileHover={{ backgroundColor: 'rgba(255, 255, 255, 0.12)' }}
-          transition={{ duration: 0.2 }}
-        >
+        <div className="flex-1 py-4">
           <div className="flex items-center gap-2 mb-2">
             <Thermometer size={16} className="text-white/40" />
             <span className="text-xs text-white/40 font-light tracking-widest uppercase">
               Temperature
             </span>
           </div>
-          <div className="text-3xl font-light text-foreground tabular-nums">
+          <div className="text-2xl font-light text-white/90 tabular-nums">
             {temperature}°
           </div>
-        </motion.div>
+        </div>
 
         {/* Humidity */}
-        <motion.div 
-          className="flex-1 bg-white/10 backdrop-blur-xl rounded-3xl p-5 border border-white/20"
-          whileHover={{ backgroundColor: 'rgba(255, 255, 255, 0.12)' }}
-          transition={{ duration: 0.2 }}
-        >
+        <div className="flex-1 py-4">
           <div className="flex items-center gap-2 mb-2">
             <Droplets size={16} className="text-white/40" />
             <span className="text-xs text-white/40 font-light tracking-widest uppercase">
               Humidity
             </span>
           </div>
-          <div className="text-3xl font-light text-foreground tabular-nums">
+          <div className="text-2xl font-light text-white/90 tabular-nums">
             {humidity}%
           </div>
-        </motion.div>
+        </div>
       </div>
 
       {/* Light Controls Section */}
