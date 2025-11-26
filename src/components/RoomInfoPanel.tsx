@@ -86,8 +86,8 @@ export const RoomInfoPanel = ({ roomName, temperature, humidity, masterSwitchOn,
 
       {/* Light Controls Section */}
       <div>
-        <motion.div
-          className="space-y-3"
+        <motion.div 
+          className="space-y-3 -ml-5"
           variants={{
             hidden: { opacity: 0 },
             show: {
