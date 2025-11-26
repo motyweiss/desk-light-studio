@@ -29,7 +29,7 @@ export const RoomInfoPanel = ({ roomName, temperature, humidity, masterSwitchOn,
     >
       {/* Room Title with Master Switch */}
       <div className="flex items-center justify-between">
-        <h1 className="text-4xl font-display font-light tracking-wide text-foreground">
+        <h1 className="text-5xl font-display font-light tracking-wide text-foreground">
           {roomName}
         </h1>
         
@@ -66,7 +66,7 @@ export const RoomInfoPanel = ({ roomName, temperature, humidity, masterSwitchOn,
               Temperature
             </span>
           </div>
-          <div className="text-2xl font-light text-white/90 tabular-nums">
+          <div className="text-xl font-light text-white/90 tabular-nums">
             {temperature}°
           </div>
         </div>
@@ -79,7 +79,7 @@ export const RoomInfoPanel = ({ roomName, temperature, humidity, masterSwitchOn,
               Humidity
             </span>
           </div>
-          <div className="text-2xl font-light text-white/90 tabular-nums">
+          <div className="text-xl font-light text-white/90 tabular-nums">
             {humidity}%
           </div>
         </div>
