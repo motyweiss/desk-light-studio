@@ -22,6 +22,7 @@ interface DeskDisplayProps {
   onMonitorLightChange: (intensity: number) => void;
   hoveredLightId: string | null;
   isLoaded: boolean;
+  isMobile: boolean;
 }
 
 const lightingStates: Record<string, string> = {
@@ -43,7 +44,8 @@ export const DeskDisplay = ({
   onDeskLampChange,
   onMonitorLightChange,
   hoveredLightId,
-  isLoaded
+  isLoaded,
+  isMobile
 }: DeskDisplayProps) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const [currentState, setCurrentState] = useState("000");
@@ -103,7 +105,7 @@ export const DeskDisplay = ({
     >
       <motion.div 
         className="relative w-full h-full"
-        animate={{
+        animate={isMobile ? {} : {
           rotateY: mousePosition.x * 8,
           rotateX: mousePosition.y * -8,
         }}
@@ -148,38 +150,40 @@ export const DeskDisplay = ({
         })}
       </motion.div>
 
-      {/* Interactive Light Hotspots Layer */}
-      <div className="absolute inset-0 z-30 pointer-events-none">
-        <div className="relative w-full h-full pointer-events-none">
-          <LightHotspot
-            id="spotlight"
-            label="Spotlight"
-            intensity={spotlightIntensity}
-            position={{ x: 79, y: 11 }}
-            onIntensityChange={onSpotlightChange}
-            isContainerHovered={isHovered}
-            isExternallyHovered={hoveredLightId === 'spotlight'}
-          />
-          <LightHotspot
-            id="deskLamp"
-            label="Desk Lamp"
-            intensity={deskLampIntensity}
-            position={{ x: 25, y: 51 }}
-            onIntensityChange={onDeskLampChange}
-            isContainerHovered={isHovered}
-            isExternallyHovered={hoveredLightId === 'deskLamp'}
-          />
-          <LightHotspot
-            id="monitorLight"
-            label="Monitor Light"
-            intensity={monitorLightIntensity}
-            position={{ x: 55, y: 38 }}
-            onIntensityChange={onMonitorLightChange}
-            isContainerHovered={isHovered}
-            isExternallyHovered={hoveredLightId === 'monitorLight'}
-          />
+      {/* Interactive Light Hotspots Layer - Hidden on Mobile */}
+      {!isMobile && (
+        <div className="absolute inset-0 z-30 pointer-events-none">
+          <div className="relative w-full h-full pointer-events-none">
+            <LightHotspot
+              id="spotlight"
+              label="Spotlight"
+              intensity={spotlightIntensity}
+              position={{ x: 79, y: 11 }}
+              onIntensityChange={onSpotlightChange}
+              isContainerHovered={isHovered}
+              isExternallyHovered={hoveredLightId === 'spotlight'}
+            />
+            <LightHotspot
+              id="deskLamp"
+              label="Desk Lamp"
+              intensity={deskLampIntensity}
+              position={{ x: 25, y: 51 }}
+              onIntensityChange={onDeskLampChange}
+              isContainerHovered={isHovered}
+              isExternallyHovered={hoveredLightId === 'deskLamp'}
+            />
+            <LightHotspot
+              id="monitorLight"
+              label="Monitor Light"
+              intensity={monitorLightIntensity}
+              position={{ x: 55, y: 38 }}
+              onIntensityChange={onMonitorLightChange}
+              isContainerHovered={isHovered}
+              isExternallyHovered={hoveredLightId === 'monitorLight'}
+            />
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 };
