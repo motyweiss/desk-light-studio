@@ -79,7 +79,7 @@ export const RoomInfoPanel = ({ roomName, temperature, humidity, lights }: RoomI
           initial="hidden"
           animate="show"
         >
-          {lights.map((light) => (
+          {lights.map((light, index) => (
             <motion.div
               key={light.id}
               variants={{
@@ -88,6 +88,9 @@ export const RoomInfoPanel = ({ roomName, temperature, humidity, lights }: RoomI
               }}
               transition={{ duration: 0.4, ease: [0.22, 0.03, 0.26, 1] }}
             >
+              {index > 0 && (
+                <div className="h-px bg-gradient-to-r from-transparent via-white/10 to-transparent mb-3" />
+              )}
               <LightControlCard
                 id={light.id}
                 label={light.label}

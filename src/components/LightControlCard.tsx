@@ -19,7 +19,7 @@ export const LightControlCard = ({ id, label, intensity, onChange }: LightContro
   return (
     <motion.div
       layout
-      className="w-full bg-white/8 backdrop-blur-xl rounded-2xl px-5 py-3.5 border border-white/15"
+      className="w-full bg-white/8 backdrop-blur-xl rounded-2xl px-5 py-3.5"
       transition={{ layout: { duration: 0.3, ease: [0.22, 0.03, 0.26, 1] } }}
     >
       <div className="flex items-center gap-4">
