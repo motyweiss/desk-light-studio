@@ -1,4 +1,4 @@
-import { motion, useMotionValue, animate, useMotionValueEvent } from "framer-motion";
+import { motion, useMotionValue, animate, useMotionValueEvent, AnimatePresence } from "framer-motion";
 import { Lightbulb } from "lucide-react";
 import { Slider } from "@/components/ui/slider";
 import { useEffect, useState } from "react";
@@ -94,21 +94,63 @@ export const LightControlCard = ({ id, label, intensity, onChange, onHover }: Li
           </motion.div>
         </div>
 
-        {/* Slider - Always Visible on Right */}
-        <div 
-          className="w-32 flex-shrink-0"
-          data-slider
-          onClick={(e) => e.stopPropagation()}
-          onPointerDown={(e) => e.stopPropagation()}
-        >
-          <Slider
-            value={[intensity]}
-            onValueChange={(values) => onChange(values[0])}
-            max={100}
-            step={1}
-            className="w-full"
-          />
-        </div>
+        {/* Slider - Animated appearance matching tooltip */}
+        <AnimatePresence>
+          {isOn && (
+            <motion.div 
+              className="w-32 flex-shrink-0"
+              data-slider
+              onClick={(e) => e.stopPropagation()}
+              onPointerDown={(e) => e.stopPropagation()}
+              initial={{ 
+                opacity: 0,
+                scaleX: 0,
+                scaleY: 0,
+              }}
+              animate={{ 
+                opacity: 1,
+                scaleX: 1,
+                scaleY: 1,
+                transition: {
+                  opacity: {
+                    duration: 0.15,
+                    ease: [0.16, 1, 0.3, 1]
+                  },
+                  scaleX: {
+                    duration: 0.25,
+                    ease: [0.16, 1, 0.3, 1]
+                  },
+                  scaleY: {
+                    duration: 0.25,
+                    ease: [0.16, 1, 0.3, 1],
+                    delay: 0.08
+                  }
+                }
+              }}
+              exit={{ 
+                opacity: 0,
+                scaleX: 0.7,
+                scaleY: 0.7,
+                transition: {
+                  duration: 0.15,
+                  ease: [0.4, 0, 1, 1]
+                }
+              }}
+              style={{
+                originX: 0,
+                originY: 0.5
+              }}
+            >
+              <Slider
+                value={[intensity]}
+                onValueChange={(values) => onChange(values[0])}
+                max={100}
+                step={1}
+                className="w-full"
+              />
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
     </motion.button>
   );
