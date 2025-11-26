@@ -204,6 +204,57 @@ const Index = () => {
             ease: [0.22, 0.03, 0.26, 1]
           }}
         >
+          {/* Lighting effect layers beneath image */}
+          <div className="absolute inset-0 pointer-events-none z-0">
+            {/* Spotlight glow - warm orange from top center */}
+            <motion.div
+              className="absolute left-1/2 -translate-x-1/2 top-0 w-[60%] h-[50%]"
+              style={{
+                background: 'radial-gradient(ellipse 100% 100% at 50% 0%, hsl(32 85% 55% / 0.25) 0%, hsl(35 80% 50% / 0.12) 35%, transparent 70%)',
+                filter: 'blur(40px)',
+              }}
+              animate={{
+                opacity: Math.pow(spotlightIntensity / 100, 0.9),
+              }}
+              transition={{
+                duration: 1.2,
+                ease: [0.4, 0, 0.2, 1]
+              }}
+            />
+
+            {/* Desk lamp glow - warm golden from left side */}
+            <motion.div
+              className="absolute left-0 top-1/2 -translate-y-1/2 w-[50%] h-[60%]"
+              style={{
+                background: 'radial-gradient(ellipse 100% 100% at 0% 50%, hsl(42 90% 58% / 0.28) 0%, hsl(40 85% 52% / 0.14) 38%, transparent 72%)',
+                filter: 'blur(45px)',
+              }}
+              animate={{
+                opacity: Math.pow(deskLampIntensity / 100, 0.9),
+              }}
+              transition={{
+                duration: 1.2,
+                ease: [0.4, 0, 0.2, 1]
+              }}
+            />
+
+            {/* Monitor light glow - cool blue from center */}
+            <motion.div
+              className="absolute left-1/2 -translate-x-1/2 top-1/3 w-[55%] h-[45%]"
+              style={{
+                background: 'radial-gradient(ellipse 100% 100% at 50% 40%, hsl(205 75% 60% / 0.22) 0%, hsl(210 70% 55% / 0.11) 40%, transparent 75%)',
+                filter: 'blur(35px)',
+              }}
+              animate={{
+                opacity: Math.pow(monitorLightIntensity / 100, 0.9),
+              }}
+              transition={{
+                duration: 1.2,
+                ease: [0.4, 0, 0.2, 1]
+              }}
+            />
+          </div>
+
           {/* Soft shadow layer underneath image */}
           <motion.div 
             className="absolute -bottom-8 left-1/2 -translate-x-1/2 w-[85%] h-[12%] pointer-events-none z-0"
