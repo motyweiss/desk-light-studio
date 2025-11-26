@@ -1,6 +1,5 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { useState } from "react";
-import { Slider } from "@/components/ui/slider";
 import { Lightbulb } from "lucide-react";
 
 interface LightHotspotProps {
@@ -299,20 +298,19 @@ export const LightHotspot = ({
             )}
           </svg>
 
-          {/* Interactive tooltip with slider - micro-animations */}
+          {/* Interactive tooltip - micro-animations */}
           <AnimatePresence>
             {isHovered && (
               <motion.div
                 className={`intensity-tooltip absolute z-50
                   ${id === 'spotlight' 
                     ? 'right-8 top-1/2 -translate-y-1/2' 
-                    : '-bottom-16 left-1/2 -translate-x-1/2'
+                    : '-bottom-12 left-1/2 -translate-x-1/2'
                   }
                   bg-white/8 backdrop-blur-xl
-                  px-8 py-5 rounded-full
+                  px-5 py-3 rounded-full
                   shadow-[0_8px_32px_rgba(0,0,0,0.4),0_2px_8px_rgba(0,0,0,0.2),inset_0_1px_1px_rgba(255,255,255,0.1)]
                   border border-white/20
-                  min-w-[240px]
                   overflow-hidden`}
                 initial={{ 
                   opacity: 0,
@@ -389,94 +387,51 @@ export const LightHotspot = ({
                 />
 
                 <motion.div 
-                  className="relative z-10 flex flex-col gap-4"
-                  initial="hidden"
-                  animate="visible"
-                  variants={{
-                    hidden: { opacity: 0 },
-                    visible: {
-                      opacity: 1,
-                      transition: {
-                        delayChildren: 0.35,
-                        staggerChildren: 0.1
-                      }
+                  className="relative z-10 flex items-center gap-3"
+                  initial={{ opacity: 0, y: 6 }}
+                  animate={{ 
+                    opacity: 1, 
+                    y: 0,
+                    transition: {
+                      delay: 0.35,
+                      duration: 0.35,
+                      ease: [0.16, 1, 0.3, 1]
                     }
                   }}
                 >
-                  {/* Top row: Icon + Text */}
-                  <motion.div 
-                    className="flex items-center gap-3"
-                    variants={{
-                      hidden: { opacity: 0, y: 6 },
-                      visible: { 
-                        opacity: 1, 
-                        y: 0,
-                        transition: {
-                          duration: 0.35,
-                          ease: [0.16, 1, 0.3, 1]
-                        }
+                  {/* Lamp icon circle */}
+                  <div
+                    className={`
+                      w-9 h-9 rounded-full flex items-center justify-center
+                      transition-all duration-300 cursor-pointer flex-shrink-0
+                      ${intensity > 0 
+                        ? 'bg-[hsl(40_65%_55%/0.3)] hover:bg-[hsl(40_65%_55%/0.4)]' 
+                        : 'bg-white/15 hover:bg-white/20'
                       }
+                    `}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onIntensityChange(intensity > 0 ? 0 : 100);
                     }}
                   >
-                    {/* Lamp icon circle */}
-                    <div
-                      className={`
-                        w-10 h-10 rounded-full flex items-center justify-center
-                        transition-all duration-300 cursor-pointer
-                        ${intensity > 0 
-                          ? 'bg-[hsl(40_65%_55%/0.3)] hover:bg-[hsl(40_65%_55%/0.4)]' 
-                          : 'bg-white/15 hover:bg-white/20'
-                        }
-                      `}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        onIntensityChange(intensity > 0 ? 0 : 100);
-                      }}
-                    >
-                      <Lightbulb 
-                        className={`w-5 h-5 transition-all duration-300 ${
-                          intensity > 0 
-                            ? 'text-[hsl(38_70%_58%)]' 
-                            : 'text-white/40'
-                        }`}
-                      />
-                    </div>
-                    
-                    {/* Text content - left aligned */}
-                    <div className="flex flex-col items-start flex-1">
-                      <span className="font-medium text-white text-base leading-tight">
-                        {label}
-                      </span>
-                      <span className="text-sm text-white/60 leading-tight mt-0.5">
-                        {intensity > 0 ? `${Math.round(intensity)}%` : 'Off'}
-                      </span>
-                    </div>
-                  </motion.div>
-                  
-                  {/* Slider */}
-                  <motion.div
-                    variants={{
-                      hidden: { opacity: 0, y: 6 },
-                      visible: { 
-                        opacity: 1, 
-                        y: 0,
-                        transition: {
-                          duration: 0.35,
-                          ease: [0.16, 1, 0.3, 1]
-                        }
-                      }
-                    }}
-                  >
-                    <Slider
-                      value={[intensity]}
-                      onValueChange={(value) => {
-                        onIntensityChange(value[0]);
-                      }}
-                      max={100}
-                      step={1}
-                      className="cursor-pointer"
+                    <Lightbulb 
+                      className={`w-5 h-5 transition-all duration-300 ${
+                        intensity > 0 
+                          ? 'text-[hsl(38_70%_58%)]' 
+                          : 'text-white/40'
+                      }`}
                     />
-                  </motion.div>
+                  </div>
+                  
+                  {/* Text content - left aligned */}
+                  <div className="flex flex-col items-start">
+                    <span className="font-medium text-white text-sm leading-tight whitespace-nowrap">
+                      {label}
+                    </span>
+                    <span className="text-xs text-white/60 leading-tight mt-0.5">
+                      {intensity > 0 ? `${Math.round(intensity)}%` : 'Off'}
+                    </span>
+                  </div>
                 </motion.div>
               </motion.div>
             )}
