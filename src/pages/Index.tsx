@@ -37,6 +37,39 @@ const Index = () => {
     setMonitorLightIntensity(targetIntensity);
   };
 
+  // Keyboard shortcuts
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Prevent if user is typing in an input field
+      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) {
+        return;
+      }
+
+      switch (e.key) {
+        case '1':
+          // Toggle Desk Lamp
+          setDeskLampIntensity(prev => prev > 0 ? 0 : 100);
+          break;
+        case '2':
+          // Toggle Monitor Light
+          setMonitorLightIntensity(prev => prev > 0 ? 0 : 100);
+          break;
+        case '3':
+          // Toggle Spotlight
+          setSpotlightIntensity(prev => prev > 0 ? 0 : 100);
+          break;
+        case ' ':
+          // Master toggle with spacebar
+          e.preventDefault(); // Prevent page scroll
+          handleMasterToggle(!masterSwitchOn);
+          break;
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [masterSwitchOn]);
+
   // Calculate page background color based on light intensities
   const getPageBackgroundColor = () => {
     const spotlightBit = spotlightIntensity > 0 ? "1" : "0";
