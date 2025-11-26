@@ -79,7 +79,7 @@ const Index = () => {
     
     // Colors extracted from actual desk image tones for each lighting state
     const stateColors: Record<string, string> = {
-      "000": "220 15% 8%",    // All off - deep charcoal with slight cool undertone
+      "000": "25 20% 6%",     // All off - very dark warm brown, cozy darkness matching image
       "001": "210 18% 10%",   // Monitor only - cool blue-tinted slate
       "010": "35 25% 12%",    // Desk lamp only - warm amber-brown glow
       "011": "28 22% 13%",    // Lamp + Monitor - balanced warm-cool mix
@@ -89,7 +89,7 @@ const Index = () => {
       "111": "30 20% 18%",    // All on - brightest warm-neutral fully lit workspace
     };
     
-    return stateColors[state] || "220 15% 8%";
+    return stateColors[state] || "25 20% 6%";
   };
 
   return (
