@@ -77,19 +77,19 @@ const Index = () => {
     const monitorLightBit = monitorLightIntensity > 0 ? "1" : "0";
     const state = `${spotlightBit}${deskLampBit}${monitorLightBit}`;
     
-    // Harmonized colors derived from desk images - each state creates unique atmosphere
+    // Colors extracted from actual desk image tones for each lighting state
     const stateColors: Record<string, string> = {
-      "000": "25 18% 10%", // All off - deep warm brown-gray, cozy darkness
-      "001": "30 16% 12%", // Monitor only - warm slate with subtle cool accent
-      "010": "28 20% 13%", // Desk lamp only - warm amber-brown undertone from lamp glow
-      "011": "32 18% 14%", // Lamp + Monitor - balanced warm with hint of cool
-      "100": "35 17% 15%", // Spotlight only - warm ceiling light ambiance
-      "101": "33 16% 16%", // Spotlight + Monitor - warm with cool accent
-      "110": "36 19% 17%", // Spotlight + Lamp - double warm sources, golden hour feel
-      "111": "34 17% 18%", // All on - brightest, warm neutral balance, fully lit workspace
+      "000": "220 15% 8%",    // All off - deep charcoal with slight cool undertone
+      "001": "210 18% 10%",   // Monitor only - cool blue-tinted slate
+      "010": "35 25% 12%",    // Desk lamp only - warm amber-brown glow
+      "011": "28 22% 13%",    // Lamp + Monitor - balanced warm-cool mix
+      "100": "32 20% 14%",    // Spotlight only - soft warm ceiling light
+      "101": "25 18% 15%",    // Spotlight + Monitor - warm neutral with cool accent
+      "110": "38 22% 16%",    // Spotlight + Lamp - rich warm golden ambiance
+      "111": "30 20% 18%",    // All on - brightest warm-neutral fully lit workspace
     };
     
-    return stateColors[state] || "25 18% 10%";
+    return stateColors[state] || "220 15% 8%";
   };
 
   return (
