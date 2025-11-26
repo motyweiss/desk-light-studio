@@ -284,7 +284,7 @@ const Index = () => {
 
         {/* Right Panel - Room Info */}
         <motion.div 
-          className="w-[45%] pl-8"
+          className="w-[42%] pl-6"
           initial={{ opacity: 0, x: 30 }}
           animate={{ 
             opacity: isLoaded ? 1 : 0,
