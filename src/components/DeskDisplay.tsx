@@ -76,8 +76,25 @@ export const DeskDisplay = ({
       className="relative w-full aspect-square"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
+      style={{
+        perspective: '1200px',
+      }}
     >
-      <div className="relative w-full h-full">
+      <motion.div 
+        className="relative w-full h-full"
+        animate={{
+          rotateY: [-1.5, 1.5, -1.5],
+          rotateX: [-0.5, 0.5, -0.5],
+        }}
+        transition={{
+          duration: 8,
+          repeat: Infinity,
+          ease: "easeInOut",
+        }}
+        style={{
+          transformStyle: 'preserve-3d',
+        }}
+      >
         {/* Stack all 8 images with improved crossfade */}
         {Object.entries(lightingStates).map(([state, image]) => {
           const isActive = state === currentState;
@@ -108,7 +125,7 @@ export const DeskDisplay = ({
             />
           );
         })}
-      </div>
+      </motion.div>
 
       {/* Interactive Light Hotspots Layer */}
       <div className="absolute inset-0 z-30 pointer-events-none">
