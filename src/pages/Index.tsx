@@ -136,6 +136,15 @@ const Index = () => {
           ease: [0.22, 0.03, 0.26, 1]
         }}
       >
+      {/* Frosted glass blur layer for smooth background */}
+      <div 
+        className="fixed inset-0 pointer-events-none z-0"
+        style={{
+          backdropFilter: 'blur(80px)',
+          WebkitBackdropFilter: 'blur(80px)',
+          background: 'linear-gradient(135deg, rgba(0,0,0,0.02) 0%, rgba(0,0,0,0.04) 100%)',
+        }}
+      />
       {/* Enhanced ambient page glow layers - synchronized positions with soft spill */}
       
       {/* Spotlight ambient glow - warm subtle orange */}
