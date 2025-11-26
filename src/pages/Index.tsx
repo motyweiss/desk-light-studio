@@ -36,8 +36,8 @@ const Index = () => {
         backgroundColor: `hsl(${getPageBackgroundColor()})`,
       }}
       transition={{
-        duration: 1.2,
-        ease: [0.25, 0.1, 0.25, 1]
+        duration: 2.0,
+        ease: [0.22, 0.03, 0.26, 1]
       }}
     >
       {/* Enhanced ambient page glow layers - synchronized positions with soft spill */}
