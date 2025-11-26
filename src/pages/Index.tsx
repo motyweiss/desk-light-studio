@@ -14,19 +14,19 @@ const Index = () => {
     const monitorLightBit = monitorLightIntensity > 0 ? "1" : "0";
     const state = `${spotlightBit}${deskLampBit}${monitorLightBit}`;
     
-    // Harmonious colors matching each lighting state
+    // Deep blue-gray base color with variations in lightness and saturation
     const stateColors: Record<string, string> = {
-      "000": "240 8% 8%", // All off - deep cool dark navy
-      "001": "220 25% 12%", // Monitor only - cool cyan-blue glow
-      "010": "45 35% 15%", // Desk lamp only - warm golden amber
-      "011": "180 20% 14%", // Lamp + Monitor - cyan-gold balance, teal undertone
-      "100": "30 40% 16%", // Spotlight only - rich warm orange
-      "101": "210 30% 14%", // Spotlight + Monitor - orange meets blue, balanced
-      "110": "40 45% 18%", // Spotlight + Lamp - intense warm amber-orange
-      "111": "35 50% 20%", // All on - brightest warm golden glow
+      "000": "210 18% 14%", // All off - base deep blue-gray
+      "001": "210 20% 15%", // Monitor only - slightly brighter, cooler blue
+      "010": "205 16% 16%", // Desk lamp only - warmer blue-gray
+      "011": "208 18% 17%", // Lamp + Monitor - balanced, slightly brighter
+      "100": "205 15% 17%", // Spotlight only - warm blue-gray, brighter
+      "101": "208 17% 18%", // Spotlight + Monitor - balanced brightness
+      "110": "202 14% 19%", // Spotlight + Lamp - warmest blue-gray
+      "111": "200 12% 20%", // All on - brightest, most neutral blue-gray
     };
     
-    return stateColors[state] || "240 8% 8%";
+    return stateColors[state] || "210 18% 14%";
   };
 
   return (
