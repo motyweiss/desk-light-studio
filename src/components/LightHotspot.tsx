@@ -46,16 +46,21 @@ export const LightHotspot = ({
     setTimeout(() => setIsPressed(false), 300);
   };
 
-  // Dynamic color scheme based on intensity
+  // Enhanced dynamic color scheme with intensity-based effects
   const isOn = intensity > 0;
   const intensityRatio = intensity / 100;
-  const dotOpacity = 0.4 + intensityRatio * 0.6;
+  const intensityCurve = Math.pow(intensityRatio, 0.7); // Non-linear for stronger high-intensity glow
+  const dotOpacity = 0.35 + intensityCurve * 0.65;
   const dotColor = isOn 
     ? `hsla(var(--warm-glow) / ${dotOpacity})` 
-    : "hsl(var(--foreground) / 0.6)";
+    : "hsl(var(--foreground) / 0.5)";
   const glowColor = isOn 
-    ? `rgba(251, 191, 36, ${0.3 + intensityRatio * 0.4})` 
-    : "rgba(255, 255, 255, 0.3)";
+    ? `rgba(251, 191, 36, ${0.25 + intensityCurve * 0.5})` 
+    : "rgba(255, 255, 255, 0.25)";
+  
+  // Breathing animation adapts to intensity
+  const breathingDuration = isOn ? 2.5 - (intensityRatio * 0.8) : 3;
+  const breathingScale = isOn ? [1, 1.08 + (intensityRatio * 0.08), 1] : [0.98, 1.05, 0.98];
 
   return (
     <AnimatePresence>
@@ -105,22 +110,22 @@ export const LightHotspot = ({
             viewBox="0 0 60 60"
             className="overflow-visible"
           >
-            {/* Breathing ambient glow - soft pulsing */}
+            {/* Enhanced breathing ambient glow - intensity-adaptive */}
             <motion.circle
               cx="30"
               cy="30"
               r="22"
-              fill={isOn ? "rgba(251, 191, 36, 0.15)" : "rgba(255, 255, 255, 0.08)"}
+              fill={isOn ? `rgba(251, 191, 36, ${0.12 + intensityCurve * 0.15})` : "rgba(255, 255, 255, 0.06)"}
               animate={{
-                opacity: [0.3, 0.5, 0.3],
-                scale: [0.95, 1.05, 0.95],
+                opacity: isOn ? [0.4 + intensityRatio * 0.2, 0.7 + intensityRatio * 0.2, 0.4 + intensityRatio * 0.2] : [0.25, 0.4, 0.25],
+                scale: breathingScale,
               }}
               transition={{
-                duration: 3,
+                duration: breathingDuration,
                 repeat: Infinity,
                 ease: "easeInOut",
               }}
-              style={{ filter: 'blur(12px)' }}
+              style={{ filter: `blur(${12 + intensityRatio * 4}px)` }}
             />
 
             {/* Outer frosted ring - subtle border */}
@@ -145,21 +150,21 @@ export const LightHotspot = ({
               }}
             />
 
-            {/* Gentle pulse ring - continuous breathing */}
+            {/* Enhanced pulse ring - intensity-responsive */}
             <motion.circle
               cx="30"
               cy="30"
               r="13"
               fill="none"
               stroke={dotColor}
-              strokeWidth="1"
-              strokeOpacity="0.3"
+              strokeWidth={isOn ? "1.2" : "0.8"}
+              strokeOpacity={isOn ? 0.4 + intensityRatio * 0.2 : 0.25}
               animate={{
-                scale: [1, 1.12, 1],
-                opacity: [0.2, 0.5, 0.2],
+                scale: [1, 1.1 + (intensityRatio * 0.08), 1],
+                opacity: isOn ? [0.3 + intensityRatio * 0.1, 0.6 + intensityRatio * 0.2, 0.3 + intensityRatio * 0.1] : [0.2, 0.4, 0.2],
               }}
               transition={{
-                duration: 2.5,
+                duration: breathingDuration,
                 repeat: Infinity,
                 ease: "easeInOut",
               }}
@@ -167,21 +172,21 @@ export const LightHotspot = ({
 
             {/* Main frosted glass dot with layers */}
             <motion.g>
-              {/* Deep glow layer - warm ambient */}
+              {/* Enhanced deep glow layer - intensity-scaled */}
               <motion.circle
                 cx="30"
                 cy="30"
                 r="11"
-                fill={isOn ? "rgba(251, 191, 36, 0.25)" : "rgba(255, 255, 255, 0.08)"}
+                fill={isOn ? `rgba(251, 191, 36, ${0.2 + intensityCurve * 0.25})` : "rgba(255, 255, 255, 0.07)"}
                 animate={{
-                  opacity: isOn ? (0.5 + intensityRatio * 0.3) : 0.3,
+                  opacity: isOn ? (0.6 + intensityCurve * 0.35) : 0.28,
                   scale: isPressed ? 0.88 : isHovered ? 1.15 : 1,
                 }}
                 transition={{ 
                   duration: 0.3,
                   ease: [0.4, 0, 0.2, 1]
                 }}
-                style={{ filter: 'blur(10px)' }}
+                style={{ filter: `blur(${10 + intensityCurve * 6}px)` }}
               />
               
               {/* Frosted glass base - translucent */}
@@ -202,27 +207,27 @@ export const LightHotspot = ({
                 }}
                 style={{
                   filter: isOn 
-                    ? `drop-shadow(0 0 8px rgba(251, 191, 36, ${intensityRatio * 0.5})) drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2))`
+                    ? `drop-shadow(0 0 ${6 + intensityCurve * 8}px rgba(251, 191, 36, ${0.4 + intensityCurve * 0.5})) drop-shadow(0 2px 6px rgba(0, 0, 0, 0.25))`
                     : 'drop-shadow(0 2px 4px rgba(0, 0, 0, 0.15))'
                 }}
               />
 
-              {/* Inner warm core when on */}
+              {/* Enhanced inner warm core - intensity-scaled */}
               {isOn && (
                 <motion.circle
                   cx="30"
                   cy="30"
                   r="7"
-                  fill={`rgba(251, 191, 36, ${intensityRatio * 0.35})`}
+                  fill={`rgba(251, 191, 36, ${0.25 + intensityCurve * 0.3})`}
                   initial={{ opacity: 0, scale: 0.4 }}
                   animate={{ 
-                    opacity: [0.7, 1, 0.7],
+                    opacity: [0.65 + intensityRatio * 0.15, 0.95 + intensityRatio * 0.05, 0.65 + intensityRatio * 0.15],
                     scale: 1,
                   }}
                   exit={{ opacity: 0, scale: 0.4 }}
                   transition={{ 
                     opacity: {
-                      duration: 2,
+                      duration: breathingDuration * 0.8,
                       repeat: Infinity,
                       ease: "easeInOut"
                     },
@@ -230,7 +235,7 @@ export const LightHotspot = ({
                       duration: 0.3
                     }
                   }}
-                  style={{ filter: 'blur(3px)' }}
+                  style={{ filter: `blur(${3 + intensityRatio * 2}px)` }}
                 />
               )}
 

@@ -43,14 +43,17 @@ const Index = () => {
         ease: [0.25, 0.1, 0.25, 1]
       }}
     >
-      {/* Ambient page glow layers - spill beyond container */}
+      {/* Enhanced ambient page glow layers - synchronized positions with soft spill */}
+      
+      {/* Spotlight ambient glow - extends from container position */}
       <motion.div
         className="fixed inset-0 pointer-events-none z-0"
         style={{
-          background: `radial-gradient(ellipse 60% 60% at 65% 35%, hsla(var(--spotlight-glow) / 0.08) 0%, transparent 50%)`,
+          background: `radial-gradient(ellipse 70% 70% at 62% 30%, hsla(var(--spotlight-glow) / 0.12) 0%, hsla(var(--spotlight-glow) / 0.04) 35%, transparent 55%)`,
+          filter: 'blur(40px)',
         }}
         animate={{
-          opacity: spotlightIntensity / 100,
+          opacity: Math.pow(spotlightIntensity / 100, 0.7),
         }}
         transition={{
           duration: 1.2,
@@ -58,13 +61,15 @@ const Index = () => {
         }}
       />
       
+      {/* Desk lamp ambient glow */}
       <motion.div
         className="fixed inset-0 pointer-events-none z-0"
         style={{
-          background: `radial-gradient(ellipse 55% 55% at 35% 60%, hsla(var(--lamp-glow) / 0.06) 0%, transparent 50%)`,
+          background: `radial-gradient(ellipse 65% 65% at 35% 58%, hsla(var(--lamp-glow) / 0.1) 0%, hsla(var(--lamp-glow) / 0.03) 35%, transparent 55%)`,
+          filter: 'blur(40px)',
         }}
         animate={{
-          opacity: deskLampIntensity / 100,
+          opacity: Math.pow(deskLampIntensity / 100, 0.7),
         }}
         transition={{
           duration: 1.2,
@@ -72,13 +77,15 @@ const Index = () => {
         }}
       />
       
+      {/* Monitor light ambient glow */}
       <motion.div
         className="fixed inset-0 pointer-events-none z-0"
         style={{
-          background: `radial-gradient(ellipse 65% 65% at 50% 45%, hsla(var(--monitor-glow) / 0.05) 0%, transparent 55%)`,
+          background: `radial-gradient(ellipse 75% 75% at 50% 42%, hsla(var(--monitor-glow) / 0.08) 0%, hsla(var(--monitor-glow) / 0.02) 40%, transparent 60%)`,
+          filter: 'blur(40px)',
         }}
         animate={{
-          opacity: monitorLightIntensity / 100,
+          opacity: Math.pow(monitorLightIntensity / 100, 0.7),
         }}
         transition={{
           duration: 1.2,
