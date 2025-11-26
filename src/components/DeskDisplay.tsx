@@ -108,11 +108,7 @@ export const DeskDisplay = ({
   return (
     <div
       ref={containerRef}
-      className="relative w-full aspect-square overflow-hidden"
-      style={{
-        backgroundColor: `hsl(${getBackgroundColor()})`,
-        transition: `background-color ${transitionDuration.slow}s cubic-bezier(${lightEasing.join(',')})`,
-      }}
+      className="relative w-full aspect-square"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
