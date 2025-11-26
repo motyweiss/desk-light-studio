@@ -46,7 +46,6 @@ export const RoomInfoPanel = ({ roomName, temperature, humidity, masterSwitchOn,
           <motion.div
             animate={{
               color: masterSwitchOn ? 'hsl(42 75% 60%)' : 'rgba(255, 255, 255, 0.4)',
-              rotate: masterSwitchOn ? 0 : 180,
             }}
             transition={{ duration: 0.5, ease: [0.22, 0.03, 0.26, 1] }}
             className="flex items-center justify-center"
