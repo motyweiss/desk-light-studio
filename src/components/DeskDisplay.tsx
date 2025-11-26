@@ -68,7 +68,18 @@ export const DeskDisplay = ({
     }
   }, [spotlightIntensity, deskLampIntensity, monitorLightIntensity, currentState]);
 
-  // Calculate glow intensity based on average intensity
+  // Unified easing and transition system
+  const lightEasing = [0.4, 0, 0.2, 1] as const;
+  const transitionDuration = {
+    fast: 0.4,
+    medium: 0.8,
+    slow: 1.2
+  };
+
+  // Calculate glow intensity with non-linear curve for natural feel
+  const getGlowOpacity = (intensity: number) => Math.pow(intensity / 100, 0.7);
+  const getDimmingOpacity = (intensity: number) => Math.pow(1 - intensity / 100, 1.5) * 0.35;
+
   const totalIntensity = spotlightIntensity + deskLampIntensity + monitorLightIntensity;
   const glowIntensity = totalIntensity / 300; // 0-1 scale
 
@@ -97,65 +108,109 @@ export const DeskDisplay = ({
   return (
     <div
       ref={containerRef}
-      className="relative w-full aspect-square rounded-[3rem] overflow-hidden shadow-2xl transition-all duration-1000"
+      className="relative w-full aspect-square rounded-[3rem] overflow-hidden shadow-2xl"
       style={{
         backgroundColor: `hsl(${getBackgroundColor()})`,
         boxShadow: glowIntensity > 0 
-          ? `0 0 ${40 + glowIntensity * 40}px hsla(var(--warm-glow) / ${0.1 + glowIntensity * 0.3}),
+          ? `0 0 ${40 + glowIntensity * 50}px hsla(var(--warm-glow) / ${0.15 + glowIntensity * 0.35}),
              0 20px 60px rgba(0, 0, 0, 0.5)`
-          : '0 20px 60px rgba(0, 0, 0, 0.5)'
+          : '0 20px 60px rgba(0, 0, 0, 0.5)',
+        transition: `background-color ${transitionDuration.slow}s cubic-bezier(${lightEasing.join(',')})`,
       }}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
-      {/* Dynamic background glow layers */}
-      {/* Spotlight glow - top right */}
+      {/* Enhanced multi-layer glow system - synchronized positions */}
+      
+      {/* Spotlight glow layers - position 79%, 11% */}
       <motion.div
         className="absolute inset-0 pointer-events-none z-[5]"
         style={{
-          background: `radial-gradient(ellipse 45% 45% at 78% 18%, hsla(var(--spotlight-glow) / 0.25) 0%, hsla(var(--spotlight-glow) / 0.12) 30%, transparent 65%)`,
+          background: `radial-gradient(ellipse 50% 50% at 79% 11%, hsla(var(--spotlight-glow) / 0.35) 0%, hsla(var(--spotlight-glow) / 0.15) 25%, transparent 60%)`,
         }}
         animate={{
-          opacity: spotlightIntensity / 100,
+          opacity: getGlowOpacity(spotlightIntensity),
         }}
         transition={{
-          duration: 0.8,
-          ease: [0.4, 0, 0.2, 1]
+          duration: transitionDuration.medium,
+          ease: lightEasing
+        }}
+      />
+      <motion.div
+        className="absolute inset-0 pointer-events-none z-[4]"
+        style={{
+          background: `radial-gradient(ellipse 65% 65% at 79% 11%, hsla(var(--spotlight-glow) / 0.2) 0%, transparent 50%)`,
+          filter: 'blur(20px)',
+        }}
+        animate={{
+          opacity: getGlowOpacity(spotlightIntensity) * 0.8,
+        }}
+        transition={{
+          duration: transitionDuration.medium,
+          ease: lightEasing
         }}
       />
       
-      {/* Desk lamp glow - bottom left */}
+      {/* Desk lamp glow layers - position 25%, 53% */}
       <motion.div
         className="absolute inset-0 pointer-events-none z-[5]"
         style={{
-          background: `radial-gradient(ellipse 40% 40% at 25% 58%, hsla(var(--lamp-glow) / 0.28) 0%, hsla(var(--lamp-glow) / 0.14) 30%, transparent 60%)`,
+          background: `radial-gradient(ellipse 45% 45% at 25% 53%, hsla(var(--lamp-glow) / 0.38) 0%, hsla(var(--lamp-glow) / 0.18) 25%, transparent 55%)`,
         }}
         animate={{
-          opacity: deskLampIntensity / 100,
+          opacity: getGlowOpacity(deskLampIntensity),
         }}
         transition={{
-          duration: 0.8,
-          ease: [0.4, 0, 0.2, 1]
+          duration: transitionDuration.medium,
+          ease: lightEasing
+        }}
+      />
+      <motion.div
+        className="absolute inset-0 pointer-events-none z-[4]"
+        style={{
+          background: `radial-gradient(ellipse 60% 60% at 25% 53%, hsla(var(--lamp-glow) / 0.22) 0%, transparent 50%)`,
+          filter: 'blur(20px)',
+        }}
+        animate={{
+          opacity: getGlowOpacity(deskLampIntensity) * 0.8,
+        }}
+        transition={{
+          duration: transitionDuration.medium,
+          ease: lightEasing
         }}
       />
       
-      {/* Monitor light glow - center */}
+      {/* Monitor light glow layers - position 55%, 38% */}
       <motion.div
         className="absolute inset-0 pointer-events-none z-[5]"
         style={{
-          background: `radial-gradient(ellipse 50% 50% at 55% 42%, hsla(var(--monitor-glow) / 0.22) 0%, hsla(var(--monitor-glow) / 0.1) 35%, transparent 70%)`,
+          background: `radial-gradient(ellipse 55% 55% at 55% 38%, hsla(var(--monitor-glow) / 0.32) 0%, hsla(var(--monitor-glow) / 0.14) 30%, transparent 65%)`,
         }}
         animate={{
-          opacity: monitorLightIntensity / 100,
+          opacity: getGlowOpacity(monitorLightIntensity),
         }}
         transition={{
-          duration: 0.8,
-          ease: [0.4, 0, 0.2, 1]
+          duration: transitionDuration.medium,
+          ease: lightEasing
+        }}
+      />
+      <motion.div
+        className="absolute inset-0 pointer-events-none z-[4]"
+        style={{
+          background: `radial-gradient(ellipse 70% 70% at 55% 38%, hsla(var(--monitor-glow) / 0.18) 0%, transparent 55%)`,
+          filter: 'blur(20px)',
+        }}
+        animate={{
+          opacity: getGlowOpacity(monitorLightIntensity) * 0.8,
+        }}
+        transition={{
+          duration: transitionDuration.medium,
+          ease: lightEasing
         }}
       />
       
       <div className="relative w-full h-full">
-        {/* Stack all 8 images with smooth crossfade */}
+        {/* Stack all 8 images with improved crossfade */}
         {Object.entries(lightingStates).map(([state, image]) => {
           const isActive = state === currentState;
           return (
@@ -167,16 +222,16 @@ export const DeskDisplay = ({
               initial={{ opacity: 0 }}
               animate={{ 
                 opacity: isActive ? 1 : 0,
-                filter: isActive ? 'brightness(1) blur(0px)' : 'brightness(0.98) blur(1px)',
+                filter: `brightness(${isActive ? 1 : 0.96})`,
               }}
               transition={{ 
                 opacity: {
-                  duration: 1.2,
-                  ease: [0.25, 0.1, 0.25, 1], // Gentle ease-in-out
+                  duration: transitionDuration.slow,
+                  ease: lightEasing,
                 },
                 filter: {
-                  duration: 1,
-                  ease: [0.25, 0.1, 0.25, 1],
+                  duration: transitionDuration.slow,
+                  ease: lightEasing,
                 }
               }}
               style={{
@@ -187,61 +242,92 @@ export const DeskDisplay = ({
         })}
       </div>
       
-      {/* Dimming overlays based on intensity */}
-      {/* Spotlight dimming - darkens when intensity is low */}
+      {/* Soft multi-layer dimming overlays - synchronized positions */}
+      
+      {/* Spotlight dimming - position 79%, 11% */}
       <motion.div
         className="absolute inset-0 pointer-events-none z-[15]"
         animate={{
-          opacity: spotlightIntensity > 0 ? (1 - spotlightIntensity / 100) * 0.5 : 0
+          opacity: spotlightIntensity > 0 ? getDimmingOpacity(spotlightIntensity) : 0
         }}
         style={{
-          background: `radial-gradient(ellipse 35% 35% at 78% 18%, rgba(0,0,0,0.8) 0%, transparent 70%)`
+          background: `radial-gradient(ellipse 38% 38% at 79% 11%, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.3) 40%, transparent 70%)`
         }}
         transition={{
-          duration: 0.8,
-          ease: [0.4, 0, 0.2, 1]
+          duration: transitionDuration.medium,
+          ease: lightEasing
+        }}
+      />
+      <motion.div
+        className="absolute inset-0 pointer-events-none z-[14]"
+        animate={{
+          opacity: spotlightIntensity > 0 ? getDimmingOpacity(spotlightIntensity) * 0.6 : 0
+        }}
+        style={{
+          background: `radial-gradient(ellipse 50% 50% at 79% 11%, rgba(0,0,0,0.4) 0%, transparent 65%)`,
+          filter: 'blur(15px)',
+        }}
+        transition={{
+          duration: transitionDuration.medium,
+          ease: lightEasing
         }}
       />
       
-      {/* Desk lamp dimming */}
+      {/* Desk lamp dimming - position 25%, 53% */}
       <motion.div
         className="absolute inset-0 pointer-events-none z-[15]"
         animate={{
-          opacity: deskLampIntensity > 0 ? (1 - deskLampIntensity / 100) * 0.5 : 0
+          opacity: deskLampIntensity > 0 ? getDimmingOpacity(deskLampIntensity) : 0
         }}
         style={{
-          background: `radial-gradient(ellipse 30% 30% at 25% 58%, rgba(0,0,0,0.8) 0%, transparent 65%)`
+          background: `radial-gradient(ellipse 35% 35% at 25% 53%, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.3) 40%, transparent 68%)`
         }}
         transition={{
-          duration: 0.8,
-          ease: [0.4, 0, 0.2, 1]
+          duration: transitionDuration.medium,
+          ease: lightEasing
+        }}
+      />
+      <motion.div
+        className="absolute inset-0 pointer-events-none z-[14]"
+        animate={{
+          opacity: deskLampIntensity > 0 ? getDimmingOpacity(deskLampIntensity) * 0.6 : 0
+        }}
+        style={{
+          background: `radial-gradient(ellipse 48% 48% at 25% 53%, rgba(0,0,0,0.4) 0%, transparent 65%)`,
+          filter: 'blur(15px)',
+        }}
+        transition={{
+          duration: transitionDuration.medium,
+          ease: lightEasing
         }}
       />
       
-      {/* Monitor dimming */}
+      {/* Monitor dimming - position 55%, 38% */}
       <motion.div
         className="absolute inset-0 pointer-events-none z-[15]"
         animate={{
-          opacity: monitorLightIntensity > 0 ? (1 - monitorLightIntensity / 100) * 0.5 : 0
+          opacity: monitorLightIntensity > 0 ? getDimmingOpacity(monitorLightIntensity) : 0
         }}
         style={{
-          background: `radial-gradient(ellipse 40% 40% at 55% 42%, rgba(0,0,0,0.8) 0%, transparent 75%)`
+          background: `radial-gradient(ellipse 42% 42% at 55% 38%, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.3) 40%, transparent 72%)`
         }}
         transition={{
-          duration: 0.8,
-          ease: [0.4, 0, 0.2, 1]
+          duration: transitionDuration.medium,
+          ease: lightEasing
         }}
       />
-      
-      {/* Transition overlay for extra smoothness */}
       <motion.div
-        className="absolute inset-0 bg-black pointer-events-none z-20"
+        className="absolute inset-0 pointer-events-none z-[14]"
         animate={{
-          opacity: isTransitioning ? 0.05 : 0,
+          opacity: monitorLightIntensity > 0 ? getDimmingOpacity(monitorLightIntensity) * 0.6 : 0
+        }}
+        style={{
+          background: `radial-gradient(ellipse 55% 55% at 55% 38%, rgba(0,0,0,0.4) 0%, transparent 70%)`,
+          filter: 'blur(15px)',
         }}
         transition={{
-          duration: 0.6,
-          ease: [0.25, 0.1, 0.25, 1]
+          duration: transitionDuration.medium,
+          ease: lightEasing
         }}
       />
 
