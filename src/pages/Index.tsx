@@ -94,8 +94,8 @@ const Index = () => {
       />
 
       {/* Main Display */}
-      <div className="w-full max-w-4xl mx-auto relative z-10">
-      <DeskDisplay 
+      <div className="w-[40%] mx-auto relative z-10">
+      <DeskDisplay
         spotlightIntensity={spotlightIntensity}
         deskLampIntensity={deskLampIntensity}
         monitorLightIntensity={monitorLightIntensity}
