@@ -77,16 +77,16 @@ const Index = () => {
     const monitorLightBit = monitorLightIntensity > 0 ? "1" : "0";
     const state = `${spotlightBit}${deskLampBit}${monitorLightBit}`;
     
-    // Colors extracted from actual desk image tones for each lighting state
+    // All warm colors matching desk image tones - no cool/blue tones
     const stateColors: Record<string, string> = {
-      "000": "25 20% 6%",     // All off - very dark warm brown, cozy darkness matching image
-      "001": "210 18% 10%",   // Monitor only - cool blue-tinted slate
+      "000": "25 20% 6%",     // All off - very dark warm brown, cozy darkness
+      "001": "28 18% 11%",    // Monitor only - warm slate brown
       "010": "35 25% 12%",    // Desk lamp only - warm amber-brown glow
-      "011": "28 22% 13%",    // Lamp + Monitor - balanced warm-cool mix
+      "011": "32 22% 14%",    // Lamp + Monitor - warm balanced mix
       "100": "32 20% 14%",    // Spotlight only - soft warm ceiling light
-      "101": "25 18% 15%",    // Spotlight + Monitor - warm neutral with cool accent
+      "101": "30 19% 15%",    // Spotlight + Monitor - warm neutral
       "110": "38 22% 16%",    // Spotlight + Lamp - rich warm golden ambiance
-      "111": "30 20% 18%",    // All on - brightest warm-neutral fully lit workspace
+      "111": "34 20% 18%",    // All on - brightest warm workspace
     };
     
     return stateColors[state] || "25 20% 6%";
@@ -170,11 +170,11 @@ const Index = () => {
         }}
       />
       
-      {/* Monitor light ambient glow - cool blue harmony */}
+      {/* Monitor light ambient glow - warm beige harmony */}
       <motion.div
         className="fixed inset-0 pointer-events-none z-0"
         style={{
-          background: `radial-gradient(ellipse 75% 75% at 50% 40%, hsl(205 50% 60% / 0.10) 0%, hsl(210 45% 55% / 0.04) 38%, transparent 62%)`,
+          background: `radial-gradient(ellipse 75% 75% at 50% 40%, hsl(38 45% 55% / 0.10) 0%, hsl(35 40% 50% / 0.04) 38%, transparent 62%)`,
           filter: 'blur(60px)',
         }}
         animate={{
@@ -238,11 +238,11 @@ const Index = () => {
               }}
             />
 
-            {/* Monitor light glow - cool blue from center */}
+            {/* Monitor light glow - warm beige from center */}
             <motion.div
               className="absolute left-1/2 -translate-x-1/2 top-1/3 w-[55%] h-[45%]"
               style={{
-                background: 'radial-gradient(ellipse 100% 100% at 50% 40%, hsl(205 75% 60% / 0.22) 0%, hsl(210 70% 55% / 0.11) 40%, transparent 75%)',
+                background: 'radial-gradient(ellipse 100% 100% at 50% 40%, hsl(38 70% 60% / 0.22) 0%, hsl(35 65% 55% / 0.11) 40%, transparent 75%)',
                 filter: 'blur(35px)',
               }}
               animate={{
