@@ -14,19 +14,23 @@ export const LightControlCard = ({ id, label, intensity, onChange }: LightContro
   const isOn = intensity > 0;
   const displayValue = useMotionValue(intensity);
   const [displayNumber, setDisplayNumber] = useState(intensity);
+  const [isAnimating, setIsAnimating] = useState(false);
   
   useMotionValueEvent(displayValue, "change", (latest) => {
     setDisplayNumber(Math.round(latest));
   });
   
   useEffect(() => {
+    // Only sync if we're not in the middle of a toggle animation
+    if (isAnimating) return;
+    
     const controls = animate(displayValue, intensity, {
       duration: 1.2,
       ease: [0.22, 0.03, 0.26, 1]
     });
     
     return controls.stop;
-  }, [intensity, displayValue]);
+  }, [intensity, displayValue, isAnimating]);
   
   const handleCardClick = (e: React.MouseEvent) => {
     // Only toggle if clicking outside the slider
@@ -34,7 +38,10 @@ export const LightControlCard = ({ id, label, intensity, onChange }: LightContro
       return;
     }
     
+    const currentValue = displayValue.get();
     const targetIntensity = isOn ? 0 : 100;
+    
+    setIsAnimating(true);
     
     // Animate from current to target
     animate(displayValue, targetIntensity, {
@@ -42,6 +49,9 @@ export const LightControlCard = ({ id, label, intensity, onChange }: LightContro
       ease: [0.22, 0.03, 0.26, 1],
       onUpdate: (latest) => {
         onChange(Math.round(latest));
+      },
+      onComplete: () => {
+        setIsAnimating(false);
       }
     });
   };
