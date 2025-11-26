@@ -141,8 +141,8 @@ const Index = () => {
           <div 
             className="absolute -bottom-8 left-1/2 -translate-x-1/2 w-[85%] h-[12%] pointer-events-none z-0"
             style={{
-              background: 'radial-gradient(ellipse 100% 100% at 50% 50%, rgba(0,0,0,0.25) 0%, rgba(0,0,0,0.08) 50%, transparent 80%)',
-              filter: 'blur(20px)',
+              background: 'radial-gradient(ellipse 100% 100% at 50% 50%, rgba(0,0,0,0.4) 0%, rgba(0,0,0,0.15) 50%, transparent 80%)',
+              filter: 'blur(25px)',
             }}
           />
           <DeskDisplay
