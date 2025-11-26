@@ -8,6 +8,17 @@ const Index = () => {
   const [deskLampIntensity, setDeskLampIntensity] = useState(0);
   const [monitorLightIntensity, setMonitorLightIntensity] = useState(0);
 
+  // Master switch logic - bidirectional synchronization
+  const allLightsOn = spotlightIntensity > 0 || deskLampIntensity > 0 || monitorLightIntensity > 0;
+  const masterSwitchOn = allLightsOn;
+
+  const handleMasterToggle = (checked: boolean) => {
+    const targetIntensity = checked ? 100 : 0;
+    setSpotlightIntensity(targetIntensity);
+    setDeskLampIntensity(targetIntensity);
+    setMonitorLightIntensity(targetIntensity);
+  };
+
   // Calculate page background color based on light intensities
   const getPageBackgroundColor = () => {
     const spotlightBit = spotlightIntensity > 0 ? "1" : "0";
@@ -99,6 +110,8 @@ const Index = () => {
             roomName="Office Desk"
             temperature={24.4}
             humidity={49}
+            masterSwitchOn={masterSwitchOn}
+            onMasterToggle={handleMasterToggle}
             lights={[
               { 
                 id: 'deskLamp', 

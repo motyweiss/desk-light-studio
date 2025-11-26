@@ -14,8 +14,8 @@ export const LightSwitch = ({ label, checked, onChange, isMaster = false }: Ligh
         onClick={() => onChange(!checked)}
         className={`relative w-20 h-10 rounded-full transition-all duration-500 ease-out ${
           checked 
-            ? 'bg-gradient-to-r from-warm-glow to-accent shadow-[0_0_20px_rgba(251,191,36,0.5)]' 
-            : 'bg-secondary shadow-inner'
+            ? 'bg-gradient-to-r from-[hsl(38_70%_58%)] to-[hsl(32_55%_52%)] shadow-[0_0_20px_rgba(200,160,80,0.5)]' 
+            : 'bg-white/10 shadow-inner'
         }`}
         aria-label={`Toggle ${label}`}
       >
@@ -35,7 +35,7 @@ export const LightSwitch = ({ label, checked, onChange, isMaster = false }: Ligh
           {/* Inner glow when active */}
           {checked && (
             <motion.div
-              className="absolute inset-0 rounded-full bg-warm-glow"
+              className="absolute inset-0 rounded-full bg-[hsl(38_70%_58%)]"
               initial={{ opacity: 0, scale: 0.8 }}
               animate={{ opacity: 0.3, scale: 1 }}
               transition={{ duration: 0.3 }}
@@ -48,7 +48,7 @@ export const LightSwitch = ({ label, checked, onChange, isMaster = false }: Ligh
           isMaster ? 'text-base font-semibold' : ''
         }`}
         animate={{
-          color: checked ? 'hsl(var(--warm-glow-soft))' : 'hsl(var(--muted-foreground))'
+          color: checked ? 'hsl(42 65% 65%)' : 'rgba(255, 255, 255, 0.4)'
         }}
         transition={{ duration: 0.4 }}
       >
