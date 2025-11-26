@@ -1,9 +1,10 @@
 import { useState, useEffect } from "react";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { DeskDisplay } from "@/components/DeskDisplay";
 import { RoomInfoPanel } from "@/components/RoomInfoPanel";
 
 const Index = () => {
+  const [isLoading, setIsLoading] = useState(true);
   const [isLoaded, setIsLoaded] = useState(false);
   const [spotlightIntensity, setSpotlightIntensity] = useState(0); // 0-100
   const [deskLampIntensity, setDeskLampIntensity] = useState(0);
@@ -12,9 +13,17 @@ const Index = () => {
   // Hover states for coordinated UI
   const [hoveredLight, setHoveredLight] = useState<string | null>(null);
 
-  // Trigger loading animation
+  // Initial loading phase - wait for assets to load
   useEffect(() => {
-    setIsLoaded(true);
+    const loadingTimer = setTimeout(() => {
+      setIsLoading(false);
+      // Small delay before starting entrance animations
+      setTimeout(() => {
+        setIsLoaded(true);
+      }, 100);
+    }, 1200); // Loading phase duration
+
+    return () => clearTimeout(loadingTimer);
   }, []);
 
   // Master switch logic - bidirectional synchronization
@@ -51,16 +60,49 @@ const Index = () => {
   };
 
   return (
-    <motion.div 
-      className="min-h-screen flex items-center justify-center p-8 relative overflow-hidden"
-      animate={{
-        backgroundColor: `hsl(${getPageBackgroundColor()})`,
-      }}
-      transition={{
-        duration: 1.2,
-        ease: [0.22, 0.03, 0.26, 1]
-      }}
-    >
+    <>
+      {/* Loading Overlay */}
+      <AnimatePresence>
+        {isLoading && (
+          <motion.div
+            className="fixed inset-0 z-50 flex items-center justify-center"
+            initial={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.6, ease: [0.22, 0.03, 0.26, 1] }}
+            style={{
+              backgroundColor: 'hsl(25 18% 10%)',
+            }}
+          >
+            {/* Subtle breathing pulse */}
+            <motion.div
+              className="w-16 h-16 rounded-full"
+              style={{
+                background: 'radial-gradient(circle, hsl(42 70% 55% / 0.15) 0%, transparent 70%)',
+              }}
+              animate={{
+                scale: [1, 1.2, 1],
+                opacity: [0.3, 0.6, 0.3],
+              }}
+              transition={{
+                duration: 2,
+                repeat: Infinity,
+                ease: "easeInOut",
+              }}
+            />
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      <motion.div 
+        className="min-h-screen flex items-center justify-center p-8 relative overflow-hidden"
+        animate={{
+          backgroundColor: `hsl(${getPageBackgroundColor()})`,
+        }}
+        transition={{
+          duration: 1.2,
+          ease: [0.22, 0.03, 0.26, 1]
+        }}
+      >
       {/* Enhanced ambient page glow layers - synchronized positions with soft spill */}
       
       {/* Spotlight ambient glow - warm subtle orange */}
@@ -201,7 +243,8 @@ const Index = () => {
           />
         </motion.div>
       </div>
-    </motion.div>
+      </motion.div>
+    </>
   );
 };
 
