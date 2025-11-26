@@ -21,6 +21,7 @@ interface DeskDisplayProps {
   onDeskLampChange: (intensity: number) => void;
   onMonitorLightChange: (intensity: number) => void;
   hoveredLightId: string | null;
+  isLoaded: boolean;
 }
 
 const lightingStates: Record<string, string> = {
@@ -41,7 +42,8 @@ export const DeskDisplay = ({
   onSpotlightChange,
   onDeskLampChange,
   onMonitorLightChange,
-  hoveredLightId
+  hoveredLightId,
+  isLoaded
 }: DeskDisplayProps) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const [currentState, setCurrentState] = useState("000");
@@ -125,7 +127,7 @@ export const DeskDisplay = ({
               className="absolute inset-0 w-full h-full object-cover"
               initial={{ opacity: 0 }}
               animate={{ 
-                opacity: isActive ? 1 : 0,
+                opacity: isActive && isLoaded ? 1 : 0,
                 filter: `brightness(${isActive ? 1 : 0.96})`,
               }}
               transition={{ 
