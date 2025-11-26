@@ -19,9 +19,10 @@ interface RoomInfoPanelProps {
   onLightHover: (lightId: string | null) => void;
   lights: Light[];
   isLoaded: boolean;
+  isMobile: boolean;
 }
 
-export const RoomInfoPanel = ({ roomName, temperature, humidity, masterSwitchOn, onMasterToggle, onLightHover, lights, isLoaded }: RoomInfoPanelProps) => {
+export const RoomInfoPanel = ({ roomName, temperature, humidity, masterSwitchOn, onMasterToggle, onLightHover, lights, isLoaded, isMobile }: RoomInfoPanelProps) => {
   // Animated counter for temperature
   const tempCount = useMotionValue(0);
   const tempDisplay = useTransform(tempCount, (latest) => latest.toFixed(1));
@@ -69,7 +70,7 @@ export const RoomInfoPanel = ({ roomName, temperature, humidity, masterSwitchOn,
           ease: [0.22, 0.03, 0.26, 1]
         }}
       >
-        <h1 className="text-5xl font-display font-light tracking-wide text-foreground">
+        <h1 className="text-3xl md:text-5xl font-display font-light tracking-wide text-foreground">
           {roomName}
         </h1>
         
@@ -108,7 +109,7 @@ export const RoomInfoPanel = ({ roomName, temperature, humidity, masterSwitchOn,
 
       {/* Climate Info */}
       <motion.div 
-        className="flex gap-6 py-6"
+        className={`flex ${isMobile ? 'gap-4' : 'gap-6'} py-4 md:py-6`}
         initial={{ opacity: 0, y: 20 }}
         animate={{ 
           opacity: isLoaded ? 1 : 0,
@@ -128,7 +129,7 @@ export const RoomInfoPanel = ({ roomName, temperature, humidity, masterSwitchOn,
               Temperature
             </span>
           </div>
-          <div className="text-xl font-light text-white/90 tabular-nums">
+          <div className="text-lg md:text-xl font-light text-white/90 tabular-nums">
             <motion.span>{tempDisplay}</motion.span>°
           </div>
         </div>
@@ -141,7 +142,7 @@ export const RoomInfoPanel = ({ roomName, temperature, humidity, masterSwitchOn,
               Humidity
             </span>
           </div>
-          <div className="text-xl font-light text-white/90 tabular-nums">
+          <div className="text-lg md:text-xl font-light text-white/90 tabular-nums">
             <motion.span>{humidityDisplay}</motion.span>%
           </div>
         </div>
@@ -166,7 +167,7 @@ export const RoomInfoPanel = ({ roomName, temperature, humidity, masterSwitchOn,
         />
         
         <motion.div 
-          className="space-y-3 -ml-5"
+          className="space-y-3"
           variants={{
             hidden: { opacity: 0 },
             show: {
@@ -198,6 +199,7 @@ export const RoomInfoPanel = ({ roomName, temperature, humidity, masterSwitchOn,
                 intensity={light.intensity}
                 onChange={light.onChange}
                 onHover={(isHovered) => onLightHover(isHovered ? light.id : null)}
+                isMobile={isMobile}
               />
             </motion.div>
           ))}
