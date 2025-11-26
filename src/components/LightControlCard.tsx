@@ -8,9 +8,10 @@ interface LightControlCardProps {
   label: string;
   intensity: number;
   onChange: (intensity: number) => void;
+  onHover: (isHovered: boolean) => void;
 }
 
-export const LightControlCard = ({ id, label, intensity, onChange }: LightControlCardProps) => {
+export const LightControlCard = ({ id, label, intensity, onChange, onHover }: LightControlCardProps) => {
   const isOn = intensity > 0;
   const displayValue = useMotionValue(intensity);
   const [displayNumber, setDisplayNumber] = useState(intensity);
@@ -61,6 +62,8 @@ export const LightControlCard = ({ id, label, intensity, onChange }: LightContro
     <motion.button
       layout
       onClick={handleCardClick}
+      onMouseEnter={() => onHover(true)}
+      onMouseLeave={() => onHover(false)}
       className="w-full bg-white/8 backdrop-blur-xl rounded-2xl px-5 py-3.5 hover:bg-white/12 transition-all duration-300 cursor-pointer text-left"
       transition={{ layout: { duration: 0.3, ease: [0.22, 0.03, 0.26, 1] } }}
       whileTap={{ scale: 0.98 }}

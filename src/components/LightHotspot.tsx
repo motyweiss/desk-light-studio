@@ -10,6 +10,7 @@ interface LightHotspotProps {
   position: { x: number; y: number }; // Percentages from container
   onIntensityChange: (value: number) => void;
   isContainerHovered: boolean;
+  isExternallyHovered: boolean;
 }
 
 export const LightHotspot = ({ 
@@ -18,7 +19,8 @@ export const LightHotspot = ({
   intensity, 
   position, 
   onIntensityChange,
-  isContainerHovered 
+  isContainerHovered,
+  isExternallyHovered
 }: LightHotspotProps) => {
   const [isHovered, setIsHovered] = useState(false);
   const [isPressed, setIsPressed] = useState(false);
@@ -64,7 +66,7 @@ export const LightHotspot = ({
 
   return (
     <AnimatePresence>
-      {isContainerHovered && (
+      {(isContainerHovered || isExternallyHovered) && (
         <motion.div
           className="absolute cursor-pointer pointer-events-auto"
           style={{
