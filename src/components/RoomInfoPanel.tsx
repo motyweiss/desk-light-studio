@@ -37,7 +37,7 @@ export const RoomInfoPanel = ({ roomName, temperature, humidity, masterSwitchOn,
           onClick={() => onMasterToggle(!masterSwitchOn)}
           className={`w-12 h-12 rounded-full backdrop-blur-xl border transition-all duration-500 ${
             masterSwitchOn 
-              ? 'bg-[hsl(38_70%_58%/0.25)] border-[hsl(38_70%_58%/0.4)] shadow-[0_0_20px_rgba(200,160,80,0.4)]' 
+              ? 'bg-[hsl(38_70%_58%/0.25)] border-[hsl(38_70%_58%/0.4)]' 
               : 'bg-white/8 border-white/15 hover:bg-white/12'
           }`}
           whileTap={{ scale: 0.92 }}
