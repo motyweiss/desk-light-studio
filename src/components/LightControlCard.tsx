@@ -102,8 +102,12 @@ export const LightControlCard = ({ id, label, intensity, onChange, onHover }: Li
           onPointerDown={(e) => e.stopPropagation()}
         >
           <Slider
-            value={[intensity]}
-            onValueChange={(values) => onChange(values[0])}
+            value={[displayNumber]}
+            onValueChange={(values) => {
+              const newValue = values[0];
+              displayValue.set(newValue);
+              onChange(newValue);
+            }}
             max={100}
             step={1}
             className="w-full"
