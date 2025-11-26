@@ -51,19 +51,29 @@ export const DeskDisplay = ({
   const [isHovered, setIsHovered] = useState(false);
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
 
-  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (!containerRef.current) return;
+  // Track mouse movement across entire window
+  useEffect(() => {
+    const handleMouseMove = (e: MouseEvent) => {
+      // Calculate position relative to viewport center
+      const x = (e.clientX / window.innerWidth) - 0.5; // -0.5 to 0.5
+      const y = (e.clientY / window.innerHeight) - 0.5; // -0.5 to 0.5
+      
+      setMousePosition({ x, y });
+    };
+
+    window.addEventListener('mousemove', handleMouseMove);
     
-    const rect = containerRef.current.getBoundingClientRect();
-    const x = (e.clientX - rect.left) / rect.width - 0.5; // -0.5 to 0.5
-    const y = (e.clientY - rect.top) / rect.height - 0.5; // -0.5 to 0.5
-    
-    setMousePosition({ x, y });
+    return () => {
+      window.removeEventListener('mousemove', handleMouseMove);
+    };
+  }, []);
+
+  const handleMouseEnter = () => {
+    setIsHovered(true);
   };
 
   const handleMouseLeave = () => {
     setIsHovered(false);
-    setMousePosition({ x: 0, y: 0 });
   };
 
   // Calculate current lighting state based on intensity
@@ -94,9 +104,8 @@ export const DeskDisplay = ({
     <div
       ref={containerRef}
       className="relative w-full aspect-square"
-      onMouseEnter={() => setIsHovered(true)}
+      onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
-      onMouseMove={handleMouseMove}
       style={{
         perspective: '1000px',
       }}
