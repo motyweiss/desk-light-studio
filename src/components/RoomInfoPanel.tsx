@@ -203,15 +203,10 @@ export const RoomInfoPanel = ({ roomName, temperature, humidity, airQuality, mas
           </CircularProgress>
           <div className="flex flex-col">
             <span className="text-[9px] text-white/55 font-light tracking-[0.2em] uppercase mb-1">
-              PM 2.5
+              Air Quality
             </span>
-            <div className="text-base font-light tabular-nums">
-              <motion.span
-                animate={{ color: getAirQualityStatus(airQuality).color }}
-                transition={{ duration: 0.5, ease: [0.22, 0.03, 0.26, 1] }}
-              >
-                {getAirQualityStatus(airQuality).label}
-              </motion.span>
+            <div className="text-base font-light text-white tabular-nums">
+              <span>{getAirQualityStatus(airQuality).label}</span>
             </div>
           </div>
         </div>
