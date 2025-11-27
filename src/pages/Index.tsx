@@ -31,7 +31,6 @@ const Index = () => {
   const [monitorLightIntensity, setMonitorLightIntensity] = useState(0);
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
-  const [isSyncing, setIsSyncing] = useState(false);
 
   // Hover states for coordinated UI
   const [hoveredLight, setHoveredLight] = useState<string | null>(null);
@@ -155,7 +154,6 @@ const Index = () => {
       }
 
       try {
-        setIsSyncing(true);
         const states = await homeAssistant.getAllEntityStates(entityIds);
         
         // Update spotlight
@@ -207,8 +205,6 @@ const Index = () => {
         }
       } catch (error) {
         console.error("❌ Failed to sync with Home Assistant:", error);
-      } finally {
-        setIsSyncing(false);
       }
     };
 
@@ -300,11 +296,7 @@ const Index = () => {
   return (
     <>
       <LoadingOverlay isLoading={isLoading} />
-      <ConnectionStatusIndicator 
-        isConnected={isConnected} 
-        isSyncing={isSyncing}
-        onClick={() => setSettingsOpen(true)}
-      />
+      <ConnectionStatusIndicator isConnected={isConnected} />
       <SettingsButton onClick={() => setSettingsOpen(true)} />
       <SettingsDialog
         open={settingsOpen}
