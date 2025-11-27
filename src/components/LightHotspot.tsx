@@ -307,7 +307,7 @@ export const LightHotspot = ({
             {(isHovered || isExternallyHovered) && (
               <motion.div
                 key={`tooltip-${id}`}
-                className={`intensity-tooltip absolute z-50
+                className={`intensity-tooltip absolute z-50 cursor-pointer
                   ${id === 'spotlight' 
                     ? 'right-3 top-1/2 -translate-y-1/2' 
                     : '-bottom-12 left-1/2 -translate-x-1/2'
@@ -360,7 +360,10 @@ export const LightHotspot = ({
                 style={{
                   transformOrigin: id === 'spotlight' ? 'right center' : 'center top'
                 }}
-                onClick={(e) => e.stopPropagation()}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onIntensityChange(intensity > 0 ? 0 : 100);
+                }}
               >
                 {/* שכבת זוהר פנימית */}
                 <motion.div 
@@ -386,7 +389,7 @@ export const LightHotspot = ({
                 <div className="relative z-10 flex items-center gap-3">
                   {/* Lamp icon circle - Exactly 42x42 pixels with frosted glass effect, no fill */}
                   <motion.div
-                    className="w-[42px] h-[42px] rounded-full flex items-center justify-center cursor-pointer flex-shrink-0 backdrop-blur-xl"
+                    className="w-[42px] h-[42px] rounded-full flex items-center justify-center flex-shrink-0 backdrop-blur-xl"
                     initial={{ scale: 0.7, opacity: 0 }}
                     animate={{
                       scale: 1,
@@ -396,10 +399,6 @@ export const LightHotspot = ({
                       delay: 0.12,
                       duration: 0.35,
                       ease: [0.34, 1.56, 0.64, 1]
-                    }}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      onIntensityChange(intensity > 0 ? 0 : 100);
                     }}
                   >
                     <IconComponent 
