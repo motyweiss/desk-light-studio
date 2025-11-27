@@ -193,6 +193,7 @@ export const RoomInfoPanel = ({ roomName, temperature, humidity, airQuality, mas
           delay: 0.2,
           ease: [0.22, 0.03, 0.26, 1]
         }}
+        style={{ display: 'none' }}
       >
         {/* Temperature - Icon + Number only */}
         <div className="flex items-center gap-2">

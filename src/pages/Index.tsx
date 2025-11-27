@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo, useCallback } from "react";
 import { motion } from "framer-motion";
-import { Sun, Thermometer, Droplets } from "lucide-react";
+import { Sun, Thermometer, Droplets, Wind } from "lucide-react";
 import { DeskDisplay } from "@/components/DeskDisplay";
 import { RoomInfoPanel } from "@/components/RoomInfoPanel";
 import { LoadingOverlay } from "@/components/LoadingOverlay";
@@ -221,9 +221,9 @@ const Index = () => {
             </motion.button>
           </div>
 
-          {/* Climate Data */}
+          {/* Climate Data - Minimal inline version */}
           <motion.div 
-            className="flex gap-10 mb-3"
+            className="flex justify-center gap-8 mb-3"
             initial={{ opacity: 0, y: 20 }}
             animate={{ 
               opacity: isLoaded ? 1 : 0,
@@ -235,38 +235,22 @@ const Index = () => {
               ease: [0.22, 0.03, 0.26, 1]
             }}
           >
-            {/* Temperature */}
-            <div className="flex items-center gap-3">
-              <div className="flex items-center justify-center w-10 h-10 rounded-full bg-white/5 backdrop-blur-sm">
-                <Thermometer className="w-5 h-5 text-white/50" strokeWidth={1.5} />
-              </div>
-              <div className="flex flex-col">
-                <div className="text-[9px] uppercase tracking-[0.2em] text-foreground/40 mb-0.5 font-light">Temperature</div>
-                <motion.div 
-                  className="text-lg font-light text-foreground tabular-nums"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: isLoaded ? 1 : 0 }}
-                >
-                  21°
-                </motion.div>
-              </div>
+            {/* Temperature - Icon + Number only */}
+            <div className="flex items-center gap-2">
+              <Thermometer className="w-5 h-5 text-white/60" strokeWidth={1.5} />
+              <div className="text-base font-light text-white tabular-nums">21.0°</div>
             </div>
-            
-            {/* Humidity */}
-            <div className="flex items-center gap-3">
-              <div className="flex items-center justify-center w-10 h-10 rounded-full bg-white/5 backdrop-blur-sm">
-                <Droplets className="w-5 h-5 text-white/50" strokeWidth={1.5} />
-              </div>
-              <div className="flex flex-col">
-                <div className="text-[9px] uppercase tracking-[0.2em] text-foreground/40 mb-0.5 font-light">Humidity</div>
-                <motion.div 
-                  className="text-lg font-light text-foreground tabular-nums"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: isLoaded ? 1 : 0 }}
-                >
-                  49%
-                </motion.div>
-              </div>
+
+            {/* Humidity - Icon + Number only */}
+            <div className="flex items-center gap-2">
+              <Droplets className="w-5 h-5 text-white/60" strokeWidth={1.5} />
+              <div className="text-base font-light text-white tabular-nums">49%</div>
+            </div>
+
+            {/* Air Quality - Icon + Number only */}
+            <div className="flex items-center gap-2">
+              <Wind className="w-5 h-5 text-white/60" strokeWidth={1.5} />
+              <div className="text-base font-light text-white tabular-nums">85</div>
             </div>
           </motion.div>
         </motion.div>
