@@ -200,15 +200,14 @@ const Index = () => {
         {/* Desk Display Panel */}
         <motion.div 
           className="w-full md:w-[50%] relative"
-          initial={{ opacity: 0, y: 30, scale: 0.95, filter: "blur(8px)" }}
+          initial={{ opacity: 0, y: 20, scale: 0.95 }}
           animate={{ 
             opacity: isLoaded ? 1 : 0,
-            y: isLoaded ? 0 : 30,
-            scale: isLoaded ? 1 : 0.95,
-            filter: isLoaded ? "blur(0px)" : "blur(8px)"
+            y: isLoaded ? 0 : 20,
+            scale: isLoaded ? 1 : 0.95
           }}
           transition={{ 
-            duration: 1,
+            duration: 0.8,
             delay: 0.4,
             ease: [0.22, 0.03, 0.26, 1]
           }}
@@ -270,8 +269,8 @@ const Index = () => {
             initial={{ opacity: 0 }}
             animate={{ opacity: isLoaded ? 1 : 0 }}
             transition={{ 
-              duration: 1.2,
-              delay: 1.0,
+              duration: 0.8,
+              delay: 0.6,
               ease: [0.22, 0.03, 0.26, 1]
             }}
             style={{
@@ -294,14 +293,14 @@ const Index = () => {
         {/* Room Info Panel */}
         <motion.div 
           className="w-full md:w-[42%] md:pl-6"
-          initial={{ opacity: 0, y: 30 }}
+          initial={{ opacity: 0, y: 20 }}
           animate={{ 
             opacity: isLoaded ? 1 : 0,
-            y: isLoaded ? 0 : 30
+            y: isLoaded ? 0 : 20
           }}
           transition={{ 
-            duration: 1,
-            delay: 0.6,
+            duration: 0.8,
+            delay: 0.5,
             ease: [0.22, 0.03, 0.26, 1]
           }}
         >

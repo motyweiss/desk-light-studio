@@ -142,7 +142,7 @@ export const DeskDisplay = ({
               initial={{ opacity: 0 }}
               animate={{ 
                 opacity: isActive && isLoaded ? 1 : 0,
-                filter: `brightness(${isActive ? 1 : 0.96})`,
+                filter: isLoaded ? (isActive ? `blur(0px) brightness(1)` : `blur(0px) brightness(0.96)`) : `blur(8px) brightness(0.96)`,
               }}
               transition={{ 
                 opacity: {
@@ -150,7 +150,8 @@ export const DeskDisplay = ({
                   ease: lightEasing,
                 },
                 filter: {
-                  duration: transitionDuration.slow,
+                  duration: isLoaded ? transitionDuration.slow : 0.8,
+                  delay: isLoaded ? 0 : 0.4,
                   ease: lightEasing,
                 }
               }}
