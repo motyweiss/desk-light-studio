@@ -135,10 +135,9 @@ export const RoomInfoPanel = ({ roomName, temperature, humidity, airQuality, mas
         </motion.button>
       </motion.div>
 
-      {/* Climate Info - Full version hidden on mobile, compact version shown */}
-      {/* Desktop version - Full */}
+      {/* Climate & Devices Info Card - Desktop only */}
       <motion.div 
-        className="hidden md:flex gap-10 py-6"
+        className="hidden md:block rounded-2xl bg-white/[0.02] backdrop-blur-md border border-white/[0.05] py-5 px-6"
         initial={{ opacity: 0, y: 10 }}
         animate={{ 
           opacity: isLoaded ? 1 : 0,
@@ -150,119 +149,110 @@ export const RoomInfoPanel = ({ roomName, temperature, humidity, airQuality, mas
           ease: [0.22, 0.03, 0.26, 1]
         }}
       >
-        {/* Temperature */}
-        <div className="flex items-center gap-3">
-              <CircularProgress 
-                value={temperature} 
-                min={15} 
-                max={35} 
-                size={44} 
-                strokeWidth={2.5}
-                isLoaded={isLoaded}
-                colorType="temperature"
-              >
-            <Thermometer className="w-5 h-5 text-white/60" strokeWidth={1.5} />
-          </CircularProgress>
-          <div className="flex flex-col">
-            <span className="text-[9px] text-white/55 font-light tracking-[0.2em] uppercase mb-1">
-              Temperature
-            </span>
-            <div className="text-base font-light text-white tabular-nums">
-              <motion.span>{tempDisplay}</motion.span>°
-            </div>
-          </div>
-        </div>
-
-        {/* Humidity */}
-        <div className="flex items-center gap-3">
-              <CircularProgress 
-                value={humidity} 
-                min={0} 
-                max={100} 
-                size={44} 
-                strokeWidth={2.5}
-                isLoaded={isLoaded}
-                colorType="humidity"
-              >
-            <Droplets className="w-5 h-5 text-white/60" strokeWidth={1.5} />
-          </CircularProgress>
-          <div className="flex flex-col">
-            <span className="text-[9px] text-white/55 font-light tracking-[0.2em] uppercase mb-1">
-              Humidity
-            </span>
-            <div className="text-base font-light text-white tabular-nums">
-              <motion.span>{humidityDisplay}</motion.span>%
-            </div>
-          </div>
-        </div>
-
-        {/* PM 2.5 */}
-        <div className="flex items-center gap-3">
-              <CircularProgress 
-                value={airQuality} 
-                min={0} 
-                max={100} 
-                size={44} 
-                strokeWidth={2.5}
-                isLoaded={isLoaded}
-                colorType="airQuality"
-              >
-            <Wind className="w-5 h-5 text-white/60" strokeWidth={1.5} />
-          </CircularProgress>
-          <div className="flex flex-col">
-            <span className="text-[9px] text-white/55 font-light tracking-[0.2em] uppercase mb-1">
-              Air Quality
-            </span>
-            <div className="text-base font-light text-white tabular-nums">
-              <span>{getAirQualityStatus(airQuality).label}</span>
-            </div>
-          </div>
-        </div>
-      </motion.div>
-
-      {/* Devices Battery Section - Desktop only */}
-      {devices && devices.length > 0 && (
-        <motion.div 
-          className="hidden md:flex flex-col gap-4 py-2"
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ 
-            opacity: isLoaded ? 1 : 0,
-            y: isLoaded ? 0 : 10
-          }}
-          transition={{ 
-            duration: 0.8,
-            delay: 0.4,
-            ease: [0.22, 0.03, 0.26, 1]
-          }}
-        >
-          {devices.map((device) => (
-            <div key={device.id} className="flex items-center gap-3">
-              <CircularProgress 
-                value={device.batteryLevel} 
-                min={0} 
-                max={100} 
-                size={44} 
-                strokeWidth={2.5}
-                isLoaded={isLoaded}
-                colorType="battery"
-              >
-                <Smartphone className="w-5 h-5 text-white/60" strokeWidth={1.5} />
-              </CircularProgress>
-              <div className="flex flex-col">
-                <span className="text-[9px] text-white/55 font-light tracking-[0.2em] uppercase mb-1">
-                  {device.name}
-                </span>
-                <div className="text-base font-light text-white tabular-nums flex items-center gap-1.5">
-                  <span>{device.batteryLevel}%</span>
-                  {device.isCharging && (
-                    <Zap className="w-3.5 h-3.5 text-[hsl(45_90%_55%)]" fill="currentColor" />
-                  )}
-                </div>
+        {/* Climate Info */}
+        <div className="flex gap-10 mb-4">
+          {/* Temperature */}
+          <div className="flex items-center gap-3">
+                <CircularProgress 
+                  value={temperature} 
+                  min={15} 
+                  max={35} 
+                  size={44} 
+                  strokeWidth={2.5}
+                  isLoaded={isLoaded}
+                  colorType="temperature"
+                >
+              <Thermometer className="w-5 h-5 text-white/60" strokeWidth={1.5} />
+            </CircularProgress>
+            <div className="flex flex-col">
+              <span className="text-[9px] text-white/55 font-light tracking-[0.2em] uppercase mb-1">
+                Temperature
+              </span>
+              <div className="text-base font-light text-white tabular-nums">
+                <motion.span>{tempDisplay}</motion.span>°
               </div>
             </div>
-          ))}
-        </motion.div>
-      )}
+          </div>
+
+          {/* Humidity */}
+          <div className="flex items-center gap-3">
+                <CircularProgress 
+                  value={humidity} 
+                  min={0} 
+                  max={100} 
+                  size={44} 
+                  strokeWidth={2.5}
+                  isLoaded={isLoaded}
+                  colorType="humidity"
+                >
+              <Droplets className="w-5 h-5 text-white/60" strokeWidth={1.5} />
+            </CircularProgress>
+            <div className="flex flex-col">
+              <span className="text-[9px] text-white/55 font-light tracking-[0.2em] uppercase mb-1">
+                Humidity
+              </span>
+              <div className="text-base font-light text-white tabular-nums">
+                <motion.span>{humidityDisplay}</motion.span>%
+              </div>
+            </div>
+          </div>
+
+          {/* PM 2.5 */}
+          <div className="flex items-center gap-3">
+                <CircularProgress 
+                  value={airQuality} 
+                  min={0} 
+                  max={100} 
+                  size={44} 
+                  strokeWidth={2.5}
+                  isLoaded={isLoaded}
+                  colorType="airQuality"
+                >
+              <Wind className="w-5 h-5 text-white/60" strokeWidth={1.5} />
+            </CircularProgress>
+            <div className="flex flex-col">
+              <span className="text-[9px] text-white/55 font-light tracking-[0.2em] uppercase mb-1">
+                Air Quality
+              </span>
+              <div className="text-base font-light text-white tabular-nums">
+                <span>{getAirQualityStatus(airQuality).label}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Devices Battery Section */}
+        {devices && devices.length > 0 && (
+          <div className="flex flex-col gap-4">
+            {devices.map((device) => (
+              <div key={device.id} className="flex items-center gap-3">
+                <CircularProgress 
+                  value={device.batteryLevel} 
+                  min={0} 
+                  max={100} 
+                  size={44} 
+                  strokeWidth={2.5}
+                  isLoaded={isLoaded}
+                  colorType="battery"
+                >
+                  <Smartphone className="w-5 h-5 text-white/60" strokeWidth={1.5} />
+                </CircularProgress>
+                <div className="flex flex-col">
+                  <span className="text-[9px] text-white/55 font-light tracking-[0.2em] uppercase mb-1">
+                    {device.name}
+                  </span>
+                  <div className="text-base font-light text-white tabular-nums flex items-center gap-1.5">
+                    <span>{device.batteryLevel}%</span>
+                    {device.isCharging && (
+                      <Zap className="w-3.5 h-3.5 text-[hsl(45_90%_55%)]" fill="currentColor" />
+                    )}
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </motion.div>
 
       {/* Mobile version - Minimal inline */}
       <motion.div 
