@@ -1,6 +1,7 @@
 import { motion, useMotionValue, useTransform, animate } from "framer-motion";
 import { Thermometer, Droplets, Sun, Wind } from "lucide-react";
 import { LightControlCard } from "./LightControlCard";
+import { CircularProgress } from "./CircularProgress";
 import { useEffect } from "react";
 
 interface Light {
@@ -136,9 +137,16 @@ export const RoomInfoPanel = ({ roomName, temperature, humidity, airQuality, mas
       >
         {/* Temperature */}
         <div className="flex items-center gap-3">
-          <div className="flex items-center justify-center w-11 h-11 rounded-full bg-white/5 backdrop-blur-sm">
+          <CircularProgress 
+            value={temperature} 
+            min={15} 
+            max={35} 
+            size={44} 
+            strokeWidth={2.5}
+            isLoaded={isLoaded}
+          >
             <Thermometer className="w-5 h-5 text-white/60" strokeWidth={1.5} />
-          </div>
+          </CircularProgress>
           <div className="flex flex-col">
             <span className="text-[9px] text-white/55 font-light tracking-[0.2em] uppercase mb-1">
               Temperature
@@ -151,9 +159,16 @@ export const RoomInfoPanel = ({ roomName, temperature, humidity, airQuality, mas
 
         {/* Humidity */}
         <div className="flex items-center gap-3">
-          <div className="flex items-center justify-center w-11 h-11 rounded-full bg-white/5 backdrop-blur-sm">
+          <CircularProgress 
+            value={humidity} 
+            min={0} 
+            max={100} 
+            size={44} 
+            strokeWidth={2.5}
+            isLoaded={isLoaded}
+          >
             <Droplets className="w-5 h-5 text-white/60" strokeWidth={1.5} />
-          </div>
+          </CircularProgress>
           <div className="flex flex-col">
             <span className="text-[9px] text-white/55 font-light tracking-[0.2em] uppercase mb-1">
               Humidity
@@ -166,9 +181,16 @@ export const RoomInfoPanel = ({ roomName, temperature, humidity, airQuality, mas
 
         {/* PM 2.5 */}
         <div className="flex items-center gap-3">
-          <div className="flex items-center justify-center w-11 h-11 rounded-full bg-white/5 backdrop-blur-sm">
+          <CircularProgress 
+            value={airQuality} 
+            min={0} 
+            max={100} 
+            size={44} 
+            strokeWidth={2.5}
+            isLoaded={isLoaded}
+          >
             <Wind className="w-5 h-5 text-white/60" strokeWidth={1.5} />
-          </div>
+          </CircularProgress>
           <div className="flex flex-col">
             <span className="text-[9px] text-white/55 font-light tracking-[0.2em] uppercase mb-1">
               PM 2.5
@@ -198,7 +220,16 @@ export const RoomInfoPanel = ({ roomName, temperature, humidity, airQuality, mas
       >
         {/* Temperature - Icon + Number only */}
         <div className="flex items-center gap-2">
-          <Thermometer className="w-5 h-5 text-white/60" strokeWidth={1.5} />
+          <CircularProgress 
+            value={temperature} 
+            min={15} 
+            max={35} 
+            size={32} 
+            strokeWidth={2}
+            isLoaded={isLoaded}
+          >
+            <Thermometer className="w-4 h-4 text-white/60" strokeWidth={1.5} />
+          </CircularProgress>
           <div className="text-base font-light text-white tabular-nums">
             <motion.span>{tempDisplay}</motion.span>°
           </div>
@@ -206,7 +237,16 @@ export const RoomInfoPanel = ({ roomName, temperature, humidity, airQuality, mas
 
         {/* Humidity - Icon + Number only */}
         <div className="flex items-center gap-2">
-          <Droplets className="w-5 h-5 text-white/60" strokeWidth={1.5} />
+          <CircularProgress 
+            value={humidity} 
+            min={0} 
+            max={100} 
+            size={32} 
+            strokeWidth={2}
+            isLoaded={isLoaded}
+          >
+            <Droplets className="w-4 h-4 text-white/60" strokeWidth={1.5} />
+          </CircularProgress>
           <div className="text-base font-light text-white tabular-nums">
             <motion.span>{humidityDisplay}</motion.span>%
           </div>
@@ -214,7 +254,16 @@ export const RoomInfoPanel = ({ roomName, temperature, humidity, airQuality, mas
 
         {/* PM 2.5 - Icon + Number only */}
         <div className="flex items-center gap-2">
-          <Wind className="w-5 h-5 text-white/60" strokeWidth={1.5} />
+          <CircularProgress 
+            value={airQuality} 
+            min={0} 
+            max={100} 
+            size={32} 
+            strokeWidth={2}
+            isLoaded={isLoaded}
+          >
+            <Wind className="w-4 h-4 text-white/60" strokeWidth={1.5} />
+          </CircularProgress>
           <div className="text-base font-light text-white tabular-nums">
             <motion.span>{airQualityDisplay}</motion.span>
           </div>
