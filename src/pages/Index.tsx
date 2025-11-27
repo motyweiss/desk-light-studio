@@ -671,21 +671,6 @@ const Index = () => {
     return `${spotlightBit}${deskLampBit}${monitorLightBit}`;
   }, [spotlightIntensity, deskLampIntensity, monitorLightIntensity]);
 
-  // Background color based on lighting state
-  const pageBackgroundColor = useMemo(() => {
-    switch (lightingState) {
-      case "000": return "hsl(28 20% 18%)";  // All off - dark warm brown
-      case "001": return "hsl(32 22% 20%)";  // Monitor only
-      case "010": return "hsl(36 24% 22%)";  // Desk lamp only
-      case "011": return "hsl(38 26% 24%)";  // Desk lamp + Monitor
-      case "100": return "hsl(34 23% 21%)";  // Spotlight only
-      case "101": return "hsl(37 25% 23%)";  // Spotlight + Monitor
-      case "110": return "hsl(39 27% 25%)";  // Spotlight + Desk lamp
-      case "111": return "hsl(40 28% 26%)";  // All on - warmest
-      default: return "hsl(28 20% 18%)";
-    }
-  }, [lightingState]);
-
   // Track binary state changes only (not continuous slider adjustments)
   useEffect(() => {
     setIsTransitioning(true);
@@ -712,12 +697,8 @@ const Index = () => {
 
       <motion.div
         className="min-h-[100dvh] flex items-center justify-center p-4 md:p-8 relative overflow-hidden"
-        initial={{ backgroundColor: "hsl(28 20% 18%)" }}
-        animate={{ 
-          backgroundColor: pageBackgroundColor
-        }}
-        transition={{ 
-          backgroundColor: { duration: 1.5, ease: [0.22, 0.03, 0.26, 1] }
+        style={{
+          backgroundColor: "hsl(28 20% 18%)",
         }}
       >
       {/* Frosted glass blur layer for smooth background */}
