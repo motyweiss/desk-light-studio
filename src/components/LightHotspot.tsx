@@ -308,13 +308,14 @@ export const LightHotspot = ({
                     ? 'right-8 top-1/2 -translate-y-1/2' 
                     : '-bottom-12 left-1/2 -translate-x-1/2'
                   }
-                  bg-white/8 backdrop-blur-xl
+                  bg-white/8
                   px-5 py-3 rounded-full
                   shadow-[0_8px_32px_rgba(0,0,0,0.4),0_2px_8px_rgba(0,0,0,0.2),inset_0_1px_1px_rgba(255,255,255,0.1)]
                   border border-white/20
                   overflow-hidden mr-10`}
                 initial={{ 
                   scale: 0.9,
+                  backdropFilter: "blur(0px)",
                   originX: id === 'spotlight' ? 1 : 0.5,
                   originY: id === 'spotlight' ? 0.5 : 0
                 }}
@@ -322,9 +323,14 @@ export const LightHotspot = ({
                   scale: 1,
                   x: mousePos.x,
                   y: mousePos.y,
+                  backdropFilter: "blur(24px)",
                   transition: {
                     scale: {
                       duration: 0.3,
+                      ease: [0.4, 0, 0.2, 1]
+                    },
+                    backdropFilter: {
+                      duration: 0.4,
                       ease: [0.4, 0, 0.2, 1]
                     },
                     x: {
@@ -341,6 +347,7 @@ export const LightHotspot = ({
                 }}
                 exit={{ 
                   scale: 0.9,
+                  backdropFilter: "blur(0px)",
                   transition: {
                     duration: 0.2,
                     ease: [0.4, 0, 0.2, 1]
