@@ -240,7 +240,7 @@ const Index = () => {
         
         if (entityMapping.iphoneBatteryState && states.has(entityMapping.iphoneBatteryState)) {
           const state = states.get(entityMapping.iphoneBatteryState)!;
-          setIphoneBatteryCharging(state.state === "charging");
+          setIphoneBatteryCharging(state.state.toLowerCase() === "charging");
           console.log(`⚡ iPhone Charging initial: ${state.state}`);
         }
       } catch (error) {
@@ -351,7 +351,7 @@ const Index = () => {
       
       if (entityMapping.iphoneBatteryState && states.has(entityMapping.iphoneBatteryState)) {
         const state = states.get(entityMapping.iphoneBatteryState)!;
-        setIphoneBatteryCharging(state.state === "charging");
+        setIphoneBatteryCharging(state.state.toLowerCase() === "charging");
       }
     } catch (error) {
       console.error("❌ Force sync failed:", error);
@@ -540,10 +540,10 @@ const Index = () => {
         
         if (entityMapping.iphoneBatteryState && states.has(entityMapping.iphoneBatteryState)) {
           const state = states.get(entityMapping.iphoneBatteryState)!;
-          const isCharging = state.state === "charging";
+          const isCharging = state.state.toLowerCase() === "charging";
           setIphoneBatteryCharging(current => {
             if (current !== isCharging) {
-              console.log(`⚡ iPhone Charging synced: ${current} → ${isCharging}`);
+              console.log(`⚡ iPhone Charging synced: ${current} → ${isCharging} (state: ${state.state})`);
               return isCharging;
             }
             return current;
