@@ -23,7 +23,7 @@ export const ConnectionStatusIndicator = ({
 
   const getStatusColor = () => {
     if (!isConnected) return "text-foreground/30";
-    return "text-[hsl(142,76%,56%)]"; // Bright green for active connection
+    return "text-white"; // White for active connection
   };
 
   const getTooltipText = () => {
@@ -43,7 +43,7 @@ export const ConnectionStatusIndicator = ({
     >
       <motion.div
         className={`w-10 h-10 rounded-full backdrop-blur-xl border flex items-center justify-center ${getStatusColor()} transition-colors duration-300 ${
-          isConnected ? 'border-[hsl(142,76%,56%)]/40' : 'border-white/20'
+          isConnected ? 'border-white/40' : 'border-white/20'
         }`}
         initial={{ opacity: 0, scale: 0.8 }}
         animate={{ opacity: 1, scale: 1 }}
