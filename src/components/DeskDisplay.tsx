@@ -136,30 +136,19 @@ export const DeskDisplay = ({
               src={image}
               alt={`Desk lighting state ${state}`}
               className="absolute inset-0 w-full h-full object-cover"
-              initial={{ opacity: 0, scale: 1.02 }}
+              initial={{ opacity: 0 }}
               animate={{ 
                 opacity: isActive && isLoaded ? 1 : 0,
-                scale: isActive && isLoaded ? 1 : 1.02,
-                filter: isLoaded ? (isActive ? `blur(0px) brightness(1)` : `blur(2px) brightness(0.95)`) : `blur(8px) brightness(0.96)`,
               }}
               transition={{ 
                 opacity: {
                   duration: transitionDuration.slow,
                   ease: lightEasing,
                 },
-                scale: {
-                  duration: transitionDuration.slow,
-                  ease: lightEasing,
-                },
-                filter: {
-                  duration: isLoaded ? transitionDuration.medium : 0.8,
-                  delay: isLoaded ? 0 : 0.4,
-                  ease: lightEasing,
-                }
               }}
               style={{
                 pointerEvents: isActive ? 'auto' : 'none',
-                willChange: 'opacity, transform, filter',
+                willChange: 'opacity',
               }}
             />
           );
