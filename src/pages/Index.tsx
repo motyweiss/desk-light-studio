@@ -137,6 +137,95 @@ const Index = () => {
     });
   };
 
+  // Initial sync on page load - fetch current state before animations
+  useEffect(() => {
+    if (!isConnected || !entityMapping) return;
+
+    const initialSync = async () => {
+      const lightEntityIds = [
+        entityMapping.spotlight,
+        entityMapping.deskLamp,
+        entityMapping.monitorLight,
+      ].filter(Boolean) as string[];
+      
+      const sensorEntityIds = [
+        entityMapping.temperatureSensor,
+        entityMapping.humiditySensor,
+        entityMapping.airQualitySensor,
+      ].filter(Boolean) as string[];
+
+      const allEntityIds = [...lightEntityIds, ...sensorEntityIds];
+
+      if (allEntityIds.length === 0) return;
+
+      console.log("🔄 Initial sync from Home Assistant");
+
+      try {
+        const states = await homeAssistant.getAllEntityStates(allEntityIds);
+        
+        // Update lights
+        if (entityMapping.spotlight && states.has(entityMapping.spotlight)) {
+          const state = states.get(entityMapping.spotlight)!;
+          const newIntensity = state.state === "on" 
+            ? Math.round((state.brightness || 255) / 255 * 100)
+            : 0;
+          setSpotlightIntensity(newIntensity);
+          console.log(`💡 Spotlight initial: ${newIntensity}%`);
+        }
+
+        if (entityMapping.deskLamp && states.has(entityMapping.deskLamp)) {
+          const state = states.get(entityMapping.deskLamp)!;
+          const newIntensity = state.state === "on" 
+            ? Math.round((state.brightness || 255) / 255 * 100)
+            : 0;
+          setDeskLampIntensity(newIntensity);
+          console.log(`💡 Desk Lamp initial: ${newIntensity}%`);
+        }
+
+        if (entityMapping.monitorLight && states.has(entityMapping.monitorLight)) {
+          const state = states.get(entityMapping.monitorLight)!;
+          const newIntensity = state.state === "on" 
+            ? Math.round((state.brightness || 255) / 255 * 100)
+            : 0;
+          setMonitorLightIntensity(newIntensity);
+          console.log(`💡 Monitor Light initial: ${newIntensity}%`);
+        }
+        
+        // Update sensors
+        if (entityMapping.temperatureSensor && states.has(entityMapping.temperatureSensor)) {
+          const state = states.get(entityMapping.temperatureSensor)!;
+          const tempValue = parseFloat(state.state);
+          if (!isNaN(tempValue)) {
+            setTemperature(tempValue);
+            console.log(`🌡️ Temperature initial: ${tempValue}°C`);
+          }
+        }
+        
+        if (entityMapping.humiditySensor && states.has(entityMapping.humiditySensor)) {
+          const state = states.get(entityMapping.humiditySensor)!;
+          const humidityValue = parseFloat(state.state);
+          if (!isNaN(humidityValue)) {
+            setHumidity(Math.round(humidityValue));
+            console.log(`💧 Humidity initial: ${humidityValue}%`);
+          }
+        }
+        
+        if (entityMapping.airQualitySensor && states.has(entityMapping.airQualitySensor)) {
+          const state = states.get(entityMapping.airQualitySensor)!;
+          const aqValue = parseFloat(state.state);
+          if (!isNaN(aqValue)) {
+            setAirQuality(Math.round(aqValue));
+            console.log(`🌬️ Air Quality initial: ${aqValue}`);
+          }
+        }
+      } catch (error) {
+        console.error("❌ Failed to perform initial sync:", error);
+      }
+    };
+
+    initialSync();
+  }, [isConnected, entityMapping]); // Run once when connected
+
   // Bidirectional sync with Home Assistant - poll for state changes
   useEffect(() => {
     if (!isConnected || !entityMapping) return;
