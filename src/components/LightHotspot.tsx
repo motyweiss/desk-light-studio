@@ -486,7 +486,7 @@ export const LightHotspot = ({
                       <IconComponent 
                         className={`w-7 h-7 transition-colors duration-300 ${
                           intensity > 0 
-                            ? 'text-white' 
+                            ? 'text-[hsl(38_70%_58%)]' 
                             : 'text-[rgb(180,180,180)]'
                         }`}
                       />
