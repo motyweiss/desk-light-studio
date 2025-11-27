@@ -73,7 +73,7 @@ export const LightControlCard = ({ id, label, intensity, onChange, onHover }: Li
       onClick={handleCardClick}
       onMouseEnter={() => onHover(id)}
       onMouseLeave={() => onHover(null)}
-      className="w-full bg-transparent backdrop-blur-0 rounded-none px-0 py-3.5 hover:bg-white/5 active:bg-white/3 transition-colors duration-300 cursor-pointer text-left"
+      className="w-full bg-transparent rounded-none px-0 py-3.5 hover:bg-white/[0.03] active:bg-white/[0.02] transition-colors duration-300 cursor-pointer text-left"
       transition={{
         layout: { duration: 0.25, ease: [0.22, 0.03, 0.26, 1] },
         scale: { duration: 0.35, ease: [0.22, 0.03, 0.26, 1] }
