@@ -119,9 +119,10 @@ export const RoomInfoPanel = ({ roomName, temperature, humidity, airQuality, mas
         </motion.button>
       </motion.div>
 
-      {/* Climate Info - Hidden on mobile (shown in Index.tsx) */}
+      {/* Climate Info - Full version hidden on mobile, compact version shown */}
+      {/* Desktop version - Full */}
       <motion.div 
-        className="hidden md:flex gap-8 py-6"
+        className="hidden md:flex gap-6 py-6"
         initial={{ opacity: 0, y: 10 }}
         animate={{ 
           opacity: isLoaded ? 1 : 0,
@@ -135,14 +136,14 @@ export const RoomInfoPanel = ({ roomName, temperature, humidity, airQuality, mas
       >
         {/* Temperature */}
         <div className="flex items-center gap-3">
-          <div className="flex items-center justify-center w-12 h-12 rounded-full bg-white/5 backdrop-blur-sm">
-            <Thermometer className="w-6 h-6 text-white/60" strokeWidth={1.5} />
+          <div className="flex items-center justify-center w-11 h-11 rounded-full bg-white/5 backdrop-blur-sm">
+            <Thermometer className="w-5 h-5 text-white/60" strokeWidth={1.5} />
           </div>
           <div className="flex flex-col">
-            <span className="text-[9px] md:text-[10px] text-white/55 font-light tracking-[0.2em] uppercase mb-1.5">
+            <span className="text-[9px] text-white/55 font-light tracking-[0.2em] uppercase mb-1">
               Temperature
             </span>
-            <div className="text-base md:text-lg font-light text-white tabular-nums">
+            <div className="text-base font-light text-white tabular-nums">
               <motion.span>{tempDisplay}</motion.span>°
             </div>
           </div>
@@ -150,14 +151,14 @@ export const RoomInfoPanel = ({ roomName, temperature, humidity, airQuality, mas
 
         {/* Humidity */}
         <div className="flex items-center gap-3">
-          <div className="flex items-center justify-center w-12 h-12 rounded-full bg-white/5 backdrop-blur-sm">
-            <Droplets className="w-6 h-6 text-white/60" strokeWidth={1.5} />
+          <div className="flex items-center justify-center w-11 h-11 rounded-full bg-white/5 backdrop-blur-sm">
+            <Droplets className="w-5 h-5 text-white/60" strokeWidth={1.5} />
           </div>
           <div className="flex flex-col">
-            <span className="text-[9px] md:text-[10px] text-white/55 font-light tracking-[0.2em] uppercase mb-1.5">
+            <span className="text-[9px] text-white/55 font-light tracking-[0.2em] uppercase mb-1">
               Humidity
             </span>
-            <div className="text-base md:text-lg font-light text-white tabular-nums">
+            <div className="text-base font-light text-white tabular-nums">
               <motion.span>{humidityDisplay}</motion.span>%
             </div>
           </div>
@@ -165,16 +166,55 @@ export const RoomInfoPanel = ({ roomName, temperature, humidity, airQuality, mas
 
         {/* Air Quality */}
         <div className="flex items-center gap-3">
-          <div className="flex items-center justify-center w-12 h-12 rounded-full bg-white/5 backdrop-blur-sm">
-            <Wind className="w-6 h-6 text-white/60" strokeWidth={1.5} />
+          <div className="flex items-center justify-center w-11 h-11 rounded-full bg-white/5 backdrop-blur-sm">
+            <Wind className="w-5 h-5 text-white/60" strokeWidth={1.5} />
           </div>
           <div className="flex flex-col">
-            <span className="text-[9px] md:text-[10px] text-white/55 font-light tracking-[0.2em] uppercase mb-1.5">
+            <span className="text-[9px] text-white/55 font-light tracking-[0.2em] uppercase mb-1">
               Air Quality
             </span>
-            <div className="text-base md:text-lg font-light text-white tabular-nums">
+            <div className="text-base font-light text-white tabular-nums">
               <motion.span>{airQualityDisplay}</motion.span>
             </div>
+          </div>
+        </div>
+      </motion.div>
+
+      {/* Mobile version - Minimal inline */}
+      <motion.div 
+        className="flex md:hidden justify-center gap-8 py-4"
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ 
+          opacity: isLoaded ? 1 : 0,
+          y: isLoaded ? 0 : 10
+        }}
+        transition={{ 
+          duration: 0.6,
+          delay: 0.2,
+          ease: [0.22, 0.03, 0.26, 1]
+        }}
+      >
+        {/* Temperature - Icon + Number only */}
+        <div className="flex items-center gap-2">
+          <Thermometer className="w-5 h-5 text-white/60" strokeWidth={1.5} />
+          <div className="text-base font-light text-white tabular-nums">
+            <motion.span>{tempDisplay}</motion.span>°
+          </div>
+        </div>
+
+        {/* Humidity - Icon + Number only */}
+        <div className="flex items-center gap-2">
+          <Droplets className="w-5 h-5 text-white/60" strokeWidth={1.5} />
+          <div className="text-base font-light text-white tabular-nums">
+            <motion.span>{humidityDisplay}</motion.span>%
+          </div>
+        </div>
+
+        {/* Air Quality - Icon + Number only */}
+        <div className="flex items-center gap-2">
+          <Wind className="w-5 h-5 text-white/60" strokeWidth={1.5} />
+          <div className="text-base font-light text-white tabular-nums">
+            <motion.span>{airQualityDisplay}</motion.span>
           </div>
         </div>
       </motion.div>
