@@ -158,6 +158,8 @@ const Index = () => {
     if (allEntityIds.length === 0) return;
 
     console.log("🔄 Starting Home Assistant sync polling");
+    console.log("📡 Light entities:", lightEntityIds);
+    console.log("🌡️ Sensor entities:", sensorEntityIds);
 
     const syncStates = async () => {
       // Skip if user is manually changing lights
