@@ -312,53 +312,45 @@ export const LightHotspot = ({
                   px-5 py-3 rounded-full
                   shadow-[0_8px_32px_rgba(0,0,0,0.4),0_2px_8px_rgba(0,0,0,0.2),inset_0_1px_1px_rgba(255,255,255,0.1)]
                   border border-white/20
-                  overflow-hidden`}
+                  overflow-hidden mr-10`}
                 initial={{ 
                   opacity: 0,
-                  scaleX: 0,
-                  scaleY: 0,
+                  scale: 0.9,
                   originX: id === 'spotlight' ? 1 : 0.5,
                   originY: id === 'spotlight' ? 0.5 : 0
                 }}
                 animate={{ 
                   opacity: 1,
-                  scaleX: 1,
-                  scaleY: 1,
+                  scale: 1,
                   x: mousePos.x,
                   y: mousePos.y,
                   transition: {
                     opacity: {
-                      duration: 0.15,
-                      ease: [0.16, 1, 0.3, 1]
+                      duration: 0.2,
+                      ease: [0.4, 0, 0.2, 1]
                     },
-                    scaleX: {
-                      duration: 0.25,
-                      ease: [0.16, 1, 0.3, 1]
-                    },
-                    scaleY: {
-                      duration: 0.25,
-                      ease: [0.16, 1, 0.3, 1],
-                      delay: 0.08
+                    scale: {
+                      duration: 0.3,
+                      ease: [0.4, 0, 0.2, 1]
                     },
                     x: {
                       type: "spring",
-                      stiffness: 150,
-                      damping: 20
+                      stiffness: 120,
+                      damping: 18
                     },
                     y: {
                       type: "spring",
-                      stiffness: 150,
-                      damping: 20
+                      stiffness: 120,
+                      damping: 18
                     }
                   }
                 }}
                 exit={{ 
                   opacity: 0,
-                  scaleX: 0.7,
-                  scaleY: 0.7,
+                  scale: 0.9,
                   transition: {
-                    duration: 0.15,
-                    ease: [0.4, 0, 1, 1]
+                    duration: 0.2,
+                    ease: [0.4, 0, 0.2, 1]
                   }
                 }}
                 style={{
@@ -373,9 +365,9 @@ export const LightHotspot = ({
                   animate={{ 
                     opacity: 1,
                     transition: { 
-                      delay: 0.35,
-                      duration: 0.3,
-                      ease: [0.16, 1, 0.3, 1]
+                      delay: 0.15,
+                      duration: 0.25,
+                      ease: [0.4, 0, 0.2, 1]
                     }
                   }}
                   style={{
@@ -389,14 +381,14 @@ export const LightHotspot = ({
 
                 <motion.div 
                   className="relative z-10 flex items-center gap-3"
-                  initial={{ opacity: 0, y: 6 }}
+                  initial={{ opacity: 0, y: 4 }}
                   animate={{ 
                     opacity: 1, 
                     y: 0,
                     transition: {
-                      delay: 0.35,
-                      duration: 0.35,
-                      ease: [0.16, 1, 0.3, 1]
+                      delay: 0.1,
+                      duration: 0.25,
+                      ease: [0.4, 0, 0.2, 1]
                     }
                   }}
                 >
@@ -409,14 +401,14 @@ export const LightHotspot = ({
                     }}
                   >
                     <motion.div
-                      initial={{ scale: 0.6, opacity: 0 }}
+                      initial={{ scale: 0.8, opacity: 0 }}
                       animate={{
                         scale: 1,
                         opacity: 1
                       }}
                       transition={{
-                        scale: { duration: 0.4, ease: [0.22, 0.03, 0.26, 1] },
-                        opacity: { duration: 0.35, ease: [0.22, 0.03, 0.26, 1] }
+                        duration: 0.25,
+                        ease: [0.4, 0, 0.2, 1]
                       }}
                     >
                       <IconComponent 
