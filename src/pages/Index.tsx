@@ -40,8 +40,8 @@ const Index = () => {
   // Hover states for coordinated UI
   const [hoveredLight, setHoveredLight] = useState<string | null>(null);
   
-  // Ref to prevent polling updates during manual changes
-  const isManualChangeRef = useRef(false);
+  // Ref to track last manual change timestamp (instead of boolean)
+  const lastManualChangeRef = useRef<number>(0);
   
   // Home Assistant integration
   const { toast } = useToast();
@@ -83,7 +83,7 @@ const Index = () => {
   const masterSwitchOn = allLightsOn;
 
   const handleMasterToggle = useCallback(async (checked: boolean) => {
-    isManualChangeRef.current = true;
+    lastManualChangeRef.current = Date.now();
     const targetIntensity = checked ? 100 : 0;
     setSpotlightIntensity(targetIntensity);
     setDeskLampIntensity(targetIntensity);
@@ -96,17 +96,16 @@ const Index = () => {
       if (entityMapping.monitorLight) await homeAssistant.setLightBrightness(entityMapping.monitorLight, targetIntensity);
     }
     
+    // Force sync after a short delay
     setTimeout(() => {
-      isManualChangeRef.current = false;
-      // Force immediate sync after manual change
       forceSyncStates();
-    }, 500);
+    }, 300);
   }, [isConnected, entityMapping]);
 
   // Handle individual light intensity changes with Home Assistant sync
   const createLightChangeHandler = useCallback((lightId: string, setter: (value: number) => void) => {
     return async (newIntensity: number) => {
-      isManualChangeRef.current = true;
+      lastManualChangeRef.current = Date.now();
       setter(newIntensity);
 
       // Sync with Home Assistant if connected
@@ -122,11 +121,10 @@ const Index = () => {
         }
       }
       
+      // Force sync after a short delay
       setTimeout(() => {
-        isManualChangeRef.current = false;
-        // Force immediate sync after manual change
         forceSyncStates();
-      }, 500);
+      }, 300);
     };
   }, [isConnected, entityMapping]);
 
@@ -345,12 +343,6 @@ const Index = () => {
     console.log("🌡️ Sensor entities:", sensorEntityIds);
 
     const syncStates = async () => {
-      // Skip if user is manually changing lights
-      if (isManualChangeRef.current) {
-        console.log("⏭️  Skipping sync - manual change in progress");
-        return;
-      }
-
       try {
         const states = await homeAssistant.getAllEntityStates(allEntityIds);
         
@@ -369,6 +361,12 @@ const Index = () => {
             : 0;
           
           setSpotlightIntensity(current => {
+            // Only skip update if manual change happened in last 200ms
+            const timeSinceManualChange = Date.now() - lastManualChangeRef.current;
+            if (timeSinceManualChange < 200) {
+              return current;
+            }
+            
             // Always update when state changes (on/off) or when there's any brightness difference
             if (current !== newIntensity) {
               console.log(`💡 Spotlight synced: ${current} → ${newIntensity}% (state: ${state.state})`);
@@ -386,6 +384,12 @@ const Index = () => {
             : 0;
           
           setDeskLampIntensity(current => {
+            // Only skip update if manual change happened in last 200ms
+            const timeSinceManualChange = Date.now() - lastManualChangeRef.current;
+            if (timeSinceManualChange < 200) {
+              return current;
+            }
+            
             // Always update when state changes (on/off) or when there's any brightness difference
             if (current !== newIntensity) {
               console.log(`💡 Desk Lamp synced: ${current} → ${newIntensity}% (state: ${state.state})`);
@@ -403,6 +407,12 @@ const Index = () => {
             : 0;
           
           setMonitorLightIntensity(current => {
+            // Only skip update if manual change happened in last 200ms
+            const timeSinceManualChange = Date.now() - lastManualChangeRef.current;
+            if (timeSinceManualChange < 200) {
+              return current;
+            }
+            
             // Always update when state changes (on/off) or when there's any brightness difference
             if (current !== newIntensity) {
               console.log(`💡 Monitor Light synced: ${current} → ${newIntensity}% (state: ${state.state})`);
@@ -468,8 +478,8 @@ const Index = () => {
     // Initial sync
     syncStates();
 
-    // Poll every 800ms for real-time updates
-    const interval = setInterval(syncStates, 800);
+    // Poll every 500ms for real-time updates
+    const interval = setInterval(syncStates, 500);
 
     return () => {
       console.log("🛑 Stopping Home Assistant sync polling");
@@ -515,43 +525,40 @@ const Index = () => {
           // Toggle Desk Lamp with HA sync
           e.preventDefault();
           const newDeskLampIntensity = deskLampIntensity > 0 ? 0 : 100;
-          isManualChangeRef.current = true;
+          lastManualChangeRef.current = Date.now();
           setDeskLampIntensity(newDeskLampIntensity);
           if (isConnected && entityMapping?.deskLamp) {
             await homeAssistant.setLightBrightness(entityMapping.deskLamp, newDeskLampIntensity);
           }
           setTimeout(() => {
-            isManualChangeRef.current = false;
             forceSyncStates();
-          }, 500);
+          }, 300);
           break;
         case '2':
           // Toggle Monitor Light with HA sync
           e.preventDefault();
           const newMonitorIntensity = monitorLightIntensity > 0 ? 0 : 100;
-          isManualChangeRef.current = true;
+          lastManualChangeRef.current = Date.now();
           setMonitorLightIntensity(newMonitorIntensity);
           if (isConnected && entityMapping?.monitorLight) {
             await homeAssistant.setLightBrightness(entityMapping.monitorLight, newMonitorIntensity);
           }
           setTimeout(() => {
-            isManualChangeRef.current = false;
             forceSyncStates();
-          }, 500);
+          }, 300);
           break;
         case '3':
           // Toggle Spotlight with HA sync
           e.preventDefault();
           const newSpotlightIntensity = spotlightIntensity > 0 ? 0 : 100;
-          isManualChangeRef.current = true;
+          lastManualChangeRef.current = Date.now();
           setSpotlightIntensity(newSpotlightIntensity);
           if (isConnected && entityMapping?.spotlight) {
             await homeAssistant.setLightBrightness(entityMapping.spotlight, newSpotlightIntensity);
           }
           setTimeout(() => {
-            isManualChangeRef.current = false;
             forceSyncStates();
-          }, 500);
+          }, 300);
           break;
         case ' ':
           // Master toggle with spacebar
