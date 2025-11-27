@@ -32,33 +32,20 @@ export const ClimateTooltip = ({
   const translateYSpring = useSpring(translateY, springConfig);
   const rotateXSpring = useSpring(rotateX, springConfig);
   const rotateYSpring = useSpring(rotateY, springConfig);
-  
-  useEffect(() => {
-    const handleMouseMove = (e: MouseEvent) => {
-      const { clientX, clientY, currentTarget } = e;
-      const target = currentTarget as HTMLElement;
-      const rect = target.getBoundingClientRect();
-      
-      const x = (clientX - rect.left) / rect.width - 0.5;
-      const y = (clientY - rect.top) / rect.height - 0.5;
-      
-      mouseX.set(x);
-      mouseY.set(y);
-    };
+
+  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    const x = (e.clientX - rect.left) / rect.width - 0.5;
+    const y = (e.clientY - rect.top) / rect.height - 0.5;
     
-    const handleMouseLeave = () => {
-      mouseX.set(0);
-      mouseY.set(0);
-    };
-    
-    window.addEventListener('mousemove', handleMouseMove as any);
-    window.addEventListener('mouseleave', handleMouseLeave);
-    
-    return () => {
-      window.removeEventListener('mousemove', handleMouseMove as any);
-      window.removeEventListener('mouseleave', handleMouseLeave);
-    };
-  }, [mouseX, mouseY]);
+    mouseX.set(x);
+    mouseY.set(y);
+  };
+
+  const handleMouseLeave = () => {
+    mouseX.set(0);
+    mouseY.set(0);
+  };
   
   const getAirQualityLabel = (pm25: number): string => {
     if (pm25 <= 12) return 'Good';
@@ -86,6 +73,8 @@ export const ClimateTooltip = ({
         scale: isLoaded ? 1 : 0.9,
       }}
       transition={{ duration: 0.8, delay: 1.2, ease: [0.22, 0.03, 0.26, 1] }}
+      onMouseMove={handleMouseMove}
+      onMouseLeave={handleMouseLeave}
     >
       <motion.div
         className="relative bg-white/8 backdrop-blur-[32px] border border-white/20 px-4 py-3 rounded-full flex items-center justify-center gap-5"
@@ -120,18 +109,23 @@ export const ClimateTooltip = ({
           <AnimatePresence>
             {isHovered && (
               <motion.div
-                initial={{ opacity: 0, width: 0, scale: 0.8 }}
-                animate={{ opacity: 1, width: 'auto', scale: 1 }}
-                exit={{ opacity: 0, width: 0, scale: 0.8 }}
-                className="overflow-hidden origin-right"
+                initial={{ opacity: 0, width: 0 }}
+                animate={{ opacity: 1, width: 'auto' }}
+                exit={{ opacity: 0, width: 0 }}
+                className="overflow-hidden flex items-center"
                 transition={{ duration: 0.35, ease: [0.22, 0.03, 0.26, 1] }}
               >
-                <div className="flex flex-col pr-2 items-end">
-                  <span className="text-xs text-white/40 uppercase tracking-wider">Temp</span>
-                  <span className="text-sm text-white font-light">
+                <motion.div 
+                  className="flex flex-col pr-3 items-end"
+                  initial={{ opacity: 0, y: 5 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.3, delay: 0.1, ease: [0.22, 0.03, 0.26, 1] }}
+                >
+                  <span className="text-[10px] text-white/30 uppercase tracking-widest font-light mb-0.5">Temp</span>
+                  <span className="text-base text-white font-light tabular-nums">
                     {temperature.toFixed(1)}°
                   </span>
-                </div>
+                </motion.div>
               </motion.div>
             )}
           </AnimatePresence>
@@ -166,18 +160,23 @@ export const ClimateTooltip = ({
           <AnimatePresence>
             {isHovered && (
               <motion.div
-                initial={{ opacity: 0, width: 0, scale: 0.8 }}
-                animate={{ opacity: 1, width: 'auto', scale: 1 }}
-                exit={{ opacity: 0, width: 0, scale: 0.8 }}
-                className="overflow-hidden origin-center"
+                initial={{ opacity: 0, width: 0 }}
+                animate={{ opacity: 1, width: 'auto' }}
+                exit={{ opacity: 0, width: 0 }}
+                className="overflow-hidden flex items-center"
                 transition={{ duration: 0.35, ease: [0.22, 0.03, 0.26, 1] }}
               >
-                <div className="flex flex-col pl-1">
-                  <span className="text-xs text-white/40 uppercase tracking-wider">Humidity</span>
-                  <span className="text-sm text-white font-light">
+                <motion.div 
+                  className="flex flex-col items-center"
+                  initial={{ opacity: 0, y: 5 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.3, delay: 0.15, ease: [0.22, 0.03, 0.26, 1] }}
+                >
+                  <span className="text-[10px] text-white/30 uppercase tracking-widest font-light mb-0.5">Humidity</span>
+                  <span className="text-base text-white font-light tabular-nums">
                     {humidity.toFixed(0)}%
                   </span>
-                </div>
+                </motion.div>
               </motion.div>
             )}
           </AnimatePresence>
@@ -200,18 +199,23 @@ export const ClimateTooltip = ({
           <AnimatePresence>
             {isHovered && (
               <motion.div
-                initial={{ opacity: 0, width: 0, scale: 0.8 }}
-                animate={{ opacity: 1, width: 'auto', scale: 1 }}
-                exit={{ opacity: 0, width: 0, scale: 0.8 }}
-                className="overflow-hidden origin-left"
+                initial={{ opacity: 0, width: 0 }}
+                animate={{ opacity: 1, width: 'auto' }}
+                exit={{ opacity: 0, width: 0 }}
+                className="overflow-hidden flex items-center"
                 transition={{ duration: 0.35, ease: [0.22, 0.03, 0.26, 1] }}
               >
-                <div className="flex flex-col pl-2 items-start">
-                  <span className="text-xs text-white/40 uppercase tracking-wider">Air</span>
-                  <span className="text-sm text-white font-light">
+                <motion.div 
+                  className="flex flex-col pl-3 items-start"
+                  initial={{ opacity: 0, y: 5 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.3, delay: 0.2, ease: [0.22, 0.03, 0.26, 1] }}
+                >
+                  <span className="text-[10px] text-white/30 uppercase tracking-widest font-light mb-0.5">Air</span>
+                  <span className="text-base text-white font-light">
                     {getAirQualityLabel(airQuality)}
                   </span>
-                </div>
+                </motion.div>
               </motion.div>
             )}
           </AnimatePresence>
