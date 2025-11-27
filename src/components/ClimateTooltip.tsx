@@ -1,7 +1,7 @@
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, useMotionValue, useTransform, useSpring } from "framer-motion";
 import { Thermometer, Droplets, Wind } from "lucide-react";
 import { CircularProgress } from "./CircularProgress";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 interface ClimateTooltipProps {
   temperature: number;
@@ -18,6 +18,44 @@ export const ClimateTooltip = ({
 }: ClimateTooltipProps) => {
   const [isHovered, setIsHovered] = useState(false);
   
+  // Mouse tracking for parallax effect
+  const mouseX = useMotionValue(0);
+  const mouseY = useMotionValue(0);
+  
+  const rotateX = useTransform(mouseY, [-0.5, 0.5], [2, -2]);
+  const rotateY = useTransform(mouseX, [-0.5, 0.5], [-3, 3]);
+  
+  const springConfig = { stiffness: 150, damping: 20 };
+  const rotateXSpring = useSpring(rotateX, springConfig);
+  const rotateYSpring = useSpring(rotateY, springConfig);
+  
+  useEffect(() => {
+    const handleMouseMove = (e: MouseEvent) => {
+      const { clientX, clientY, currentTarget } = e;
+      const target = currentTarget as HTMLElement;
+      const rect = target.getBoundingClientRect();
+      
+      const x = (clientX - rect.left) / rect.width - 0.5;
+      const y = (clientY - rect.top) / rect.height - 0.5;
+      
+      mouseX.set(x);
+      mouseY.set(y);
+    };
+    
+    const handleMouseLeave = () => {
+      mouseX.set(0);
+      mouseY.set(0);
+    };
+    
+    window.addEventListener('mousemove', handleMouseMove as any);
+    window.addEventListener('mouseleave', handleMouseLeave);
+    
+    return () => {
+      window.removeEventListener('mousemove', handleMouseMove as any);
+      window.removeEventListener('mouseleave', handleMouseLeave);
+    };
+  }, [mouseX, mouseY]);
+  
   const getAirQualityLabel = (pm25: number): string => {
     if (pm25 <= 12) return 'Good';
     if (pm25 <= 35) return 'Moderate';
@@ -27,18 +65,24 @@ export const ClimateTooltip = ({
   
   return (
     <motion.div
-      className="absolute -bottom-6 z-20 hidden md:block"
-      style={{ left: 'calc(50% - 60px)', transform: 'translateX(-50%)' }}
+      className="absolute -bottom-8 z-20 hidden md:block"
+      style={{ 
+        left: 'calc(50% - 80px)', 
+        transformStyle: 'preserve-3d',
+        perspective: 1000,
+        rotateX: rotateXSpring,
+        rotateY: rotateYSpring,
+      }}
       initial={{ opacity: 0, y: 15, scale: 0.9 }}
       animate={{ 
         opacity: isLoaded ? 1 : 0,
         y: isLoaded ? 0 : 15,
-        scale: isLoaded ? 1 : 0.9
+        scale: isLoaded ? 1 : 0.9,
       }}
       transition={{ duration: 0.8, delay: 1.2, ease: [0.22, 0.03, 0.26, 1] }}
     >
       <motion.div
-        className="bg-white/15 backdrop-blur-xl border border-white/20 px-4 py-3 rounded-full flex items-center justify-center gap-5"
+        className="bg-white/15 backdrop-blur-xl border border-white/20 px-4 py-3 rounded-full flex items-center justify-center gap-5 shadow-[0_8px_32px_rgba(0,0,0,0.3)]"
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
         initial={false}
@@ -67,7 +111,7 @@ export const ClimateTooltip = ({
                 initial={{ opacity: 0, width: 0, scale: 0.8 }}
                 animate={{ opacity: 1, width: 'auto', scale: 1 }}
                 exit={{ opacity: 0, width: 0, scale: 0.8 }}
-                className="overflow-hidden origin-left"
+                className="overflow-hidden origin-center"
                 transition={{ duration: 0.35, ease: [0.22, 0.03, 0.26, 1] }}
               >
                 <div className="flex flex-col pl-1">
@@ -101,7 +145,7 @@ export const ClimateTooltip = ({
                 initial={{ opacity: 0, width: 0, scale: 0.8 }}
                 animate={{ opacity: 1, width: 'auto', scale: 1 }}
                 exit={{ opacity: 0, width: 0, scale: 0.8 }}
-                className="overflow-hidden origin-left"
+                className="overflow-hidden origin-center"
                 transition={{ duration: 0.35, ease: [0.22, 0.03, 0.26, 1] }}
               >
                 <div className="flex flex-col pl-1">
@@ -135,7 +179,7 @@ export const ClimateTooltip = ({
                 initial={{ opacity: 0, width: 0, scale: 0.8 }}
                 animate={{ opacity: 1, width: 'auto', scale: 1 }}
                 exit={{ opacity: 0, width: 0, scale: 0.8 }}
-                className="overflow-hidden origin-left"
+                className="overflow-hidden origin-center"
                 transition={{ duration: 0.35, ease: [0.22, 0.03, 0.26, 1] }}
               >
                 <div className="flex flex-col pl-1">
