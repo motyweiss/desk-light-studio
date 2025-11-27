@@ -126,7 +126,7 @@ export const RoomInfoPanel = ({ roomName, temperature, humidity, masterSwitchOn,
             <Thermometer className="w-6 h-6 text-white/50" strokeWidth={1.5} />
           </div>
           <div className="flex flex-col">
-            <span className="text-[9px] text-white/40 font-light tracking-[0.2em] uppercase mb-1.5">
+            <span className="text-[9px] md:text-[10px] text-white/40 font-light tracking-[0.2em] uppercase mb-1.5">
               Temperature
             </span>
             <div className="text-base md:text-lg font-light text-white tabular-nums">
@@ -141,7 +141,7 @@ export const RoomInfoPanel = ({ roomName, temperature, humidity, masterSwitchOn,
             <Droplets className="w-6 h-6 text-white/50" strokeWidth={1.5} />
           </div>
           <div className="flex flex-col">
-            <span className="text-[9px] text-white/40 font-light tracking-[0.2em] uppercase mb-1.5">
+            <span className="text-[9px] md:text-[10px] text-white/40 font-light tracking-[0.2em] uppercase mb-1.5">
               Humidity
             </span>
             <div className="text-base md:text-lg font-light text-white tabular-nums">
