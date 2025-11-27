@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { Wifi, WifiOff, RefreshCw } from "lucide-react";
+import { Zap, WifiOff, RefreshCw } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 interface ConnectionStatusIndicatorProps {
@@ -47,19 +47,7 @@ export const ConnectionStatusIndicator = ({
                 <RefreshCw className="w-5 h-5" />
               </motion.div>
             ) : (
-              <motion.div
-                animate={{ 
-                  scale: [1, 1.2, 1],
-                  opacity: [1, 0.7, 1]
-                }}
-                transition={{ 
-                  duration: 2, 
-                  repeat: Infinity,
-                  ease: "easeInOut"
-                }}
-              >
-                <Wifi className="w-5 h-5" />
-              </motion.div>
+              <Zap className="w-5 h-5" />
             )}
           </motion.button>
         </TooltipTrigger>
