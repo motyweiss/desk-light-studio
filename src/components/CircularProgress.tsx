@@ -51,8 +51,8 @@ export const CircularProgress = ({
           }}
           style={{ strokeDasharray: circumference }}
           transition={{ 
-            duration: 2, 
-            delay: 0.5, 
+            duration: isLoaded ? 1.5 : 2,
+            delay: isLoaded ? 0 : 0.5,
             ease: [0.22, 0.03, 0.26, 1] 
           }}
         />
