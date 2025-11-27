@@ -14,9 +14,9 @@ export const AmbientGlowLayers = ({
   monitorLightIntensity,
   allLightsOn
 }: AmbientGlowLayersProps) => {
-  const spotlightOpacity = useMemo(() => Math.pow(spotlightIntensity / 100, 1.8), [spotlightIntensity]);
-  const deskLampOpacity = useMemo(() => Math.pow(deskLampIntensity / 100, 1.8), [deskLampIntensity]);
-  const monitorLightOpacity = useMemo(() => Math.pow(monitorLightIntensity / 100, 1.8), [monitorLightIntensity]);
+  const spotlightOpacity = useMemo(() => Math.pow(spotlightIntensity / 100, 2.2) * 0.5, [spotlightIntensity]);
+  const deskLampOpacity = useMemo(() => Math.pow(deskLampIntensity / 100, 2.2) * 0.5, [deskLampIntensity]);
+  const monitorLightOpacity = useMemo(() => Math.pow(monitorLightIntensity / 100, 2.2) * 0.5, [monitorLightIntensity]);
 
   return (
     <>
@@ -24,8 +24,8 @@ export const AmbientGlowLayers = ({
       <motion.div
         className="fixed inset-0 pointer-events-none z-0"
         style={{
-          background: `radial-gradient(ellipse 70% 70% at 50% 35%, hsl(42 70% 58% / 0.22) 0%, hsl(43 65% 54% / 0.12) 30%, transparent 60%)`,
-          filter: 'blur(70px)',
+          background: `radial-gradient(ellipse 70% 70% at 50% 35%, hsl(40 45% 50% / 0.12) 0%, hsl(42 40% 48% / 0.06) 30%, transparent 60%)`,
+          filter: 'blur(90px)',
         }}
         initial={{ opacity: 0 }}
         animate={{
@@ -42,8 +42,8 @@ export const AmbientGlowLayers = ({
       <motion.div
         className="fixed inset-0 pointer-events-none z-0"
         style={{
-          background: `radial-gradient(ellipse 65% 65% at 30% 55%, hsl(44 75% 60% / 0.20) 0%, hsl(45 70% 56% / 0.10) 35%, transparent 58%)`,
-          filter: 'blur(65px)',
+          background: `radial-gradient(ellipse 65% 65% at 30% 55%, hsl(42 50% 52% / 0.11) 0%, hsl(44 45% 50% / 0.05) 35%, transparent 58%)`,
+          filter: 'blur(85px)',
         }}
         initial={{ opacity: 0 }}
         animate={{
@@ -60,8 +60,8 @@ export const AmbientGlowLayers = ({
       <motion.div
         className="fixed inset-0 pointer-events-none z-0"
         style={{
-          background: `radial-gradient(ellipse 75% 75% at 50% 40%, hsl(43 65% 60% / 0.18) 0%, hsl(44 60% 56% / 0.09) 38%, transparent 62%)`,
-          filter: 'blur(60px)',
+          background: `radial-gradient(ellipse 75% 75% at 50% 40%, hsl(41 48% 52% / 0.10) 0%, hsl(43 43% 50% / 0.04) 38%, transparent 62%)`,
+          filter: 'blur(80px)',
         }}
         initial={{ opacity: 0 }}
         animate={{
@@ -78,12 +78,12 @@ export const AmbientGlowLayers = ({
       <motion.div
         className="fixed inset-0 pointer-events-none z-0"
         style={{
-          background: `radial-gradient(ellipse 80% 80% at 50% 50%, hsl(43 65% 56% / 0.08) 0%, transparent 70%)`,
-          filter: 'blur(100px)',
+          background: `radial-gradient(ellipse 80% 80% at 50% 50%, hsl(41 40% 48% / 0.04) 0%, transparent 70%)`,
+          filter: 'blur(120px)',
         }}
         initial={{ opacity: 0, scale: 1 }}
         animate={{
-          opacity: [(allLightsOn ? 0.3 : 0), (allLightsOn ? 0.5 : 0), (allLightsOn ? 0.3 : 0)],
+          opacity: [(allLightsOn ? 0.15 : 0), (allLightsOn ? 0.25 : 0), (allLightsOn ? 0.15 : 0)],
           scale: [1, 1.05, 1],
         }}
         transition={{
