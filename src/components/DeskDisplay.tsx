@@ -45,9 +45,7 @@ export const DeskDisplay = ({
   hoveredLightId,
   isLoaded
 }: DeskDisplayProps) => {
-  const containerRef = useRef<HTMLDivElement>(null);
   const [currentState, setCurrentState] = useState("000");
-  const [isTransitioning, setIsTransitioning] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
 
@@ -106,7 +104,6 @@ export const DeskDisplay = ({
 
   return (
     <div
-      ref={containerRef}
       className="relative w-full aspect-square"
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
