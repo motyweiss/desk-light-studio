@@ -125,17 +125,12 @@ export const DeskDisplay = ({
         animate={{
           rotateY: mousePosition.x * 8,
           rotateX: mousePosition.y * -8,
-          scale: isTransitioning ? 1.005 : 1,
         }}
         transition={{
           type: "spring",
           stiffness: 80,
           damping: 25,
           mass: 0.5,
-          scale: {
-            duration: 0.75,
-            ease: [0.22, 0.03, 0.26, 1]
-          }
         }}
         style={{
           transformStyle: 'preserve-3d',
@@ -168,22 +163,6 @@ export const DeskDisplay = ({
           );
         })}
         
-        {/* Subtle transition overlay for smooth state changes */}
-        <motion.div
-          className="absolute inset-0 pointer-events-none"
-          style={{
-            background: 'radial-gradient(ellipse 100% 100% at 50% 50%, hsl(43 70% 58% / 0.06) 0%, transparent 70%)',
-            filter: 'blur(40px)',
-          }}
-          initial={{ opacity: 0 }}
-          animate={{
-            opacity: isTransitioning ? [0, 0.4, 0] : 0,
-          }}
-          transition={{
-            duration: 1.5,
-            ease: lightEasing,
-          }}
-        />
       </motion.div>
 
       {/* Interactive Light Hotspots Layer - Desktop Only */}
