@@ -314,21 +314,15 @@ export const LightHotspot = ({
                   border border-white/20
                   overflow-hidden mr-10`}
                 initial={{ 
-                  opacity: 0,
                   scale: 0.9,
                   originX: id === 'spotlight' ? 1 : 0.5,
                   originY: id === 'spotlight' ? 0.5 : 0
                 }}
                 animate={{ 
-                  opacity: 1,
                   scale: 1,
                   x: mousePos.x,
                   y: mousePos.y,
                   transition: {
-                    opacity: {
-                      duration: 0.2,
-                      ease: [0.4, 0, 0.2, 1]
-                    },
                     scale: {
                       duration: 0.3,
                       ease: [0.4, 0, 0.2, 1]
@@ -346,7 +340,6 @@ export const LightHotspot = ({
                   }
                 }}
                 exit={{ 
-                  opacity: 0,
                   scale: 0.9,
                   transition: {
                     duration: 0.2,
