@@ -71,7 +71,7 @@ export const ClimateTooltip = ({
     <motion.div
       className="absolute z-20 hidden md:block"
       style={{ 
-        bottom: '-52px',
+        bottom: '-42px',
         left: 'calc(50% - 80px)', 
         transformStyle: 'preserve-3d',
         perspective: 1000,
@@ -89,9 +89,10 @@ export const ClimateTooltip = ({
       transition={{ duration: 0.8, delay: 1.2, ease: [0.22, 0.03, 0.26, 1] }}
     >
       <motion.div
-        className="relative bg-white/8 backdrop-blur-[24px] border border-white/20 px-4 py-3 rounded-full flex items-center justify-center gap-5"
+        className="relative bg-white/8 backdrop-blur-[32px] border border-white/20 px-4 py-3 rounded-full flex items-center justify-center gap-5"
         style={{
           boxShadow: '0 4px 24px rgba(0,0,0,0.15), 0 1px 4px rgba(0,0,0,0.1), inset 0 1px 1px rgba(255,255,255,0.1)',
+          backdropFilter: 'blur(32px) saturate(180%)',
         }}
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
@@ -103,13 +104,33 @@ export const ClimateTooltip = ({
       >
         {/* Internal glow layer matching tooltip aesthetic */}
         <motion.div 
-          className="absolute inset-0 rounded-full pointer-events-none"
+          className="absolute inset-0 rounded-full pointer-events-none backdrop-blur-[20px]"
           style={{
             background: 'radial-gradient(circle at 50% 50%, rgba(200, 160, 80, 0.06) 0%, transparent 70%)',
+            filter: 'blur(12px)',
           }}
         />
         {/* Temperature */}
-        <div className="flex items-center gap-2">
+        <div className="flex items-center">
+          <AnimatePresence>
+            {isHovered && (
+              <motion.div
+                initial={{ opacity: 0, width: 0, scale: 0.8 }}
+                animate={{ opacity: 1, width: 'auto', scale: 1 }}
+                exit={{ opacity: 0, width: 0, scale: 0.8 }}
+                className="overflow-hidden origin-right"
+                transition={{ duration: 0.35, ease: [0.22, 0.03, 0.26, 1] }}
+              >
+                <div className="flex flex-col pr-2 items-end">
+                  <span className="text-xs text-white/40 uppercase tracking-wider">Temp</span>
+                  <span className="text-sm text-white font-light">
+                    {temperature.toFixed(1)}°
+                  </span>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+          
           <CircularProgress 
             value={temperature}
             min={15}
@@ -121,25 +142,6 @@ export const ClimateTooltip = ({
           >
             <Thermometer className="w-4 h-4 text-white/60" />
           </CircularProgress>
-          
-          <AnimatePresence>
-            {isHovered && (
-              <motion.div
-                initial={{ opacity: 0, width: 0, scale: 0.8 }}
-                animate={{ opacity: 1, width: 'auto', scale: 1 }}
-                exit={{ opacity: 0, width: 0, scale: 0.8 }}
-                className="overflow-hidden origin-center"
-                transition={{ duration: 0.35, ease: [0.22, 0.03, 0.26, 1] }}
-              >
-                <div className="flex flex-col pl-1">
-                  <span className="text-xs text-white/40 uppercase tracking-wider">Temp</span>
-                  <span className="text-sm text-white font-light">
-                    {temperature.toFixed(1)}°
-                  </span>
-                </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
         </div>
         
         {/* Humidity */}
@@ -177,7 +179,7 @@ export const ClimateTooltip = ({
         </div>
         
         {/* Air Quality */}
-        <div className="flex items-center gap-2">
+        <div className="flex items-center">
           <CircularProgress 
             value={airQuality}
             min={0}
@@ -196,10 +198,10 @@ export const ClimateTooltip = ({
                 initial={{ opacity: 0, width: 0, scale: 0.8 }}
                 animate={{ opacity: 1, width: 'auto', scale: 1 }}
                 exit={{ opacity: 0, width: 0, scale: 0.8 }}
-                className="overflow-hidden origin-center"
+                className="overflow-hidden origin-left"
                 transition={{ duration: 0.35, ease: [0.22, 0.03, 0.26, 1] }}
               >
-                <div className="flex flex-col pl-1">
+                <div className="flex flex-col pl-2 items-start">
                   <span className="text-xs text-white/40 uppercase tracking-wider">Air</span>
                   <span className="text-sm text-white font-light">
                     {getAirQualityLabel(airQuality)}
