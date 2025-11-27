@@ -65,7 +65,7 @@ export const LightHotspot = ({
   const breathingScale = isOn ? [1, 1.08 + (intensityRatio * 0.08), 1] : [0.98, 1.05, 0.98];
 
   return (
-    <AnimatePresence>
+    <AnimatePresence mode="wait">
       {(isContainerHovered || isExternallyHovered) && (
         <motion.div
           className="absolute cursor-pointer pointer-events-auto"
@@ -74,9 +74,9 @@ export const LightHotspot = ({
             top: `${position.y}%`,
             transform: 'translate(-50%, -50%)',
           }}
-          initial={{ opacity: 0, scale: 0.5 }}
-          animate={{ opacity: 1, scale: 1 }}
-          exit={{ opacity: 0, scale: 0.5 }}
+          initial={{ scale: 0.5 }}
+          animate={{ scale: 1 }}
+          exit={{ scale: 0.5 }}
           transition={{ 
             duration: 0.4, 
             ease: [0.4, 0, 0.2, 1] 
