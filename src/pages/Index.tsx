@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { Power } from "lucide-react";
 import { DeskDisplay } from "@/components/DeskDisplay";
 import { RoomInfoPanel } from "@/components/RoomInfoPanel";
 
@@ -196,7 +197,109 @@ const Index = () => {
       />
 
       {/* Responsive Layout Container */}
-      <div className="flex flex-col md:flex-row items-center gap-8 md:gap-16 max-w-7xl w-full relative z-10">
+      <div className="flex flex-col md:flex-row items-center gap-8 md:gap-16 max-w-7xl w-full relative z-10 pb-[120px] md:pb-0">
+        {/* Mobile: Room Info Header (Title, Climate, Master Switch) */}
+        <motion.div 
+          className="w-full md:hidden"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ 
+            opacity: isLoaded ? 1 : 0,
+            y: isLoaded ? 0 : 20
+          }}
+          transition={{ 
+            duration: 0.8,
+            delay: 0.3,
+            ease: [0.22, 0.03, 0.26, 1]
+          }}
+        >
+          {/* Room Title */}
+          <motion.h1 
+            className="text-5xl font-light mb-6 tracking-tight text-foreground"
+            style={{ fontFamily: "'Cormorant Garamond', serif" }}
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ 
+              opacity: isLoaded ? 1 : 0,
+              y: isLoaded ? 0 : 10
+            }}
+            transition={{ 
+              duration: 0.6,
+              delay: 0.4,
+              ease: [0.22, 0.03, 0.26, 1]
+            }}
+          >
+            Office Desk
+          </motion.h1>
+
+          {/* Climate Data */}
+          <motion.div 
+            className="flex items-center gap-12 mb-6"
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ 
+              opacity: isLoaded ? 1 : 0,
+              y: isLoaded ? 0 : 10
+            }}
+            transition={{ 
+              duration: 0.6,
+              delay: 0.5,
+              ease: [0.22, 0.03, 0.26, 1]
+            }}
+          >
+            <div className="flex flex-col">
+              <div className="text-[10px] uppercase tracking-widest text-foreground/40 mb-1 font-light">Temperature</div>
+              <motion.div 
+                className="text-xl font-light text-foreground tabular-nums"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: isLoaded ? 1 : 0 }}
+              >
+                24.4°
+              </motion.div>
+            </div>
+            
+            <div className="flex flex-col">
+              <div className="text-[10px] uppercase tracking-widest text-foreground/40 mb-1 font-light">Humidity</div>
+              <motion.div 
+                className="text-xl font-light text-foreground tabular-nums"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: isLoaded ? 1 : 0 }}
+              >
+                49%
+              </motion.div>
+            </div>
+          </motion.div>
+
+          {/* Master Switch */}
+          <motion.button
+            onClick={() => handleMasterToggle(!masterSwitchOn)}
+            className="w-12 h-12 rounded-full flex items-center justify-center border border-white/20 hover:border-white/30 active:border-white/40 transition-all duration-200"
+            style={{
+              backgroundColor: 'transparent',
+            }}
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{ 
+              opacity: isLoaded ? 1 : 0,
+              scale: isLoaded ? 1 : 0.8
+            }}
+            transition={{ 
+              duration: 0.5,
+              delay: 0.6,
+              ease: [0.22, 0.03, 0.26, 1]
+            }}
+          >
+            <motion.div
+              animate={{
+                color: masterSwitchOn ? 'hsl(38 70% 58%)' : 'rgba(255, 255, 255, 0.5)'
+              }}
+              transition={{ duration: 0.3 }}
+            >
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83" />
+              </svg>
+            </motion.div>
+          </motion.button>
+        </motion.div>
+
         {/* Desk Display Panel */}
         <motion.div 
           className="w-full md:w-[50%] relative"
@@ -290,7 +393,7 @@ const Index = () => {
           />
         </motion.div>
 
-        {/* Room Info Panel */}
+        {/* Room Info Panel - Full on desktop, Light cards only on mobile */}
         <motion.div 
           className="w-full md:w-[42%] md:pl-6"
           initial={{ opacity: 0, y: 20 }}

@@ -55,9 +55,9 @@ export const RoomInfoPanel = ({ roomName, temperature, humidity, masterSwitchOn,
 
   return (
     <div className="space-y-4 md:space-y-6">
-      {/* Room Title with Master Switch */}
+      {/* Room Title with Master Switch - Hidden on mobile (shown in Index.tsx) */}
       <motion.div 
-        className="flex items-center justify-between"
+        className="hidden md:flex items-center justify-between"
         initial={{ opacity: 0, y: 10 }}
         animate={{ 
           opacity: isLoaded ? 1 : 0,
@@ -106,9 +106,9 @@ export const RoomInfoPanel = ({ roomName, temperature, humidity, masterSwitchOn,
         </motion.button>
       </motion.div>
 
-      {/* Climate Info */}
+      {/* Climate Info - Hidden on mobile (shown in Index.tsx) */}
       <motion.div 
-        className="flex gap-4 md:gap-6 py-3 md:py-6"
+        className="hidden md:flex gap-4 md:gap-6 py-3 md:py-6"
         initial={{ opacity: 0, y: 10 }}
         animate={{ 
           opacity: isLoaded ? 1 : 0,
@@ -149,9 +149,9 @@ export const RoomInfoPanel = ({ roomName, temperature, humidity, masterSwitchOn,
 
       {/* Light Controls Section */}
       <div>
-        {/* Separator */}
+        {/* Separator - Hidden on mobile */}
         <motion.div 
-          className="h-px bg-white/10 mb-5"
+          className="hidden md:block h-px bg-white/10 mb-5"
           initial={{ scaleX: 0, opacity: 0 }}
           animate={{ 
             scaleX: isLoaded ? 1 : 0,
