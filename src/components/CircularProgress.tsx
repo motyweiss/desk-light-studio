@@ -9,6 +9,7 @@ interface CircularProgressProps {
   children: React.ReactNode;
   isLoaded?: boolean;
   colorType?: 'temperature' | 'humidity' | 'airQuality' | 'battery' | 'default';
+  delay?: number;
 }
 
 export const CircularProgress = ({ 
@@ -19,7 +20,8 @@ export const CircularProgress = ({
   strokeWidth = 2, 
   children,
   isLoaded = true,
-  colorType = 'default'
+  colorType = 'default',
+  delay = 0
 }: CircularProgressProps) => {
   const radius = (size - strokeWidth) / 2;
   const circumference = 2 * Math.PI * radius;
@@ -87,8 +89,8 @@ export const CircularProgress = ({
           }}
           style={{ strokeDasharray: circumference }}
           transition={{ 
-            duration: isLoaded ? 1.5 : 2,
-            delay: isLoaded ? 0 : 0.5,
+            duration: 2.2,
+            delay: delay,
             ease: [0.22, 0.03, 0.26, 1] 
           }}
         />

@@ -162,6 +162,7 @@ export const RoomInfoPanel = ({ roomName, temperature, humidity, airQuality, mas
                   strokeWidth={2.5}
                   isLoaded={isLoaded}
                   colorType="temperature"
+                  delay={0.4}
                 >
               <Thermometer className="w-5 h-5 text-white/60" strokeWidth={1.5} />
             </CircularProgress>
@@ -185,6 +186,7 @@ export const RoomInfoPanel = ({ roomName, temperature, humidity, airQuality, mas
                   strokeWidth={2.5}
                   isLoaded={isLoaded}
                   colorType="humidity"
+                  delay={0.6}
                 >
               <Droplets className="w-5 h-5 text-white/60" strokeWidth={1.5} />
             </CircularProgress>
@@ -208,6 +210,7 @@ export const RoomInfoPanel = ({ roomName, temperature, humidity, airQuality, mas
                   strokeWidth={2.5}
                   isLoaded={isLoaded}
                   colorType="airQuality"
+                  delay={0.8}
                 >
               <Wind className="w-5 h-5 text-white/60" strokeWidth={1.5} />
             </CircularProgress>
@@ -225,7 +228,7 @@ export const RoomInfoPanel = ({ roomName, temperature, humidity, airQuality, mas
         {/* Devices Battery Section */}
         {devices && devices.length > 0 && (
           <div className="flex flex-row gap-10 mt-8">
-            {devices.map((device) => {
+            {devices.map((device, index) => {
               const DeviceIcon = device.icon === 'headphones' ? Headphones : Smartphone;
               
               return (
@@ -238,6 +241,7 @@ export const RoomInfoPanel = ({ roomName, temperature, humidity, airQuality, mas
                     strokeWidth={2.5}
                     isLoaded={isLoaded}
                     colorType="battery"
+                    delay={1.0 + (index * 0.2)}
                   >
                     <DeviceIcon className="w-5 h-5 text-white/60" strokeWidth={1.5} />
                   </CircularProgress>
