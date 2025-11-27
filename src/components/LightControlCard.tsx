@@ -151,7 +151,7 @@ export const LightControlCard = ({ id, label, intensity, onChange, onHover }: Li
             animate={{
               scale: isOn ? 1 : 0.92,
               opacity: 1,
-              color: isOn ? 'rgb(255, 255, 255)' : 'rgb(180, 180, 180)'
+              color: isOn ? 'hsl(38 70% 58%)' : 'rgb(180, 180, 180)'
             }}
             transition={{ 
               scale: { duration: 0.4, ease: [0.22, 0.03, 0.26, 1] },
