@@ -138,13 +138,9 @@ export const LightControlCard = ({ id, label, intensity, onChange, onHover }: Li
       whileTap={{ scale: 0.96 }}
     >
       <div className="flex items-center gap-3 md:gap-4">
-        {/* Icon Circle - Exactly 42x42 pixels with milky frosted glass effect */}
-        <motion.div
+        {/* Icon Circle - Exactly 42x42 pixels with frosted glass effect, no fill */}
+        <div
           className="w-[42px] h-[42px] rounded-full flex items-center justify-center pointer-events-none flex-shrink-0 backdrop-blur-xl"
-          animate={{
-            backgroundColor: isOn ? 'rgba(255, 255, 255, 0.18)' : 'rgba(255, 255, 255, 0.12)'
-          }}
-          transition={{ duration: 0.3, ease: [0.22, 0.03, 0.26, 1] }}
         >
           <motion.div
             initial={{ scale: 0.5, opacity: 0 }}
@@ -161,7 +157,7 @@ export const LightControlCard = ({ id, label, intensity, onChange, onHover }: Li
           >
             <IconComponent className="w-7 h-7" />
           </motion.div>
-        </motion.div>
+        </div>
 
         {/* Text Info */}
         <div className="flex-1 text-left min-w-0">

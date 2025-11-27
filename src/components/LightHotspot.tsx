@@ -457,17 +457,9 @@ export const LightHotspot = ({
                     }
                   }}
                 >
-                  {/* Lamp icon circle - Exactly 42x42 pixels with milky frosted glass effect */}
-                  <motion.div
-                    className={`
-                      w-[42px] h-[42px] rounded-full flex items-center justify-center
-                      cursor-pointer flex-shrink-0 backdrop-blur-xl
-                      transition-all duration-300
-                      ${intensity > 0 
-                        ? 'bg-white/18 hover:bg-white/22' 
-                        : 'bg-white/12 hover:bg-white/16'
-                      }
-                    `}
+                  {/* Lamp icon circle - Exactly 42x42 pixels with frosted glass effect, no fill */}
+                  <div
+                    className="w-[42px] h-[42px] rounded-full flex items-center justify-center cursor-pointer flex-shrink-0 backdrop-blur-xl"
                     onClick={(e) => {
                       e.stopPropagation();
                       onIntensityChange(intensity > 0 ? 0 : 100);
@@ -492,7 +484,7 @@ export const LightHotspot = ({
                         }`}
                       />
                     </motion.div>
-                  </motion.div>
+                  </div>
                   
                   {/* Text content - left aligned */}
                   <div className="flex flex-col items-start">
