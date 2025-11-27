@@ -320,7 +320,7 @@ const Index = () => {
               },
               { 
                 id: 'monitorLight', 
-                label: 'Monitor Light', 
+                label: 'Monitor Back Light', 
                 intensity: monitorLightIntensity, 
                 onChange: setMonitorLightIntensity 
               },
