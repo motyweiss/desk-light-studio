@@ -64,21 +64,21 @@ export const LightControlCard = ({ id, label, intensity, onChange, onHover }: Li
       onClick={handleCardClick}
       onMouseEnter={() => onHover(true)}
       onMouseLeave={() => onHover(false)}
-      className="w-full bg-white/8 backdrop-blur-xl rounded-2xl px-5 py-3.5 hover:bg-white/12 transition-all duration-300 cursor-pointer text-left"
+      className="w-full bg-white/8 backdrop-blur-xl rounded-xl md:rounded-2xl px-4 md:px-5 py-3 md:py-3.5 hover:bg-white/12 active:bg-white/15 transition-all duration-300 cursor-pointer text-left"
       transition={{ layout: { duration: 0.3, ease: [0.22, 0.03, 0.26, 1] } }}
       whileTap={{ scale: 0.98 }}
     >
-      <div className="flex items-center gap-4">
+      <div className="flex items-center gap-3 md:gap-4">
         {/* Icon Circle */}
         <motion.div
-          className={`w-8 h-8 rounded-full flex items-center justify-center transition-colors duration-300 pointer-events-none flex-shrink-0 ${
+          className={`w-7 h-7 md:w-8 md:h-8 rounded-full flex items-center justify-center transition-colors duration-300 pointer-events-none flex-shrink-0 ${
             isOn 
               ? 'bg-[hsl(38_70%_58%/0.2)]' 
               : 'bg-white/10'
           }`}
         >
           <Lightbulb 
-            className={`w-4 h-4 transition-all duration-300 ${
+            className={`w-3.5 h-3.5 md:w-4 md:h-4 transition-all duration-300 ${
               isOn 
                 ? 'text-[hsl(38_70%_58%)]' 
                 : 'text-white/40'
@@ -88,9 +88,9 @@ export const LightControlCard = ({ id, label, intensity, onChange, onHover }: Li
 
         {/* Text Info */}
         <div className="flex-1 text-left min-w-0">
-          <div className="font-light text-base text-foreground tracking-wide">{label}</div>
+          <div className="font-light text-sm md:text-base text-foreground tracking-wide">{label}</div>
           <motion.div 
-            className="text-xs font-light tracking-wider tabular-nums"
+            className="text-[10px] md:text-xs font-light tracking-wider tabular-nums"
             animate={{
               color: isOn ? 'hsl(42 65% 65%)' : 'rgba(255, 255, 255, 0.3)'
             }}
@@ -102,7 +102,7 @@ export const LightControlCard = ({ id, label, intensity, onChange, onHover }: Li
 
         {/* Slider - Always Visible on Right */}
         <div 
-          className="w-32 flex-shrink-0"
+          className="w-24 md:w-32 flex-shrink-0"
           data-slider
           onClick={(e) => e.stopPropagation()}
           onPointerDown={(e) => e.stopPropagation()}

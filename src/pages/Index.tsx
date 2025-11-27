@@ -127,7 +127,7 @@ const Index = () => {
       </AnimatePresence>
 
       <motion.div 
-        className="min-h-screen flex items-center justify-center p-8 relative overflow-hidden"
+        className="min-h-[100dvh] flex items-center justify-center p-4 md:p-8 relative overflow-hidden"
         animate={{
           backgroundColor: `hsl(${getPageBackgroundColor()})`,
         }}
@@ -195,11 +195,11 @@ const Index = () => {
         }}
       />
 
-      {/* Two-Column Layout Container */}
-      <div className="flex items-center gap-16 max-w-7xl w-full relative z-10">
-        {/* Left Panel - Desk Display */}
+      {/* Responsive Layout Container */}
+      <div className="flex flex-col md:flex-row items-center gap-8 md:gap-16 max-w-7xl w-full relative z-10">
+        {/* Desk Display Panel */}
         <motion.div 
-          className="w-[50%] relative"
+          className="w-full md:w-[50%] relative"
           initial={{ opacity: 0, y: 30, scale: 0.95, filter: "blur(8px)" }}
           animate={{ 
             opacity: isLoaded ? 1 : 0,
@@ -291,17 +291,17 @@ const Index = () => {
           />
         </motion.div>
 
-        {/* Right Panel - Room Info */}
+        {/* Room Info Panel */}
         <motion.div 
-          className="w-[42%] pl-6"
-          initial={{ opacity: 0, x: 30 }}
+          className="w-full md:w-[42%] md:pl-6"
+          initial={{ opacity: 0, y: 30 }}
           animate={{ 
             opacity: isLoaded ? 1 : 0,
-            x: isLoaded ? 0 : 30
+            y: isLoaded ? 0 : 30
           }}
           transition={{ 
             duration: 1,
-            delay: 0.8,
+            delay: 0.6,
             ease: [0.22, 0.03, 0.26, 1]
           }}
         >
