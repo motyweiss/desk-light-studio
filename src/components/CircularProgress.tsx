@@ -8,7 +8,7 @@ interface CircularProgressProps {
   strokeWidth?: number;
   children: React.ReactNode;
   isLoaded?: boolean;
-  colorType?: 'temperature' | 'humidity' | 'airQuality' | 'default';
+  colorType?: 'temperature' | 'humidity' | 'airQuality' | 'battery' | 'default';
 }
 
 export const CircularProgress = ({ 
@@ -46,6 +46,11 @@ export const CircularProgress = ({
         if (val <= 35) return 'hsl(45 90% 55%)';               // Yellow - moderate
         if (val <= 55) return 'hsl(25 90% 55%)';               // Orange - unhealthy sensitive
         return 'hsl(0 75% 55%)';                                // Red - unhealthy
+        
+      case 'battery':
+        if (val >= 50) return 'hsl(142 70% 45%)';              // Green - good
+        if (val >= 20) return 'hsl(45 90% 55%)';               // Yellow - medium
+        return 'hsl(0 75% 55%)';                                // Red - low
         
       default:
         return 'hsl(44 85% 58%)';                               // Default warm amber

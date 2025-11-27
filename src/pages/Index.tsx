@@ -36,6 +36,10 @@ const Index = () => {
   const [temperature, setTemperature] = useState(21.0);
   const [humidity, setHumidity] = useState(49);
   const [airQuality, setAirQuality] = useState(85);
+  
+  // Device battery states
+  const [iphoneBatteryLevel, setIphoneBatteryLevel] = useState(0);
+  const [iphoneBatteryCharging, setIphoneBatteryCharging] = useState(false);
 
   // Hover states for coordinated UI
   const [hoveredLight, setHoveredLight] = useState<string | null>(null);
@@ -155,6 +159,8 @@ const Index = () => {
         entityMapping.temperatureSensor,
         entityMapping.humiditySensor,
         entityMapping.airQualitySensor,
+        entityMapping.iphoneBatteryLevel,
+        entityMapping.iphoneBatteryState,
       ].filter(Boolean) as string[];
 
       const allEntityIds = [...lightEntityIds, ...sensorEntityIds];
@@ -221,6 +227,22 @@ const Index = () => {
             console.log(`🌬️ Air Quality initial: ${aqValue}`);
           }
         }
+        
+        // Update battery sensors
+        if (entityMapping.iphoneBatteryLevel && states.has(entityMapping.iphoneBatteryLevel)) {
+          const state = states.get(entityMapping.iphoneBatteryLevel)!;
+          const batteryValue = parseFloat(state.state);
+          if (!isNaN(batteryValue)) {
+            setIphoneBatteryLevel(Math.round(batteryValue));
+            console.log(`🔋 iPhone Battery initial: ${batteryValue}%`);
+          }
+        }
+        
+        if (entityMapping.iphoneBatteryState && states.has(entityMapping.iphoneBatteryState)) {
+          const state = states.get(entityMapping.iphoneBatteryState)!;
+          setIphoneBatteryCharging(state.state === "charging");
+          console.log(`⚡ iPhone Charging initial: ${state.state}`);
+        }
       } catch (error) {
         console.error("❌ Failed to perform initial sync:", error);
         
@@ -251,6 +273,8 @@ const Index = () => {
       entityMapping.temperatureSensor,
       entityMapping.humiditySensor,
       entityMapping.airQualitySensor,
+      entityMapping.iphoneBatteryLevel,
+      entityMapping.iphoneBatteryState,
     ].filter(Boolean) as string[];
 
     const allEntityIds = [...lightEntityIds, ...sensorEntityIds];
@@ -315,6 +339,20 @@ const Index = () => {
           setAirQuality(Math.round(aqValue));
         }
       }
+      
+      // Update battery sensors
+      if (entityMapping.iphoneBatteryLevel && states.has(entityMapping.iphoneBatteryLevel)) {
+        const state = states.get(entityMapping.iphoneBatteryLevel)!;
+        const batteryValue = parseFloat(state.state);
+        if (!isNaN(batteryValue)) {
+          setIphoneBatteryLevel(Math.round(batteryValue));
+        }
+      }
+      
+      if (entityMapping.iphoneBatteryState && states.has(entityMapping.iphoneBatteryState)) {
+        const state = states.get(entityMapping.iphoneBatteryState)!;
+        setIphoneBatteryCharging(state.state === "charging");
+      }
     } catch (error) {
       console.error("❌ Force sync failed:", error);
       
@@ -339,6 +377,8 @@ const Index = () => {
       entityMapping.temperatureSensor,
       entityMapping.humiditySensor,
       entityMapping.airQualitySensor,
+      entityMapping.iphoneBatteryLevel,
+      entityMapping.iphoneBatteryState,
     ].filter(Boolean) as string[];
 
     const allEntityIds = [...lightEntityIds, ...sensorEntityIds];
@@ -480,6 +520,34 @@ const Index = () => {
               return current;
             });
           }
+        }
+        
+        // Update battery sensors
+        if (entityMapping.iphoneBatteryLevel && states.has(entityMapping.iphoneBatteryLevel)) {
+          const state = states.get(entityMapping.iphoneBatteryLevel)!;
+          const batteryValue = parseFloat(state.state);
+          
+          if (!isNaN(batteryValue)) {
+            setIphoneBatteryLevel(current => {
+              if (Math.abs(current - batteryValue) > 1) {
+                console.log(`🔋 iPhone Battery synced: ${current} → ${batteryValue}%`);
+                return Math.round(batteryValue);
+              }
+              return current;
+            });
+          }
+        }
+        
+        if (entityMapping.iphoneBatteryState && states.has(entityMapping.iphoneBatteryState)) {
+          const state = states.get(entityMapping.iphoneBatteryState)!;
+          const isCharging = state.state === "charging";
+          setIphoneBatteryCharging(current => {
+            if (current !== isCharging) {
+              console.log(`⚡ iPhone Charging synced: ${current} → ${isCharging}`);
+              return isCharging;
+            }
+            return current;
+          });
         }
       } catch (error) {
         console.error("❌ Failed to sync with Home Assistant:", error);
@@ -912,6 +980,14 @@ const Index = () => {
             masterSwitchOn={masterSwitchOn}
             onMasterToggle={handleMasterToggle}
             onLightHover={setHoveredLight}
+            devices={[
+              {
+                id: "iphone",
+                name: "Moty's iPhone",
+                batteryLevel: iphoneBatteryLevel,
+                isCharging: iphoneBatteryCharging,
+              }
+            ]}
             lights={[
               { 
                 id: 'deskLamp', 
