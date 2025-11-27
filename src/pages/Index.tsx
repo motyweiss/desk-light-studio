@@ -354,6 +354,12 @@ const Index = () => {
       try {
         const states = await homeAssistant.getAllEntityStates(allEntityIds);
         
+        if (states.size === 0) {
+          console.log("⚠️  No states returned, retrying in 500ms");
+          setTimeout(syncStates, 500);
+          return;
+        }
+        
         // Update light entities
         // Update spotlight
         if (entityMapping.spotlight && states.has(entityMapping.spotlight)) {
@@ -363,13 +369,9 @@ const Index = () => {
             : 0;
           
           setSpotlightIntensity(current => {
-            // Always update if light is off OR intensity difference is significant
-            const shouldUpdate = state.state === "off" 
-              ? newIntensity !== current
-              : Math.abs(current - newIntensity) > 2;
-            
-            if (shouldUpdate) {
-              console.log(`💡 Spotlight synced: ${current} → ${newIntensity}%`);
+            // Always update when state changes (on/off) or when there's any brightness difference
+            if (current !== newIntensity) {
+              console.log(`💡 Spotlight synced: ${current} → ${newIntensity}% (state: ${state.state})`);
               return newIntensity;
             }
             return current;
@@ -384,13 +386,9 @@ const Index = () => {
             : 0;
           
           setDeskLampIntensity(current => {
-            // Always update if light is off OR intensity difference is significant
-            const shouldUpdate = state.state === "off" 
-              ? newIntensity !== current
-              : Math.abs(current - newIntensity) > 2;
-            
-            if (shouldUpdate) {
-              console.log(`💡 Desk Lamp synced: ${current} → ${newIntensity}%`);
+            // Always update when state changes (on/off) or when there's any brightness difference
+            if (current !== newIntensity) {
+              console.log(`💡 Desk Lamp synced: ${current} → ${newIntensity}% (state: ${state.state})`);
               return newIntensity;
             }
             return current;
@@ -405,13 +403,9 @@ const Index = () => {
             : 0;
           
           setMonitorLightIntensity(current => {
-            // Always update if light is off OR intensity difference is significant
-            const shouldUpdate = state.state === "off" 
-              ? newIntensity !== current
-              : Math.abs(current - newIntensity) > 2;
-            
-            if (shouldUpdate) {
-              console.log(`💡 Monitor Light synced: ${current} → ${newIntensity}%`);
+            // Always update when state changes (on/off) or when there's any brightness difference
+            if (current !== newIntensity) {
+              console.log(`💡 Monitor Light synced: ${current} → ${newIntensity}% (state: ${state.state})`);
               return newIntensity;
             }
             return current;
@@ -474,8 +468,8 @@ const Index = () => {
     // Initial sync
     syncStates();
 
-    // Poll every 1.5 seconds for faster updates
-    const interval = setInterval(syncStates, 1500);
+    // Poll every 800ms for real-time updates
+    const interval = setInterval(syncStates, 800);
 
     return () => {
       console.log("🛑 Stopping Home Assistant sync polling");
