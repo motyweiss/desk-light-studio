@@ -130,7 +130,7 @@ const Index = () => {
       <div className="flex flex-col md:flex-row items-center gap-6 md:gap-16 max-w-7xl w-full relative z-10 px-5 md:px-0 pb-20 md:pb-0">
         {/* Mobile: Room Info Header (Title, Climate, Master Switch) */}
         <motion.div 
-          className="w-full md:hidden"
+          className="w-full md:hidden pt-12"
           initial={{ opacity: 0, y: 30 }}
           animate={{ 
             opacity: isLoaded ? 1 : 0,
@@ -195,7 +195,7 @@ const Index = () => {
 
           {/* Climate Data */}
           <motion.div 
-            className="flex gap-10 mb-6"
+            className="flex gap-10 mb-3"
             initial={{ opacity: 0, y: 20 }}
             animate={{ 
               opacity: isLoaded ? 1 : 0,
