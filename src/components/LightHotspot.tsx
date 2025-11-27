@@ -65,9 +65,10 @@ export const LightHotspot = ({
   const breathingScale = isOn ? [1, 1.08 + (intensityRatio * 0.08), 1] : [0.98, 1.05, 0.98];
 
   return (
-    <AnimatePresence mode="wait">
+    <AnimatePresence>
       {(isContainerHovered || isExternallyHovered) && (
         <motion.div
+          key={`hotspot-${id}`}
           className="absolute cursor-pointer pointer-events-auto"
           style={{
             left: `${position.x}%`,
@@ -78,8 +79,8 @@ export const LightHotspot = ({
           animate={{ scale: 1 }}
           exit={{ scale: 0.5 }}
           transition={{ 
-            duration: 0.4, 
-            ease: [0.4, 0, 0.2, 1] 
+            duration: 0.3, 
+            ease: "easeInOut" 
           }}
           onMouseEnter={(e) => {
             e.stopPropagation();
@@ -305,6 +306,7 @@ export const LightHotspot = ({
           <AnimatePresence>
             {(isHovered || isExternallyHovered) && (
               <motion.div
+                key={`tooltip-${id}`}
                 className={`intensity-tooltip absolute z-50
                   ${id === 'spotlight' 
                     ? 'right-3 top-1/2 -translate-y-1/2' 
@@ -351,7 +353,7 @@ export const LightHotspot = ({
                   opacity: 0,
                   scale: 0.94,
                   transition: {
-                    duration: 0.2,
+                    duration: 0.18,
                     ease: "easeInOut"
                   }
                 }}
