@@ -319,7 +319,7 @@ export const LightHotspot = ({
                   overflow-hidden mr-10`}
                 initial={{ 
                   opacity: 0,
-                  scale: 0.94,
+                  scale: 0.92,
                   originX: id === 'spotlight' ? 1 : 0.5,
                   originY: id === 'spotlight' ? 0.5 : 0
                 }}
@@ -330,12 +330,12 @@ export const LightHotspot = ({
                   y: mousePos.y,
                   transition: {
                     opacity: {
-                      duration: 0.2,
-                      ease: "easeInOut"
+                      duration: 0.35,
+                      ease: [0.25, 0.46, 0.45, 0.94]
                     },
                     scale: {
-                      duration: 0.3,
-                      ease: "easeInOut"
+                      duration: 0.4,
+                      ease: [0.34, 1.56, 0.64, 1]
                     },
                     x: {
                       type: "spring",
@@ -351,10 +351,10 @@ export const LightHotspot = ({
                 }}
                 exit={{ 
                   opacity: 0,
-                  scale: 0.94,
+                  scale: 0.92,
                   transition: {
-                    duration: 0.18,
-                    ease: "easeInOut"
+                    duration: 0.25,
+                    ease: [0.55, 0.085, 0.68, 0.53]
                   }
                 }}
                 style={{
@@ -369,9 +369,9 @@ export const LightHotspot = ({
                   animate={{ 
                     opacity: 1,
                     transition: { 
-                      delay: 0.1,
-                      duration: 0.25,
-                      ease: "easeInOut"
+                      delay: 0.15,
+                      duration: 0.35,
+                      ease: [0.25, 0.46, 0.45, 0.94]
                     }
                   }}
                   style={{
@@ -393,9 +393,9 @@ export const LightHotspot = ({
                       opacity: 1
                     }}
                     transition={{
-                      delay: 0.08,
-                      duration: 0.25,
-                      ease: "easeInOut"
+                      delay: 0.12,
+                      duration: 0.35,
+                      ease: [0.34, 1.56, 0.64, 1]
                     }}
                     onClick={(e) => {
                       e.stopPropagation();
@@ -415,15 +415,15 @@ export const LightHotspot = ({
                   <div className="flex flex-col items-start gap-1.5">
                     <motion.span 
                       className="font-medium text-white text-sm leading-tight whitespace-nowrap"
-                      initial={{ opacity: 0, x: -6 }}
+                      initial={{ opacity: 0, x: -8 }}
                       animate={{ 
                         opacity: 1, 
                         x: 0 
                       }}
                       transition={{
-                        delay: 0.1,
-                        duration: 0.25,
-                        ease: "easeInOut"
+                        delay: 0.18,
+                        duration: 0.35,
+                        ease: [0.25, 0.46, 0.45, 0.94]
                       }}
                     >
                       {label}
@@ -432,15 +432,15 @@ export const LightHotspot = ({
                       className={`text-xs leading-tight ${
                         intensity > 0 ? 'text-[hsl(43_90%_60%)]' : 'text-white/60'
                       }`}
-                      initial={{ opacity: 0, x: -6 }}
+                      initial={{ opacity: 0, x: -8 }}
                       animate={{ 
                         opacity: 1, 
                         x: 0 
                       }}
                       transition={{
-                        delay: 0.14,
-                        duration: 0.25,
-                        ease: "easeInOut"
+                        delay: 0.24,
+                        duration: 0.35,
+                        ease: [0.25, 0.46, 0.45, 0.94]
                       }}
                     >
                       {intensity > 0 ? `${Math.round(intensity)}%` : 'Off'}
