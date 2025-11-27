@@ -361,13 +361,14 @@ export const LightHotspot = ({
                 {/* שכבת זוהר פנימית */}
                 <motion.div 
                   className="absolute inset-0 rounded-full pointer-events-none"
-                  initial={{ opacity: 0 }}
+                  initial={{ opacity: 0, scale: 0.8 }}
                   animate={{ 
                     opacity: 1,
+                    scale: 1,
                     transition: { 
-                      delay: 0.15,
-                      duration: 0.25,
-                      ease: [0.4, 0, 0.2, 1]
+                      delay: 0.12,
+                      duration: 0.35,
+                      ease: [0.34, 1.56, 0.64, 1]
                     }
                   }}
                   style={{
@@ -379,58 +380,69 @@ export const LightHotspot = ({
                   }}
                 />
 
-                <motion.div 
-                  className="relative z-10 flex items-center gap-3"
-                  initial={{ opacity: 0, y: 4 }}
-                  animate={{ 
-                    opacity: 1, 
-                    y: 0,
-                    transition: {
-                      delay: 0.1,
-                      duration: 0.25,
-                      ease: [0.4, 0, 0.2, 1]
-                    }
-                  }}
-                >
+                <div className="relative z-10 flex items-center gap-3">
                   {/* Lamp icon circle - Exactly 42x42 pixels with frosted glass effect, no fill */}
-                  <div
+                  <motion.div
                     className="w-[42px] h-[42px] rounded-full flex items-center justify-center cursor-pointer flex-shrink-0 backdrop-blur-xl"
+                    initial={{ scale: 0.5, opacity: 0, rotate: -20 }}
+                    animate={{
+                      scale: 1,
+                      opacity: 1,
+                      rotate: 0
+                    }}
+                    transition={{
+                      delay: 0.15,
+                      duration: 0.45,
+                      ease: [0.34, 1.56, 0.64, 1]
+                    }}
                     onClick={(e) => {
                       e.stopPropagation();
                       onIntensityChange(intensity > 0 ? 0 : 100);
                     }}
                   >
-                    <motion.div
-                      initial={{ scale: 0.8, opacity: 0 }}
-                      animate={{
-                        scale: 1,
-                        opacity: 1
-                      }}
-                      transition={{
-                        duration: 0.25,
-                        ease: [0.4, 0, 0.2, 1]
-                      }}
-                    >
-                      <IconComponent 
-                        className={`w-7 h-7 transition-colors duration-300 ${
-                          intensity > 0 
-                            ? 'text-[hsl(43_90%_60%)]' 
-                            : 'text-[rgb(180,180,180)]'
-                        }`}
-                      />
-                    </motion.div>
-                  </div>
+                    <IconComponent 
+                      className={`w-7 h-7 transition-colors duration-300 ${
+                        intensity > 0 
+                          ? 'text-[hsl(43_90%_60%)]' 
+                          : 'text-[rgb(180,180,180)]'
+                      }`}
+                    />
+                  </motion.div>
                   
                   {/* Text content - left aligned */}
-                  <div className="flex flex-col items-start">
-                    <span className="font-medium text-white text-sm leading-tight whitespace-nowrap">
+                  <div className="flex flex-col items-start gap-0.5">
+                    <motion.span 
+                      className="font-medium text-white text-sm leading-tight whitespace-nowrap"
+                      initial={{ opacity: 0, x: -8 }}
+                      animate={{ 
+                        opacity: 1, 
+                        x: 0 
+                      }}
+                      transition={{
+                        delay: 0.22,
+                        duration: 0.4,
+                        ease: [0.34, 1.56, 0.64, 1]
+                      }}
+                    >
                       {label}
-                    </span>
-                    <span className="text-xs text-white/60 leading-tight mt-0.5">
+                    </motion.span>
+                    <motion.span 
+                      className="text-xs text-white/60 leading-tight"
+                      initial={{ opacity: 0, x: -8 }}
+                      animate={{ 
+                        opacity: 1, 
+                        x: 0 
+                      }}
+                      transition={{
+                        delay: 0.3,
+                        duration: 0.4,
+                        ease: [0.34, 1.56, 0.64, 1]
+                      }}
+                    >
                       {intensity > 0 ? `${Math.round(intensity)}%` : 'Off'}
-                    </span>
+                    </motion.span>
                   </div>
-                </motion.div>
+                </div>
               </motion.div>
             )}
           </AnimatePresence>
