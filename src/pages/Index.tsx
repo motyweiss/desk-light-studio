@@ -127,10 +127,10 @@ const Index = () => {
       />
 
       {/* Responsive Layout Container */}
-      <div className="flex flex-col md:flex-row items-center gap-12 md:gap-16 max-w-7xl w-full relative z-10 px-6 md:px-0 pb-[140px] md:pb-0">
+      <div className="flex flex-col md:flex-row items-center gap-6 md:gap-16 max-w-7xl w-full relative z-10 px-5 md:px-0 pb-20 md:pb-0">
         {/* Mobile: Room Info Header (Title, Climate, Master Switch) */}
         <motion.div 
-          className="w-full md:hidden px-8"
+          className="w-full md:hidden"
           initial={{ opacity: 0, y: 30 }}
           animate={{ 
             opacity: isLoaded ? 1 : 0,
@@ -143,9 +143,9 @@ const Index = () => {
           }}
         >
           {/* Room Title with Master Switch */}
-          <div className="flex items-start justify-between mb-8">
+          <div className="flex items-start justify-between mb-5">
             <motion.h1 
-              className="text-4xl font-light tracking-tight text-foreground leading-tight"
+              className="text-[2.5rem] font-light tracking-tight text-foreground leading-tight"
               style={{ fontFamily: "'Cormorant Garamond', serif" }}
               initial={{ opacity: 0, y: 20 }}
               animate={{ 
@@ -164,7 +164,7 @@ const Index = () => {
             {/* Master Switch - Identical to desktop */}
             <motion.button
               onClick={() => handleMasterToggle(!masterSwitchOn)}
-              className={`w-14 h-14 rounded-full backdrop-blur-xl border-2 transition-all duration-500 flex-shrink-0 ${
+              className={`w-12 h-12 rounded-full backdrop-blur-xl border-2 transition-all duration-500 flex-shrink-0 ${
                 masterSwitchOn 
                   ? 'border-[hsl(38_70%_58%/0.6)]' 
                   : 'border-white/20 hover:border-white/30'
@@ -188,14 +188,14 @@ const Index = () => {
                 transition={{ duration: 0.5, ease: [0.22, 0.03, 0.26, 1] }}
                 className="flex items-center justify-center"
               >
-                <Sun className="w-6 h-6" strokeWidth={2} />
+                <Sun className="w-5 h-5" strokeWidth={2} />
               </motion.div>
             </motion.button>
           </div>
 
           {/* Climate Data */}
           <motion.div 
-            className="flex gap-12 mb-10"
+            className="flex gap-10 mb-6"
             initial={{ opacity: 0, y: 20 }}
             animate={{ 
               opacity: isLoaded ? 1 : 0,
@@ -209,11 +209,11 @@ const Index = () => {
           >
             {/* Temperature */}
             <div className="flex items-center gap-3">
-              <div className="flex items-center justify-center w-11 h-11 rounded-full bg-white/5 backdrop-blur-sm">
+              <div className="flex items-center justify-center w-10 h-10 rounded-full bg-white/5 backdrop-blur-sm">
                 <Thermometer className="w-5 h-5 text-white/50" strokeWidth={1.5} />
               </div>
               <div className="flex flex-col">
-                <div className="text-[9px] uppercase tracking-[0.2em] text-foreground/40 mb-1 font-light">Temperature</div>
+                <div className="text-[9px] uppercase tracking-[0.2em] text-foreground/40 mb-0.5 font-light">Temperature</div>
                 <motion.div 
                   className="text-lg font-light text-foreground tabular-nums"
                   initial={{ opacity: 0 }}
@@ -226,11 +226,11 @@ const Index = () => {
             
             {/* Humidity */}
             <div className="flex items-center gap-3">
-              <div className="flex items-center justify-center w-11 h-11 rounded-full bg-white/5 backdrop-blur-sm">
+              <div className="flex items-center justify-center w-10 h-10 rounded-full bg-white/5 backdrop-blur-sm">
                 <Droplets className="w-5 h-5 text-white/50" strokeWidth={1.5} />
               </div>
               <div className="flex flex-col">
-                <div className="text-[9px] uppercase tracking-[0.2em] text-foreground/40 mb-1 font-light">Humidity</div>
+                <div className="text-[9px] uppercase tracking-[0.2em] text-foreground/40 mb-0.5 font-light">Humidity</div>
                 <motion.div 
                   className="text-lg font-light text-foreground tabular-nums"
                   initial={{ opacity: 0 }}
