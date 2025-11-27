@@ -118,7 +118,7 @@ export const LightControlCard = ({ id, label, intensity, onChange, onHover }: Li
 
         {/* Slider - Always Visible on Right */}
         <div 
-          className="w-24 md:w-32 flex-shrink-0"
+          className="w-24 md:w-32 flex-shrink-0 pr-4"
           data-slider
           onClick={(e) => e.stopPropagation()}
           onPointerDown={(e) => e.stopPropagation()}
