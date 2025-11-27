@@ -73,17 +73,17 @@ export const LightControlCard = ({ id, label, intensity, onChange, onHover }: Li
       onClick={handleCardClick}
       onMouseEnter={() => onHover(true)}
       onMouseLeave={() => onHover(false)}
-      className="w-full bg-white/8 backdrop-blur-xl rounded-xl md:rounded-2xl px-3.5 md:px-5 py-2.5 md:py-3.5 hover:bg-white/12 active:bg-white/15 transition-colors duration-200 cursor-pointer text-left"
+      className="w-full bg-white/8 backdrop-blur-xl rounded-xl md:rounded-2xl px-4 md:px-5 py-4 md:py-3.5 hover:bg-white/12 active:bg-white/15 transition-colors duration-200 cursor-pointer text-left"
       transition={{ 
         layout: { duration: 0.25, ease: [0.22, 0.03, 0.26, 1] },
         scale: { duration: 0.15, ease: [0.22, 0.03, 0.26, 1] }
       }}
       whileTap={{ scale: 0.96 }}
     >
-      <div className="flex items-center gap-2.5 md:gap-4">
+      <div className="flex items-center gap-3 md:gap-4">
         {/* Icon Circle - Exactly 42x42 pixels with frosted glass effect, no fill */}
         <div
-          className="w-9 h-9 md:w-[42px] md:h-[42px] rounded-full flex items-center justify-center pointer-events-none flex-shrink-0 backdrop-blur-xl"
+          className="w-12 h-12 md:w-[42px] md:h-[42px] rounded-full flex items-center justify-center pointer-events-none flex-shrink-0 backdrop-blur-xl"
         >
           <motion.div
             initial={{ scale: 0.5, opacity: 0 }}
@@ -98,15 +98,15 @@ export const LightControlCard = ({ id, label, intensity, onChange, onHover }: Li
               color: { duration: 0.3, ease: [0.22, 0.03, 0.26, 1] }
             }}
           >
-            <IconComponent className="w-6 h-6 md:w-7 md:h-7" />
+            <IconComponent className="w-7 h-7 md:w-7 md:h-7" />
           </motion.div>
         </div>
 
         {/* Text Info */}
         <div className="flex-1 text-left min-w-0">
-          <div className="font-light text-xs md:text-base text-foreground tracking-wide">{label}</div>
+          <div className="font-light text-sm md:text-base text-foreground tracking-wide">{label}</div>
           <motion.div 
-            className="text-[9px] md:text-xs font-light tracking-wider tabular-nums"
+            className="text-xs md:text-xs font-light tracking-wider tabular-nums"
             animate={{
               color: isOn ? 'hsl(42 65% 65%)' : 'rgba(255, 255, 255, 0.3)'
             }}
@@ -118,7 +118,7 @@ export const LightControlCard = ({ id, label, intensity, onChange, onHover }: Li
 
         {/* Slider - Always Visible on Right */}
         <div 
-          className="w-20 md:w-32 flex-shrink-0"
+          className="w-28 md:w-32 flex-shrink-0"
           data-slider
           onClick={(e) => e.stopPropagation()}
           onPointerDown={(e) => e.stopPropagation()}
