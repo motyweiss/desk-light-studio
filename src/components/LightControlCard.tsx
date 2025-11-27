@@ -73,14 +73,14 @@ export const LightControlCard = ({ id, label, intensity, onChange, onHover }: Li
       onClick={handleCardClick}
       onMouseEnter={() => onHover(true)}
       onMouseLeave={() => onHover(false)}
-      className="w-full bg-white/8 backdrop-blur-xl rounded-xl md:rounded-2xl px-3 md:px-5 py-4 md:py-3.5 hover:bg-white/12 active:bg-white/15 transition-colors duration-200 cursor-pointer text-left"
+      className="w-full bg-white/8 backdrop-blur-xl rounded-xl md:rounded-2xl px-2.5 md:px-5 py-4 md:py-3.5 hover:bg-white/12 active:bg-white/15 transition-colors duration-200 cursor-pointer text-left"
       transition={{ 
         layout: { duration: 0.25, ease: [0.22, 0.03, 0.26, 1] },
         scale: { duration: 0.15, ease: [0.22, 0.03, 0.26, 1] }
       }}
       whileTap={{ scale: 0.96 }}
     >
-      <div className="flex items-center gap-3 md:gap-4">
+      <div className="flex items-center gap-2 md:gap-4">
         {/* Icon Circle - Exactly 42x42 pixels with frosted glass effect, no fill */}
         <div
           className="w-12 h-12 md:w-[42px] md:h-[42px] rounded-full flex items-center justify-center pointer-events-none flex-shrink-0 backdrop-blur-xl"
@@ -118,7 +118,7 @@ export const LightControlCard = ({ id, label, intensity, onChange, onHover }: Li
 
         {/* Slider - Always Visible on Right */}
         <div 
-          className="w-28 md:w-32 flex-shrink-0"
+          className="w-24 md:w-32 flex-shrink-0"
           data-slider
           onClick={(e) => e.stopPropagation()}
           onPointerDown={(e) => e.stopPropagation()}
