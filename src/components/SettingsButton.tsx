@@ -9,7 +9,7 @@ export const SettingsButton = ({ onClick }: SettingsButtonProps) => {
   return (
     <motion.button
       onClick={onClick}
-      className="fixed top-6 right-6 z-50 w-10 h-10 rounded-full bg-white/10 backdrop-blur-xl border border-white/20 flex items-center justify-center text-foreground hover:bg-white/15 hover:border-white/30 transition-all duration-300"
+      className="hidden md:flex fixed top-6 right-6 z-50 w-10 h-10 rounded-full bg-white/10 backdrop-blur-xl border border-white/20 items-center justify-center text-foreground hover:bg-white/15 hover:border-white/30 transition-all duration-300"
       whileHover={{ scale: 1.05 }}
       whileTap={{ scale: 0.95 }}
       initial={{ opacity: 0, scale: 0.8 }}

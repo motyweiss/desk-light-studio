@@ -37,7 +37,7 @@ export const ConnectionStatusIndicator = ({
 
   return (
     <div
-      className="fixed top-6 right-20 z-50"
+      className="hidden md:block fixed top-6 right-20 z-50"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => {
         setIsHovered(false);
