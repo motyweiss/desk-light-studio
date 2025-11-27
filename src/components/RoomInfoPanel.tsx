@@ -135,9 +135,9 @@ export const RoomInfoPanel = ({ roomName, temperature, humidity, airQuality, mas
         </motion.button>
       </motion.div>
 
-      {/* Climate & Devices Info Card - Desktop only */}
+      {/* Climate & Devices Info - Desktop only */}
       <motion.div 
-        className="hidden md:block rounded-2xl bg-white/[0.01] backdrop-blur-md py-4 px-5"
+        className="hidden md:block rounded-2xl py-4 px-5"
         initial={{ opacity: 0, y: 10 }}
         animate={{ 
           opacity: isLoaded ? 1 : 0,
