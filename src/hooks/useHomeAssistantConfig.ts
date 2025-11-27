@@ -4,9 +4,15 @@ import { homeAssistant, type HomeAssistantConfig, type EntityMapping } from "@/s
 const CONFIG_KEY = "ha_config";
 const ENTITY_MAPPING_KEY = "ha_entity_mapping";
 
+const DEFAULT_ENTITY_MAPPING: EntityMapping = {
+  deskLamp: "light.go",
+  monitorLight: "light.screen",
+  spotlight: "light.door",
+};
+
 export const useHomeAssistantConfig = () => {
   const [config, setConfig] = useState<HomeAssistantConfig | null>(null);
-  const [entityMapping, setEntityMapping] = useState<EntityMapping>({});
+  const [entityMapping, setEntityMapping] = useState<EntityMapping>(DEFAULT_ENTITY_MAPPING);
   const [isConnected, setIsConnected] = useState(false);
 
   useEffect(() => {
@@ -31,6 +37,9 @@ export const useHomeAssistantConfig = () => {
       } catch (e) {
         console.error("Failed to parse saved mapping:", e);
       }
+    } else {
+      // Use default mapping if no saved mapping exists
+      setEntityMapping(DEFAULT_ENTITY_MAPPING);
     }
   }, []);
 
