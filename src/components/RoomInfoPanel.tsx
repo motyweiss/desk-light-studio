@@ -224,7 +224,7 @@ export const RoomInfoPanel = ({ roomName, temperature, humidity, airQuality, mas
 
         {/* Devices Battery Section */}
         {devices && devices.length > 0 && (
-          <div className="flex flex-col gap-5 mt-8">
+          <div className="flex flex-row gap-10 mt-8">
             {devices.map((device) => {
               const DeviceIcon = device.icon === 'headphones' ? Headphones : Smartphone;
               
