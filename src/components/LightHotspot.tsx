@@ -319,10 +319,10 @@ export const LightHotspot = ({
                     ? 'right-3 top-1/2 -translate-y-1/2' 
                     : '-bottom-12 left-1/2 -translate-x-1/2'
                   }
-                  bg-white/8 backdrop-blur-[24px]
+                  bg-white/15 backdrop-blur-[24px]
                   pl-5 pr-8 py-3 rounded-full
-                  shadow-[0_4px_24px_rgba(0,0,0,0.15),0_1px_4px_rgba(0,0,0,0.1),inset_0_1px_1px_rgba(255,255,255,0.1)]
-                  border border-white/20
+                  shadow-[0_4px_24px_rgba(0,0,0,0.2),0_1px_4px_rgba(0,0,0,0.15),inset_0_1px_1px_rgba(255,255,255,0.15)]
+                  border border-white/25
                   overflow-hidden mr-10`}
                 initial={{ 
                   opacity: 0,
