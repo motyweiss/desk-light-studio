@@ -14,9 +14,9 @@ export const AmbientGlowLayers = ({
   monitorLightIntensity,
   allLightsOn
 }: AmbientGlowLayersProps) => {
-  const spotlightOpacity = useMemo(() => Math.pow(spotlightIntensity / 100, 0.8), [spotlightIntensity]);
-  const deskLampOpacity = useMemo(() => Math.pow(deskLampIntensity / 100, 0.8), [deskLampIntensity]);
-  const monitorLightOpacity = useMemo(() => Math.pow(monitorLightIntensity / 100, 0.8), [monitorLightIntensity]);
+  const spotlightOpacity = useMemo(() => Math.pow(spotlightIntensity / 100, 2.0), [spotlightIntensity]);
+  const deskLampOpacity = useMemo(() => Math.pow(deskLampIntensity / 100, 2.0), [deskLampIntensity]);
+  const monitorLightOpacity = useMemo(() => Math.pow(monitorLightIntensity / 100, 2.0), [monitorLightIntensity]);
 
   return (
     <>

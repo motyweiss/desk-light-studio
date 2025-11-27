@@ -281,7 +281,7 @@ const Index = () => {
                 filter: 'blur(40px)',
               }}
               animate={{
-                opacity: Math.pow(spotlightIntensity / 100, 0.9),
+                opacity: Math.pow(spotlightIntensity / 100, 2.0),
               }}
               transition={{
                 duration: 1.5,
@@ -297,7 +297,7 @@ const Index = () => {
                 filter: 'blur(45px)',
               }}
               animate={{
-                opacity: Math.pow(deskLampIntensity / 100, 0.9),
+                opacity: Math.pow(deskLampIntensity / 100, 2.0),
               }}
               transition={{
                 duration: 1.5,
@@ -313,7 +313,7 @@ const Index = () => {
                 filter: 'blur(35px)',
               }}
               animate={{
-                opacity: Math.pow(monitorLightIntensity / 100, 0.9),
+                opacity: Math.pow(monitorLightIntensity / 100, 2.0),
               }}
               transition={{
                 duration: 1.5,
