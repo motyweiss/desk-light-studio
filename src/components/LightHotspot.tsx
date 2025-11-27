@@ -435,13 +435,12 @@ export const LightHotspot = ({
                       {label}
                     </motion.span>
                     <motion.span 
-                      className={`text-xs leading-tight ${
-                        intensity > 0 ? 'text-[hsl(43_90%_60%)]' : 'text-white/60'
-                      }`}
+                      className="text-xs leading-tight"
                       initial={{ opacity: 0, x: -8 }}
                       animate={{ 
                         opacity: 1, 
-                        x: 0 
+                        x: 0,
+                        color: intensity > 0 ? 'rgba(255, 255, 255, 0.4)' : 'rgba(255, 255, 255, 0.25)'
                       }}
                       transition={{
                         delay: 0.24,
