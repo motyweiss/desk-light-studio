@@ -109,6 +109,28 @@ class HomeAssistantService {
       return false;
     }
   }
+
+  async getAllEntityStates(entityIds: string[]): Promise<Map<string, { state: string; brightness?: number }>> {
+    const stateMap = new Map<string, { state: string; brightness?: number }>();
+    
+    try {
+      await Promise.all(
+        entityIds.map(async (entityId) => {
+          const entity = await this.getEntityState(entityId);
+          if (entity) {
+            stateMap.set(entityId, {
+              state: entity.state,
+              brightness: entity.attributes.brightness,
+            });
+          }
+        })
+      );
+    } catch (error) {
+      console.error("Failed to get all entity states:", error);
+    }
+
+    return stateMap;
+  }
 }
 
 export const homeAssistant = new HomeAssistantService();
