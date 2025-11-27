@@ -170,7 +170,7 @@ export const RoomInfoPanel = ({ roomName, temperature, humidity, masterSwitchOn,
         />
         
         <motion.div 
-          className="space-y-3 md:space-y-4 -ml-3 md:-ml-5"
+          className="space-y-2 md:space-y-4 px-3 md:px-0 -ml-0 md:-ml-5"
           variants={{
             hidden: { opacity: 0 },
             show: {
@@ -194,7 +194,7 @@ export const RoomInfoPanel = ({ roomName, temperature, humidity, masterSwitchOn,
               transition={{ duration: 0.7, ease: [0.22, 0.03, 0.26, 1] }}
             >
               {index > 0 && (
-                <div className="h-px bg-white/10 mb-4" />
+                <div className="h-px bg-white/10 mb-3 md:mb-4" />
               )}
               <LightControlCard
                 id={light.id}
