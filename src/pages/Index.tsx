@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, useCallback } from "react";
+import { useState, useEffect, useMemo, useCallback, useRef } from "react";
 import { motion } from "framer-motion";
 import { Sun, Thermometer, Droplets, Wind } from "lucide-react";
 import { DeskDisplay } from "@/components/DeskDisplay";
@@ -33,6 +33,9 @@ const Index = () => {
 
   // Hover states for coordinated UI
   const [hoveredLight, setHoveredLight] = useState<string | null>(null);
+  
+  // Ref to prevent polling updates during manual changes
+  const isManualChangeRef = useRef(false);
   
   // Home Assistant integration
   const { toast } = useToast();
@@ -74,6 +77,7 @@ const Index = () => {
   const masterSwitchOn = allLightsOn;
 
   const handleMasterToggle = useCallback(async (checked: boolean) => {
+    isManualChangeRef.current = true;
     const targetIntensity = checked ? 100 : 0;
     setSpotlightIntensity(targetIntensity);
     setDeskLampIntensity(targetIntensity);
@@ -85,11 +89,16 @@ const Index = () => {
       if (entityMapping.deskLamp) await homeAssistant.setLightBrightness(entityMapping.deskLamp, targetIntensity);
       if (entityMapping.monitorLight) await homeAssistant.setLightBrightness(entityMapping.monitorLight, targetIntensity);
     }
+    
+    setTimeout(() => {
+      isManualChangeRef.current = false;
+    }, 1000);
   }, [isConnected, entityMapping]);
 
   // Handle individual light intensity changes with Home Assistant sync
   const createLightChangeHandler = useCallback((lightId: string, setter: (value: number) => void) => {
     return async (newIntensity: number) => {
+      isManualChangeRef.current = true;
       setter(newIntensity);
 
       // Sync with Home Assistant if connected
@@ -104,6 +113,10 @@ const Index = () => {
           await homeAssistant.setLightBrightness(entityId, newIntensity);
         }
       }
+      
+      setTimeout(() => {
+        isManualChangeRef.current = false;
+      }, 1000);
     };
   }, [isConnected, entityMapping]);
 
@@ -117,6 +130,94 @@ const Index = () => {
       description: "Your lights are now synced",
     });
   };
+
+  // Bidirectional sync with Home Assistant - poll for state changes
+  useEffect(() => {
+    if (!isConnected || !entityMapping) return;
+
+    const entityIds = [
+      entityMapping.spotlight,
+      entityMapping.deskLamp,
+      entityMapping.monitorLight,
+    ].filter(Boolean) as string[];
+
+    if (entityIds.length === 0) return;
+
+    console.log("🔄 Starting Home Assistant sync polling");
+
+    const syncStates = async () => {
+      // Skip if user is manually changing lights
+      if (isManualChangeRef.current) {
+        console.log("⏭️  Skipping sync - manual change in progress");
+        return;
+      }
+
+      try {
+        const states = await homeAssistant.getAllEntityStates(entityIds);
+        
+        // Update spotlight
+        if (entityMapping.spotlight && states.has(entityMapping.spotlight)) {
+          const state = states.get(entityMapping.spotlight)!;
+          const newIntensity = state.state === "on" 
+            ? Math.round((state.brightness || 255) / 255 * 100)
+            : 0;
+          
+          setSpotlightIntensity(current => {
+            if (Math.abs(current - newIntensity) > 2) {
+              console.log(`💡 Spotlight synced: ${current} → ${newIntensity}%`);
+              return newIntensity;
+            }
+            return current;
+          });
+        }
+
+        // Update desk lamp
+        if (entityMapping.deskLamp && states.has(entityMapping.deskLamp)) {
+          const state = states.get(entityMapping.deskLamp)!;
+          const newIntensity = state.state === "on" 
+            ? Math.round((state.brightness || 255) / 255 * 100)
+            : 0;
+          
+          setDeskLampIntensity(current => {
+            if (Math.abs(current - newIntensity) > 2) {
+              console.log(`💡 Desk Lamp synced: ${current} → ${newIntensity}%`);
+              return newIntensity;
+            }
+            return current;
+          });
+        }
+
+        // Update monitor light
+        if (entityMapping.monitorLight && states.has(entityMapping.monitorLight)) {
+          const state = states.get(entityMapping.monitorLight)!;
+          const newIntensity = state.state === "on" 
+            ? Math.round((state.brightness || 255) / 255 * 100)
+            : 0;
+          
+          setMonitorLightIntensity(current => {
+            if (Math.abs(current - newIntensity) > 2) {
+              console.log(`💡 Monitor Light synced: ${current} → ${newIntensity}%`);
+              return newIntensity;
+            }
+            return current;
+          });
+        }
+      } catch (error) {
+        console.error("❌ Failed to sync with Home Assistant:", error);
+      }
+    };
+
+    // Initial sync
+    syncStates();
+
+    // Poll every 3 seconds
+    const interval = setInterval(syncStates, 3000);
+
+    return () => {
+      console.log("🛑 Stopping Home Assistant sync polling");
+      clearInterval(interval);
+    };
+  }, [isConnected, entityMapping]);
 
   // Keyboard shortcuts
   useEffect(() => {
