@@ -98,7 +98,9 @@ const Index = () => {
     
     setTimeout(() => {
       isManualChangeRef.current = false;
-    }, 1000);
+      // Force immediate sync after manual change
+      forceSyncStates();
+    }, 500);
   }, [isConnected, entityMapping]);
 
   // Handle individual light intensity changes with Home Assistant sync
@@ -122,7 +124,9 @@ const Index = () => {
       
       setTimeout(() => {
         isManualChangeRef.current = false;
-      }, 1000);
+        // Force immediate sync after manual change
+        forceSyncStates();
+      }, 500);
     };
   }, [isConnected, entityMapping]);
 
@@ -233,6 +237,89 @@ const Index = () => {
     initialSync();
   }, [isConnected, entityMapping]); // Run once when connected
 
+  // Force sync function - immediate sync without conditions
+  const forceSyncStates = useCallback(async () => {
+    if (!isConnected || !entityMapping) return;
+
+    const lightEntityIds = [
+      entityMapping.spotlight,
+      entityMapping.deskLamp,
+      entityMapping.monitorLight,
+    ].filter(Boolean) as string[];
+    
+    const sensorEntityIds = [
+      entityMapping.temperatureSensor,
+      entityMapping.humiditySensor,
+      entityMapping.airQualitySensor,
+    ].filter(Boolean) as string[];
+
+    const allEntityIds = [...lightEntityIds, ...sensorEntityIds];
+    if (allEntityIds.length === 0) return;
+
+    console.log("⚡ Force sync triggered");
+
+    try {
+      const states = await homeAssistant.getAllEntityStates(allEntityIds);
+      
+      // Update spotlight
+      if (entityMapping.spotlight && states.has(entityMapping.spotlight)) {
+        const state = states.get(entityMapping.spotlight)!;
+        const newIntensity = state.state === "on" 
+          ? Math.round((state.brightness || 255) / 255 * 100)
+          : 0;
+        setSpotlightIntensity(newIntensity);
+        console.log(`💡 Spotlight force synced: ${newIntensity}%`);
+      }
+
+      // Update desk lamp
+      if (entityMapping.deskLamp && states.has(entityMapping.deskLamp)) {
+        const state = states.get(entityMapping.deskLamp)!;
+        const newIntensity = state.state === "on" 
+          ? Math.round((state.brightness || 255) / 255 * 100)
+          : 0;
+        setDeskLampIntensity(newIntensity);
+        console.log(`💡 Desk Lamp force synced: ${newIntensity}%`);
+      }
+
+      // Update monitor light
+      if (entityMapping.monitorLight && states.has(entityMapping.monitorLight)) {
+        const state = states.get(entityMapping.monitorLight)!;
+        const newIntensity = state.state === "on" 
+          ? Math.round((state.brightness || 255) / 255 * 100)
+          : 0;
+        setMonitorLightIntensity(newIntensity);
+        console.log(`💡 Monitor Light force synced: ${newIntensity}%`);
+      }
+      
+      // Update sensors
+      if (entityMapping.temperatureSensor && states.has(entityMapping.temperatureSensor)) {
+        const state = states.get(entityMapping.temperatureSensor)!;
+        const tempValue = parseFloat(state.state);
+        if (!isNaN(tempValue)) {
+          setTemperature(tempValue);
+        }
+      }
+      
+      if (entityMapping.humiditySensor && states.has(entityMapping.humiditySensor)) {
+        const state = states.get(entityMapping.humiditySensor)!;
+        const humidityValue = parseFloat(state.state);
+        if (!isNaN(humidityValue)) {
+          setHumidity(Math.round(humidityValue));
+        }
+      }
+      
+      if (entityMapping.airQualitySensor && states.has(entityMapping.airQualitySensor)) {
+        const state = states.get(entityMapping.airQualitySensor)!;
+        const aqValue = parseFloat(state.state);
+        if (!isNaN(aqValue)) {
+          setAirQuality(Math.round(aqValue));
+        }
+      }
+    } catch (error) {
+      console.error("❌ Force sync failed:", error);
+    }
+  }, [isConnected, entityMapping]);
+
   // Bidirectional sync with Home Assistant - poll for state changes
   useEffect(() => {
     if (!isConnected || !entityMapping) return;
@@ -276,7 +363,12 @@ const Index = () => {
             : 0;
           
           setSpotlightIntensity(current => {
-            if (Math.abs(current - newIntensity) > 2) {
+            // Always update if light is off OR intensity difference is significant
+            const shouldUpdate = state.state === "off" 
+              ? newIntensity !== current
+              : Math.abs(current - newIntensity) > 2;
+            
+            if (shouldUpdate) {
               console.log(`💡 Spotlight synced: ${current} → ${newIntensity}%`);
               return newIntensity;
             }
@@ -292,7 +384,12 @@ const Index = () => {
             : 0;
           
           setDeskLampIntensity(current => {
-            if (Math.abs(current - newIntensity) > 2) {
+            // Always update if light is off OR intensity difference is significant
+            const shouldUpdate = state.state === "off" 
+              ? newIntensity !== current
+              : Math.abs(current - newIntensity) > 2;
+            
+            if (shouldUpdate) {
               console.log(`💡 Desk Lamp synced: ${current} → ${newIntensity}%`);
               return newIntensity;
             }
@@ -308,7 +405,12 @@ const Index = () => {
             : 0;
           
           setMonitorLightIntensity(current => {
-            if (Math.abs(current - newIntensity) > 2) {
+            // Always update if light is off OR intensity difference is significant
+            const shouldUpdate = state.state === "off" 
+              ? newIntensity !== current
+              : Math.abs(current - newIntensity) > 2;
+            
+            if (shouldUpdate) {
               console.log(`💡 Monitor Light synced: ${current} → ${newIntensity}%`);
               return newIntensity;
             }
@@ -372,8 +474,8 @@ const Index = () => {
     // Initial sync
     syncStates();
 
-    // Poll every 3 seconds
-    const interval = setInterval(syncStates, 3000);
+    // Poll every 1.5 seconds for faster updates
+    const interval = setInterval(syncStates, 1500);
 
     return () => {
       console.log("🛑 Stopping Home Assistant sync polling");
@@ -381,9 +483,34 @@ const Index = () => {
     };
   }, [isConnected, entityMapping]);
 
-  // Keyboard shortcuts
+  // Window focus/visibility sync - sync immediately when user returns to tab
   useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
+    const handleVisibilityChange = () => {
+      if (!document.hidden && isConnected) {
+        console.log("👀 Tab visible - triggering sync");
+        forceSyncStates();
+      }
+    };
+
+    const handleFocus = () => {
+      if (isConnected) {
+        console.log("🔍 Window focused - triggering sync");
+        forceSyncStates();
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    window.addEventListener('focus', handleFocus);
+
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      window.removeEventListener('focus', handleFocus);
+    };
+  }, [isConnected, forceSyncStates]);
+
+  // Keyboard shortcuts with proper HA sync
+  useEffect(() => {
+    const handleKeyDown = async (e: KeyboardEvent) => {
       // Prevent if user is typing in an input field
       if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) {
         return;
@@ -391,16 +518,46 @@ const Index = () => {
 
       switch (e.key) {
         case '1':
-          // Toggle Desk Lamp
-          setDeskLampIntensity(prev => prev > 0 ? 0 : 100);
+          // Toggle Desk Lamp with HA sync
+          e.preventDefault();
+          const newDeskLampIntensity = deskLampIntensity > 0 ? 0 : 100;
+          isManualChangeRef.current = true;
+          setDeskLampIntensity(newDeskLampIntensity);
+          if (isConnected && entityMapping?.deskLamp) {
+            await homeAssistant.setLightBrightness(entityMapping.deskLamp, newDeskLampIntensity);
+          }
+          setTimeout(() => {
+            isManualChangeRef.current = false;
+            forceSyncStates();
+          }, 500);
           break;
         case '2':
-          // Toggle Monitor Light
-          setMonitorLightIntensity(prev => prev > 0 ? 0 : 100);
+          // Toggle Monitor Light with HA sync
+          e.preventDefault();
+          const newMonitorIntensity = monitorLightIntensity > 0 ? 0 : 100;
+          isManualChangeRef.current = true;
+          setMonitorLightIntensity(newMonitorIntensity);
+          if (isConnected && entityMapping?.monitorLight) {
+            await homeAssistant.setLightBrightness(entityMapping.monitorLight, newMonitorIntensity);
+          }
+          setTimeout(() => {
+            isManualChangeRef.current = false;
+            forceSyncStates();
+          }, 500);
           break;
         case '3':
-          // Toggle Spotlight
-          setSpotlightIntensity(prev => prev > 0 ? 0 : 100);
+          // Toggle Spotlight with HA sync
+          e.preventDefault();
+          const newSpotlightIntensity = spotlightIntensity > 0 ? 0 : 100;
+          isManualChangeRef.current = true;
+          setSpotlightIntensity(newSpotlightIntensity);
+          if (isConnected && entityMapping?.spotlight) {
+            await homeAssistant.setLightBrightness(entityMapping.spotlight, newSpotlightIntensity);
+          }
+          setTimeout(() => {
+            isManualChangeRef.current = false;
+            forceSyncStates();
+          }, 500);
           break;
         case ' ':
           // Master toggle with spacebar
@@ -412,7 +569,7 @@ const Index = () => {
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [masterSwitchOn]);
+  }, [masterSwitchOn, deskLampIntensity, monitorLightIntensity, spotlightIntensity, isConnected, entityMapping, handleMasterToggle, forceSyncStates]);
 
   // Calculate page background color based on light intensities - memoized for performance
   const pageBackgroundColor = useMemo(() => {
