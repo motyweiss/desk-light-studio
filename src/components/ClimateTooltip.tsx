@@ -22,10 +22,14 @@ export const ClimateTooltip = ({
   const mouseX = useMotionValue(0);
   const mouseY = useMotionValue(0);
   
-  const rotateX = useTransform(mouseY, [-0.5, 0.5], [2, -2]);
-  const rotateY = useTransform(mouseX, [-0.5, 0.5], [-3, 3]);
+  const translateX = useTransform(mouseX, [-0.5, 0.5], [-8, 8]);
+  const translateY = useTransform(mouseY, [-0.5, 0.5], [-6, 6]);
+  const rotateX = useTransform(mouseY, [-0.5, 0.5], [3, -3]);
+  const rotateY = useTransform(mouseX, [-0.5, 0.5], [-4, 4]);
   
-  const springConfig = { stiffness: 150, damping: 20 };
+  const springConfig = { stiffness: 120, damping: 25 };
+  const translateXSpring = useSpring(translateX, springConfig);
+  const translateYSpring = useSpring(translateY, springConfig);
   const rotateXSpring = useSpring(rotateX, springConfig);
   const rotateYSpring = useSpring(rotateY, springConfig);
   
@@ -65,13 +69,16 @@ export const ClimateTooltip = ({
   
   return (
     <motion.div
-      className="absolute -bottom-8 z-20 hidden md:block"
+      className="absolute z-20 hidden md:block"
       style={{ 
+        bottom: '-72px',
         left: 'calc(50% - 80px)', 
         transformStyle: 'preserve-3d',
         perspective: 1000,
         rotateX: rotateXSpring,
         rotateY: rotateYSpring,
+        x: translateXSpring,
+        y: translateYSpring,
       }}
       initial={{ opacity: 0, y: 15, scale: 0.9 }}
       animate={{ 
@@ -82,7 +89,10 @@ export const ClimateTooltip = ({
       transition={{ duration: 0.8, delay: 1.2, ease: [0.22, 0.03, 0.26, 1] }}
     >
       <motion.div
-        className="bg-white/15 backdrop-blur-xl border border-white/20 px-4 py-3 rounded-full flex items-center justify-center gap-5 shadow-[0_8px_32px_rgba(0,0,0,0.3)]"
+        className="relative bg-white/15 backdrop-blur-2xl border border-white/20 px-4 py-3 rounded-full flex items-center justify-center gap-5 shadow-[0_8px_32px_rgba(0,0,0,0.3)]"
+        style={{
+          filter: 'blur(0px)',
+        }}
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
         initial={false}
@@ -91,6 +101,13 @@ export const ClimateTooltip = ({
         }}
         transition={{ duration: 0.4, ease: [0.22, 0.03, 0.26, 1] }}
       >
+        {/* Blurred background layer */}
+        <div 
+          className="absolute inset-0 rounded-full bg-white/10 backdrop-blur-xl -z-10"
+          style={{
+            filter: 'blur(20px)',
+          }}
+        />
         {/* Temperature */}
         <div className="flex items-center gap-2">
           <CircularProgress 
