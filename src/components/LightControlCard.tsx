@@ -73,12 +73,12 @@ export const LightControlCard = ({ id, label, intensity, onChange, onHover }: Li
       onClick={handleCardClick}
       onMouseEnter={() => onHover(id)}
       onMouseLeave={() => onHover(null)}
-      className="w-full bg-white/8 backdrop-blur-xl rounded-xl md:rounded-2xl px-2.5 md:px-5 py-4 md:py-3.5 hover:bg-white/12 active:bg-white/15 transition-colors duration-200 cursor-pointer text-left"
+      className="w-full bg-white/8 backdrop-blur-xl rounded-xl md:rounded-2xl px-2.5 md:px-5 py-4 md:py-3.5 hover:bg-white/12 active:bg-white/10 transition-colors duration-300 cursor-pointer text-left"
       transition={{ 
         layout: { duration: 0.25, ease: [0.22, 0.03, 0.26, 1] },
-        scale: { duration: 0.15, ease: [0.22, 0.03, 0.26, 1] }
+        scale: { duration: 0.35, ease: [0.22, 0.03, 0.26, 1] }
       }}
-      whileTap={{ scale: 0.96 }}
+      whileTap={{ scale: 0.98 }}
     >
       <div className="flex items-center gap-2 md:gap-4">
         {/* Icon Circle - Exactly 42x42 pixels with frosted glass effect, no fill */}
