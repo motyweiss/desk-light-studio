@@ -118,6 +118,7 @@ export const LightHotspot = ({
               cy="30"
               r="22"
               fill={isOn ? `rgba(200, 160, 80, ${0.12 + intensityCurve * 0.15})` : "rgba(255, 255, 255, 0.06)"}
+              initial={{ opacity: 0.25, scale: 1 }}
               animate={{
                 opacity: isOn ? [0.4 + intensityRatio * 0.2, 0.7 + intensityRatio * 0.2, 0.4 + intensityRatio * 0.2] : [0.25, 0.4, 0.25],
                 scale: breathingScale,
@@ -180,6 +181,7 @@ export const LightHotspot = ({
                 cy="30"
                 r="11"
                 fill={isOn ? `rgba(200, 160, 80, ${0.2 + intensityCurve * 0.25})` : "rgba(255, 255, 255, 0.07)"}
+                initial={{ opacity: 0.28, scale: 1 }}
                 animate={{
                   opacity: isOn ? (0.6 + intensityCurve * 0.35) : 0.28,
                   scale: isPressed ? 0.88 : isHovered ? 1.15 : 1,
