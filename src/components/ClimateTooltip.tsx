@@ -69,10 +69,10 @@ export const ClimateTooltip = ({
   
   return (
     <motion.div
-      className="absolute z-20 hidden md:block"
+      className="absolute z-20 hidden md:flex items-center justify-center"
       style={{ 
         bottom: '-42px',
-        left: 'calc(50% - 80px)', 
+        left: 'calc(50% - 80px)',
         transformStyle: 'preserve-3d',
         perspective: 1000,
         rotateX: rotateXSpring,
@@ -80,10 +80,9 @@ export const ClimateTooltip = ({
         x: translateXSpring,
         y: translateYSpring,
       }}
-      initial={{ opacity: 0, y: 15, scale: 0.9 }}
+      initial={{ opacity: 0, scale: 0.9 }}
       animate={{ 
         opacity: isLoaded ? 1 : 0,
-        y: isLoaded ? 0 : 15,
         scale: isLoaded ? 1 : 0.9,
       }}
       transition={{ duration: 0.8, delay: 1.2, ease: [0.22, 0.03, 0.26, 1] }}
@@ -94,13 +93,19 @@ export const ClimateTooltip = ({
           boxShadow: '0 4px 24px rgba(0,0,0,0.15), 0 1px 4px rgba(0,0,0,0.1), inset 0 1px 1px rgba(255,255,255,0.1)',
           backdropFilter: 'blur(32px) saturate(180%)',
         }}
+        layout="position"
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
         initial={false}
         animate={{ 
           scale: isHovered ? 1.05 : 1,
+          x: isHovered ? 0 : 0,
         }}
-        transition={{ duration: 0.4, ease: [0.22, 0.03, 0.26, 1] }}
+        transition={{ 
+          duration: 0.4, 
+          ease: [0.22, 0.03, 0.26, 1],
+          layout: { duration: 0.35, ease: [0.22, 0.03, 0.26, 1] }
+        }}
       >
         {/* Internal glow layer matching tooltip aesthetic */}
         <motion.div 
