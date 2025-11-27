@@ -322,7 +322,7 @@ export const RoomInfoPanel = ({ roomName, temperature, humidity, airQuality, mas
       </motion.div>
 
       {/* Light Controls Section */}
-      <div className="rounded-2xl bg-white/[0.02] backdrop-blur-md border border-white/[0.05]">
+      <div className="rounded-2xl bg-white/[0.02] backdrop-blur-md border border-white/[0.05] mt-8">
         <motion.div
           className="space-y-0"
           variants={{
