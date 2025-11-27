@@ -42,14 +42,12 @@ export const ConnectionStatusIndicator = ({
       onMouseMove={handleMouseMove}
     >
       <motion.div
-        className={`w-10 h-10 rounded-full backdrop-blur-xl border flex items-center justify-center ${getStatusColor()} transition-colors duration-300 ${
-          isConnected ? 'border-white/40' : 'border-white/20'
-        }`}
+        className={`w-10 h-10 flex items-center justify-center ${getStatusColor()} transition-colors duration-300`}
         initial={{ opacity: 0, scale: 0.8 }}
         animate={{ opacity: 1, scale: 1 }}
         transition={{ duration: 0.3, delay: 0.6 }}
       >
-        <Zap className="w-5 h-5" />
+        <Zap className="w-5 h-5" strokeWidth={1.5} />
       </motion.div>
 
       {/* Tooltip */}
@@ -80,7 +78,7 @@ export const ConnectionStatusIndicator = ({
           <div className="bg-white/8 backdrop-blur-[24px] pl-5 pr-8 py-2.5 rounded-full shadow-[0_4px_24px_rgba(0,0,0,0.15),0_1px_4px_rgba(0,0,0,0.1),inset_0_1px_1px_rgba(255,255,255,0.1)] border border-white/20">
             <div className="flex items-center gap-3">
               <div className={`w-9 h-9 rounded-full backdrop-blur-xl flex items-center justify-center transition-colors duration-500 ${getStatusColor()}`}>
-                <Zap className="w-5 h-5" />
+                <Zap className="w-5 h-5" strokeWidth={1.5} />
               </div>
               <div className="text-xs font-light text-foreground whitespace-nowrap pr-[15px]">
                 {getTooltipText()}
