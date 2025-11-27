@@ -329,11 +329,11 @@ export const LightHotspot = ({
                   transition: {
                     opacity: {
                       duration: 0.2,
-                      ease: [0.25, 0.1, 0.25, 1]
+                      ease: "easeInOut"
                     },
                     scale: {
-                      duration: 0.35,
-                      ease: [0.34, 1.26, 0.64, 1]
+                      duration: 0.3,
+                      ease: "easeInOut"
                     },
                     x: {
                       type: "spring",
@@ -351,8 +351,8 @@ export const LightHotspot = ({
                   opacity: 0,
                   scale: 0.94,
                   transition: {
-                    duration: 0.15,
-                    ease: [0.4, 0, 1, 1]
+                    duration: 0.2,
+                    ease: "easeInOut"
                   }
                 }}
                 style={{
@@ -367,9 +367,9 @@ export const LightHotspot = ({
                   animate={{ 
                     opacity: 1,
                     transition: { 
-                      delay: 0.12,
-                      duration: 0.3,
-                      ease: [0.25, 0.1, 0.25, 1]
+                      delay: 0.1,
+                      duration: 0.25,
+                      ease: "easeInOut"
                     }
                   }}
                   style={{
@@ -392,8 +392,8 @@ export const LightHotspot = ({
                     }}
                     transition={{
                       delay: 0.08,
-                      duration: 0.3,
-                      ease: [0.34, 1.26, 0.64, 1]
+                      duration: 0.25,
+                      ease: "easeInOut"
                     }}
                     onClick={(e) => {
                       e.stopPropagation();
@@ -419,9 +419,9 @@ export const LightHotspot = ({
                         x: 0 
                       }}
                       transition={{
-                        delay: 0.12,
-                        duration: 0.28,
-                        ease: [0.25, 0.1, 0.25, 1]
+                        delay: 0.1,
+                        duration: 0.25,
+                        ease: "easeInOut"
                       }}
                     >
                       {label}
@@ -436,9 +436,9 @@ export const LightHotspot = ({
                         x: 0 
                       }}
                       transition={{
-                        delay: 0.16,
-                        duration: 0.28,
-                        ease: [0.25, 0.1, 0.25, 1]
+                        delay: 0.14,
+                        duration: 0.25,
+                        ease: "easeInOut"
                       }}
                     >
                       {intensity > 0 ? `${Math.round(intensity)}%` : 'Off'}
