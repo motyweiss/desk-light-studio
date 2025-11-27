@@ -458,7 +458,7 @@ export const LightHotspot = ({
                   }}
                 >
                   {/* Lamp icon circle - Exactly 42x42 pixels */}
-                  <div
+                  <motion.div
                     className={`
                       w-[42px] h-[42px] rounded-full flex items-center justify-center
                       transition-all duration-300 cursor-pointer flex-shrink-0
@@ -472,14 +472,28 @@ export const LightHotspot = ({
                       onIntensityChange(intensity > 0 ? 0 : 100);
                     }}
                   >
-                    <IconComponent 
-                      className={`w-8 h-8 transition-all duration-300 ${
-                        intensity > 0 
-                          ? 'text-white' 
-                          : 'text-[rgb(180,180,180)]'
-                      }`}
-                    />
-                  </div>
+                    <motion.div
+                      initial={{ scale: 0.6, opacity: 0 }}
+                      animate={{
+                        scale: intensity > 0 ? 1 : 0.88,
+                        opacity: 1,
+                        rotateZ: intensity > 0 ? 0 : -10
+                      }}
+                      transition={{
+                        scale: { duration: 0.4, ease: [0.22, 0.03, 0.26, 1] },
+                        opacity: { duration: 0.35, ease: [0.22, 0.03, 0.26, 1] },
+                        rotateZ: { duration: 0.35, ease: [0.22, 0.03, 0.26, 1] }
+                      }}
+                    >
+                      <IconComponent 
+                        className={`w-7 h-7 transition-colors duration-300 ${
+                          intensity > 0 
+                            ? 'text-white' 
+                            : 'text-[rgb(180,180,180)]'
+                        }`}
+                      />
+                    </motion.div>
+                  </motion.div>
                   
                   {/* Text content - left aligned */}
                   <div className="flex flex-col items-start">
