@@ -223,7 +223,7 @@ const Index = () => {
 
           {/* Climate Data - Minimal inline version */}
           <motion.div 
-            className="flex justify-center gap-8 mb-3"
+            className="flex gap-8 mb-3"
             initial={{ opacity: 0, y: 20 }}
             animate={{ 
               opacity: isLoaded ? 1 : 0,
