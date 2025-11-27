@@ -495,7 +495,10 @@ const Index = () => {
             {/* PM 2.5 - Icon + Number only */}
             <div className="flex items-center gap-2">
               <Wind className="w-5 h-5 text-white/60" strokeWidth={1.5} />
-              <div className="text-base font-light text-white tabular-nums">{airQuality}</div>
+              <div className="text-base font-light text-white tabular-nums">
+                {airQuality}
+                <span className="text-[10px] text-white/40 ml-1">µg/m³</span>
+              </div>
             </div>
           </motion.div>
         </motion.div>
