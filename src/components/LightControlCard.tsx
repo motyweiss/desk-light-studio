@@ -64,26 +64,30 @@ export const LightControlCard = ({ id, label, intensity, onChange, onHover }: Li
       onClick={handleCardClick}
       onMouseEnter={() => onHover(true)}
       onMouseLeave={() => onHover(false)}
-      className="w-full bg-white/8 backdrop-blur-xl rounded-xl md:rounded-2xl px-4 md:px-5 py-3 md:py-3.5 hover:bg-white/12 active:bg-white/15 transition-all duration-300 cursor-pointer text-left"
-      transition={{ layout: { duration: 0.3, ease: [0.22, 0.03, 0.26, 1] } }}
-      whileTap={{ scale: 0.98 }}
+      className="w-full bg-white/8 backdrop-blur-xl rounded-xl md:rounded-2xl px-4 md:px-5 py-3 md:py-3.5 hover:bg-white/12 active:bg-white/15 transition-colors duration-200 cursor-pointer text-left"
+      transition={{ 
+        layout: { duration: 0.25, ease: [0.22, 0.03, 0.26, 1] },
+        scale: { duration: 0.15, ease: [0.22, 0.03, 0.26, 1] }
+      }}
+      whileTap={{ scale: 0.96 }}
     >
       <div className="flex items-center gap-3 md:gap-4">
         {/* Icon Circle */}
         <motion.div
-          className={`w-7 h-7 md:w-8 md:h-8 rounded-full flex items-center justify-center transition-colors duration-300 pointer-events-none flex-shrink-0 ${
-            isOn 
-              ? 'bg-[hsl(38_70%_58%/0.2)]' 
-              : 'bg-white/10'
-          }`}
+          className="w-7 h-7 md:w-8 md:h-8 rounded-full flex items-center justify-center pointer-events-none flex-shrink-0"
+          animate={{
+            backgroundColor: isOn ? 'hsl(38 70% 58% / 0.2)' : 'rgba(255, 255, 255, 0.1)'
+          }}
+          transition={{ duration: 0.3, ease: [0.22, 0.03, 0.26, 1] }}
         >
-          <Lightbulb 
-            className={`w-3.5 h-3.5 md:w-4 md:h-4 transition-all duration-300 ${
-              isOn 
-                ? 'text-[hsl(38_70%_58%)]' 
-                : 'text-white/40'
-            }`}
-          />
+          <motion.div
+            animate={{
+              color: isOn ? 'hsl(38 70% 58%)' : 'rgba(255, 255, 255, 0.4)'
+            }}
+            transition={{ duration: 0.3, ease: [0.22, 0.03, 0.26, 1] }}
+          >
+            <Lightbulb className="w-3.5 h-3.5 md:w-4 md:h-4" />
+          </motion.div>
         </motion.div>
 
         {/* Text Info */}

@@ -58,13 +58,13 @@ export const RoomInfoPanel = ({ roomName, temperature, humidity, masterSwitchOn,
       {/* Room Title with Master Switch */}
       <motion.div 
         className="flex items-center justify-between"
-        initial={{ opacity: 0, x: -20 }}
+        initial={{ opacity: 0, y: 10 }}
         animate={{ 
           opacity: isLoaded ? 1 : 0,
-          x: isLoaded ? 0 : -20
+          y: isLoaded ? 0 : 10
         }}
         transition={{ 
-          duration: 0.8,
+          duration: 0.6,
           delay: 0,
           ease: [0.22, 0.03, 0.26, 1]
         }}
@@ -109,14 +109,14 @@ export const RoomInfoPanel = ({ roomName, temperature, humidity, masterSwitchOn,
       {/* Climate Info */}
       <motion.div 
         className="flex gap-4 md:gap-6 py-3 md:py-6"
-        initial={{ opacity: 0, y: 20 }}
+        initial={{ opacity: 0, y: 10 }}
         animate={{ 
           opacity: isLoaded ? 1 : 0,
-          y: isLoaded ? 0 : 20
+          y: isLoaded ? 0 : 10
         }}
         transition={{ 
-          duration: 0.8,
-          delay: 0.3,
+          duration: 0.6,
+          delay: 0.2,
           ease: [0.22, 0.03, 0.26, 1]
         }}
       >
@@ -158,8 +158,8 @@ export const RoomInfoPanel = ({ roomName, temperature, humidity, masterSwitchOn,
             opacity: isLoaded ? 1 : 0
           }}
           transition={{ 
-            duration: 0.8,
-            delay: 1.2,
+            duration: 0.6,
+            delay: 0.6,
             ease: [0.22, 0.03, 0.26, 1]
           }}
           style={{ originX: 0 }}
@@ -172,8 +172,8 @@ export const RoomInfoPanel = ({ roomName, temperature, humidity, masterSwitchOn,
             show: {
               opacity: 1,
               transition: {
-                delayChildren: 1.4,
-                staggerChildren: 0.12
+                delayChildren: 0.8,
+                staggerChildren: 0.08
               }
             }
           }}
@@ -184,10 +184,10 @@ export const RoomInfoPanel = ({ roomName, temperature, humidity, masterSwitchOn,
             <motion.div
               key={light.id}
               variants={{
-                hidden: { opacity: 0, y: 20, scale: 0.97 },
+                hidden: { opacity: 0, y: 15, scale: 0.95 },
                 show: { opacity: 1, y: 0, scale: 1 }
               }}
-              transition={{ duration: 0.6, ease: [0.22, 0.03, 0.26, 1] }}
+              transition={{ duration: 0.5, ease: [0.22, 0.03, 0.26, 1] }}
             >
               {index > 0 && (
                 <div className="h-px bg-white/10 mb-3" />
