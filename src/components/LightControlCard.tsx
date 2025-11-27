@@ -103,7 +103,7 @@ export const LightControlCard = ({ id, label, intensity, onChange, onHover }: Li
         </div>
 
         {/* Text Info */}
-        <div className="flex-1 text-left min-w-0">
+        <div className="flex-1 text-left min-w-0 space-y-1">
           <div className="font-light text-sm md:text-base text-foreground tracking-wide">{label}</div>
           <motion.div 
             className="text-xs md:text-xs font-light tracking-wider tabular-nums"
