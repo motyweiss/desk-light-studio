@@ -10,21 +10,42 @@ import { Loader2, CheckCircle2, AlertCircle } from "lucide-react";
 interface SettingsDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onSave: (config: { baseUrl: string; accessToken: string }, mapping: { deskLamp?: string; monitorLight?: string; spotlight?: string }) => void;
+  onSave: (
+    config: { baseUrl: string; accessToken: string }, 
+    mapping: { 
+      deskLamp?: string; 
+      monitorLight?: string; 
+      spotlight?: string;
+      temperatureSensor?: string;
+      humiditySensor?: string;
+      airQualitySensor?: string;
+    }
+  ) => void;
   currentConfig: { baseUrl: string; accessToken: string } | null;
-  currentMapping: { deskLamp?: string; monitorLight?: string; spotlight?: string };
+  currentMapping: { 
+    deskLamp?: string; 
+    monitorLight?: string; 
+    spotlight?: string;
+    temperatureSensor?: string;
+    humiditySensor?: string;
+    airQualitySensor?: string;
+  };
 }
 
 export const SettingsDialog = ({ open, onOpenChange, onSave, currentConfig, currentMapping }: SettingsDialogProps) => {
-  const [baseUrl, setBaseUrl] = useState(currentConfig?.baseUrl || "https://4q8tnepf0wp8hemaazk4ftgeuprqycwx.ui.nabu.casa");
-  const [accessToken, setAccessToken] = useState(currentConfig?.accessToken || "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJjMTg5MDdmNGIwZjc0MTMwOWMwNjVhOGQ5ZWMzZTVkMyIsImlhdCI6MTc2NDI1MjkzMCwiZXhwIjoyMDc5NjEyOTMwfQ.8Bf9hCZxENEek09mImxvbfFP4RsnkS-Twf61m9CeKsw");
+  const [baseUrl, setBaseUrl] = useState(currentConfig?.baseUrl || "");
+  const [accessToken, setAccessToken] = useState(currentConfig?.accessToken || "");
   const [deskLamp, setDeskLamp] = useState(currentMapping.deskLamp || "light.go");
   const [monitorLight, setMonitorLight] = useState(currentMapping.monitorLight || "light.screen");
   const [spotlight, setSpotlight] = useState(currentMapping.spotlight || "light.door");
+  const [temperatureSensor, setTemperatureSensor] = useState(currentMapping.temperatureSensor || "sensor.dyson_pure_temperature");
+  const [humiditySensor, setHumiditySensor] = useState(currentMapping.humiditySensor || "sensor.dyson_pure_humidity");
+  const [airQualitySensor, setAirQualitySensor] = useState(currentMapping.airQualitySensor || "sensor.dyson_pure_pm_2_5");
   
   const [isTestingConnection, setIsTestingConnection] = useState(false);
   const [connectionStatus, setConnectionStatus] = useState<{ success: boolean; version?: string; error?: string } | null>(null);
   const [availableLights, setAvailableLights] = useState<HAEntity[]>([]);
+  const [availableSensors, setAvailableSensors] = useState<HAEntity[]>([]);
   const [isLoadingLights, setIsLoadingLights] = useState(false);
 
   useEffect(() => {
@@ -36,6 +57,9 @@ export const SettingsDialog = ({ open, onOpenChange, onSave, currentConfig, curr
       setDeskLamp(currentMapping.deskLamp || "light.go");
       setMonitorLight(currentMapping.monitorLight || "light.screen");
       setSpotlight(currentMapping.spotlight || "light.door");
+      setTemperatureSensor(currentMapping.temperatureSensor || "sensor.dyson_pure_temperature");
+      setHumiditySensor(currentMapping.humiditySensor || "sensor.dyson_pure_humidity");
+      setAirQualitySensor(currentMapping.airQualitySensor || "sensor.dyson_pure_pm_2_5");
     }
   }, [currentConfig, currentMapping]);
 
@@ -52,8 +76,12 @@ export const SettingsDialog = ({ open, onOpenChange, onSave, currentConfig, curr
     
     if (result.success) {
       setIsLoadingLights(true);
-      const lights = await homeAssistant.getLights();
+      const [lights, sensors] = await Promise.all([
+        homeAssistant.getLights(),
+        homeAssistant.getSensors()
+      ]);
       setAvailableLights(lights);
+      setAvailableSensors(sensors);
       setIsLoadingLights(false);
     }
     
@@ -66,41 +94,46 @@ export const SettingsDialog = ({ open, onOpenChange, onSave, currentConfig, curr
     
     onSave(
       { baseUrl: normalizedUrl, accessToken },
-      { deskLamp, monitorLight, spotlight }
+      { deskLamp, monitorLight, spotlight, temperatureSensor, humiditySensor, airQualitySensor }
     );
     onOpenChange(false);
   };
 
-  const isFormValid = baseUrl && accessToken && deskLamp && monitorLight && spotlight;
+  const isFormValid = baseUrl && accessToken && deskLamp && monitorLight && spotlight && temperatureSensor && humiditySensor && airQualitySensor;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto bg-white/[0.08] backdrop-blur-[40px] border border-white/15 shadow-[0_8px_32px_rgba(0,0,0,0.35)]">
         <DialogHeader>
-          <DialogTitle className="text-2xl font-light flex items-center gap-2">
-            <span>⚙️</span> Home Assistant Configuration
+          <DialogTitle 
+            className="text-3xl font-light tracking-tight text-foreground flex items-center gap-3"
+            style={{ fontFamily: "'Cormorant Garamond', serif" }}
+          >
+            <span className="text-2xl">⚙️</span> 
+            Home Assistant Configuration
           </DialogTitle>
         </DialogHeader>
 
-        <div className="space-y-6 py-4">
+        <div className="space-y-6 py-6">
           {/* Connection Status */}
           <AnimatePresence mode="wait">
             {connectionStatus && (
               <motion.div
-                initial={{ opacity: 0, y: -10 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -10 }}
-                className={`p-3 rounded-lg border ${
+                initial={{ opacity: 0, y: -10, scale: 0.95 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, y: -10, scale: 0.95 }}
+                transition={{ duration: 0.2, ease: [0.22, 0.03, 0.26, 1] }}
+                className={`p-4 rounded-xl backdrop-blur-xl border ${
                   connectionStatus.success
-                    ? "bg-green-500/10 border-green-500/30 text-green-300"
-                    : "bg-red-500/10 border-red-500/30 text-red-300"
+                    ? "bg-green-500/[0.08] border-green-400/30 text-green-200"
+                    : "bg-red-500/[0.08] border-red-400/30 text-red-200"
                 }`}
               >
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-3">
                   {connectionStatus.success ? (
-                    <CheckCircle2 className="w-4 h-4" />
+                    <CheckCircle2 className="w-5 h-5 flex-shrink-0" />
                   ) : (
-                    <AlertCircle className="w-4 h-4" />
+                    <AlertCircle className="w-5 h-5 flex-shrink-0" />
                   )}
                   <span className="text-sm font-light">
                     {connectionStatus.success
@@ -113,28 +146,30 @@ export const SettingsDialog = ({ open, onOpenChange, onSave, currentConfig, curr
           </AnimatePresence>
 
           {/* Base URL */}
-          <div className="space-y-2">
-            <label className="text-sm font-light text-foreground/80">Base URL</label>
+          <div className="space-y-3">
+            <label className="text-sm font-light text-white/70 tracking-wide">Base URL</label>
             <Input
               type="text"
               placeholder="https://your-home-assistant.duckdns.org:8123"
               value={baseUrl}
               onChange={(e) => setBaseUrl(e.target.value)}
+              className="h-12 rounded-xl bg-white/[0.06] border-white/15 text-white placeholder:text-white/30 focus-visible:ring-[hsl(43_88%_60%/0.3)] focus-visible:border-[hsl(43_88%_60%/0.5)] transition-all duration-200"
             />
-            <p className="text-xs text-foreground/50">Your Home Assistant instance URL (with port if needed)</p>
+            <p className="text-xs text-white/40 font-light">Your Home Assistant instance URL (with port if needed)</p>
           </div>
 
           {/* Access Token */}
-          <div className="space-y-2">
-            <label className="text-sm font-light text-foreground/80">Long-Lived Access Token</label>
+          <div className="space-y-3">
+            <label className="text-sm font-light text-white/70 tracking-wide">Long-Lived Access Token</label>
             <Input
               type="password"
               placeholder="Enter your Home Assistant token"
               value={accessToken}
               onChange={(e) => setAccessToken(e.target.value)}
+              className="h-12 rounded-xl bg-white/[0.06] border-white/15 text-white placeholder:text-white/30 focus-visible:ring-[hsl(43_88%_60%/0.3)] focus-visible:border-[hsl(43_88%_60%/0.5)] transition-all duration-200 font-mono text-sm tracking-tight"
             />
-            <p className="text-xs text-foreground/50 flex items-center gap-1">
-              🔒 Token is stored securely in your browser
+            <p className="text-xs text-white/40 font-light flex items-center gap-1.5">
+              <span className="text-sm">🔒</span> Token is stored securely in your browser
             </p>
           </div>
 
@@ -143,8 +178,7 @@ export const SettingsDialog = ({ open, onOpenChange, onSave, currentConfig, curr
             <Button
               onClick={handleTestConnection}
               disabled={!baseUrl || !accessToken || isTestingConnection}
-              variant="primary"
-              className="w-full"
+              className="w-full h-12 rounded-xl bg-[hsl(43_88%_60%)] hover:bg-[hsl(43_88%_65%)] text-white font-light tracking-wide text-base border-0 shadow-[0_4px_16px_hsl(43_88%_60%/0.25)] disabled:opacity-40 disabled:shadow-none transition-all duration-200"
             >
               {isTestingConnection ? (
                 <>
@@ -162,21 +196,22 @@ export const SettingsDialog = ({ open, onOpenChange, onSave, currentConfig, curr
             <motion.div
               initial={{ opacity: 0, height: 0 }}
               animate={{ opacity: 1, height: "auto" }}
-              className="space-y-4 pt-4 border-t border-white/10"
+              transition={{ duration: 0.3, ease: [0.22, 0.03, 0.26, 1] }}
+              className="space-y-5 pt-6 border-t border-white/10"
             >
-              <h3 className="text-sm font-light text-foreground/80">Entity Mapping</h3>
+              <h3 className="text-base font-light text-white/80 tracking-wide">Entity Mapping</h3>
               
               {isLoadingLights ? (
-                <div className="flex items-center justify-center py-8">
-                  <Loader2 className="w-6 h-6 animate-spin text-foreground/50" />
+                <div className="flex items-center justify-center py-12">
+                  <Loader2 className="w-6 h-6 animate-spin text-white/40" />
                 </div>
               ) : (
-                <>
+                <div className="space-y-4">
                   {/* Desk Lamp */}
                   <div className="space-y-2">
-                    <label className="text-sm font-light text-foreground/60">Desk Lamp</label>
+                    <label className="text-sm font-light text-white/60">Desk Lamp</label>
                     <Select value={deskLamp} onValueChange={setDeskLamp}>
-                      <SelectTrigger>
+                      <SelectTrigger className="h-11 rounded-xl bg-white/[0.06] border-white/15 text-white">
                         <SelectValue placeholder="Select entity..." />
                       </SelectTrigger>
                       <SelectContent>
@@ -191,9 +226,9 @@ export const SettingsDialog = ({ open, onOpenChange, onSave, currentConfig, curr
 
                   {/* Monitor Light */}
                   <div className="space-y-2">
-                    <label className="text-sm font-light text-foreground/60">Monitor Light</label>
+                    <label className="text-sm font-light text-white/60">Monitor Light</label>
                     <Select value={monitorLight} onValueChange={setMonitorLight}>
-                      <SelectTrigger>
+                      <SelectTrigger className="h-11 rounded-xl bg-white/[0.06] border-white/15 text-white">
                         <SelectValue placeholder="Select entity..." />
                       </SelectTrigger>
                       <SelectContent>
@@ -208,9 +243,9 @@ export const SettingsDialog = ({ open, onOpenChange, onSave, currentConfig, curr
 
                   {/* Spotlight */}
                   <div className="space-y-2">
-                    <label className="text-sm font-light text-foreground/60">Spotlight</label>
+                    <label className="text-sm font-light text-white/60">Spotlight</label>
                     <Select value={spotlight} onValueChange={setSpotlight}>
-                      <SelectTrigger>
+                      <SelectTrigger className="h-11 rounded-xl bg-white/[0.06] border-white/15 text-white">
                         <SelectValue placeholder="Select entity..." />
                       </SelectTrigger>
                       <SelectContent>
@@ -222,22 +257,80 @@ export const SettingsDialog = ({ open, onOpenChange, onSave, currentConfig, curr
                       </SelectContent>
                     </Select>
                   </div>
-                </>
+
+                  {/* Sensor Section */}
+                  <div className="h-px bg-white/10 my-6" />
+                  
+                  <h3 className="text-base font-light text-white/80 tracking-wide mb-4">Climate Sensors</h3>
+
+                  {/* Temperature Sensor */}
+                  <div className="space-y-2">
+                    <label className="text-sm font-light text-white/60">Temperature Sensor</label>
+                    <Select value={temperatureSensor} onValueChange={setTemperatureSensor}>
+                      <SelectTrigger className="h-11 rounded-xl bg-white/[0.06] border-white/15 text-white">
+                        <SelectValue placeholder="Select sensor..." />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {availableSensors.map((sensor) => (
+                          <SelectItem key={sensor.entity_id} value={sensor.entity_id}>
+                            {sensor.attributes.friendly_name || sensor.entity_id}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  {/* Humidity Sensor */}
+                  <div className="space-y-2">
+                    <label className="text-sm font-light text-white/60">Humidity Sensor</label>
+                    <Select value={humiditySensor} onValueChange={setHumiditySensor}>
+                      <SelectTrigger className="h-11 rounded-xl bg-white/[0.06] border-white/15 text-white">
+                        <SelectValue placeholder="Select sensor..." />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {availableSensors.map((sensor) => (
+                          <SelectItem key={sensor.entity_id} value={sensor.entity_id}>
+                            {sensor.attributes.friendly_name || sensor.entity_id}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  {/* Air Quality Sensor */}
+                  <div className="space-y-2">
+                    <label className="text-sm font-light text-white/60">PM 2.5 Sensor</label>
+                    <Select value={airQualitySensor} onValueChange={setAirQualitySensor}>
+                      <SelectTrigger className="h-11 rounded-xl bg-white/[0.06] border-white/15 text-white">
+                        <SelectValue placeholder="Select sensor..." />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {availableSensors.map((sensor) => (
+                          <SelectItem key={sensor.entity_id} value={sensor.entity_id}>
+                            {sensor.attributes.friendly_name || sensor.entity_id}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
               )}
             </motion.div>
           )}
         </div>
 
         {/* Footer Buttons */}
-        <div className="flex gap-2 pt-4">
-          <Button variant="outline" onClick={() => onOpenChange(false)} className="flex-1">
+        <div className="flex gap-3 pt-6 border-t border-white/10">
+          <Button 
+            onClick={() => onOpenChange(false)} 
+            className="flex-1 h-11 rounded-xl bg-white/[0.06] hover:bg-white/[0.1] text-white border border-white/15 font-light tracking-wide"
+          >
             Cancel
           </Button>
           <Button
-            variant="primary"
             onClick={handleSave}
             disabled={!isFormValid}
-            className="flex-1"
+            className="flex-1 h-11 rounded-xl bg-[hsl(43_88%_60%)] hover:bg-[hsl(43_88%_65%)] text-white font-light tracking-wide border-0 shadow-[0_4px_16px_hsl(43_88%_60%/0.25)] disabled:opacity-40 disabled:shadow-none transition-all duration-200"
           >
             Save & Connect
           </Button>

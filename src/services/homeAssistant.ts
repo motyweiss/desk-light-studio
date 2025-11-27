@@ -77,6 +77,22 @@ class HomeAssistantService {
     }
   }
 
+  async getSensors(): Promise<HAEntity[]> {
+    try {
+      const response = await fetch(`${this.config?.baseUrl}/api/states`, {
+        headers: this.getHeaders(),
+      });
+
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+
+      const entities: HAEntity[] = await response.json();
+      return entities.filter(e => e.entity_id.startsWith("sensor."));
+    } catch (error) {
+      console.error("Failed to get sensors:", error);
+      return [];
+    }
+  }
+
   async getEntityState(entityId: string): Promise<HAEntity | null> {
     try {
       const response = await fetch(`${this.config?.baseUrl}/api/states/${entityId}`, {

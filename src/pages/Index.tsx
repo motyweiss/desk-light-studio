@@ -128,7 +128,14 @@ const Index = () => {
 
   const handleSaveSettings = (
     newConfig: { baseUrl: string; accessToken: string },
-    newMapping: { deskLamp?: string; monitorLight?: string; spotlight?: string }
+    newMapping: { 
+      deskLamp?: string; 
+      monitorLight?: string; 
+      spotlight?: string;
+      temperatureSensor?: string;
+      humiditySensor?: string;
+      airQualitySensor?: string;
+    }
   ) => {
     saveConfig(newConfig, newMapping);
     toast({
