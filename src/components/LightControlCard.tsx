@@ -138,11 +138,12 @@ export const LightControlCard = ({ id, label, intensity, onChange, onHover }: Li
       whileTap={{ scale: 0.96 }}
     >
       <div className="flex items-center gap-3 md:gap-4">
-        {/* Icon Circle - Exactly 42x42 pixels */}
+        {/* Icon Circle - Exactly 42x42 pixels with frosted glass effect */}
         <motion.div
-          className="w-[42px] h-[42px] rounded-full flex items-center justify-center pointer-events-none flex-shrink-0"
+          className="w-[42px] h-[42px] rounded-full flex items-center justify-center pointer-events-none flex-shrink-0 backdrop-blur-xl border border-white/10"
           animate={{
-            backgroundColor: isOn ? 'rgba(255, 255, 255, 0.15)' : 'rgba(255, 255, 255, 0.08)'
+            backgroundColor: isOn ? 'rgba(255, 255, 255, 0.12)' : 'rgba(255, 255, 255, 0.06)',
+            borderColor: isOn ? 'rgba(255, 255, 255, 0.15)' : 'rgba(255, 255, 255, 0.08)'
           }}
           transition={{ duration: 0.3, ease: [0.22, 0.03, 0.26, 1] }}
         >
