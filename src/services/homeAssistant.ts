@@ -7,6 +7,9 @@ export interface EntityMapping {
   deskLamp?: string;
   monitorLight?: string;
   spotlight?: string;
+  temperatureSensor?: string;
+  humiditySensor?: string;
+  airQualitySensor?: string;
 }
 
 export interface HAEntity {
