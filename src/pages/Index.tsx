@@ -200,7 +200,7 @@ const Index = () => {
       <div className="flex flex-col md:flex-row items-center gap-8 md:gap-16 max-w-7xl w-full relative z-10 pb-[120px] md:pb-0">
         {/* Mobile: Room Info Header (Title, Climate, Master Switch) */}
         <motion.div 
-          className="w-full md:hidden"
+          className="w-full md:hidden pt-[100px]"
           initial={{ opacity: 0, y: 20 }}
           animate={{ 
             opacity: isLoaded ? 1 : 0,
@@ -215,7 +215,7 @@ const Index = () => {
           {/* Room Title with Master Switch */}
           <div className="flex items-center justify-between mb-6">
             <motion.h1 
-              className="text-5xl font-light tracking-tight text-foreground"
+              className="text-4xl font-light tracking-tight text-foreground"
               style={{ fontFamily: "'Cormorant Garamond', serif" }}
               initial={{ opacity: 0, y: 10 }}
               animate={{ 
