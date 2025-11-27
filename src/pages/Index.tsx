@@ -43,6 +43,10 @@ const Index = () => {
   // Ref to track last manual change timestamp (instead of boolean)
   const lastManualChangeRef = useRef<number>(0);
   
+  // Connection retry state
+  const [isReconnecting, setIsReconnecting] = useState(false);
+  const reconnectAttemptRef = useRef(0);
+  
   // Home Assistant integration
   const { toast } = useToast();
   const { config, entityMapping, isConnected, saveConfig } = useHomeAssistantConfig();
@@ -229,6 +233,14 @@ const Index = () => {
         }
       } catch (error) {
         console.error("❌ Failed to perform initial sync:", error);
+        
+        // Mark as reconnecting on initial sync failure
+        setIsReconnecting(true);
+        toast({
+          title: "Connection Failed",
+          description: "Unable to connect to Home Assistant. Retrying...",
+          variant: "destructive",
+        });
       }
     };
 
@@ -315,6 +327,11 @@ const Index = () => {
       }
     } catch (error) {
       console.error("❌ Force sync failed:", error);
+      
+      // Mark as reconnecting if force sync fails
+      if (!isReconnecting) {
+        setIsReconnecting(true);
+      }
     }
   }, [isConnected, entityMapping]);
 
@@ -346,10 +363,14 @@ const Index = () => {
       try {
         const states = await homeAssistant.getAllEntityStates(allEntityIds);
         
-        if (states.size === 0) {
-          console.log("⚠️  No states returned, retrying in 500ms");
-          setTimeout(syncStates, 500);
-          return;
+        // Connection successful - reset reconnection state
+        if (isReconnecting) {
+          setIsReconnecting(false);
+          reconnectAttemptRef.current = 0;
+          toast({
+            title: "Reconnected",
+            description: "Successfully reconnected to Home Assistant",
+          });
         }
         
         // Update light entities
@@ -472,6 +493,25 @@ const Index = () => {
         }
       } catch (error) {
         console.error("❌ Failed to sync with Home Assistant:", error);
+        
+        // Mark as reconnecting if not already
+        if (!isReconnecting) {
+          setIsReconnecting(true);
+          toast({
+            title: "Connection Lost",
+            description: "Attempting to reconnect to Home Assistant...",
+            variant: "destructive",
+          });
+        }
+        
+        // Increment reconnection attempt counter
+        reconnectAttemptRef.current += 1;
+        const retryCount = homeAssistant.getRetryCount();
+        
+        // Log reconnection attempt
+        if (reconnectAttemptRef.current % 5 === 0) {
+          console.warn(`🔄 Reconnection attempt ${reconnectAttemptRef.current} (retry count: ${retryCount})`);
+        }
       }
     };
 
@@ -615,7 +655,7 @@ const Index = () => {
   return (
     <>
       <LoadingOverlay isLoading={isLoading} />
-      <ConnectionStatusIndicator isConnected={isConnected} />
+      <ConnectionStatusIndicator isConnected={isConnected} isReconnecting={isReconnecting} />
       <SettingsButton onClick={() => setSettingsOpen(true)} />
       <SettingsDialog
         open={settingsOpen}

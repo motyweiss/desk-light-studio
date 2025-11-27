@@ -23,6 +23,9 @@ export interface HAEntity {
 
 class HomeAssistantService {
   private config: HomeAssistantConfig | null = null;
+  private retryCount = 0;
+  private maxRetries = 5;
+  private baseRetryDelay = 1000; // Start with 1 second
 
   setConfig(config: HomeAssistantConfig) {
     // Remove trailing slash from baseUrl to prevent double slashes
@@ -38,6 +41,47 @@ class HomeAssistantService {
       "Authorization": `Bearer ${this.config.accessToken}`,
       "Content-Type": "application/json",
     };
+  }
+
+  private async retryWithBackoff<T>(
+    operation: () => Promise<T>,
+    operationName: string
+  ): Promise<T> {
+    let lastError: Error | null = null;
+    
+    for (let attempt = 0; attempt <= this.maxRetries; attempt++) {
+      try {
+        const result = await operation();
+        // Reset retry count on success
+        if (this.retryCount > 0) {
+          console.log(`✅ ${operationName} succeeded after ${this.retryCount} retries`);
+          this.retryCount = 0;
+        }
+        return result;
+      } catch (error) {
+        lastError = error as Error;
+        this.retryCount = attempt + 1;
+        
+        if (attempt < this.maxRetries) {
+          // Calculate exponential backoff delay: 1s, 2s, 4s, 8s, 16s
+          const delay = this.baseRetryDelay * Math.pow(2, attempt);
+          console.warn(`⚠️  ${operationName} failed (attempt ${attempt + 1}/${this.maxRetries + 1}), retrying in ${delay}ms...`);
+          console.warn(`   Error: ${lastError.message}`);
+          await new Promise(resolve => setTimeout(resolve, delay));
+        }
+      }
+    }
+    
+    console.error(`❌ ${operationName} failed after ${this.maxRetries + 1} attempts`);
+    throw lastError;
+  }
+
+  resetRetryCount() {
+    this.retryCount = 0;
+  }
+
+  getRetryCount(): number {
+    return this.retryCount;
   }
 
   async testConnection(): Promise<{ success: boolean; version?: string; error?: string }> {
@@ -130,9 +174,9 @@ class HomeAssistantService {
   }
 
   async getAllEntityStates(entityIds: string[]): Promise<Map<string, { state: string; brightness?: number }>> {
-    const stateMap = new Map<string, { state: string; brightness?: number }>();
-    
-    try {
+    return this.retryWithBackoff(async () => {
+      const stateMap = new Map<string, { state: string; brightness?: number }>();
+      
       await Promise.all(
         entityIds.map(async (entityId) => {
           const entity = await this.getEntityState(entityId);
@@ -144,11 +188,14 @@ class HomeAssistantService {
           }
         })
       );
-    } catch (error) {
-      console.error("Failed to get all entity states:", error);
-    }
 
-    return stateMap;
+      // If no states were returned, throw error to trigger retry
+      if (stateMap.size === 0) {
+        throw new Error("No entity states returned from Home Assistant");
+      }
+
+      return stateMap;
+    }, "getAllEntityStates");
   }
 }
 

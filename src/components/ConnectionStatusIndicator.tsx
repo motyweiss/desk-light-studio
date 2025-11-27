@@ -4,10 +4,12 @@ import { Zap } from "lucide-react";
 
 interface ConnectionStatusIndicatorProps {
   isConnected: boolean;
+  isReconnecting?: boolean;
 }
 
 export const ConnectionStatusIndicator = ({ 
-  isConnected
+  isConnected,
+  isReconnecting = false
 }: ConnectionStatusIndicatorProps) => {
   const [isHovered, setIsHovered] = useState(false);
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
@@ -22,11 +24,13 @@ export const ConnectionStatusIndicator = ({
   };
 
   const getStatusColor = () => {
+    if (isReconnecting) return "text-yellow-500 animate-pulse";
     if (!isConnected) return "text-foreground/30";
     return "text-white"; // White for active connection
   };
 
   const getTooltipText = () => {
+    if (isReconnecting) return "Reconnecting to Home Assistant...";
     if (!isConnected) return "Not connected to Home Assistant";
     return "Connected to Home Assistant";
   };
