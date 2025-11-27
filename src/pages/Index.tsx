@@ -31,6 +31,11 @@ const Index = () => {
   const [monitorLightIntensity, setMonitorLightIntensity] = useState(0);
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
+  
+  // Climate sensor states
+  const [temperature, setTemperature] = useState(21.0);
+  const [humidity, setHumidity] = useState(49);
+  const [airQuality, setAirQuality] = useState(85);
 
   // Hover states for coordinated UI
   const [hoveredLight, setHoveredLight] = useState<string | null>(null);
@@ -136,13 +141,21 @@ const Index = () => {
   useEffect(() => {
     if (!isConnected || !entityMapping) return;
 
-    const entityIds = [
+    const lightEntityIds = [
       entityMapping.spotlight,
       entityMapping.deskLamp,
       entityMapping.monitorLight,
     ].filter(Boolean) as string[];
+    
+    const sensorEntityIds = [
+      entityMapping.temperatureSensor,
+      entityMapping.humiditySensor,
+      entityMapping.airQualitySensor,
+    ].filter(Boolean) as string[];
 
-    if (entityIds.length === 0) return;
+    const allEntityIds = [...lightEntityIds, ...sensorEntityIds];
+
+    if (allEntityIds.length === 0) return;
 
     console.log("🔄 Starting Home Assistant sync polling");
 
@@ -154,8 +167,9 @@ const Index = () => {
       }
 
       try {
-        const states = await homeAssistant.getAllEntityStates(entityIds);
+        const states = await homeAssistant.getAllEntityStates(allEntityIds);
         
+        // Update light entities
         // Update spotlight
         if (entityMapping.spotlight && states.has(entityMapping.spotlight)) {
           const state = states.get(entityMapping.spotlight)!;
@@ -202,6 +216,55 @@ const Index = () => {
             }
             return current;
           });
+        }
+        
+        // Update sensor entities
+        // Update temperature
+        if (entityMapping.temperatureSensor && states.has(entityMapping.temperatureSensor)) {
+          const state = states.get(entityMapping.temperatureSensor)!;
+          const tempValue = parseFloat(state.state);
+          
+          if (!isNaN(tempValue)) {
+            setTemperature(current => {
+              if (Math.abs(current - tempValue) > 0.1) {
+                console.log(`🌡️ Temperature synced: ${current} → ${tempValue}°C`);
+                return tempValue;
+              }
+              return current;
+            });
+          }
+        }
+        
+        // Update humidity
+        if (entityMapping.humiditySensor && states.has(entityMapping.humiditySensor)) {
+          const state = states.get(entityMapping.humiditySensor)!;
+          const humidityValue = parseFloat(state.state);
+          
+          if (!isNaN(humidityValue)) {
+            setHumidity(current => {
+              if (Math.abs(current - humidityValue) > 1) {
+                console.log(`💧 Humidity synced: ${current} → ${humidityValue}%`);
+                return Math.round(humidityValue);
+              }
+              return current;
+            });
+          }
+        }
+        
+        // Update air quality (PM2.5)
+        if (entityMapping.airQualitySensor && states.has(entityMapping.airQualitySensor)) {
+          const state = states.get(entityMapping.airQualitySensor)!;
+          const aqValue = parseFloat(state.state);
+          
+          if (!isNaN(aqValue)) {
+            setAirQuality(current => {
+              if (Math.abs(current - aqValue) > 1) {
+                console.log(`🌬️ Air Quality synced: ${current} → ${aqValue}`);
+                return Math.round(aqValue);
+              }
+              return current;
+            });
+          }
         }
       } catch (error) {
         console.error("❌ Failed to sync with Home Assistant:", error);
@@ -418,19 +481,19 @@ const Index = () => {
             {/* Temperature - Icon + Number only */}
             <div className="flex items-center gap-2">
               <Thermometer className="w-5 h-5 text-white/60" strokeWidth={1.5} />
-              <div className="text-base font-light text-white tabular-nums">21.0°</div>
+              <div className="text-base font-light text-white tabular-nums">{temperature.toFixed(1)}°</div>
             </div>
 
             {/* Humidity - Icon + Number only */}
             <div className="flex items-center gap-2">
               <Droplets className="w-5 h-5 text-white/60" strokeWidth={1.5} />
-              <div className="text-base font-light text-white tabular-nums">49%</div>
+              <div className="text-base font-light text-white tabular-nums">{humidity}%</div>
             </div>
 
             {/* Air Quality - Icon + Number only */}
             <div className="flex items-center gap-2">
               <Wind className="w-5 h-5 text-white/60" strokeWidth={1.5} />
-              <div className="text-base font-light text-white tabular-nums">85</div>
+              <div className="text-base font-light text-white tabular-nums">{airQuality}</div>
             </div>
           </motion.div>
         </motion.div>
@@ -563,9 +626,9 @@ const Index = () => {
         >
           <RoomInfoPanel
             roomName="Office Desk"
-            temperature={21}
-            humidity={49}
-            airQuality={85}
+            temperature={temperature}
+            humidity={humidity}
+            airQuality={airQuality}
             masterSwitchOn={masterSwitchOn}
             onMasterToggle={handleMasterToggle}
             onLightHover={setHoveredLight}

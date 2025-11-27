@@ -8,6 +8,9 @@ const DEFAULT_ENTITY_MAPPING: EntityMapping = {
   deskLamp: "light.go",
   monitorLight: "light.screen",
   spotlight: "light.door",
+  temperatureSensor: "sensor.dyson_pure_temperature",
+  humiditySensor: "sensor.dyson_pure_humidity",
+  airQualitySensor: "sensor.dyson_pure_pm_2_5",
 };
 
 export const useHomeAssistantConfig = () => {
