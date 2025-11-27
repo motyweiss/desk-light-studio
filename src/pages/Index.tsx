@@ -78,19 +78,19 @@ const Index = () => {
     const monitorLightBit = monitorLightIntensity > 0 ? "1" : "0";
     const state = `${spotlightBit}${deskLampBit}${monitorLightBit}`;
     
-    // All warm colors matching desk image tones - no cool/blue tones
+    // All warm colors matching desk image tones - brighter cream/beige palette
     const stateColors: Record<string, string> = {
-      "000": "25 20% 6%",     // All off - very dark warm brown, cozy darkness
-      "001": "28 18% 11%",    // Monitor only - warm slate brown
-      "010": "35 25% 12%",    // Desk lamp only - warm amber-brown glow
-      "011": "32 22% 14%",    // Lamp + Monitor - warm balanced mix
-      "100": "32 20% 14%",    // Spotlight only - soft warm ceiling light
-      "101": "30 19% 15%",    // Spotlight + Monitor - warm neutral
-      "110": "38 22% 16%",    // Spotlight + Lamp - rich warm golden ambiance
-      "111": "34 20% 18%",    // All on - brightest warm workspace
+      "000": "35 18% 38%",     // All off - warm taupe/mushroom gray
+      "001": "32 20% 42%",     // Monitor only - warm neutral tan
+      "010": "38 28% 45%",     // Desk lamp only - warm golden tan
+      "011": "35 25% 48%",     // Lamp + Monitor - warm balanced beige
+      "100": "30 22% 44%",     // Spotlight only - soft warm brown
+      "101": "32 21% 46%",     // Spotlight + Monitor - warm neutral
+      "110": "36 26% 50%",     // Spotlight + Lamp - rich warm cream
+      "111": "34 24% 52%",     // All on - brightest warm workspace
     };
     
-    return stateColors[state] || "25 20% 6%";
+    return stateColors[state] || "35 18% 38%";
   };
 
   return (
@@ -104,7 +104,7 @@ const Index = () => {
             exit={{ opacity: 0 }}
             transition={{ duration: 0.6, ease: [0.22, 0.03, 0.26, 1] }}
             style={{
-              backgroundColor: 'hsl(25 18% 10%)',
+              backgroundColor: 'hsl(35 20% 40%)',
             }}
           >
             {/* Subtle breathing pulse */}
@@ -143,16 +143,16 @@ const Index = () => {
         style={{
           backdropFilter: 'blur(80px)',
           WebkitBackdropFilter: 'blur(80px)',
-          background: 'linear-gradient(135deg, rgba(0,0,0,0.02) 0%, rgba(0,0,0,0.04) 100%)',
+          background: 'linear-gradient(135deg, hsl(38 15% 45% / 0.03) 0%, hsl(35 12% 42% / 0.05) 100%)',
         }}
       />
       {/* Enhanced ambient page glow layers - synchronized positions with soft spill */}
       
-      {/* Spotlight ambient glow - warm subtle orange */}
+      {/* Spotlight ambient glow - warm golden orange */}
       <motion.div
         className="fixed inset-0 pointer-events-none z-0"
         style={{
-          background: `radial-gradient(ellipse 70% 70% at 50% 35%, hsl(25 60% 50% / 0.12) 0%, hsl(30 55% 45% / 0.05) 30%, transparent 60%)`,
+          background: `radial-gradient(ellipse 70% 70% at 50% 35%, hsl(32 65% 58% / 0.18) 0%, hsl(35 60% 52% / 0.08) 30%, transparent 60%)`,
           filter: 'blur(70px)',
         }}
         animate={{
@@ -164,11 +164,11 @@ const Index = () => {
         }}
       />
       
-      {/* Desk lamp ambient glow - soft warm gold */}
+      {/* Desk lamp ambient glow - rich warm gold */}
       <motion.div
         className="fixed inset-0 pointer-events-none z-0"
         style={{
-          background: `radial-gradient(ellipse 65% 65% at 30% 55%, hsl(42 70% 55% / 0.11) 0%, hsl(40 65% 50% / 0.04) 35%, transparent 58%)`,
+          background: `radial-gradient(ellipse 65% 65% at 30% 55%, hsl(42 75% 60% / 0.15) 0%, hsl(40 70% 55% / 0.07) 35%, transparent 58%)`,
           filter: 'blur(65px)',
         }}
         animate={{
@@ -180,11 +180,11 @@ const Index = () => {
         }}
       />
       
-      {/* Monitor light ambient glow - warm beige harmony */}
+      {/* Monitor light ambient glow - warm cream beige */}
       <motion.div
         className="fixed inset-0 pointer-events-none z-0"
         style={{
-          background: `radial-gradient(ellipse 75% 75% at 50% 40%, hsl(38 45% 55% / 0.10) 0%, hsl(35 40% 50% / 0.04) 38%, transparent 62%)`,
+          background: `radial-gradient(ellipse 75% 75% at 50% 40%, hsl(38 50% 60% / 0.14) 0%, hsl(35 45% 55% / 0.06) 38%, transparent 62%)`,
           filter: 'blur(60px)',
         }}
         animate={{
@@ -318,11 +318,11 @@ const Index = () => {
         >
           {/* Lighting effect layers beneath image */}
           <div className="absolute inset-0 pointer-events-none z-0">
-            {/* Spotlight glow - warm orange from top center */}
+            {/* Spotlight glow - warm golden orange from top center */}
             <motion.div
               className="absolute left-1/2 -translate-x-1/2 top-0 w-[60%] h-[50%]"
               style={{
-                background: 'radial-gradient(ellipse 100% 100% at 50% 0%, hsl(32 85% 55% / 0.25) 0%, hsl(35 80% 50% / 0.12) 35%, transparent 70%)',
+                background: 'radial-gradient(ellipse 100% 100% at 50% 0%, hsl(38 85% 62% / 0.30) 0%, hsl(40 80% 58% / 0.15) 35%, transparent 70%)',
                 filter: 'blur(40px)',
               }}
               animate={{
@@ -334,11 +334,11 @@ const Index = () => {
               }}
             />
 
-            {/* Desk lamp glow - warm golden from left side */}
+            {/* Desk lamp glow - rich warm golden from left side */}
             <motion.div
               className="absolute left-0 top-1/2 -translate-y-1/2 w-[50%] h-[60%]"
               style={{
-                background: 'radial-gradient(ellipse 100% 100% at 0% 50%, hsl(42 90% 58% / 0.28) 0%, hsl(40 85% 52% / 0.14) 38%, transparent 72%)',
+                background: 'radial-gradient(ellipse 100% 100% at 0% 50%, hsl(42 90% 65% / 0.35) 0%, hsl(43 85% 60% / 0.18) 38%, transparent 72%)',
                 filter: 'blur(45px)',
               }}
               animate={{
@@ -350,11 +350,11 @@ const Index = () => {
               }}
             />
 
-            {/* Monitor light glow - warm beige from center */}
+            {/* Monitor light glow - warm beige cream from center */}
             <motion.div
               className="absolute left-1/2 -translate-x-1/2 top-1/3 w-[55%] h-[45%]"
               style={{
-                background: 'radial-gradient(ellipse 100% 100% at 50% 40%, hsl(38 70% 60% / 0.22) 0%, hsl(35 65% 55% / 0.11) 40%, transparent 75%)',
+                background: 'radial-gradient(ellipse 100% 100% at 50% 40%, hsl(38 70% 65% / 0.28) 0%, hsl(36 65% 60% / 0.14) 40%, transparent 75%)',
                 filter: 'blur(35px)',
               }}
               animate={{
