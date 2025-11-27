@@ -88,7 +88,7 @@ export const RoomInfoPanel = ({ roomName, temperature, humidity, masterSwitchOn,
           onClick={() => onMasterToggle(!masterSwitchOn)}
           className={`w-14 h-14 rounded-full backdrop-blur-xl border-2 transition-all duration-500 flex-shrink-0 ${
             masterSwitchOn 
-              ? 'border-[hsl(38_70%_58%/0.6)]' 
+              ? 'border-[hsl(35_30%_55%/0.6)]' 
               : 'border-white/20 hover:border-white/30'
           }`}
           whileTap={{ scale: 0.92 }}
@@ -96,7 +96,7 @@ export const RoomInfoPanel = ({ roomName, temperature, humidity, masterSwitchOn,
         >
           <motion.div
             animate={{
-              color: masterSwitchOn ? 'hsl(42 75% 60%)' : 'rgba(255, 255, 255, 0.4)',
+              color: masterSwitchOn ? 'hsl(36 35% 58%)' : 'rgba(255, 255, 255, 0.4)',
             }}
             transition={{ duration: 0.5, ease: [0.22, 0.03, 0.26, 1] }}
             className="flex items-center justify-center"
