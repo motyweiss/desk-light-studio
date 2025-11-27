@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo, useCallback } from "react";
 import { motion } from "framer-motion";
-import { Sun } from "lucide-react";
+import { Sun, Thermometer, Droplets } from "lucide-react";
 import { DeskDisplay } from "@/components/DeskDisplay";
 import { RoomInfoPanel } from "@/components/RoomInfoPanel";
 import { LoadingOverlay } from "@/components/LoadingOverlay";
@@ -195,7 +195,7 @@ const Index = () => {
 
           {/* Climate Data */}
           <motion.div 
-            className="flex items-center gap-12 mb-6"
+            className="flex gap-8 mb-6"
             initial={{ opacity: 0, y: 20 }}
             animate={{ 
               opacity: isLoaded ? 1 : 0,
@@ -207,26 +207,38 @@ const Index = () => {
               ease: [0.22, 0.03, 0.26, 1]
             }}
           >
-            <div className="flex flex-col">
-              <div className="text-[10px] uppercase tracking-widest text-foreground/40 mb-1 font-light">Temperature</div>
-              <motion.div 
-                className="text-xl font-light text-foreground tabular-nums"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: isLoaded ? 1 : 0 }}
-              >
-                24.4°
-              </motion.div>
+            {/* Temperature */}
+            <div className="flex items-center gap-3">
+              <div className="flex items-center justify-center w-10 h-10 rounded-full bg-white/5 backdrop-blur-sm">
+                <Thermometer className="w-5 h-5 text-white/50" strokeWidth={1.5} />
+              </div>
+              <div className="flex flex-col">
+                <div className="text-[10px] uppercase tracking-[0.15em] text-foreground/40 mb-0.5 font-light">Temperature</div>
+                <motion.div 
+                  className="text-2xl font-light text-foreground tabular-nums"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: isLoaded ? 1 : 0 }}
+                >
+                  24.4°
+                </motion.div>
+              </div>
             </div>
             
-            <div className="flex flex-col">
-              <div className="text-[10px] uppercase tracking-widest text-foreground/40 mb-1 font-light">Humidity</div>
-              <motion.div 
-                className="text-xl font-light text-foreground tabular-nums"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: isLoaded ? 1 : 0 }}
-              >
-                49%
-              </motion.div>
+            {/* Humidity */}
+            <div className="flex items-center gap-3">
+              <div className="flex items-center justify-center w-10 h-10 rounded-full bg-white/5 backdrop-blur-sm">
+                <Droplets className="w-5 h-5 text-white/50" strokeWidth={1.5} />
+              </div>
+              <div className="flex flex-col">
+                <div className="text-[10px] uppercase tracking-[0.15em] text-foreground/40 mb-0.5 font-light">Humidity</div>
+                <motion.div 
+                  className="text-2xl font-light text-foreground tabular-nums"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: isLoaded ? 1 : 0 }}
+                >
+                  49%
+                </motion.div>
+              </div>
             </div>
           </motion.div>
         </motion.div>
