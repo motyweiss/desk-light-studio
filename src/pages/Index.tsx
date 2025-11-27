@@ -663,28 +663,6 @@ const Index = () => {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [masterSwitchOn, deskLampIntensity, monitorLightIntensity, spotlightIntensity, isConnected, entityMapping, handleMasterToggle]);
 
-  // Calculate page background color based on light intensities - memoized for performance
-  const pageBackgroundColor = useMemo(() => {
-    const spotlightBit = spotlightIntensity > 0 ? "1" : "0";
-    const deskLampBit = deskLampIntensity > 0 ? "1" : "0";
-    const monitorLightBit = monitorLightIntensity > 0 ? "1" : "0";
-    const state = `${spotlightBit}${deskLampBit}${monitorLightBit}`;
-    
-    // All warm colors matching desk image tones - darker for better contrast
-    const stateColors: Record<string, string> = {
-      "000": "28 20% 18%",     // All off - warm dark brown
-      "001": "30 22% 22%",     // Monitor only - warm slate brown
-      "010": "35 28% 24%",     // Desk lamp only - warm golden brown
-      "011": "32 25% 26%",     // Lamp + Monitor - warm balanced tan
-      "100": "30 24% 25%",     // Spotlight only - soft warm brown
-      "101": "32 23% 28%",     // Spotlight + Monitor - warm neutral
-      "110": "36 26% 30%",     // Spotlight + Lamp - rich warm ochre
-      "111": "34 24% 32%",     // All on - brightest warm workspace
-    };
-    
-    return stateColors[state] || "28 20% 18%";
-  }, [spotlightIntensity, deskLampIntensity, monitorLightIntensity]);
-
   // Calculate binary lighting state (on/off only, not intensity)
   const lightingState = useMemo(() => {
     const spotlightBit = spotlightIntensity > 0 ? "1" : "0";
@@ -719,12 +697,8 @@ const Index = () => {
 
       <motion.div
         className="min-h-[100dvh] flex items-center justify-center p-4 md:p-8 relative overflow-hidden"
-        animate={{
-          backgroundColor: `hsl(${pageBackgroundColor})`,
-        }}
-        transition={{
-          duration: 1.5,
-          ease: [0.22, 0.03, 0.26, 1]
+        style={{
+          backgroundColor: `hsl(28 20% 18%)`, // Fixed dark background
         }}
       >
       {/* Frosted glass blur layer for smooth background */}
