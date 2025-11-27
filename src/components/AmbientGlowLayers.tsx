@@ -27,6 +27,7 @@ export const AmbientGlowLayers = ({
           background: `radial-gradient(ellipse 70% 70% at 50% 35%, hsl(42 70% 58% / 0.22) 0%, hsl(43 65% 54% / 0.11) 30%, transparent 60%)`,
           filter: 'blur(70px)',
         }}
+        initial={{ opacity: 0 }}
         animate={{
           opacity: spotlightOpacity,
         }}
@@ -43,6 +44,7 @@ export const AmbientGlowLayers = ({
           background: `radial-gradient(ellipse 65% 65% at 30% 55%, hsl(44 75% 60% / 0.20) 0%, hsl(45 70% 56% / 0.10) 35%, transparent 58%)`,
           filter: 'blur(65px)',
         }}
+        initial={{ opacity: 0 }}
         animate={{
           opacity: deskLampOpacity,
         }}
@@ -59,6 +61,7 @@ export const AmbientGlowLayers = ({
           background: `radial-gradient(ellipse 75% 75% at 50% 40%, hsl(43 65% 60% / 0.18) 0%, hsl(44 60% 56% / 0.09) 38%, transparent 62%)`,
           filter: 'blur(60px)',
         }}
+        initial={{ opacity: 0 }}
         animate={{
           opacity: monitorLightOpacity,
         }}
@@ -75,6 +78,7 @@ export const AmbientGlowLayers = ({
           background: `radial-gradient(ellipse 80% 80% at 50% 50%, hsl(43 65% 56% / 0.08) 0%, transparent 70%)`,
           filter: 'blur(100px)',
         }}
+        initial={{ opacity: 0, scale: 1 }}
         animate={{
           opacity: [(allLightsOn ? 0.3 : 0), (allLightsOn ? 0.5 : 0), (allLightsOn ? 0.3 : 0)],
           scale: [1, 1.05, 1],
