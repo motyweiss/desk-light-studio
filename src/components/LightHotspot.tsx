@@ -476,13 +476,11 @@ export const LightHotspot = ({
                       initial={{ scale: 0.6, opacity: 0 }}
                       animate={{
                         scale: intensity > 0 ? 1 : 0.88,
-                        opacity: 1,
-                        rotateZ: intensity > 0 ? 0 : -10
+                        opacity: 1
                       }}
                       transition={{
                         scale: { duration: 0.4, ease: [0.22, 0.03, 0.26, 1] },
-                        opacity: { duration: 0.35, ease: [0.22, 0.03, 0.26, 1] },
-                        rotateZ: { duration: 0.35, ease: [0.22, 0.03, 0.26, 1] }
+                        opacity: { duration: 0.35, ease: [0.22, 0.03, 0.26, 1] }
                       }}
                     >
                       <IconComponent 
