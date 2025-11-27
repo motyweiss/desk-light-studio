@@ -240,8 +240,9 @@ const Index = () => {
         
         if (entityMapping.iphoneBatteryState && states.has(entityMapping.iphoneBatteryState)) {
           const state = states.get(entityMapping.iphoneBatteryState)!;
-          setIphoneBatteryCharging(state.state.toLowerCase() === "charging");
-          console.log(`⚡ iPhone Charging initial: ${state.state}`);
+          const isCharging = state.state.toLowerCase().includes("charging") && !state.state.toLowerCase().includes("not");
+          setIphoneBatteryCharging(isCharging);
+          console.log(`⚡ iPhone Charging initial: ${state.state} → ${isCharging}`);
         }
       } catch (error) {
         console.error("❌ Failed to perform initial sync:", error);
@@ -351,7 +352,8 @@ const Index = () => {
       
       if (entityMapping.iphoneBatteryState && states.has(entityMapping.iphoneBatteryState)) {
         const state = states.get(entityMapping.iphoneBatteryState)!;
-        setIphoneBatteryCharging(state.state.toLowerCase() === "charging");
+        const isCharging = state.state.toLowerCase().includes("charging") && !state.state.toLowerCase().includes("not");
+        setIphoneBatteryCharging(isCharging);
       }
     } catch (error) {
       console.error("❌ Force sync failed:", error);
@@ -540,10 +542,10 @@ const Index = () => {
         
         if (entityMapping.iphoneBatteryState && states.has(entityMapping.iphoneBatteryState)) {
           const state = states.get(entityMapping.iphoneBatteryState)!;
-          const isCharging = state.state.toLowerCase() === "charging";
+          const isCharging = state.state.toLowerCase().includes("charging") && !state.state.toLowerCase().includes("not");
           setIphoneBatteryCharging(current => {
             if (current !== isCharging) {
-              console.log(`⚡ iPhone Charging synced: ${current} → ${isCharging} (state: ${state.state})`);
+              console.log(`⚡ iPhone Charging synced: ${current} → ${isCharging} (state: "${state.state}")`);
               return isCharging;
             }
             return current;
