@@ -175,6 +175,7 @@ export const RoomInfoPanel = ({ roomName, temperature, humidity, airQuality, mas
             </span>
             <div className="text-base font-light text-white tabular-nums">
               <motion.span>{airQualityDisplay}</motion.span>
+              <span className="text-[10px] text-white/40 ml-1">µg/m³</span>
             </div>
           </div>
         </div>
