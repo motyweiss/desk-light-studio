@@ -334,7 +334,7 @@ export const RoomInfoPanel = ({ roomName, temperature, humidity, airQuality, mas
       {/* Light Controls Section */}
       <div className="rounded-2xl bg-white/[0.02] backdrop-blur-md border border-white/[0.05] p-4">
         <motion.div 
-          className="space-y-3 md:-ml-1"
+          className="space-y-0"
           variants={{
             hidden: { opacity: 0 },
             show: {
@@ -348,7 +348,7 @@ export const RoomInfoPanel = ({ roomName, temperature, humidity, airQuality, mas
           initial="hidden"
           animate={isLoaded ? "show" : "hidden"}
         >
-          {lights.map((light) => (
+          {lights.map((light, index) => (
             <motion.div
               key={light.id}
               variants={{
@@ -357,6 +357,9 @@ export const RoomInfoPanel = ({ roomName, temperature, humidity, airQuality, mas
               }}
               transition={{ duration: 0.7, ease: [0.22, 0.03, 0.26, 1] }}
             >
+              {index > 0 && (
+                <div className="h-px bg-white/10 w-full" />
+              )}
               <LightControlCard
                 id={light.id}
                 label={light.label}
