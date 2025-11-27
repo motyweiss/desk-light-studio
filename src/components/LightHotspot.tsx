@@ -51,24 +51,18 @@ export const LightHotspot = ({
   // Enhanced dynamic color scheme with intensity-based effects
   const isOn = intensity > 0;
   const intensityRatio = intensity / 100;
-  const intensityCurve = Math.pow(intensityRatio, 0.6); // Smooth non-linear curve
+  const intensityCurve = Math.pow(intensityRatio, 0.7); // Non-linear for stronger high-intensity glow
+  const dotOpacity = 0.35 + intensityCurve * 0.65;
+  const dotColor = isOn 
+    ? `hsla(38, 70%, 58%, ${dotOpacity})` 
+    : "hsl(var(--foreground) / 0.5)";
+  const glowColor = isOn 
+    ? `rgba(200, 160, 80, ${0.25 + intensityCurve * 0.5})` 
+    : "rgba(255, 255, 255, 0.25)";
   
-  // Warm color palette matching page design
-  const warmGlow = isOn 
-    ? `hsl(43 ${90 - intensityRatio * 10}% ${60 + intensityRatio * 8}%)` 
-    : "hsl(var(--foreground) / 0.4)";
-  const warmGlowRgba = isOn 
-    ? `rgba(${220 - intensityRatio * 20}, ${180 - intensityRatio * 10}, ${100 + intensityRatio * 20}, ${0.3 + intensityCurve * 0.6})` 
-    : "rgba(255, 255, 255, 0.15)";
-  
-  // Dynamic breathing that feels alive
-  const breathingDuration = isOn ? 2.2 - (intensityRatio * 0.6) : 2.8;
-  const breathingScale = isOn 
-    ? [1, 1.12 + (intensityRatio * 0.15), 1] 
-    : [0.96, 1.06, 0.96];
-  const pulseOpacity = isOn 
-    ? [0.5 + intensityRatio * 0.2, 0.85 + intensityRatio * 0.15, 0.5 + intensityRatio * 0.2]
-    : [0.3, 0.5, 0.3];
+  // Breathing animation adapts to intensity
+  const breathingDuration = isOn ? 2.5 - (intensityRatio * 0.8) : 3;
+  const breathingScale = isOn ? [1, 1.08 + (intensityRatio * 0.08), 1] : [0.98, 1.05, 0.98];
 
   return (
     <AnimatePresence>
@@ -113,299 +107,193 @@ export const LightHotspot = ({
           }}
         >
           <svg
-            width="80"
-            height="80"
-            viewBox="0 0 80 80"
+            width="60"
+            height="60"
+            viewBox="0 0 60 60"
             className="overflow-visible"
           >
-            {/* Outer expanding glow waves - alive and breathing */}
+            {/* Enhanced breathing ambient glow - intensity-adaptive */}
             <motion.circle
-              cx="40"
-              cy="40"
-              r="32"
-              fill={warmGlowRgba}
+              cx="30"
+              cy="30"
+              r="22"
+              fill={isOn ? `rgba(200, 160, 80, ${0.12 + intensityCurve * 0.15})` : "rgba(255, 255, 255, 0.06)"}
               animate={{
-                opacity: pulseOpacity,
+                opacity: isOn ? [0.4 + intensityRatio * 0.2, 0.7 + intensityRatio * 0.2, 0.4 + intensityRatio * 0.2] : [0.25, 0.4, 0.25],
                 scale: breathingScale,
               }}
               transition={{
                 duration: breathingDuration,
                 repeat: Infinity,
-                ease: [0.45, 0.05, 0.55, 0.95],
+                ease: "easeInOut",
               }}
-              style={{ filter: `blur(${16 + intensityCurve * 8}px)` }}
-            />
-            
-            {/* Secondary pulse wave - offset timing */}
-            <motion.circle
-              cx="40"
-              cy="40"
-              r="28"
-              fill={warmGlowRgba}
-              animate={{
-                opacity: isOn 
-                  ? [0.3 + intensityRatio * 0.15, 0.6 + intensityRatio * 0.2, 0.3 + intensityRatio * 0.15]
-                  : [0.2, 0.35, 0.2],
-                scale: isOn 
-                  ? [1.05, 1.18 + (intensityRatio * 0.12), 1.05]
-                  : [1, 1.08, 1],
-              }}
-              transition={{
-                duration: breathingDuration * 1.1,
-                repeat: Infinity,
-                ease: [0.45, 0.05, 0.55, 0.95],
-                delay: breathingDuration * 0.3,
-              }}
-              style={{ filter: `blur(${14 + intensityCurve * 6}px)` }}
+              style={{ filter: `blur(${12 + intensityRatio * 4}px)` }}
             />
 
-            {/* Animated orbital rings - dynamic motion */}
+            {/* Outer frosted ring - subtle border */}
             <motion.circle
-              cx="40"
-              cy="40"
-              r="20"
-              fill="none"
-              stroke={warmGlow}
-              strokeWidth="1"
-              strokeOpacity={isOn ? 0.5 + intensityRatio * 0.2 : 0.25}
-              animate={{
-                scale: breathingScale,
-                rotate: isOn ? 360 : 0,
-                opacity: pulseOpacity,
-              }}
-              transition={{
-                scale: {
-                  duration: breathingDuration,
-                  repeat: Infinity,
-                  ease: [0.45, 0.05, 0.55, 0.95],
-                },
-                rotate: {
-                  duration: 12,
-                  repeat: Infinity,
-                  ease: "linear"
-                },
-                opacity: {
-                  duration: breathingDuration,
-                  repeat: Infinity,
-                  ease: [0.45, 0.05, 0.55, 0.95],
-                }
-              }}
-              style={{ filter: 'blur(0.5px)' }}
-            />
-            
-            {/* Inner pulse ring with warm glow */}
-            <motion.circle
-              cx="40"
-              cy="40"
+              cx="30"
+              cy="30"
               r="16"
-              fill="none"
-              stroke={warmGlow}
-              strokeWidth={isOn ? "1.5" : "1"}
-              strokeOpacity={isOn ? 0.6 + intensityRatio * 0.2 : 0.3}
-              animate={{
-                scale: [1, 1.15 + (intensityRatio * 0.12), 1],
-                opacity: isOn 
-                  ? [0.4 + intensityRatio * 0.15, 0.75 + intensityRatio * 0.15, 0.4 + intensityRatio * 0.15] 
-                  : [0.25, 0.45, 0.25],
-              }}
-              transition={{
-                duration: breathingDuration * 0.85,
-                repeat: Infinity,
-                ease: [0.45, 0.05, 0.55, 0.95],
-              }}
-            />
-            
-            {/* Frosted outer ring */}
-            <motion.circle
-              cx="40"
-              cy="40"
-              r="18"
-              fill="rgba(255, 255, 255, 0.04)"
-              stroke="rgba(255, 255, 255, 0.15)"
+              fill="rgba(255, 255, 255, 0.05)"
+              stroke="rgba(255, 255, 255, 0.2)"
               strokeWidth="0.5"
+              initial={{ opacity: 0, scale: 0.8 }}
               animate={{
-                opacity: isHovered ? 0.5 : 0.25,
-                scale: isHovered ? 1.08 : 1,
+                opacity: isContainerHovered ? (isHovered ? 0.6 : 0.3) : 0.2,
+                scale: isHovered ? 1.1 : 1,
               }}
               transition={{ 
                 duration: 0.4,
                 ease: [0.4, 0, 0.2, 1]
               }}
-              style={{ filter: 'blur(1px)' }}
+              style={{
+                filter: 'blur(1px)',
+              }}
             />
 
-            {/* Main frosted glass dot with enhanced layers */}
+            {/* Enhanced pulse ring - intensity-responsive */}
+            <motion.circle
+              cx="30"
+              cy="30"
+              r="13"
+              fill="none"
+              stroke={dotColor}
+              strokeWidth={isOn ? "1.2" : "0.8"}
+              strokeOpacity={isOn ? 0.4 + intensityRatio * 0.2 : 0.25}
+              animate={{
+                scale: [1, 1.1 + (intensityRatio * 0.08), 1],
+                opacity: isOn ? [0.3 + intensityRatio * 0.1, 0.6 + intensityRatio * 0.2, 0.3 + intensityRatio * 0.1] : [0.2, 0.4, 0.2],
+              }}
+              transition={{
+                duration: breathingDuration,
+                repeat: Infinity,
+                ease: "easeInOut",
+              }}
+            />
+
+            {/* Main frosted glass dot with layers */}
             <motion.g>
-              {/* Multi-layered deep glow */}
+              {/* Enhanced deep glow layer - intensity-scaled */}
               <motion.circle
-                cx="40"
-                cy="40"
-                r="13"
-                fill={warmGlowRgba}
-                animate={{
-                  opacity: pulseOpacity,
-                  scale: isPressed ? 0.85 : isHovered ? 1.18 : 1,
-                }}
-                transition={{ 
-                  duration: 0.35,
-                  ease: [0.4, 0, 0.2, 1]
-                }}
-                style={{ filter: `blur(${12 + intensityCurve * 8}px)` }}
-              />
-              
-              {/* Secondary glow layer */}
-              <motion.circle
-                cx="40"
-                cy="40"
+                cx="30"
+                cy="30"
                 r="11"
-                fill={isOn ? warmGlowRgba : "rgba(255, 255, 255, 0.08)"}
+                fill={isOn ? `rgba(200, 160, 80, ${0.2 + intensityCurve * 0.25})` : "rgba(255, 255, 255, 0.07)"}
                 animate={{
-                  opacity: isOn ? (0.7 + intensityCurve * 0.25) : 0.3,
-                  scale: isPressed ? 0.88 : isHovered ? 1.12 : 1,
+                  opacity: isOn ? (0.6 + intensityCurve * 0.35) : 0.28,
+                  scale: isPressed ? 0.88 : isHovered ? 1.15 : 1,
                 }}
                 transition={{ 
                   duration: 0.3,
                   ease: [0.4, 0, 0.2, 1]
                 }}
-                style={{ filter: `blur(${8 + intensityCurve * 4}px)` }}
+                style={{ filter: `blur(${10 + intensityCurve * 6}px)` }}
               />
               
-              {/* Frosted glass base with border */}
+              {/* Frosted glass base - translucent */}
               <motion.circle
-                cx="40"
-                cy="40"
-                r="10"
-                fill="rgba(255, 255, 255, 0.15)"
-                stroke={isOn ? warmGlow : "rgba(255, 255, 255, 0.35)"}
-                strokeWidth={isOn ? "1" : "0.8"}
+                cx="30"
+                cy="30"
+                r="9"
+                fill="rgba(255, 255, 255, 0.12)"
+                stroke="rgba(255, 255, 255, 0.3)"
+                strokeWidth="0.8"
                 animate={{
-                  scale: isPressed ? 0.92 : isHovered ? 1.08 : 1,
+                  scale: isPressed ? 0.9 : isHovered ? 1.1 : 1,
                 }}
                 transition={{
                   type: "spring",
-                  stiffness: 350,
-                  damping: 22,
+                  stiffness: 400,
+                  damping: 25,
                 }}
-                style={{ filter: 'blur(0.5px)' }}
+                style={{
+                  filter: isOn 
+                    ? `drop-shadow(0 0 ${6 + intensityCurve * 8}px rgba(200, 160, 80, ${0.4 + intensityCurve * 0.5})) drop-shadow(0 2px 6px rgba(0, 0, 0, 0.25))`
+                    : 'drop-shadow(0 2px 4px rgba(0, 0, 0, 0.15))'
+                }}
               />
 
-              {/* Vibrant inner warm core */}
+              {/* Enhanced inner warm core - intensity-scaled */}
               {isOn && (
                 <motion.circle
-                  cx="40"
-                  cy="40"
-                  r="8"
-                  fill={warmGlow}
-                  initial={{ opacity: 0, scale: 0.3 }}
+                  cx="30"
+                  cy="30"
+                  r="7"
+                  fill={`rgba(200, 160, 80, ${0.25 + intensityCurve * 0.3})`}
+                  initial={{ opacity: 0, scale: 0.4 }}
                   animate={{ 
-                    opacity: [0.7 + intensityRatio * 0.15, 0.95, 0.7 + intensityRatio * 0.15],
-                    scale: [1, 1.05, 1],
+                    opacity: [0.65 + intensityRatio * 0.15, 0.95 + intensityRatio * 0.05, 0.65 + intensityRatio * 0.15],
+                    scale: 1,
                   }}
-                  exit={{ opacity: 0, scale: 0.3 }}
+                  exit={{ opacity: 0, scale: 0.4 }}
                   transition={{ 
                     opacity: {
-                      duration: breathingDuration * 0.75,
+                      duration: breathingDuration * 0.8,
                       repeat: Infinity,
-                      ease: [0.45, 0.05, 0.55, 0.95]
+                      ease: "easeInOut"
                     },
                     scale: {
-                      duration: breathingDuration * 0.75,
-                      repeat: Infinity,
-                      ease: [0.45, 0.05, 0.55, 0.95]
+                      duration: 0.3
                     }
                   }}
-                  style={{ filter: `blur(${2 + intensityRatio * 3}px)` }}
-                />
-              )}
-              
-              {/* Intense center spark */}
-              {isOn && intensityRatio > 0.5 && (
-                <motion.circle
-                  cx="40"
-                  cy="40"
-                  r="4"
-                  fill="hsl(45 95% 75%)"
-                  initial={{ opacity: 0, scale: 0 }}
-                  animate={{ 
-                    opacity: [0.6, 0.9, 0.6],
-                    scale: [0.95, 1.08, 0.95],
-                  }}
-                  exit={{ opacity: 0, scale: 0 }}
-                  transition={{ 
-                    duration: breathingDuration * 0.6,
-                    repeat: Infinity,
-                    ease: [0.45, 0.05, 0.55, 0.95]
-                  }}
-                  style={{ filter: 'blur(1px)' }}
+                  style={{ filter: `blur(${3 + intensityRatio * 2}px)` }}
                 />
               )}
 
-              {/* Enhanced glass reflection highlights */}
+              {/* Glass reflection highlights - multiple layers */}
               <motion.ellipse
-                cx="36"
-                cy="36"
-                rx="4"
-                ry="5"
+                cx="27"
+                cy="27"
+                rx="3.5"
+                ry="4"
                 fill="white"
-                opacity={0.6}
+                opacity={0.5}
                 animate={{
-                  scale: isPressed ? 0.82 : 1,
-                  opacity: isPressed ? 0.4 : 0.6,
+                  scale: isPressed ? 0.85 : 1,
                 }}
-                transition={{ duration: 0.18 }}
-                style={{ filter: 'blur(1.5px)' }}
+                transition={{ duration: 0.15 }}
+                style={{ filter: 'blur(1px)' }}
               />
               
               <motion.circle
-                cx="35"
-                cy="35"
-                r="2"
+                cx="26"
+                cy="26"
+                r="1.5"
                 fill="white"
-                opacity={0.85}
+                opacity={0.8}
                 animate={{
-                  scale: isPressed ? 0.75 : 1,
+                  scale: isPressed ? 0.8 : 1,
                 }}
-                transition={{ duration: 0.18 }}
-                style={{ filter: 'blur(0.5px)' }}
+                transition={{ duration: 0.15 }}
               />
             </motion.g>
 
-            {/* Enhanced ripple waves on click */}
+            {/* Ripple effect on click - frosted wave */}
             {isPressed && (
               <>
                 <motion.circle
-                  cx="40"
-                  cy="40"
-                  r="10"
+                  cx="30"
+                  cy="30"
+                  r="9"
                   fill="none"
-                  stroke={warmGlow}
-                  strokeWidth="2"
-                  initial={{ scale: 1, opacity: 0.7 }}
-                  animate={{ scale: 2.5, opacity: 0 }}
-                  transition={{ duration: 0.7, ease: [0.4, 0, 0.2, 1] }}
+                  stroke="rgba(255, 255, 255, 0.4)"
+                  strokeWidth="1.5"
+                  initial={{ scale: 1, opacity: 0.6 }}
+                  animate={{ scale: 2.2, opacity: 0 }}
+                  transition={{ duration: 0.6, ease: "easeOut" }}
                   style={{ filter: 'blur(1px)' }}
                 />
                 <motion.circle
-                  cx="40"
-                  cy="40"
-                  r="10"
+                  cx="30"
+                  cy="30"
+                  r="9"
                   fill="none"
-                  stroke="rgba(255, 255, 255, 0.5)"
-                  strokeWidth="1.5"
-                  initial={{ scale: 1, opacity: 0.6 }}
-                  animate={{ scale: 3.2, opacity: 0 }}
-                  transition={{ duration: 0.8, ease: [0.4, 0, 0.2, 1] }}
-                  style={{ filter: 'blur(1.5px)' }}
-                />
-                <motion.circle
-                  cx="40"
-                  cy="40"
-                  r="10"
-                  fill={warmGlowRgba}
-                  initial={{ scale: 1, opacity: 0.4 }}
-                  animate={{ scale: 2, opacity: 0 }}
-                  transition={{ duration: 0.6, ease: [0.4, 0, 0.2, 1] }}
-                  style={{ filter: `blur(8px)` }}
+                  stroke={dotColor}
+                  strokeWidth="1"
+                  initial={{ scale: 1, opacity: 0.5 }}
+                  animate={{ scale: 2.8, opacity: 0 }}
+                  transition={{ duration: 0.7, ease: "easeOut" }}
                 />
               </>
             )}
