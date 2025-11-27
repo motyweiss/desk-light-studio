@@ -322,7 +322,7 @@ export const RoomInfoPanel = ({ roomName, temperature, humidity, airQuality, mas
       </motion.div>
 
       {/* Light Controls Section */}
-      <div className="rounded-2xl bg-white/[0.02] backdrop-blur-md border border-white/[0.05] py-2 px-0">
+      <div className="rounded-2xl bg-white/[0.02] backdrop-blur-md border border-white/[0.05]">
         <motion.div
           className="space-y-0"
           variants={{
@@ -346,11 +346,12 @@ export const RoomInfoPanel = ({ roomName, temperature, humidity, airQuality, mas
                 show: { opacity: 1, y: 0, scale: 1, filter: 'blur(0px)' }
               }}
               transition={{ duration: 0.7, ease: [0.22, 0.03, 0.26, 1] }}
+              className={`${index === 0 ? 'pt-2' : ''} ${index === lights.length - 1 ? 'pb-2' : ''}`}
             >
               {index > 0 && (
                 <div className="h-px bg-white/10 w-full mx-0" />
               )}
-                <LightControlCard
+              <LightControlCard
                 id={light.id}
                 label={light.label}
                 intensity={light.intensity}
