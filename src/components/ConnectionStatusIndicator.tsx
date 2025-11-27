@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { Zap, WifiOff, RefreshCw } from "lucide-react";
+import { Zap } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 interface ConnectionStatusIndicatorProps {
@@ -10,7 +10,6 @@ interface ConnectionStatusIndicatorProps {
 
 export const ConnectionStatusIndicator = ({ 
   isConnected, 
-  isSyncing = false,
   onClick 
 }: ConnectionStatusIndicatorProps) => {
   const getStatusColor = () => {
@@ -20,7 +19,6 @@ export const ConnectionStatusIndicator = ({
 
   const getTooltipText = () => {
     if (!isConnected) return "Not connected to Home Assistant";
-    if (isSyncing) return "Syncing with Home Assistant...";
     return "Connected to Home Assistant";
   };
 
@@ -37,18 +35,7 @@ export const ConnectionStatusIndicator = ({
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.3, delay: 0.6 }}
           >
-            {!isConnected ? (
-              <WifiOff className="w-5 h-5" />
-            ) : isSyncing ? (
-              <motion.div
-                animate={{ rotate: 360 }}
-                transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-              >
-                <RefreshCw className="w-5 h-5" />
-              </motion.div>
-            ) : (
-              <Zap className="w-5 h-5" />
-            )}
+            <Zap className="w-5 h-5" />
           </motion.button>
         </TooltipTrigger>
         <TooltipContent side="bottom" className="bg-background/95 backdrop-blur-xl border-white/20">
