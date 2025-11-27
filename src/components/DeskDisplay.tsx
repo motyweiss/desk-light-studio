@@ -94,12 +94,12 @@ export const DeskDisplay = ({
     }
   }, [spotlightIntensity, deskLampIntensity, monitorLightIntensity, currentState]);
 
-  // Unified easing and transition system
-  const lightEasing = [0.4, 0, 0.2, 1] as const;
+  // Unified easing and transition system for smooth crossfades
+  const lightEasing = [0.22, 0.03, 0.26, 1] as const;
   const transitionDuration = {
-    fast: 0.4,
-    medium: 0.8,
-    slow: 1.2
+    fast: 0.5,
+    medium: 1.0,
+    slow: 1.5
   };
 
   return (
@@ -127,7 +127,7 @@ export const DeskDisplay = ({
           transformStyle: 'preserve-3d',
         }}
       >
-        {/* Stack all 8 images with improved crossfade */}
+        {/* Stack all 8 images with smooth crossfade transitions */}
         {Object.entries(lightingStates).map(([state, image]) => {
           const isActive = state === currentState;
           return (
@@ -136,24 +136,30 @@ export const DeskDisplay = ({
               src={image}
               alt={`Desk lighting state ${state}`}
               className="absolute inset-0 w-full h-full object-cover"
-              initial={{ opacity: 0 }}
+              initial={{ opacity: 0, scale: 1.02 }}
               animate={{ 
                 opacity: isActive && isLoaded ? 1 : 0,
-                filter: isLoaded ? (isActive ? `blur(0px) brightness(1)` : `blur(0px) brightness(0.96)`) : `blur(8px) brightness(0.96)`,
+                scale: isActive && isLoaded ? 1 : 1.02,
+                filter: isLoaded ? (isActive ? `blur(0px) brightness(1)` : `blur(2px) brightness(0.95)`) : `blur(8px) brightness(0.96)`,
               }}
               transition={{ 
                 opacity: {
                   duration: transitionDuration.slow,
                   ease: lightEasing,
                 },
+                scale: {
+                  duration: transitionDuration.slow,
+                  ease: lightEasing,
+                },
                 filter: {
-                  duration: isLoaded ? transitionDuration.slow : 0.8,
+                  duration: isLoaded ? transitionDuration.medium : 0.8,
                   delay: isLoaded ? 0 : 0.4,
                   ease: lightEasing,
                 }
               }}
               style={{
                 pointerEvents: isActive ? 'auto' : 'none',
+                willChange: 'opacity, transform, filter',
               }}
             />
           );

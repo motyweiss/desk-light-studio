@@ -105,7 +105,7 @@ const Index = () => {
           backgroundColor: `hsl(${pageBackgroundColor})`,
         }}
         transition={{
-          duration: 1.2,
+          duration: 1.5,
           ease: [0.22, 0.03, 0.26, 1]
         }}
       >
@@ -272,8 +272,8 @@ const Index = () => {
                 opacity: Math.pow(spotlightIntensity / 100, 0.9),
               }}
               transition={{
-                duration: 1.2,
-                ease: [0.4, 0, 0.2, 1]
+                duration: 1.5,
+                ease: [0.22, 0.03, 0.26, 1]
               }}
             />
 
@@ -288,8 +288,8 @@ const Index = () => {
                 opacity: Math.pow(deskLampIntensity / 100, 0.9),
               }}
               transition={{
-                duration: 1.2,
-                ease: [0.4, 0, 0.2, 1]
+                duration: 1.5,
+                ease: [0.22, 0.03, 0.26, 1]
               }}
             />
 
@@ -304,8 +304,8 @@ const Index = () => {
                 opacity: Math.pow(monitorLightIntensity / 100, 0.9),
               }}
               transition={{
-                duration: 1.2,
-                ease: [0.4, 0, 0.2, 1]
+                duration: 1.5,
+                ease: [0.22, 0.03, 0.26, 1]
               }}
             />
           </div>
