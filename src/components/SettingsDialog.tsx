@@ -43,7 +43,10 @@ export const SettingsDialog = ({ open, onOpenChange, onSave, currentConfig, curr
     setIsTestingConnection(true);
     setConnectionStatus(null);
     
-    homeAssistant.setConfig({ baseUrl, accessToken });
+    // Normalize URL by removing trailing slashes
+    const normalizedUrl = baseUrl.replace(/\/+$/, '');
+    
+    homeAssistant.setConfig({ baseUrl: normalizedUrl, accessToken });
     const result = await homeAssistant.testConnection();
     setConnectionStatus(result);
     
@@ -58,8 +61,11 @@ export const SettingsDialog = ({ open, onOpenChange, onSave, currentConfig, curr
   };
 
   const handleSave = () => {
+    // Normalize URL by removing trailing slashes
+    const normalizedUrl = baseUrl.replace(/\/+$/, '');
+    
     onSave(
-      { baseUrl, accessToken },
+      { baseUrl: normalizedUrl, accessToken },
       { deskLamp, monitorLight, spotlight }
     );
     onOpenChange(false);
