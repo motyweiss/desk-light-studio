@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -103,7 +103,7 @@ export const SettingsDialog = ({ open, onOpenChange, onSave, currentConfig, curr
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto bg-white/[0.08] backdrop-blur-[40px] border border-white/15 shadow-[0_8px_32px_rgba(0,0,0,0.35)]">
+      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle 
             className="text-3xl font-light tracking-tight text-foreground flex items-center gap-3"
@@ -112,6 +112,7 @@ export const SettingsDialog = ({ open, onOpenChange, onSave, currentConfig, curr
             <span className="text-2xl">⚙️</span> 
             Home Assistant Configuration
           </DialogTitle>
+          <p className="text-sm text-white/40 font-light pt-1">Configure your Home Assistant connection and entity mappings</p>
         </DialogHeader>
 
         <div className="space-y-6 py-6">
@@ -153,7 +154,7 @@ export const SettingsDialog = ({ open, onOpenChange, onSave, currentConfig, curr
               placeholder="https://your-home-assistant.duckdns.org:8123"
               value={baseUrl}
               onChange={(e) => setBaseUrl(e.target.value)}
-              className="h-12 rounded-xl bg-white/[0.06] border-white/15 text-white placeholder:text-white/30 focus-visible:ring-[hsl(43_88%_60%/0.3)] focus-visible:border-[hsl(43_88%_60%/0.5)] transition-all duration-200"
+              className="h-12"
             />
             <p className="text-xs text-white/40 font-light">Your Home Assistant instance URL (with port if needed)</p>
           </div>
@@ -166,7 +167,7 @@ export const SettingsDialog = ({ open, onOpenChange, onSave, currentConfig, curr
               placeholder="Enter your Home Assistant token"
               value={accessToken}
               onChange={(e) => setAccessToken(e.target.value)}
-              className="h-12 rounded-xl bg-white/[0.06] border-white/15 text-white placeholder:text-white/30 focus-visible:ring-[hsl(43_88%_60%/0.3)] focus-visible:border-[hsl(43_88%_60%/0.5)] transition-all duration-200 font-mono text-sm tracking-tight"
+              className="h-12 font-mono text-sm tracking-tight"
             />
             <p className="text-xs text-white/40 font-light flex items-center gap-1.5">
               <span className="text-sm">🔒</span> Token is stored securely in your browser
@@ -178,7 +179,8 @@ export const SettingsDialog = ({ open, onOpenChange, onSave, currentConfig, curr
             <Button
               onClick={handleTestConnection}
               disabled={!baseUrl || !accessToken || isTestingConnection}
-              className="w-full h-12 rounded-xl bg-[hsl(43_88%_60%)] hover:bg-[hsl(43_88%_65%)] text-white font-light tracking-wide text-base border-0 shadow-[0_4px_16px_hsl(43_88%_60%/0.25)] disabled:opacity-40 disabled:shadow-none transition-all duration-200"
+              variant="primary"
+              className="w-full h-12 rounded-xl font-light tracking-wide text-base"
             >
               {isTestingConnection ? (
                 <>
@@ -211,7 +213,7 @@ export const SettingsDialog = ({ open, onOpenChange, onSave, currentConfig, curr
                   <div className="space-y-2">
                     <label className="text-sm font-light text-white/60">Desk Lamp</label>
                     <Select value={deskLamp} onValueChange={setDeskLamp}>
-                      <SelectTrigger className="h-11 rounded-xl bg-white/[0.06] border-white/15 text-white">
+                      <SelectTrigger className="h-11">
                         <SelectValue placeholder="Select entity..." />
                       </SelectTrigger>
                       <SelectContent>
@@ -228,7 +230,7 @@ export const SettingsDialog = ({ open, onOpenChange, onSave, currentConfig, curr
                   <div className="space-y-2">
                     <label className="text-sm font-light text-white/60">Monitor Light</label>
                     <Select value={monitorLight} onValueChange={setMonitorLight}>
-                      <SelectTrigger className="h-11 rounded-xl bg-white/[0.06] border-white/15 text-white">
+                      <SelectTrigger className="h-11">
                         <SelectValue placeholder="Select entity..." />
                       </SelectTrigger>
                       <SelectContent>
@@ -245,7 +247,7 @@ export const SettingsDialog = ({ open, onOpenChange, onSave, currentConfig, curr
                   <div className="space-y-2">
                     <label className="text-sm font-light text-white/60">Spotlight</label>
                     <Select value={spotlight} onValueChange={setSpotlight}>
-                      <SelectTrigger className="h-11 rounded-xl bg-white/[0.06] border-white/15 text-white">
+                      <SelectTrigger className="h-11">
                         <SelectValue placeholder="Select entity..." />
                       </SelectTrigger>
                       <SelectContent>
@@ -267,7 +269,7 @@ export const SettingsDialog = ({ open, onOpenChange, onSave, currentConfig, curr
                   <div className="space-y-2">
                     <label className="text-sm font-light text-white/60">Temperature Sensor</label>
                     <Select value={temperatureSensor} onValueChange={setTemperatureSensor}>
-                      <SelectTrigger className="h-11 rounded-xl bg-white/[0.06] border-white/15 text-white">
+                      <SelectTrigger className="h-11">
                         <SelectValue placeholder="Select sensor..." />
                       </SelectTrigger>
                       <SelectContent>
@@ -284,7 +286,7 @@ export const SettingsDialog = ({ open, onOpenChange, onSave, currentConfig, curr
                   <div className="space-y-2">
                     <label className="text-sm font-light text-white/60">Humidity Sensor</label>
                     <Select value={humiditySensor} onValueChange={setHumiditySensor}>
-                      <SelectTrigger className="h-11 rounded-xl bg-white/[0.06] border-white/15 text-white">
+                      <SelectTrigger className="h-11">
                         <SelectValue placeholder="Select sensor..." />
                       </SelectTrigger>
                       <SelectContent>
@@ -301,7 +303,7 @@ export const SettingsDialog = ({ open, onOpenChange, onSave, currentConfig, curr
                   <div className="space-y-2">
                     <label className="text-sm font-light text-white/60">PM 2.5 Sensor</label>
                     <Select value={airQualitySensor} onValueChange={setAirQualitySensor}>
-                      <SelectTrigger className="h-11 rounded-xl bg-white/[0.06] border-white/15 text-white">
+                      <SelectTrigger className="h-11">
                         <SelectValue placeholder="Select sensor..." />
                       </SelectTrigger>
                       <SelectContent>
@@ -322,15 +324,17 @@ export const SettingsDialog = ({ open, onOpenChange, onSave, currentConfig, curr
         {/* Footer Buttons */}
         <div className="flex gap-3 pt-6 border-t border-white/10">
           <Button 
+            variant="outline"
             onClick={() => onOpenChange(false)} 
-            className="flex-1 h-11 rounded-xl bg-white/[0.06] hover:bg-white/[0.1] text-white border border-white/15 font-light tracking-wide"
+            className="flex-1 h-11 rounded-xl font-light tracking-wide"
           >
             Cancel
           </Button>
           <Button
+            variant="primary"
             onClick={handleSave}
             disabled={!isFormValid}
-            className="flex-1 h-11 rounded-xl bg-[hsl(43_88%_60%)] hover:bg-[hsl(43_88%_65%)] text-white font-light tracking-wide border-0 shadow-[0_4px_16px_hsl(43_88%_60%/0.25)] disabled:opacity-40 disabled:shadow-none transition-all duration-200"
+            className="flex-1 h-11 rounded-xl font-light tracking-wide"
           >
             Save & Connect
           </Button>

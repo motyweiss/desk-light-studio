@@ -36,14 +36,14 @@ const DialogContent = React.forwardRef<
     <DialogPrimitive.Content
       ref={ref}
       className={cn(
-        "fixed left-[50%] top-[50%] z-50 grid w-full max-w-lg translate-x-[-50%] translate-y-[-50%] gap-4 bg-[hsl(28_18%_12%)] backdrop-blur-xl border border-white/15 p-8 shadow-[0_16px_48px_rgba(0,0,0,0.5)] duration-300 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-96 data-[state=open]:zoom-in-96 rounded-2xl",
+        "fixed left-[50%] top-[50%] z-50 grid w-full max-w-lg translate-x-[-50%] translate-y-[-50%] gap-6 bg-[hsl(28_18%_11%)] backdrop-blur-[40px] border border-white/15 p-8 shadow-[0_20px_60px_rgba(0,0,0,0.6)] duration-300 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-96 data-[state=open]:zoom-in-96 data-[state=closed]:slide-out-to-top-[2%] data-[state=open]:slide-in-from-top-[2%] rounded-2xl",
         className
       )}
       {...props}
     >
       {children}
-      <DialogPrimitive.Close className="absolute right-5 top-5 rounded-full w-8 h-8 flex items-center justify-center opacity-60 hover:opacity-100 transition-all hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-white/30 disabled:pointer-events-none">
-        <X className="h-4 w-4" />
+      <DialogPrimitive.Close className="absolute right-5 top-5 rounded-full w-8 h-8 flex items-center justify-center opacity-60 hover:opacity-100 transition-all duration-200 hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-white/30 disabled:pointer-events-none">
+        <X className="h-4 w-4 text-white" />
         <span className="sr-only">Close</span>
       </DialogPrimitive.Close>
     </DialogPrimitive.Content>
