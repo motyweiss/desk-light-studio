@@ -400,7 +400,7 @@ const Index = () => {
       />
 
       {/* Responsive Layout Container */}
-      <div className="flex flex-col md:flex-row items-center gap-6 md:gap-16 max-w-7xl w-full relative z-10 px-5 md:px-0 pb-20 md:pb-0">
+      <div className="flex flex-col md:flex-row items-center gap-6 md:gap-12 max-w-7xl w-full relative z-10 px-5 md:px-0 pb-20 md:pb-0">
         {/* Mobile: Room Info Header (Title, Climate, Master Switch) */}
         <motion.div 
           className="w-full md:hidden pt-12"
@@ -505,7 +505,7 @@ const Index = () => {
 
         {/* Desk Display Panel */}
         <motion.div 
-          className="w-full md:w-[50%] relative"
+          className="w-full md:w-[46%] relative"
           initial={{ opacity: 0, y: 40, scale: 0.92, filter: 'blur(10px)' }}
           animate={{ 
             opacity: isLoaded ? 1 : 0,
@@ -617,7 +617,7 @@ const Index = () => {
 
         {/* Room Info Panel - Full on desktop, Light cards only on mobile */}
         <motion.div 
-          className="w-full md:w-[42%] md:pl-6"
+          className="w-full md:w-[48%] md:pl-4"
           initial={{ opacity: 0, x: 30 }}
           animate={{ 
             opacity: isLoaded ? 1 : 0,
