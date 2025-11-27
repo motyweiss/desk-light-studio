@@ -200,7 +200,7 @@ const Index = () => {
       <div className="flex flex-col md:flex-row items-center gap-8 md:gap-16 max-w-7xl w-full relative z-10 pb-[120px] md:pb-0">
         {/* Mobile: Room Info Header (Title, Climate, Master Switch) */}
         <motion.div 
-          className="w-full md:hidden px-[100px]"
+          className="w-full md:hidden px-[40px]"
           initial={{ opacity: 0, y: 20 }}
           animate={{ 
             opacity: isLoaded ? 1 : 0,
