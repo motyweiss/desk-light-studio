@@ -124,7 +124,15 @@ const Index = () => {
     return stateColors[state] || "28 20% 18%";
   }, [spotlightIntensity, deskLampIntensity, monitorLightIntensity]);
 
-  // Track lighting state changes for coordinated transitions
+  // Calculate binary lighting state (on/off only, not intensity)
+  const lightingState = useMemo(() => {
+    const spotlightBit = spotlightIntensity > 0 ? "1" : "0";
+    const deskLampBit = deskLampIntensity > 0 ? "1" : "0";
+    const monitorLightBit = monitorLightIntensity > 0 ? "1" : "0";
+    return `${spotlightBit}${deskLampBit}${monitorLightBit}`;
+  }, [spotlightIntensity, deskLampIntensity, monitorLightIntensity]);
+
+  // Track binary state changes only (not continuous slider adjustments)
   useEffect(() => {
     setIsTransitioning(true);
     const timer = setTimeout(() => {
@@ -132,7 +140,7 @@ const Index = () => {
     }, 1500);
     
     return () => clearTimeout(timer);
-  }, [spotlightIntensity, deskLampIntensity, monitorLightIntensity]);
+  }, [lightingState]);
 
   return (
     <>
@@ -142,17 +150,10 @@ const Index = () => {
         className="min-h-[100dvh] flex items-center justify-center p-4 md:p-8 relative overflow-hidden"
         animate={{
           backgroundColor: `hsl(${pageBackgroundColor})`,
-          scale: isTransitioning ? 1.002 : 1,
         }}
         transition={{
-          backgroundColor: {
-            duration: 1.5,
-            ease: [0.22, 0.03, 0.26, 1]
-          },
-          scale: {
-            duration: 0.75,
-            ease: [0.22, 0.03, 0.26, 1]
-          }
+          duration: 1.5,
+          ease: [0.22, 0.03, 0.26, 1]
         }}
       >
       {/* Frosted glass blur layer for smooth background */}
