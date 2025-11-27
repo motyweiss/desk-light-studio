@@ -24,6 +24,13 @@ interface RoomInfoPanelProps {
 }
 
 export const RoomInfoPanel = ({ roomName, temperature, humidity, airQuality, masterSwitchOn, onMasterToggle, onLightHover, lights, isLoaded }: RoomInfoPanelProps) => {
+  const getAirQualityStatus = (value: number): { label: string; color: string } => {
+    if (value <= 12) return { label: 'Good', color: 'hsl(142 70% 45%)' };
+    if (value <= 35) return { label: 'Moderate', color: 'hsl(45 90% 55%)' };
+    if (value <= 55) return { label: 'Sensitive', color: 'hsl(25 90% 55%)' };
+    return { label: 'Unhealthy', color: 'hsl(0 75% 55%)' };
+  };
+
   // Animated counter for temperature
   const tempCount = useMotionValue(0);
   const tempDisplay = useTransform(tempCount, (latest) => latest.toFixed(1));
@@ -198,9 +205,13 @@ export const RoomInfoPanel = ({ roomName, temperature, humidity, airQuality, mas
             <span className="text-[9px] text-white/55 font-light tracking-[0.2em] uppercase mb-1">
               PM 2.5
             </span>
-            <div className="text-base font-light text-white tabular-nums">
-              <motion.span>{airQualityDisplay}</motion.span>
-              <span className="text-[10px] text-white/40 ml-1">µg/m³</span>
+            <div className="text-base font-light tabular-nums">
+              <motion.span
+                animate={{ color: getAirQualityStatus(airQuality).color }}
+                transition={{ duration: 0.5, ease: [0.22, 0.03, 0.26, 1] }}
+              >
+                {getAirQualityStatus(airQuality).label}
+              </motion.span>
             </div>
           </div>
         </div>
