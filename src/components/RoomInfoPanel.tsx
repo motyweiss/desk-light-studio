@@ -83,7 +83,7 @@ export const RoomInfoPanel = ({ roomName, temperature, humidity, airQuality, mas
   }, [isLoaded, temperature, humidity, airQuality, tempCount, humidityCount, airQualityCount]);
 
   return (
-    <div className="space-y-6 md:space-y-8">
+    <div className="space-y-4 md:space-y-5">
       {/* Room Title with Master Switch - Hidden on mobile (shown in Index.tsx) */}
       <motion.div 
         className="hidden md:flex items-start justify-between"
@@ -98,7 +98,7 @@ export const RoomInfoPanel = ({ roomName, temperature, humidity, airQuality, mas
           ease: [0.22, 0.03, 0.26, 1]
         }}
       >
-        <h1 className="text-3xl md:text-5xl font-display font-light tracking-tight md:tracking-tight text-foreground leading-tight">
+        <h1 className="text-3xl md:text-4xl font-display font-light tracking-tight md:tracking-tight text-foreground leading-tight">
           {roomName}
         </h1>
         
@@ -223,7 +223,7 @@ export const RoomInfoPanel = ({ roomName, temperature, humidity, airQuality, mas
       {/* Devices Battery Section - Desktop only */}
       {devices && devices.length > 0 && (
         <motion.div 
-          className="hidden md:flex flex-col gap-4 py-4"
+          className="hidden md:flex flex-col gap-4 py-2"
           initial={{ opacity: 0, y: 10 }}
           animate={{ 
             opacity: isLoaded ? 1 : 0,
