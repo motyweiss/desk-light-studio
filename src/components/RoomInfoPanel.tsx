@@ -137,14 +137,15 @@ export const RoomInfoPanel = ({ roomName, temperature, humidity, airQuality, mas
       >
         {/* Temperature */}
         <div className="flex items-center gap-3">
-          <CircularProgress 
-            value={temperature} 
-            min={15} 
-            max={35} 
-            size={44} 
-            strokeWidth={2.5}
-            isLoaded={isLoaded}
-          >
+              <CircularProgress 
+                value={temperature} 
+                min={15} 
+                max={35} 
+                size={44} 
+                strokeWidth={2.5}
+                isLoaded={isLoaded}
+                colorType="temperature"
+              >
             <Thermometer className="w-5 h-5 text-white/60" strokeWidth={1.5} />
           </CircularProgress>
           <div className="flex flex-col">
@@ -159,14 +160,15 @@ export const RoomInfoPanel = ({ roomName, temperature, humidity, airQuality, mas
 
         {/* Humidity */}
         <div className="flex items-center gap-3">
-          <CircularProgress 
-            value={humidity} 
-            min={0} 
-            max={100} 
-            size={44} 
-            strokeWidth={2.5}
-            isLoaded={isLoaded}
-          >
+              <CircularProgress 
+                value={humidity} 
+                min={0} 
+                max={100} 
+                size={44} 
+                strokeWidth={2.5}
+                isLoaded={isLoaded}
+                colorType="humidity"
+              >
             <Droplets className="w-5 h-5 text-white/60" strokeWidth={1.5} />
           </CircularProgress>
           <div className="flex flex-col">
@@ -181,14 +183,15 @@ export const RoomInfoPanel = ({ roomName, temperature, humidity, airQuality, mas
 
         {/* PM 2.5 */}
         <div className="flex items-center gap-3">
-          <CircularProgress 
-            value={airQuality} 
-            min={0} 
-            max={100} 
-            size={44} 
-            strokeWidth={2.5}
-            isLoaded={isLoaded}
-          >
+              <CircularProgress 
+                value={airQuality} 
+                min={0} 
+                max={100} 
+                size={44} 
+                strokeWidth={2.5}
+                isLoaded={isLoaded}
+                colorType="airQuality"
+              >
             <Wind className="w-5 h-5 text-white/60" strokeWidth={1.5} />
           </CircularProgress>
           <div className="flex flex-col">
