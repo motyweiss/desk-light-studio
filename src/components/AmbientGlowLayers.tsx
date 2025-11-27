@@ -24,7 +24,7 @@ export const AmbientGlowLayers = ({
       <motion.div
         className="fixed inset-0 pointer-events-none z-0"
         style={{
-          background: `radial-gradient(ellipse 70% 70% at 50% 35%, hsl(32 65% 58% / 0.22) 0%, hsl(35 60% 52% / 0.12) 30%, transparent 60%)`,
+          background: `radial-gradient(ellipse 70% 70% at 50% 35%, hsl(32 45% 56% / 0.20) 0%, hsl(33 40% 52% / 0.10) 30%, transparent 60%)`,
           filter: 'blur(70px)',
         }}
         animate={{
@@ -40,7 +40,7 @@ export const AmbientGlowLayers = ({
       <motion.div
         className="fixed inset-0 pointer-events-none z-0"
         style={{
-          background: `radial-gradient(ellipse 65% 65% at 30% 55%, hsl(42 75% 60% / 0.20) 0%, hsl(40 70% 55% / 0.10) 35%, transparent 58%)`,
+          background: `radial-gradient(ellipse 65% 65% at 30% 55%, hsl(36 50% 58% / 0.18) 0%, hsl(35 45% 54% / 0.09) 35%, transparent 58%)`,
           filter: 'blur(65px)',
         }}
         animate={{
@@ -56,7 +56,7 @@ export const AmbientGlowLayers = ({
       <motion.div
         className="fixed inset-0 pointer-events-none z-0"
         style={{
-          background: `radial-gradient(ellipse 75% 75% at 50% 40%, hsl(38 50% 60% / 0.18) 0%, hsl(35 45% 55% / 0.09) 38%, transparent 62%)`,
+          background: `radial-gradient(ellipse 75% 75% at 50% 40%, hsl(35 40% 58% / 0.16) 0%, hsl(34 35% 54% / 0.08) 38%, transparent 62%)`,
           filter: 'blur(60px)',
         }}
         animate={{
@@ -72,7 +72,7 @@ export const AmbientGlowLayers = ({
       <motion.div
         className="fixed inset-0 pointer-events-none z-0"
         style={{
-          background: `radial-gradient(ellipse 80% 80% at 50% 50%, hsl(38 60% 55% / 0.08) 0%, transparent 70%)`,
+          background: `radial-gradient(ellipse 80% 80% at 50% 50%, hsl(35 40% 54% / 0.07) 0%, transparent 70%)`,
           filter: 'blur(100px)',
         }}
         animate={{
