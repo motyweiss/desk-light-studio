@@ -356,7 +356,6 @@ export const RoomInfoPanel = ({ roomName, temperature, humidity, airQuality, mas
                 show: { opacity: 1, y: 0, scale: 1, filter: 'blur(0px)' }
               }}
               transition={{ duration: 0.7, ease: [0.22, 0.03, 0.26, 1] }}
-              className="rounded-xl bg-white/[0.03] backdrop-blur-sm p-3 transition-all duration-300 hover:bg-white/[0.05]"
             >
               <LightControlCard
                 id={light.id}
