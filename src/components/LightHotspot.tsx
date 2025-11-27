@@ -457,10 +457,10 @@ export const LightHotspot = ({
                     }
                   }}
                 >
-                  {/* Lamp icon circle - Exactly 24x24 pixels */}
+                  {/* Lamp icon circle - Exactly 42x42 pixels */}
                   <div
                     className={`
-                      w-6 h-6 rounded-full flex items-center justify-center
+                      w-[42px] h-[42px] rounded-full flex items-center justify-center
                       transition-all duration-300 cursor-pointer flex-shrink-0
                       ${intensity > 0 
                         ? 'bg-white/15 hover:bg-white/20' 
@@ -473,7 +473,7 @@ export const LightHotspot = ({
                     }}
                   >
                     <IconComponent 
-                      className={`w-4 h-4 transition-all duration-300 ${
+                      className={`w-8 h-8 transition-all duration-300 ${
                         intensity > 0 
                           ? 'text-white' 
                           : 'text-[rgb(180,180,180)]'
