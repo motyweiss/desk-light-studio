@@ -5,9 +5,6 @@ import { DeskDisplay } from "@/components/DeskDisplay";
 import { RoomInfoPanel } from "@/components/RoomInfoPanel";
 import { LoadingOverlay } from "@/components/LoadingOverlay";
 import { AmbientGlowLayers } from "@/components/AmbientGlowLayers";
-import { GestureHint } from "@/components/GestureHint";
-import { useTouchGestures } from "@/hooks/useTouchGestures";
-import { useToast } from "@/hooks/use-toast";
 
 // Import all desk images for preloading
 import desk000 from "@/assets/desk-000.png";
@@ -28,28 +25,6 @@ const Index = () => {
 
   // Hover states for coordinated UI
   const [hoveredLight, setHoveredLight] = useState<string | null>(null);
-  
-  // Mobile gesture hints
-  const [showGestureHint, setShowGestureHint] = useState(false);
-  const [currentLightIndex, setCurrentLightIndex] = useState(0);
-  const { toast } = useToast();
-
-  // Light order for swipe cycling
-  const lights = [
-    { name: 'Desk Lamp', intensity: deskLampIntensity, setter: setDeskLampIntensity },
-    { name: 'Monitor Light', intensity: monitorLightIntensity, setter: setMonitorLightIntensity },
-    { name: 'Spotlight', intensity: spotlightIntensity, setter: setSpotlightIntensity },
-  ];
-
-  // Show gesture hint after loading completes (mobile only)
-  useEffect(() => {
-    if (isLoaded && 'ontouchstart' in window) {
-      const timer = setTimeout(() => {
-        setShowGestureHint(true);
-      }, 1500);
-      return () => clearTimeout(timer);
-    }
-  }, [isLoaded]);
 
   // Optimized image loading - preload primary "all lights off" image first
   useEffect(() => {
@@ -126,49 +101,6 @@ const Index = () => {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [masterSwitchOn]);
 
-  // Touch gestures for mobile
-  useTouchGestures({
-    onSwipeRight: () => {
-      // Cycle to next light
-      const nextIndex = (currentLightIndex + 1) % lights.length;
-      setCurrentLightIndex(nextIndex);
-      const currentLight = lights[nextIndex];
-      const newIntensity = currentLight.intensity > 0 ? 0 : 100;
-      currentLight.setter(newIntensity);
-      
-      toast({
-        description: `${currentLight.name} ${newIntensity > 0 ? 'ON' : 'OFF'}`,
-        duration: 1500,
-      });
-    },
-    onSwipeLeft: () => {
-      // Cycle to previous light
-      const prevIndex = (currentLightIndex - 1 + lights.length) % lights.length;
-      setCurrentLightIndex(prevIndex);
-      const currentLight = lights[prevIndex];
-      const newIntensity = currentLight.intensity > 0 ? 0 : 100;
-      currentLight.setter(newIntensity);
-      
-      toast({
-        description: `${currentLight.name} ${newIntensity > 0 ? 'ON' : 'OFF'}`,
-        duration: 1500,
-      });
-    },
-    onPinch: (scale: number) => {
-      // Adjust master brightness based on pinch
-      const allLightsOn = spotlightIntensity > 0 || deskLampIntensity > 0 || monitorLightIntensity > 0;
-      
-      if (scale > 1.2 && !allLightsOn) {
-        // Pinch out - turn all lights on
-        handleMasterToggle(true);
-      } else if (scale < 0.8 && allLightsOn) {
-        // Pinch in - turn all lights off
-        handleMasterToggle(false);
-      }
-    },
-    threshold: 80
-  });
-
   // Calculate page background color based on light intensities - memoized for performance
   const pageBackgroundColor = useMemo(() => {
     const spotlightBit = spotlightIntensity > 0 ? "1" : "0";
@@ -194,7 +126,6 @@ const Index = () => {
   return (
     <>
       <LoadingOverlay isLoading={isLoading} />
-      <GestureHint show={showGestureHint} onDismiss={() => setShowGestureHint(false)} />
 
       <motion.div 
         className="min-h-[100dvh] flex items-center justify-center p-4 md:p-8 relative overflow-hidden"
@@ -224,10 +155,10 @@ const Index = () => {
       />
 
       {/* Responsive Layout Container */}
-      <div className="flex flex-col md:flex-row items-center gap-6 md:gap-16 max-w-7xl w-full relative z-10 px-10 md:px-0 pb-[120px] md:pb-0">
+      <div className="flex flex-col md:flex-row items-center gap-6 md:gap-16 max-w-7xl w-full relative z-10 px-5 md:px-0 pb-20 md:pb-0">
         {/* Mobile: Room Info Header (Title, Climate, Master Switch) */}
         <motion.div 
-          className="w-full md:hidden"
+          className="w-full md:hidden pt-12"
           initial={{ opacity: 0, y: 30 }}
           animate={{ 
             opacity: isLoaded ? 1 : 0,
@@ -240,9 +171,9 @@ const Index = () => {
           }}
         >
           {/* Room Title with Master Switch */}
-          <div className="flex items-start justify-between mb-6">
+          <div className="flex items-start justify-between mb-5">
             <motion.h1 
-              className="text-4xl font-light tracking-tight text-foreground leading-tight"
+              className="text-[2.5rem] font-light tracking-tight text-foreground leading-tight"
               style={{ fontFamily: "'Cormorant Garamond', serif" }}
               initial={{ opacity: 0, y: 20 }}
               animate={{ 
@@ -292,7 +223,7 @@ const Index = () => {
 
           {/* Climate Data */}
           <motion.div 
-            className="flex gap-10 mb-8"
+            className="flex gap-10 mb-3"
             initial={{ opacity: 0, y: 20 }}
             animate={{ 
               opacity: isLoaded ? 1 : 0,
@@ -310,9 +241,9 @@ const Index = () => {
                 <Thermometer className="w-5 h-5 text-white/50" strokeWidth={1.5} />
               </div>
               <div className="flex flex-col">
-                <div className="text-[10px] uppercase tracking-[0.2em] text-foreground/40 mb-1 font-light">Temperature</div>
+                <div className="text-[9px] uppercase tracking-[0.2em] text-foreground/40 mb-0.5 font-light">Temperature</div>
                 <motion.div 
-                  className="text-xl font-light text-foreground tabular-nums"
+                  className="text-lg font-light text-foreground tabular-nums"
                   initial={{ opacity: 0 }}
                   animate={{ opacity: isLoaded ? 1 : 0 }}
                 >
@@ -327,9 +258,9 @@ const Index = () => {
                 <Droplets className="w-5 h-5 text-white/50" strokeWidth={1.5} />
               </div>
               <div className="flex flex-col">
-                <div className="text-[10px] uppercase tracking-[0.2em] text-foreground/40 mb-1 font-light">Humidity</div>
+                <div className="text-[9px] uppercase tracking-[0.2em] text-foreground/40 mb-0.5 font-light">Humidity</div>
                 <motion.div 
-                  className="text-xl font-light text-foreground tabular-nums"
+                  className="text-lg font-light text-foreground tabular-nums"
                   initial={{ opacity: 0 }}
                   animate={{ opacity: isLoaded ? 1 : 0 }}
                 >
