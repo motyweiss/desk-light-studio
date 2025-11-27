@@ -195,7 +195,7 @@ const Index = () => {
 
           {/* Climate Data */}
           <motion.div 
-            className="flex gap-10 mb-6"
+            className="flex gap-10 mb-4"
             initial={{ opacity: 0, y: 20 }}
             animate={{ 
               opacity: isLoaded ? 1 : 0,
