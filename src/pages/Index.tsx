@@ -127,7 +127,7 @@ const Index = () => {
       />
 
       {/* Responsive Layout Container */}
-      <div className="flex flex-col md:flex-row items-center gap-6 md:gap-16 max-w-7xl w-full relative z-10 px-5 md:px-0 pb-20 md:pb-0">
+      <div className="flex flex-col md:flex-row items-center gap-6 md:gap-16 max-w-7xl w-full relative z-10 px-5 md:px-0 pt-8 md:pt-0 pb-20 md:pb-0">
         {/* Mobile: Room Info Header (Title, Climate, Master Switch) */}
         <motion.div 
           className="w-full md:hidden"
