@@ -28,8 +28,6 @@ export const ClimateTooltip = ({
   return (
     <motion.div
       className="absolute -bottom-6 left-1/2 -translate-x-1/2 z-20 hidden md:block"
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
       initial={{ opacity: 0, y: 15, scale: 0.9 }}
       animate={{ 
         opacity: isLoaded ? 1 : 0,
@@ -39,11 +37,13 @@ export const ClimateTooltip = ({
       transition={{ duration: 0.8, delay: 1.2, ease: [0.22, 0.03, 0.26, 1] }}
     >
       <motion.div
-        className={`
-          flex items-center gap-4 transition-all duration-400
-          ${isHovered ? 'bg-black/25 backdrop-blur-xl border border-white/10 px-5 py-3 rounded-2xl' : ''}
-        `}
-        layout
+        className="bg-black/25 backdrop-blur-xl border border-white/10 px-4 py-3 rounded-full flex items-center justify-center"
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => setIsHovered(false)}
+        initial={false}
+        animate={{ 
+          scale: isHovered ? 1.05 : 1,
+        }}
         transition={{ duration: 0.4, ease: [0.22, 0.03, 0.26, 1] }}
       >
         {/* Temperature */}
@@ -63,13 +63,13 @@ export const ClimateTooltip = ({
           <AnimatePresence>
             {isHovered && (
               <motion.div
-                initial={{ opacity: 0, width: 0 }}
-                animate={{ opacity: 1, width: 'auto' }}
-                exit={{ opacity: 0, width: 0 }}
-                className="overflow-hidden"
-                transition={{ duration: 0.3, ease: 'easeInOut' }}
+                initial={{ opacity: 0, width: 0, scale: 0.8 }}
+                animate={{ opacity: 1, width: 'auto', scale: 1 }}
+                exit={{ opacity: 0, width: 0, scale: 0.8 }}
+                className="overflow-hidden origin-left"
+                transition={{ duration: 0.35, ease: [0.22, 0.03, 0.26, 1] }}
               >
-                <div className="flex flex-col">
+                <div className="flex flex-col pl-1">
                   <span className="text-xs text-white/40 uppercase tracking-wider">Temp</span>
                   <span className="text-sm text-white font-light">
                     {temperature.toFixed(1)}°
@@ -97,13 +97,13 @@ export const ClimateTooltip = ({
           <AnimatePresence>
             {isHovered && (
               <motion.div
-                initial={{ opacity: 0, width: 0 }}
-                animate={{ opacity: 1, width: 'auto' }}
-                exit={{ opacity: 0, width: 0 }}
-                className="overflow-hidden"
-                transition={{ duration: 0.3, ease: 'easeInOut' }}
+                initial={{ opacity: 0, width: 0, scale: 0.8 }}
+                animate={{ opacity: 1, width: 'auto', scale: 1 }}
+                exit={{ opacity: 0, width: 0, scale: 0.8 }}
+                className="overflow-hidden origin-left"
+                transition={{ duration: 0.35, ease: [0.22, 0.03, 0.26, 1] }}
               >
-                <div className="flex flex-col">
+                <div className="flex flex-col pl-1">
                   <span className="text-xs text-white/40 uppercase tracking-wider">Humidity</span>
                   <span className="text-sm text-white font-light">
                     {humidity.toFixed(0)}%
@@ -131,13 +131,13 @@ export const ClimateTooltip = ({
           <AnimatePresence>
             {isHovered && (
               <motion.div
-                initial={{ opacity: 0, width: 0 }}
-                animate={{ opacity: 1, width: 'auto' }}
-                exit={{ opacity: 0, width: 0 }}
-                className="overflow-hidden"
-                transition={{ duration: 0.3, ease: 'easeInOut' }}
+                initial={{ opacity: 0, width: 0, scale: 0.8 }}
+                animate={{ opacity: 1, width: 'auto', scale: 1 }}
+                exit={{ opacity: 0, width: 0, scale: 0.8 }}
+                className="overflow-hidden origin-left"
+                transition={{ duration: 0.35, ease: [0.22, 0.03, 0.26, 1] }}
               >
-                <div className="flex flex-col">
+                <div className="flex flex-col pl-1">
                   <span className="text-xs text-white/40 uppercase tracking-wider">Air</span>
                   <span className="text-sm text-white font-light">
                     {getAirQualityLabel(airQuality)}
