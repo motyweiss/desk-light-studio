@@ -89,10 +89,9 @@ export const ClimateTooltip = ({
       transition={{ duration: 0.8, delay: 1.2, ease: [0.22, 0.03, 0.26, 1] }}
     >
       <motion.div
-        className="relative backdrop-blur-3xl border border-white/25 px-4 py-3 rounded-full flex items-center justify-center gap-5 shadow-[0_8px_32px_rgba(0,0,0,0.4)]"
+        className="relative bg-white/8 backdrop-blur-[24px] border border-white/20 px-4 py-3 rounded-full flex items-center justify-center gap-5"
         style={{
-          background: 'rgba(255, 255, 255, 0.12)',
-          boxShadow: '0 8px 32px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.2)',
+          boxShadow: '0 4px 24px rgba(0,0,0,0.15), 0 1px 4px rgba(0,0,0,0.1), inset 0 1px 1px rgba(255,255,255,0.1)',
         }}
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
@@ -102,12 +101,11 @@ export const ClimateTooltip = ({
         }}
         transition={{ duration: 0.4, ease: [0.22, 0.03, 0.26, 1] }}
       >
-        {/* Enhanced blurred background layer */}
-        <div 
-          className="absolute inset-0 rounded-full backdrop-blur-3xl -z-10"
+        {/* Internal glow layer matching tooltip aesthetic */}
+        <motion.div 
+          className="absolute inset-0 rounded-full pointer-events-none"
           style={{
-            background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.15) 0%, rgba(255, 255, 255, 0.08) 100%)',
-            filter: 'blur(25px)',
+            background: 'radial-gradient(circle at 50% 50%, rgba(200, 160, 80, 0.06) 0%, transparent 70%)',
           }}
         />
         {/* Temperature */}
