@@ -54,10 +54,10 @@ export const RoomInfoPanel = ({ roomName, temperature, humidity, masterSwitchOn,
   }, [isLoaded, temperature, humidity, tempCount, humidityCount]);
 
   return (
-    <div className="space-y-4 md:space-y-6">
+    <div className="space-y-6 md:space-y-8">
       {/* Room Title with Master Switch - Hidden on mobile (shown in Index.tsx) */}
       <motion.div 
-        className="hidden md:flex items-center justify-between"
+        className="hidden md:flex items-start justify-between"
         initial={{ opacity: 0, y: 10 }}
         animate={{ 
           opacity: isLoaded ? 1 : 0,
@@ -69,7 +69,7 @@ export const RoomInfoPanel = ({ roomName, temperature, humidity, masterSwitchOn,
           ease: [0.22, 0.03, 0.26, 1]
         }}
       >
-        <h1 className="text-3xl md:text-5xl font-display font-light tracking-wide text-foreground">
+        <h1 className="text-3xl md:text-5xl font-display font-light tracking-wide text-foreground leading-tight">
           {roomName}
         </h1>
         
@@ -86,7 +86,7 @@ export const RoomInfoPanel = ({ roomName, temperature, humidity, masterSwitchOn,
             ease: [0.22, 0.03, 0.26, 1]
           }}
           onClick={() => onMasterToggle(!masterSwitchOn)}
-          className={`w-10 h-10 md:w-12 md:h-12 rounded-full backdrop-blur-xl border transition-all duration-500 ${
+          className={`w-14 h-14 rounded-full backdrop-blur-xl border-2 transition-all duration-500 flex-shrink-0 ${
             masterSwitchOn 
               ? 'border-[hsl(38_70%_58%/0.6)]' 
               : 'border-white/20 hover:border-white/30'
@@ -101,14 +101,14 @@ export const RoomInfoPanel = ({ roomName, temperature, humidity, masterSwitchOn,
             transition={{ duration: 0.5, ease: [0.22, 0.03, 0.26, 1] }}
             className="flex items-center justify-center"
           >
-            <Sun className="w-4 h-4 md:w-5 md:h-5" strokeWidth={2.5} />
+            <Sun className="w-6 h-6" strokeWidth={2} />
           </motion.div>
         </motion.button>
       </motion.div>
 
       {/* Climate Info - Hidden on mobile (shown in Index.tsx) */}
       <motion.div 
-        className="hidden md:flex gap-8 py-4 md:py-6"
+        className="hidden md:flex gap-12 py-6"
         initial={{ opacity: 0, y: 10 }}
         animate={{ 
           opacity: isLoaded ? 1 : 0,
@@ -122,11 +122,11 @@ export const RoomInfoPanel = ({ roomName, temperature, humidity, masterSwitchOn,
       >
         {/* Temperature */}
         <div className="flex items-center gap-4">
-          <div className="flex items-center justify-center w-10 h-10 md:w-12 md:h-12 rounded-full bg-white/5 backdrop-blur-sm">
-            <Thermometer className="w-5 h-5 md:w-6 md:h-6 text-white/50" strokeWidth={1.5} />
+          <div className="flex items-center justify-center w-12 h-12 rounded-full bg-white/5 backdrop-blur-sm">
+            <Thermometer className="w-6 h-6 text-white/50" strokeWidth={1.5} />
           </div>
           <div className="flex flex-col">
-            <span className="text-[10px] text-white/40 font-light tracking-[0.15em] uppercase mb-1">
+            <span className="text-[9px] text-white/40 font-light tracking-[0.2em] uppercase mb-1.5">
               Temperature
             </span>
             <div className="text-base md:text-lg font-light text-white tabular-nums">
@@ -137,11 +137,11 @@ export const RoomInfoPanel = ({ roomName, temperature, humidity, masterSwitchOn,
 
         {/* Humidity */}
         <div className="flex items-center gap-4">
-          <div className="flex items-center justify-center w-10 h-10 md:w-12 md:h-12 rounded-full bg-white/5 backdrop-blur-sm">
-            <Droplets className="w-5 h-5 md:w-6 md:h-6 text-white/50" strokeWidth={1.5} />
+          <div className="flex items-center justify-center w-12 h-12 rounded-full bg-white/5 backdrop-blur-sm">
+            <Droplets className="w-6 h-6 text-white/50" strokeWidth={1.5} />
           </div>
           <div className="flex flex-col">
-            <span className="text-[10px] text-white/40 font-light tracking-[0.15em] uppercase mb-1">
+            <span className="text-[9px] text-white/40 font-light tracking-[0.2em] uppercase mb-1.5">
               Humidity
             </span>
             <div className="text-base md:text-lg font-light text-white tabular-nums">
@@ -155,7 +155,7 @@ export const RoomInfoPanel = ({ roomName, temperature, humidity, masterSwitchOn,
       <div>
         {/* Separator - Hidden on mobile */}
         <motion.div 
-          className="hidden md:block h-px bg-white/10 mb-5"
+          className="hidden md:block h-px bg-white/10 mb-6"
           initial={{ scaleX: 0, opacity: 0 }}
           animate={{ 
             scaleX: isLoaded ? 1 : 0,
@@ -170,7 +170,7 @@ export const RoomInfoPanel = ({ roomName, temperature, humidity, masterSwitchOn,
         />
         
         <motion.div 
-          className="space-y-2 md:space-y-3 -ml-3 md:-ml-5"
+          className="space-y-3 md:space-y-4 -ml-3 md:-ml-5"
           variants={{
             hidden: { opacity: 0 },
             show: {
@@ -194,7 +194,7 @@ export const RoomInfoPanel = ({ roomName, temperature, humidity, masterSwitchOn,
               transition={{ duration: 0.7, ease: [0.22, 0.03, 0.26, 1] }}
             >
               {index > 0 && (
-                <div className="h-px bg-white/10 mb-3" />
+                <div className="h-px bg-white/10 mb-4" />
               )}
               <LightControlCard
                 id={light.id}
