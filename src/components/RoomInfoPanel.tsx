@@ -83,10 +83,10 @@ export const RoomInfoPanel = ({ roomName, temperature, humidity, airQuality, mas
   }, [isLoaded, temperature, humidity, airQuality, tempCount, humidityCount, airQualityCount]);
 
   return (
-    <div className="space-y-3 md:space-y-4">
+    <div className="space-y-6 md:space-y-8">
       {/* Room Title with Master Switch - Hidden on mobile (shown in Index.tsx) */}
       <motion.div 
-        className="hidden md:flex items-start justify-between"
+        className="hidden md:flex items-start justify-between gap-6"
         initial={{ opacity: 0, y: 10 }}
         animate={{ 
           opacity: isLoaded ? 1 : 0,
@@ -137,7 +137,7 @@ export const RoomInfoPanel = ({ roomName, temperature, humidity, airQuality, mas
 
       {/* Climate & Devices Info - Desktop only */}
       <motion.div 
-        className="hidden md:block rounded-2xl py-4 px-5"
+        className="hidden md:block rounded-2xl py-6 px-6"
         initial={{ opacity: 0, y: 10 }}
         animate={{ 
           opacity: isLoaded ? 1 : 0,
@@ -150,7 +150,7 @@ export const RoomInfoPanel = ({ roomName, temperature, humidity, airQuality, mas
         }}
       >
         {/* Climate Info */}
-        <div className="flex gap-8 mb-5">
+        <div className="flex gap-10 mb-8">
           {/* Temperature */}
           <div className="flex items-center gap-3">
                 <CircularProgress 
@@ -223,7 +223,7 @@ export const RoomInfoPanel = ({ roomName, temperature, humidity, airQuality, mas
 
         {/* Devices Battery Section */}
         {devices && devices.length > 0 && (
-          <div className="flex flex-col gap-4">
+          <div className="flex flex-col gap-5 mt-8">
             {devices.map((device) => (
               <div key={device.id} className="flex items-center gap-3">
                 <CircularProgress 
@@ -322,7 +322,7 @@ export const RoomInfoPanel = ({ roomName, temperature, humidity, airQuality, mas
       </motion.div>
 
       {/* Light Controls Section */}
-      <div className="rounded-2xl bg-white/[0.02] backdrop-blur-md border border-white/[0.05] mt-8">
+      <div className="rounded-2xl bg-white/[0.02] backdrop-blur-md border border-white/[0.05] mt-10">
         <motion.div
           className="space-y-0"
           variants={{
