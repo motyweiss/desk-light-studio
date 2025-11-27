@@ -16,8 +16,8 @@ interface SettingsDialogProps {
 }
 
 export const SettingsDialog = ({ open, onOpenChange, onSave, currentConfig, currentMapping }: SettingsDialogProps) => {
-  const [baseUrl, setBaseUrl] = useState(currentConfig?.baseUrl || "");
-  const [accessToken, setAccessToken] = useState(currentConfig?.accessToken || "");
+  const [baseUrl, setBaseUrl] = useState(currentConfig?.baseUrl || "https://4q8tnepf0wp8hemaazk4ftgeuprqycwx.ui.nabu.casa");
+  const [accessToken, setAccessToken] = useState(currentConfig?.accessToken || "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJjMTg5MDdmNGIwZjc0MTMwOWMwNjVhOGQ5ZWMzZTVkMyIsImlhdCI6MTc2NDI1MjkzMCwiZXhwIjoyMDc5NjEyOTMwfQ.8Bf9hCZxENEek09mImxvbfFP4RsnkS-Twf61m9CeKsw");
   const [deskLamp, setDeskLamp] = useState(currentMapping.deskLamp || "");
   const [monitorLight, setMonitorLight] = useState(currentMapping.monitorLight || "");
   const [spotlight, setSpotlight] = useState(currentMapping.spotlight || "");
