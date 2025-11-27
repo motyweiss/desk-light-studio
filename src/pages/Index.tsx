@@ -5,6 +5,9 @@ import { DeskDisplay } from "@/components/DeskDisplay";
 import { RoomInfoPanel } from "@/components/RoomInfoPanel";
 import { LoadingOverlay } from "@/components/LoadingOverlay";
 import { AmbientGlowLayers } from "@/components/AmbientGlowLayers";
+import { GestureHint } from "@/components/GestureHint";
+import { useTouchGestures } from "@/hooks/useTouchGestures";
+import { useToast } from "@/hooks/use-toast";
 
 // Import all desk images for preloading
 import desk000 from "@/assets/desk-000.png";
@@ -25,6 +28,28 @@ const Index = () => {
 
   // Hover states for coordinated UI
   const [hoveredLight, setHoveredLight] = useState<string | null>(null);
+  
+  // Mobile gesture hints
+  const [showGestureHint, setShowGestureHint] = useState(false);
+  const [currentLightIndex, setCurrentLightIndex] = useState(0);
+  const { toast } = useToast();
+
+  // Light order for swipe cycling
+  const lights = [
+    { name: 'Desk Lamp', intensity: deskLampIntensity, setter: setDeskLampIntensity },
+    { name: 'Monitor Light', intensity: monitorLightIntensity, setter: setMonitorLightIntensity },
+    { name: 'Spotlight', intensity: spotlightIntensity, setter: setSpotlightIntensity },
+  ];
+
+  // Show gesture hint after loading completes (mobile only)
+  useEffect(() => {
+    if (isLoaded && 'ontouchstart' in window) {
+      const timer = setTimeout(() => {
+        setShowGestureHint(true);
+      }, 1500);
+      return () => clearTimeout(timer);
+    }
+  }, [isLoaded]);
 
   // Optimized image loading - preload primary "all lights off" image first
   useEffect(() => {
@@ -101,6 +126,49 @@ const Index = () => {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [masterSwitchOn]);
 
+  // Touch gestures for mobile
+  useTouchGestures({
+    onSwipeRight: () => {
+      // Cycle to next light
+      const nextIndex = (currentLightIndex + 1) % lights.length;
+      setCurrentLightIndex(nextIndex);
+      const currentLight = lights[nextIndex];
+      const newIntensity = currentLight.intensity > 0 ? 0 : 100;
+      currentLight.setter(newIntensity);
+      
+      toast({
+        description: `${currentLight.name} ${newIntensity > 0 ? 'ON' : 'OFF'}`,
+        duration: 1500,
+      });
+    },
+    onSwipeLeft: () => {
+      // Cycle to previous light
+      const prevIndex = (currentLightIndex - 1 + lights.length) % lights.length;
+      setCurrentLightIndex(prevIndex);
+      const currentLight = lights[prevIndex];
+      const newIntensity = currentLight.intensity > 0 ? 0 : 100;
+      currentLight.setter(newIntensity);
+      
+      toast({
+        description: `${currentLight.name} ${newIntensity > 0 ? 'ON' : 'OFF'}`,
+        duration: 1500,
+      });
+    },
+    onPinch: (scale: number) => {
+      // Adjust master brightness based on pinch
+      const allLightsOn = spotlightIntensity > 0 || deskLampIntensity > 0 || monitorLightIntensity > 0;
+      
+      if (scale > 1.2 && !allLightsOn) {
+        // Pinch out - turn all lights on
+        handleMasterToggle(true);
+      } else if (scale < 0.8 && allLightsOn) {
+        // Pinch in - turn all lights off
+        handleMasterToggle(false);
+      }
+    },
+    threshold: 80
+  });
+
   // Calculate page background color based on light intensities - memoized for performance
   const pageBackgroundColor = useMemo(() => {
     const spotlightBit = spotlightIntensity > 0 ? "1" : "0";
@@ -126,6 +194,7 @@ const Index = () => {
   return (
     <>
       <LoadingOverlay isLoading={isLoading} />
+      <GestureHint show={showGestureHint} onDismiss={() => setShowGestureHint(false)} />
 
       <motion.div 
         className="min-h-[100dvh] flex items-center justify-center p-4 md:p-8 relative overflow-hidden"
