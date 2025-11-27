@@ -71,7 +71,7 @@ export const ClimateTooltip = ({
     <motion.div
       className="absolute z-20 hidden md:block"
       style={{ 
-        bottom: '-72px',
+        bottom: '-57px',
         left: 'calc(50% - 80px)', 
         transformStyle: 'preserve-3d',
         perspective: 1000,
