@@ -1,5 +1,5 @@
 import { motion, AnimatePresence } from "framer-motion";
-import { Lamp } from "lucide-react";
+import officeChairIcon from "@/assets/office-chair.svg";
 
 interface LoadingOverlayProps {
   isLoading: boolean;
@@ -55,7 +55,7 @@ export const LoadingOverlay = ({ isLoading }: LoadingOverlayProps) => {
               }}
             />
 
-            {/* Lamp Icon in center with fade-in animation */}
+            {/* Office Chair Icon in center with fade-in animation */}
             <motion.div
               className="absolute inset-0 flex items-center justify-center"
               initial={{ scale: 0.8, opacity: 0 }}
@@ -73,9 +73,11 @@ export const LoadingOverlay = ({ isLoading }: LoadingOverlayProps) => {
                 delay: 0.2
               }}
             >
-              <Lamp 
-                className="w-7 h-7 text-white/80"
-                strokeWidth={1.5}
+              <img 
+                src={officeChairIcon}
+                alt="Office Chair"
+                className="w-7 h-7 opacity-80"
+                style={{ filter: 'brightness(0) invert(1)' }}
               />
             </motion.div>
           </motion.div>
