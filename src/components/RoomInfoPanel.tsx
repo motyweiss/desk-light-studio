@@ -350,7 +350,6 @@ export const RoomInfoPanel = ({ roomName, temperature, humidity, airQuality, mas
               {index > 0 && (
                 <div className="h-px bg-white/10 w-full mx-0" />
               )}
-              <div className="px-4 py-1">
                 <LightControlCard
                 id={light.id}
                 label={light.label}
@@ -358,7 +357,6 @@ export const RoomInfoPanel = ({ roomName, temperature, humidity, airQuality, mas
                 onChange={light.onChange}
                 onHover={(isHovered) => onLightHover(isHovered ? light.id : null)}
               />
-              </div>
             </motion.div>
           ))}
         </motion.div>
