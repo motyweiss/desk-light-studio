@@ -123,7 +123,7 @@ export const RoomInfoPanel = ({ roomName, temperature, humidity, airQuality, mas
       {/* Climate Info - Full version hidden on mobile, compact version shown */}
       {/* Desktop version - Full */}
       <motion.div 
-        className="hidden md:flex gap-6 py-6"
+        className="hidden md:flex gap-10 py-6"
         initial={{ opacity: 0, y: 10 }}
         animate={{ 
           opacity: isLoaded ? 1 : 0,
