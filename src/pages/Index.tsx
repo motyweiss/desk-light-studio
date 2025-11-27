@@ -8,7 +8,6 @@ import { AmbientGlowLayers } from "@/components/AmbientGlowLayers";
 import { SettingsButton } from "@/components/SettingsButton";
 import { ConnectionStatusIndicator } from "@/components/ConnectionStatusIndicator";
 import { SettingsDialog } from "@/components/SettingsDialog";
-import { ClimateTooltip } from "@/components/ClimateTooltip";
 import { Toaster } from "@/components/ui/toaster";
 import { useToast } from "@/hooks/use-toast";
 import { useHomeAssistantConfig } from "@/hooks/useHomeAssistantConfig";
@@ -931,14 +930,6 @@ const Index = () => {
             onDeskLampChange={createLightChangeHandler('deskLamp', setDeskLampIntensity)}
             onMonitorLightChange={createLightChangeHandler('monitorLight', setMonitorLightIntensity)}
             hoveredLightId={hoveredLight}
-            isLoaded={isLoaded}
-          />
-          
-          {/* Climate Tooltip below image */}
-          <ClimateTooltip
-            temperature={temperature}
-            humidity={humidity}
-            airQuality={airQuality}
             isLoaded={isLoaded}
           />
         </motion.div>
