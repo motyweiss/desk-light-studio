@@ -149,7 +149,7 @@ export const LightControlCard = ({ id, label, intensity, onChange, onHover }: Li
           <motion.div
             initial={{ scale: 0.5, opacity: 0 }}
             animate={{
-              scale: isOn ? 1 : 0.92,
+              scale: 1,
               opacity: 1,
               color: isOn ? 'hsl(38 70% 58%)' : 'rgb(180, 180, 180)'
             }}
