@@ -83,7 +83,7 @@ export const RoomInfoPanel = ({ roomName, temperature, humidity, airQuality, mas
   }, [isLoaded, temperature, humidity, airQuality, tempCount, humidityCount, airQualityCount]);
 
   return (
-    <div className="space-y-4 md:space-y-5">
+    <div className="space-y-3 md:space-y-4">
       {/* Room Title with Master Switch - Hidden on mobile (shown in Index.tsx) */}
       <motion.div 
         className="hidden md:flex items-start justify-between"
