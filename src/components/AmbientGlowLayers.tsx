@@ -31,8 +31,8 @@ export const AmbientGlowLayers = ({
           opacity: spotlightOpacity,
         }}
         transition={{
-          duration: 1.2,
-          ease: [0.4, 0, 0.2, 1]
+          duration: 1.5,
+          ease: [0.22, 0.03, 0.26, 1]
         }}
       />
       
@@ -47,8 +47,8 @@ export const AmbientGlowLayers = ({
           opacity: deskLampOpacity,
         }}
         transition={{
-          duration: 1.2,
-          ease: [0.4, 0, 0.2, 1]
+          duration: 1.5,
+          ease: [0.22, 0.03, 0.26, 1]
         }}
       />
       
@@ -63,8 +63,8 @@ export const AmbientGlowLayers = ({
           opacity: monitorLightOpacity,
         }}
         transition={{
-          duration: 1.2,
-          ease: [0.4, 0, 0.2, 1]
+          duration: 1.5,
+          ease: [0.22, 0.03, 0.26, 1]
         }}
       />
       
