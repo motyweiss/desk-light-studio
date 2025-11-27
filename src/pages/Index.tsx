@@ -962,7 +962,7 @@ const Index = () => {
 
         {/* Room Info Panel - Full on desktop, Light cards only on mobile */}
         <motion.div 
-          className="w-full md:w-[48%] md:pl-4"
+          className="w-full md:w-[40%] md:pl-4"
           initial={{ opacity: 0, x: 30 }}
           animate={{ 
             opacity: isLoaded ? 1 : 0,
