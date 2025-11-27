@@ -409,7 +409,7 @@ export const LightHotspot = ({
                   </motion.div>
                   
                   {/* Text content - left aligned */}
-                  <div className="flex flex-col items-start gap-0.5">
+                  <div className="flex flex-col items-start gap-1.5">
                     <motion.span 
                       className="font-medium text-white text-sm leading-tight whitespace-nowrap"
                       initial={{ opacity: 0, x: -8 }}
