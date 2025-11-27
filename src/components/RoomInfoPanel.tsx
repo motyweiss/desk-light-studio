@@ -69,7 +69,7 @@ export const RoomInfoPanel = ({ roomName, temperature, humidity, masterSwitchOn,
           ease: [0.22, 0.03, 0.26, 1]
         }}
       >
-        <h1 className="text-3xl md:text-5xl font-display font-light tracking-wide text-foreground leading-tight">
+        <h1 className="text-3xl md:text-5xl font-display font-light tracking-tight md:tracking-tight text-foreground leading-tight">
           {roomName}
         </h1>
         
