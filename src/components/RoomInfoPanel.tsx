@@ -129,7 +129,7 @@ export const RoomInfoPanel = ({ roomName, temperature, humidity, masterSwitchOn,
             <span className="text-[10px] text-white/40 font-light tracking-[0.15em] uppercase mb-1">
               Temperature
             </span>
-            <div className="text-3xl md:text-4xl font-light text-white tabular-nums">
+            <div className="text-base md:text-lg font-light text-white tabular-nums">
               <motion.span>{tempDisplay}</motion.span>°
             </div>
           </div>
@@ -144,7 +144,7 @@ export const RoomInfoPanel = ({ roomName, temperature, humidity, masterSwitchOn,
             <span className="text-[10px] text-white/40 font-light tracking-[0.15em] uppercase mb-1">
               Humidity
             </span>
-            <div className="text-3xl md:text-4xl font-light text-white tabular-nums">
+            <div className="text-base md:text-lg font-light text-white tabular-nums">
               <motion.span>{humidityDisplay}</motion.span>%
             </div>
           </div>

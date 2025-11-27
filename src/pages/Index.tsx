@@ -215,11 +215,11 @@ const Index = () => {
               <div className="flex flex-col">
                 <div className="text-[10px] uppercase tracking-[0.15em] text-foreground/40 mb-0.5 font-light">Temperature</div>
                 <motion.div 
-                  className="text-2xl font-light text-foreground tabular-nums"
+                  className="text-base font-light text-foreground tabular-nums"
                   initial={{ opacity: 0 }}
                   animate={{ opacity: isLoaded ? 1 : 0 }}
                 >
-                  24.4°
+                  21°
                 </motion.div>
               </div>
             </div>
@@ -232,7 +232,7 @@ const Index = () => {
               <div className="flex flex-col">
                 <div className="text-[10px] uppercase tracking-[0.15em] text-foreground/40 mb-0.5 font-light">Humidity</div>
                 <motion.div 
-                  className="text-2xl font-light text-foreground tabular-nums"
+                  className="text-base font-light text-foreground tabular-nums"
                   initial={{ opacity: 0 }}
                   animate={{ opacity: isLoaded ? 1 : 0 }}
                 >
@@ -371,7 +371,7 @@ const Index = () => {
         >
           <RoomInfoPanel
             roomName="Office Desk"
-            temperature={24.4}
+            temperature={21}
             humidity={49}
             masterSwitchOn={masterSwitchOn}
             onMasterToggle={handleMasterToggle}
