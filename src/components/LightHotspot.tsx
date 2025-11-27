@@ -353,8 +353,8 @@ export const LightHotspot = ({
                   opacity: 0,
                   scale: 0.92,
                   transition: {
-                    duration: 0.25,
-                    ease: [0.55, 0.085, 0.68, 0.53]
+                    duration: 0.3,
+                    ease: [0.4, 0, 0.6, 1]
                   }
                 }}
                 style={{
