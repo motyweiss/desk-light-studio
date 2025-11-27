@@ -99,11 +99,6 @@ const Index = () => {
       if (entityMapping.deskLamp) await homeAssistant.setLightBrightness(entityMapping.deskLamp, targetIntensity);
       if (entityMapping.monitorLight) await homeAssistant.setLightBrightness(entityMapping.monitorLight, targetIntensity);
     }
-    
-    // Force sync after a short delay
-    setTimeout(() => {
-      forceSyncStates();
-    }, 300);
   }, [isConnected, entityMapping]);
 
   // Handle individual light intensity changes with Home Assistant sync
@@ -124,11 +119,6 @@ const Index = () => {
           await homeAssistant.setLightBrightness(entityId, newIntensity);
         }
       }
-      
-      // Force sync after a short delay
-      setTimeout(() => {
-        forceSyncStates();
-      }, 300);
     };
   }, [isConnected, entityMapping]);
 
@@ -570,9 +560,6 @@ const Index = () => {
           if (isConnected && entityMapping?.deskLamp) {
             await homeAssistant.setLightBrightness(entityMapping.deskLamp, newDeskLampIntensity);
           }
-          setTimeout(() => {
-            forceSyncStates();
-          }, 300);
           break;
         case '2':
           // Toggle Monitor Light with HA sync
@@ -583,9 +570,6 @@ const Index = () => {
           if (isConnected && entityMapping?.monitorLight) {
             await homeAssistant.setLightBrightness(entityMapping.monitorLight, newMonitorIntensity);
           }
-          setTimeout(() => {
-            forceSyncStates();
-          }, 300);
           break;
         case '3':
           // Toggle Spotlight with HA sync
@@ -596,9 +580,6 @@ const Index = () => {
           if (isConnected && entityMapping?.spotlight) {
             await homeAssistant.setLightBrightness(entityMapping.spotlight, newSpotlightIntensity);
           }
-          setTimeout(() => {
-            forceSyncStates();
-          }, 300);
           break;
         case ' ':
           // Master toggle with spacebar
@@ -610,7 +591,7 @@ const Index = () => {
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [masterSwitchOn, deskLampIntensity, monitorLightIntensity, spotlightIntensity, isConnected, entityMapping, handleMasterToggle, forceSyncStates]);
+  }, [masterSwitchOn, deskLampIntensity, monitorLightIntensity, spotlightIntensity, isConnected, entityMapping, handleMasterToggle]);
 
   // Calculate page background color based on light intensities - memoized for performance
   const pageBackgroundColor = useMemo(() => {
