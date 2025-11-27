@@ -301,7 +301,7 @@ export const LightHotspot = ({
 
           {/* Interactive tooltip - micro-animations */}
           <AnimatePresence>
-            {isHovered && (
+            {(isHovered || isExternallyHovered) && (
               <motion.div
                 className={`intensity-tooltip absolute z-50
                   ${id === 'spotlight' 
