@@ -123,10 +123,10 @@ export const RoomInfoPanel = ({ roomName, temperature, humidity, masterSwitchOn,
         {/* Temperature */}
         <div className="flex items-center gap-4">
           <div className="flex items-center justify-center w-12 h-12 rounded-full bg-white/5 backdrop-blur-sm">
-            <Thermometer className="w-6 h-6 text-white/50" strokeWidth={1.5} />
+            <Thermometer className="w-6 h-6 text-white/60" strokeWidth={1.5} />
           </div>
           <div className="flex flex-col">
-            <span className="text-[9px] md:text-[10px] text-white/40 font-light tracking-[0.2em] uppercase mb-1.5">
+            <span className="text-[9px] md:text-[10px] text-white/55 font-light tracking-[0.2em] uppercase mb-1.5">
               Temperature
             </span>
             <div className="text-base md:text-lg font-light text-white tabular-nums">
@@ -138,10 +138,10 @@ export const RoomInfoPanel = ({ roomName, temperature, humidity, masterSwitchOn,
         {/* Humidity */}
         <div className="flex items-center gap-4">
           <div className="flex items-center justify-center w-12 h-12 rounded-full bg-white/5 backdrop-blur-sm">
-            <Droplets className="w-6 h-6 text-white/50" strokeWidth={1.5} />
+            <Droplets className="w-6 h-6 text-white/60" strokeWidth={1.5} />
           </div>
           <div className="flex flex-col">
-            <span className="text-[9px] md:text-[10px] text-white/40 font-light tracking-[0.2em] uppercase mb-1.5">
+            <span className="text-[9px] md:text-[10px] text-white/55 font-light tracking-[0.2em] uppercase mb-1.5">
               Humidity
             </span>
             <div className="text-base md:text-lg font-light text-white tabular-nums">
