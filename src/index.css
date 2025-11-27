@@ -38,14 +38,14 @@ All colors MUST be HSL.
 
     --radius: 1.5rem;
     
-    --warm-glow: 35 30% 55%;
-    --warm-glow-soft: 36 35% 62%;
-    --shadow-warm: 35 50% 50%;
+    --warm-glow: 43 90% 60%;
+    --warm-glow-soft: 44 85% 65%;
+    --shadow-warm: 42 95% 55%;
     --container-bg: 218 20% 13%;
     
     /* Dynamic lighting glow colors */
-    --spotlight-glow: 32 45% 52%;
-    --lamp-glow: 35 45% 50%;
+    --spotlight-glow: 42 85% 58%;
+    --lamp-glow: 44 80% 60%;
   }
 
 }

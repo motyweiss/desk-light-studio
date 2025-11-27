@@ -90,7 +90,7 @@ export const LightControlCard = ({ id, label, intensity, onChange, onHover }: Li
             animate={{
               scale: 1,
               opacity: 1,
-              color: isOn ? 'hsl(35 30% 55%)' : 'rgb(180, 180, 180)'
+              color: isOn ? 'hsl(43 90% 60%)' : 'rgb(180, 180, 180)'
             }}
             transition={{ 
               scale: { duration: 0.4, ease: [0.22, 0.03, 0.26, 1] },
@@ -108,7 +108,7 @@ export const LightControlCard = ({ id, label, intensity, onChange, onHover }: Li
           <motion.div 
             className="text-xs md:text-xs font-light tracking-wider tabular-nums"
             animate={{
-              color: isOn ? 'hsl(36 35% 62%)' : 'rgba(255, 255, 255, 0.3)'
+              color: isOn ? 'hsl(44 85% 65%)' : 'rgba(255, 255, 255, 0.3)'
             }}
             transition={{ duration: 0.3 }}
           >

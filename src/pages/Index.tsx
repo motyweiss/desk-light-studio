@@ -166,7 +166,7 @@ const Index = () => {
               onClick={() => handleMasterToggle(!masterSwitchOn)}
               className={`w-12 h-12 rounded-full backdrop-blur-xl border-2 transition-all duration-500 flex-shrink-0 ${
                 masterSwitchOn 
-                  ? 'border-[hsl(35_30%_55%/0.6)]' 
+                  ? 'border-[hsl(43_90%_60%/0.7)]' 
                   : 'border-white/20 hover:border-white/30'
               }`}
               whileTap={{ scale: 0.92 }}
@@ -183,7 +183,7 @@ const Index = () => {
             >
               <motion.div
                 animate={{
-                  color: masterSwitchOn ? 'hsl(36 35% 58%)' : 'rgba(255, 255, 255, 0.4)'
+                  color: masterSwitchOn ? 'hsl(44 92% 62%)' : 'rgba(255, 255, 255, 0.4)'
                 }}
                 transition={{ duration: 0.5, ease: [0.22, 0.03, 0.26, 1] }}
                 className="flex items-center justify-center"
@@ -265,7 +265,7 @@ const Index = () => {
             <motion.div
               className="absolute left-1/2 -translate-x-1/2 top-0 w-[60%] h-[50%]"
               style={{
-                background: 'radial-gradient(ellipse 100% 100% at 50% 0%, hsl(35 55% 58% / 0.25) 0%, hsl(36 50% 54% / 0.12) 35%, transparent 70%)',
+                background: 'radial-gradient(ellipse 100% 100% at 50% 0%, hsl(42 75% 58% / 0.28) 0%, hsl(43 70% 55% / 0.14) 35%, transparent 70%)',
                 filter: 'blur(40px)',
               }}
               animate={{
@@ -281,7 +281,7 @@ const Index = () => {
             <motion.div
               className="absolute left-0 top-1/2 -translate-y-1/2 w-[50%] h-[60%]"
               style={{
-                background: 'radial-gradient(ellipse 100% 100% at 0% 50%, hsl(36 60% 62% / 0.30) 0%, hsl(37 55% 58% / 0.15) 38%, transparent 72%)',
+                background: 'radial-gradient(ellipse 100% 100% at 0% 50%, hsl(44 80% 62% / 0.32) 0%, hsl(45 75% 58% / 0.16) 38%, transparent 72%)',
                 filter: 'blur(45px)',
               }}
               animate={{
@@ -297,7 +297,7 @@ const Index = () => {
             <motion.div
               className="absolute left-1/2 -translate-x-1/2 top-1/3 w-[55%] h-[45%]"
               style={{
-                background: 'radial-gradient(ellipse 100% 100% at 50% 40%, hsl(35 45% 60% / 0.24) 0%, hsl(34 40% 56% / 0.12) 40%, transparent 75%)',
+                background: 'radial-gradient(ellipse 100% 100% at 50% 40%, hsl(43 70% 60% / 0.26) 0%, hsl(44 65% 56% / 0.13) 40%, transparent 75%)',
                 filter: 'blur(35px)',
               }}
               animate={{
@@ -339,7 +339,7 @@ const Index = () => {
               ease: [0.22, 0.03, 0.26, 1]
             }}
             style={{
-              background: 'radial-gradient(ellipse 100% 100% at 50% 50%, hsl(35 45% 58% / 0.25) 0%, hsl(36 40% 54% / 0.12) 40%, transparent 70%)',
+              background: 'radial-gradient(ellipse 100% 100% at 50% 50%, hsl(43 70% 58% / 0.28) 0%, hsl(44 65% 54% / 0.14) 40%, transparent 70%)',
               filter: 'blur(30px)',
             }}
           />
