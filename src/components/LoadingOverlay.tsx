@@ -76,7 +76,7 @@ export const LoadingOverlay = ({ isLoading }: LoadingOverlayProps) => {
               <img 
                 src={officeChairIcon}
                 alt="Office Chair"
-                className="w-7 h-7 opacity-80"
+                className="w-9 h-9 opacity-80"
                 style={{ filter: 'brightness(0) invert(1)' }}
               />
             </motion.div>
