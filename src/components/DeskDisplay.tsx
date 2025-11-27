@@ -97,9 +97,9 @@ export const DeskDisplay = ({
   // Unified easing and transition system for smooth crossfades
   const lightEasing = [0.22, 0.03, 0.26, 1] as const;
   const transitionDuration = {
-    fast: 0.3,
-    medium: 0.5,
-    slow: 0.3
+    fast: 0.5,
+    medium: 1.0,
+    slow: 1.5
   };
 
   return (
