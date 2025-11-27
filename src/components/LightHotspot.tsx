@@ -457,15 +457,15 @@ export const LightHotspot = ({
                     }
                   }}
                 >
-                  {/* Lamp icon circle - Exactly 42x42 pixels with frosted glass effect */}
+                  {/* Lamp icon circle - Exactly 42x42 pixels with milky frosted glass effect */}
                   <motion.div
                     className={`
                       w-[42px] h-[42px] rounded-full flex items-center justify-center
-                      cursor-pointer flex-shrink-0 backdrop-blur-xl border
+                      cursor-pointer flex-shrink-0 backdrop-blur-xl
                       transition-all duration-300
                       ${intensity > 0 
-                        ? 'bg-white/12 border-white/15 hover:bg-white/16' 
-                        : 'bg-white/06 border-white/08 hover:bg-white/10'
+                        ? 'bg-white/18 hover:bg-white/22' 
+                        : 'bg-white/12 hover:bg-white/16'
                       }
                     `}
                     onClick={(e) => {
