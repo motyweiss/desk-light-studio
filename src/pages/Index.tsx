@@ -22,6 +22,7 @@ const Index = () => {
   const [spotlightIntensity, setSpotlightIntensity] = useState(0); // 0-100
   const [deskLampIntensity, setDeskLampIntensity] = useState(0);
   const [monitorLightIntensity, setMonitorLightIntensity] = useState(0);
+  const [isTransitioning, setIsTransitioning] = useState(false);
 
   // Hover states for coordinated UI
   const [hoveredLight, setHoveredLight] = useState<string | null>(null);
@@ -123,6 +124,16 @@ const Index = () => {
     return stateColors[state] || "28 20% 18%";
   }, [spotlightIntensity, deskLampIntensity, monitorLightIntensity]);
 
+  // Track lighting state changes for coordinated transitions
+  useEffect(() => {
+    setIsTransitioning(true);
+    const timer = setTimeout(() => {
+      setIsTransitioning(false);
+    }, 1500);
+    
+    return () => clearTimeout(timer);
+  }, [spotlightIntensity, deskLampIntensity, monitorLightIntensity]);
+
   return (
     <>
       <LoadingOverlay isLoading={isLoading} />
@@ -131,10 +142,17 @@ const Index = () => {
         className="min-h-[100dvh] flex items-center justify-center p-4 md:p-8 relative overflow-hidden"
         animate={{
           backgroundColor: `hsl(${pageBackgroundColor})`,
+          scale: isTransitioning ? 1.002 : 1,
         }}
         transition={{
-          duration: 1.5,
-          ease: [0.22, 0.03, 0.26, 1]
+          backgroundColor: {
+            duration: 1.5,
+            ease: [0.22, 0.03, 0.26, 1]
+          },
+          scale: {
+            duration: 0.75,
+            ease: [0.22, 0.03, 0.26, 1]
+          }
         }}
       >
       {/* Frosted glass blur layer for smooth background */}
