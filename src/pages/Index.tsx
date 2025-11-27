@@ -78,19 +78,19 @@ const Index = () => {
     const monitorLightBit = monitorLightIntensity > 0 ? "1" : "0";
     const state = `${spotlightBit}${deskLampBit}${monitorLightBit}`;
     
-    // All warm colors matching desk image tones - brighter cream/beige palette
+    // All warm colors matching desk image tones - darker for better contrast
     const stateColors: Record<string, string> = {
-      "000": "35 18% 38%",     // All off - warm taupe/mushroom gray
-      "001": "32 20% 42%",     // Monitor only - warm neutral tan
-      "010": "38 28% 45%",     // Desk lamp only - warm golden tan
-      "011": "35 25% 48%",     // Lamp + Monitor - warm balanced beige
-      "100": "30 22% 44%",     // Spotlight only - soft warm brown
-      "101": "32 21% 46%",     // Spotlight + Monitor - warm neutral
-      "110": "36 26% 50%",     // Spotlight + Lamp - rich warm cream
-      "111": "34 24% 52%",     // All on - brightest warm workspace
+      "000": "28 20% 18%",     // All off - warm dark brown
+      "001": "30 22% 22%",     // Monitor only - warm slate brown
+      "010": "35 28% 24%",     // Desk lamp only - warm golden brown
+      "011": "32 25% 26%",     // Lamp + Monitor - warm balanced tan
+      "100": "30 24% 25%",     // Spotlight only - soft warm brown
+      "101": "32 23% 28%",     // Spotlight + Monitor - warm neutral
+      "110": "36 26% 30%",     // Spotlight + Lamp - rich warm ochre
+      "111": "34 24% 32%",     // All on - brightest warm workspace
     };
     
-    return stateColors[state] || "35 18% 38%";
+    return stateColors[state] || "28 20% 18%";
   };
 
   return (
@@ -104,7 +104,7 @@ const Index = () => {
             exit={{ opacity: 0 }}
             transition={{ duration: 0.6, ease: [0.22, 0.03, 0.26, 1] }}
             style={{
-              backgroundColor: 'hsl(35 20% 40%)',
+              backgroundColor: 'hsl(30 22% 22%)',
             }}
           >
             {/* Subtle breathing pulse */}
