@@ -186,7 +186,7 @@ export const DeskDisplay = ({
           />
           <LightHotspot
             id="monitorLight"
-            label="Monitor Light"
+            label="Monitor Back Light"
             intensity={monitorLightIntensity}
             position={{ x: 55, y: 38 }}
             onIntensityChange={onMonitorLightChange}
