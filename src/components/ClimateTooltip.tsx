@@ -27,7 +27,8 @@ export const ClimateTooltip = ({
   
   return (
     <motion.div
-      className="absolute -bottom-6 left-1/2 -translate-x-1/2 z-20 hidden md:block"
+      className="absolute -bottom-6 z-20 hidden md:block"
+      style={{ left: 'calc(50% - 60px)', transform: 'translateX(-50%)' }}
       initial={{ opacity: 0, y: 15, scale: 0.9 }}
       animate={{ 
         opacity: isLoaded ? 1 : 0,
@@ -37,7 +38,7 @@ export const ClimateTooltip = ({
       transition={{ duration: 0.8, delay: 1.2, ease: [0.22, 0.03, 0.26, 1] }}
     >
       <motion.div
-        className="bg-black/25 backdrop-blur-xl border border-white/10 px-4 py-3 rounded-full flex items-center justify-center"
+        className="bg-white/15 backdrop-blur-xl border border-white/20 px-4 py-3 rounded-full flex items-center justify-center gap-5"
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
         initial={false}
