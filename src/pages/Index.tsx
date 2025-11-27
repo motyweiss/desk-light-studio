@@ -401,6 +401,7 @@ const Index = () => {
             roomName="Office Desk"
             temperature={21}
             humidity={49}
+            airQuality={85}
             masterSwitchOn={masterSwitchOn}
             onMasterToggle={handleMasterToggle}
             onLightHover={setHoveredLight}

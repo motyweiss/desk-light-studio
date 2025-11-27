@@ -1,5 +1,5 @@
 import { motion, useMotionValue, useTransform, animate } from "framer-motion";
-import { Thermometer, Droplets, Sun } from "lucide-react";
+import { Thermometer, Droplets, Sun, Wind } from "lucide-react";
 import { LightControlCard } from "./LightControlCard";
 import { useEffect } from "react";
 
@@ -14,6 +14,7 @@ interface RoomInfoPanelProps {
   roomName: string;
   temperature: number;
   humidity: number;
+  airQuality: number;
   masterSwitchOn: boolean;
   onMasterToggle: (checked: boolean) => void;
   onLightHover: (lightId: string | null) => void;
@@ -21,7 +22,7 @@ interface RoomInfoPanelProps {
   isLoaded: boolean;
 }
 
-export const RoomInfoPanel = ({ roomName, temperature, humidity, masterSwitchOn, onMasterToggle, onLightHover, lights, isLoaded }: RoomInfoPanelProps) => {
+export const RoomInfoPanel = ({ roomName, temperature, humidity, airQuality, masterSwitchOn, onMasterToggle, onLightHover, lights, isLoaded }: RoomInfoPanelProps) => {
   // Animated counter for temperature
   const tempCount = useMotionValue(0);
   const tempDisplay = useTransform(tempCount, (latest) => latest.toFixed(1));
@@ -29,6 +30,10 @@ export const RoomInfoPanel = ({ roomName, temperature, humidity, masterSwitchOn,
   // Animated counter for humidity
   const humidityCount = useMotionValue(0);
   const humidityDisplay = useTransform(humidityCount, (latest) => Math.round(latest));
+
+  // Animated counter for air quality
+  const airQualityCount = useMotionValue(0);
+  const airQualityDisplay = useTransform(airQualityCount, (latest) => Math.round(latest));
 
   useEffect(() => {
     if (isLoaded) {
@@ -46,12 +51,20 @@ export const RoomInfoPanel = ({ roomName, temperature, humidity, masterSwitchOn,
         ease: [0.22, 0.03, 0.26, 1]
       });
 
+      // Animate air quality counter
+      const airQualityControls = animate(airQualityCount, airQuality, {
+        duration: 2,
+        delay: 0.5,
+        ease: [0.22, 0.03, 0.26, 1]
+      });
+
       return () => {
         tempControls.stop();
         humidityControls.stop();
+        airQualityControls.stop();
       };
     }
-  }, [isLoaded, temperature, humidity, tempCount, humidityCount]);
+  }, [isLoaded, temperature, humidity, airQuality, tempCount, humidityCount, airQualityCount]);
 
   return (
     <div className="space-y-6 md:space-y-8">
@@ -108,7 +121,7 @@ export const RoomInfoPanel = ({ roomName, temperature, humidity, masterSwitchOn,
 
       {/* Climate Info - Hidden on mobile (shown in Index.tsx) */}
       <motion.div 
-        className="hidden md:flex gap-12 py-6"
+        className="hidden md:flex gap-8 py-6"
         initial={{ opacity: 0, y: 10 }}
         animate={{ 
           opacity: isLoaded ? 1 : 0,
@@ -121,7 +134,7 @@ export const RoomInfoPanel = ({ roomName, temperature, humidity, masterSwitchOn,
         }}
       >
         {/* Temperature */}
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-3">
           <div className="flex items-center justify-center w-12 h-12 rounded-full bg-white/5 backdrop-blur-sm">
             <Thermometer className="w-6 h-6 text-white/60" strokeWidth={1.5} />
           </div>
@@ -136,7 +149,7 @@ export const RoomInfoPanel = ({ roomName, temperature, humidity, masterSwitchOn,
         </div>
 
         {/* Humidity */}
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-3">
           <div className="flex items-center justify-center w-12 h-12 rounded-full bg-white/5 backdrop-blur-sm">
             <Droplets className="w-6 h-6 text-white/60" strokeWidth={1.5} />
           </div>
@@ -146,6 +159,21 @@ export const RoomInfoPanel = ({ roomName, temperature, humidity, masterSwitchOn,
             </span>
             <div className="text-base md:text-lg font-light text-white tabular-nums">
               <motion.span>{humidityDisplay}</motion.span>%
+            </div>
+          </div>
+        </div>
+
+        {/* Air Quality */}
+        <div className="flex items-center gap-3">
+          <div className="flex items-center justify-center w-12 h-12 rounded-full bg-white/5 backdrop-blur-sm">
+            <Wind className="w-6 h-6 text-white/60" strokeWidth={1.5} />
+          </div>
+          <div className="flex flex-col">
+            <span className="text-[9px] md:text-[10px] text-white/55 font-light tracking-[0.2em] uppercase mb-1.5">
+              Air Quality
+            </span>
+            <div className="text-base md:text-lg font-light text-white tabular-nums">
+              <motion.span>{airQualityDisplay}</motion.span>
             </div>
           </div>
         </div>
