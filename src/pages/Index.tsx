@@ -5,6 +5,12 @@ import { DeskDisplay } from "@/components/DeskDisplay";
 import { RoomInfoPanel } from "@/components/RoomInfoPanel";
 import { LoadingOverlay } from "@/components/LoadingOverlay";
 import { AmbientGlowLayers } from "@/components/AmbientGlowLayers";
+import { SettingsButton } from "@/components/SettingsButton";
+import { SettingsDialog } from "@/components/SettingsDialog";
+import { Toaster } from "@/components/ui/toaster";
+import { useToast } from "@/hooks/use-toast";
+import { useHomeAssistantConfig } from "@/hooks/useHomeAssistantConfig";
+import { homeAssistant } from "@/services/homeAssistant";
 
 // Import all desk images for preloading
 import desk000 from "@/assets/desk-000.png";
@@ -23,9 +29,14 @@ const Index = () => {
   const [deskLampIntensity, setDeskLampIntensity] = useState(0);
   const [monitorLightIntensity, setMonitorLightIntensity] = useState(0);
   const [isTransitioning, setIsTransitioning] = useState(false);
+  const [settingsOpen, setSettingsOpen] = useState(false);
 
   // Hover states for coordinated UI
   const [hoveredLight, setHoveredLight] = useState<string | null>(null);
+  
+  // Home Assistant integration
+  const { toast } = useToast();
+  const { config, entityMapping, isConnected, saveConfig } = useHomeAssistantConfig();
 
   // Optimized image loading - preload primary "all lights off" image first
   useEffect(() => {
@@ -62,12 +73,50 @@ const Index = () => {
   const allLightsOn = spotlightIntensity > 0 || deskLampIntensity > 0 || monitorLightIntensity > 0;
   const masterSwitchOn = allLightsOn;
 
-  const handleMasterToggle = useCallback((checked: boolean) => {
+  const handleMasterToggle = useCallback(async (checked: boolean) => {
     const targetIntensity = checked ? 100 : 0;
     setSpotlightIntensity(targetIntensity);
     setDeskLampIntensity(targetIntensity);
     setMonitorLightIntensity(targetIntensity);
-  }, []);
+
+    // Sync with Home Assistant if connected
+    if (isConnected && entityMapping) {
+      if (entityMapping.spotlight) await homeAssistant.setLightBrightness(entityMapping.spotlight, targetIntensity);
+      if (entityMapping.deskLamp) await homeAssistant.setLightBrightness(entityMapping.deskLamp, targetIntensity);
+      if (entityMapping.monitorLight) await homeAssistant.setLightBrightness(entityMapping.monitorLight, targetIntensity);
+    }
+  }, [isConnected, entityMapping]);
+
+  // Handle individual light intensity changes with Home Assistant sync
+  const createLightChangeHandler = useCallback((lightId: string, setter: (value: number) => void) => {
+    return async (newIntensity: number) => {
+      setter(newIntensity);
+
+      // Sync with Home Assistant if connected
+      if (isConnected && entityMapping) {
+        const entityId = lightId === "spotlight" 
+          ? entityMapping.spotlight 
+          : lightId === "deskLamp" 
+          ? entityMapping.deskLamp 
+          : entityMapping.monitorLight;
+
+        if (entityId) {
+          await homeAssistant.setLightBrightness(entityId, newIntensity);
+        }
+      }
+    };
+  }, [isConnected, entityMapping]);
+
+  const handleSaveSettings = (
+    newConfig: { baseUrl: string; accessToken: string },
+    newMapping: { deskLamp?: string; monitorLight?: string; spotlight?: string }
+  ) => {
+    saveConfig(newConfig, newMapping);
+    toast({
+      title: "✓ Connected to Home Assistant",
+      description: "Your lights are now synced",
+    });
+  };
 
   // Keyboard shortcuts
   useEffect(() => {
@@ -145,8 +194,17 @@ const Index = () => {
   return (
     <>
       <LoadingOverlay isLoading={isLoading} />
+      <SettingsButton onClick={() => setSettingsOpen(true)} />
+      <SettingsDialog
+        open={settingsOpen}
+        onOpenChange={setSettingsOpen}
+        onSave={handleSaveSettings}
+        currentConfig={config}
+        currentMapping={entityMapping}
+      />
+      <Toaster />
 
-      <motion.div 
+      <motion.div
         className="min-h-[100dvh] flex items-center justify-center p-4 md:p-8 relative overflow-hidden"
         animate={{
           backgroundColor: `hsl(${pageBackgroundColor})`,
@@ -378,9 +436,9 @@ const Index = () => {
             spotlightIntensity={spotlightIntensity}
             deskLampIntensity={deskLampIntensity}
             monitorLightIntensity={monitorLightIntensity}
-            onSpotlightChange={setSpotlightIntensity}
-            onDeskLampChange={setDeskLampIntensity}
-            onMonitorLightChange={setMonitorLightIntensity}
+            onSpotlightChange={createLightChangeHandler('spotlight', setSpotlightIntensity)}
+            onDeskLampChange={createLightChangeHandler('deskLamp', setDeskLampIntensity)}
+            onMonitorLightChange={createLightChangeHandler('monitorLight', setMonitorLightIntensity)}
             hoveredLightId={hoveredLight}
             isLoaded={isLoaded}
           />
@@ -413,19 +471,19 @@ const Index = () => {
                 id: 'deskLamp', 
                 label: 'Desk Lamp', 
                 intensity: deskLampIntensity, 
-                onChange: setDeskLampIntensity 
+                onChange: createLightChangeHandler('deskLamp', setDeskLampIntensity)
               },
               { 
                 id: 'monitorLight', 
                 label: 'Monitor Back Light', 
                 intensity: monitorLightIntensity, 
-                onChange: setMonitorLightIntensity 
+                onChange: createLightChangeHandler('monitorLight', setMonitorLightIntensity)
               },
               { 
                 id: 'spotlight', 
                 label: 'Spotlight', 
                 intensity: spotlightIntensity, 
-                onChange: setSpotlightIntensity 
+                onChange: createLightChangeHandler('spotlight', setSpotlightIntensity)
               },
             ]}
             isLoaded={isLoaded}
