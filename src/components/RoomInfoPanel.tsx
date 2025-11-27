@@ -327,45 +327,41 @@ export const RoomInfoPanel = ({ roomName, temperature, humidity, airQuality, mas
       </motion.div>
 
       {/* Light Controls Section */}
-      <div className="rounded-2xl bg-white/[0.02] backdrop-blur-md border border-white/[0.05] mt-10">
-        <motion.div
-          className="space-y-0"
-          variants={{
-            hidden: { opacity: 0 },
-            show: {
-              opacity: 1,
-              transition: {
-                delayChildren: 0.8,
-                staggerChildren: 0.15
-              }
+      <motion.div
+        className="space-y-4 mt-10"
+        variants={{
+          hidden: { opacity: 0 },
+          show: {
+            opacity: 1,
+            transition: {
+              delayChildren: 0.8,
+              staggerChildren: 0.15
             }
-          }}
-          initial="hidden"
-          animate={isLoaded ? "show" : "hidden"}
-        >
-          {lights.map((light, index) => (
-            <motion.div
-              key={light.id}
-              variants={{
-                hidden: { opacity: 0, y: 25, scale: 0.94, filter: 'blur(4px)' },
-                show: { opacity: 1, y: 0, scale: 1, filter: 'blur(0px)' }
-              }}
-              transition={{ duration: 0.7, ease: [0.22, 0.03, 0.26, 1] }}
-            >
-              {index > 0 && (
-                <div className="h-px bg-white/10 w-full mx-0" />
-              )}
-              <LightControlCard
-                id={light.id}
-                label={light.label}
-                intensity={light.intensity}
-                onChange={light.onChange}
-                onHover={(isHovered) => onLightHover(isHovered ? light.id : null)}
-              />
-            </motion.div>
-          ))}
-        </motion.div>
-      </div>
+          }
+        }}
+        initial="hidden"
+        animate={isLoaded ? "show" : "hidden"}
+      >
+        {lights.map((light) => (
+          <motion.div
+            key={light.id}
+            className="rounded-2xl bg-white/[0.02] backdrop-blur-md border border-white/[0.05]"
+            variants={{
+              hidden: { opacity: 0, y: 25, scale: 0.94, filter: 'blur(4px)' },
+              show: { opacity: 1, y: 0, scale: 1, filter: 'blur(0px)' }
+            }}
+            transition={{ duration: 0.7, ease: [0.22, 0.03, 0.26, 1] }}
+          >
+            <LightControlCard
+              id={light.id}
+              label={light.label}
+              intensity={light.intensity}
+              onChange={light.onChange}
+              onHover={(isHovered) => onLightHover(isHovered ? light.id : null)}
+            />
+          </motion.div>
+        ))}
+      </motion.div>
     </div>
   );
 };
