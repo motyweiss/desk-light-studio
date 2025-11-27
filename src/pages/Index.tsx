@@ -6,6 +6,16 @@ import { RoomInfoPanel } from "@/components/RoomInfoPanel";
 import { LoadingOverlay } from "@/components/LoadingOverlay";
 import { AmbientGlowLayers } from "@/components/AmbientGlowLayers";
 
+// Import all desk images for preloading
+import desk000 from "@/assets/desk-000.png";
+import desk001 from "@/assets/desk-001.png";
+import desk010 from "@/assets/desk-010.png";
+import desk011 from "@/assets/desk-011.png";
+import desk100 from "@/assets/desk-100.png";
+import desk101 from "@/assets/desk-101.png";
+import desk110 from "@/assets/desk-110.png";
+import desk111 from "@/assets/desk-111.png";
+
 const Index = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [isLoaded, setIsLoaded] = useState(false);
@@ -16,17 +26,35 @@ const Index = () => {
   // Hover states for coordinated UI
   const [hoveredLight, setHoveredLight] = useState<string | null>(null);
 
-  // Initial loading phase - wait for assets to load
+  // Optimized image loading - preload primary "all lights off" image first
   useEffect(() => {
-    const loadingTimer = setTimeout(() => {
+    // Preload the initial "all lights off" image first for fast perceived loading
+    const primaryImage = new Image();
+    primaryImage.src = desk000;
+    
+    const handlePrimaryLoad = () => {
       setIsLoading(false);
       // Small delay before starting entrance animations
       setTimeout(() => {
         setIsLoaded(true);
       }, 100);
-    }, 3000); // Loading phase duration
-
-    return () => clearTimeout(loadingTimer);
+      
+      // Preload remaining images in background after primary loads
+      const remainingImages = [desk001, desk010, desk011, desk100, desk101, desk110, desk111];
+      remainingImages.forEach(src => {
+        const img = new Image();
+        img.src = src;
+      });
+    };
+    
+    primaryImage.onload = handlePrimaryLoad;
+    
+    // Fallback timeout in case image takes too long (8 seconds max)
+    const fallbackTimer = setTimeout(() => {
+      handlePrimaryLoad();
+    }, 8000);
+    
+    return () => clearTimeout(fallbackTimer);
   }, []);
 
   // Master switch logic - bidirectional synchronization
