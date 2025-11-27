@@ -71,7 +71,7 @@ export const ClimateTooltip = ({
     <motion.div
       className="absolute z-20 hidden md:block"
       style={{ 
-        bottom: '-57px',
+        bottom: '-52px',
         left: 'calc(50% - 80px)', 
         transformStyle: 'preserve-3d',
         perspective: 1000,
@@ -89,9 +89,10 @@ export const ClimateTooltip = ({
       transition={{ duration: 0.8, delay: 1.2, ease: [0.22, 0.03, 0.26, 1] }}
     >
       <motion.div
-        className="relative bg-white/15 backdrop-blur-2xl border border-white/20 px-4 py-3 rounded-full flex items-center justify-center gap-5 shadow-[0_8px_32px_rgba(0,0,0,0.3)]"
+        className="relative backdrop-blur-3xl border border-white/25 px-4 py-3 rounded-full flex items-center justify-center gap-5 shadow-[0_8px_32px_rgba(0,0,0,0.4)]"
         style={{
-          filter: 'blur(0px)',
+          background: 'rgba(255, 255, 255, 0.12)',
+          boxShadow: '0 8px 32px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.2)',
         }}
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
@@ -101,11 +102,12 @@ export const ClimateTooltip = ({
         }}
         transition={{ duration: 0.4, ease: [0.22, 0.03, 0.26, 1] }}
       >
-        {/* Blurred background layer */}
+        {/* Enhanced blurred background layer */}
         <div 
-          className="absolute inset-0 rounded-full bg-white/10 backdrop-blur-xl -z-10"
+          className="absolute inset-0 rounded-full backdrop-blur-3xl -z-10"
           style={{
-            filter: 'blur(20px)',
+            background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.15) 0%, rgba(255, 255, 255, 0.08) 100%)',
+            filter: 'blur(25px)',
           }}
         />
         {/* Temperature */}
