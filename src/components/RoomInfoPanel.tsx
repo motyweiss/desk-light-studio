@@ -1,5 +1,5 @@
 import { motion, useMotionValue, useTransform, animate } from "framer-motion";
-import { Thermometer, Droplets, Sun, Wind, Smartphone, Zap } from "lucide-react";
+import { Thermometer, Droplets, Sun, Wind, Smartphone, Zap, Headphones } from "lucide-react";
 import { LightControlCard } from "./LightControlCard";
 import { CircularProgress } from "./CircularProgress";
 import { useEffect } from "react";
@@ -16,6 +16,7 @@ interface Device {
   name: string;
   batteryLevel: number;
   isCharging: boolean;
+  icon?: 'smartphone' | 'headphones';
 }
 
 interface RoomInfoPanelProps {
@@ -224,32 +225,36 @@ export const RoomInfoPanel = ({ roomName, temperature, humidity, airQuality, mas
         {/* Devices Battery Section */}
         {devices && devices.length > 0 && (
           <div className="flex flex-col gap-5 mt-8">
-            {devices.map((device) => (
-              <div key={device.id} className="flex items-center gap-3">
-                <CircularProgress 
-                  value={device.batteryLevel} 
-                  min={0} 
-                  max={100} 
-                  size={44} 
-                  strokeWidth={2.5}
-                  isLoaded={isLoaded}
-                  colorType="battery"
-                >
-                  <Smartphone className="w-5 h-5 text-white/60" strokeWidth={1.5} />
-                </CircularProgress>
-                <div className="flex flex-col">
-                  <span className="text-[9px] text-white/55 font-light tracking-[0.2em] uppercase mb-1">
-                    {device.name}
-                  </span>
-                  <div className="text-base font-light text-white tabular-nums flex items-center gap-1.5">
-                    <span>{device.batteryLevel}%</span>
-                    {device.isCharging && (
-                      <Zap className="w-3.5 h-3.5 text-[hsl(45_90%_55%)]" fill="currentColor" />
-                    )}
+            {devices.map((device) => {
+              const DeviceIcon = device.icon === 'headphones' ? Headphones : Smartphone;
+              
+              return (
+                <div key={device.id} className="flex items-center gap-3">
+                  <CircularProgress 
+                    value={device.batteryLevel} 
+                    min={0} 
+                    max={100} 
+                    size={44} 
+                    strokeWidth={2.5}
+                    isLoaded={isLoaded}
+                    colorType="battery"
+                  >
+                    <DeviceIcon className="w-5 h-5 text-white/60" strokeWidth={1.5} />
+                  </CircularProgress>
+                  <div className="flex flex-col">
+                    <span className="text-[9px] text-white/55 font-light tracking-[0.2em] uppercase mb-1">
+                      {device.name}
+                    </span>
+                    <div className="text-base font-light text-white tabular-nums flex items-center gap-1.5">
+                      <span>{device.batteryLevel}%</span>
+                      {device.isCharging && (
+                        <Zap className="w-3.5 h-3.5 text-[hsl(45_90%_55%)]" fill="currentColor" />
+                      )}
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         )}
       </motion.div>

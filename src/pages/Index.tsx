@@ -962,6 +962,14 @@ const Index = () => {
                 name: "Moty's iPhone",
                 batteryLevel: iphoneBatteryLevel,
                 isCharging: iphoneBatteryCharging,
+                icon: 'smartphone' as const,
+              },
+              {
+                id: "airpods",
+                name: "AirPods Max",
+                batteryLevel: 80,
+                isCharging: false,
+                icon: 'headphones' as const,
               }
             ]}
             lights={[
