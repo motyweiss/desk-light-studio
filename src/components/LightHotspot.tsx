@@ -1,5 +1,5 @@
 import { motion, AnimatePresence } from "framer-motion";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { getIconForLight } from "@/components/icons/LightIcons";
 
 interface LightHotspotProps {
@@ -25,6 +25,13 @@ export const LightHotspot = ({
   const [isHovered, setIsHovered] = useState(false);
   const [isPressed, setIsPressed] = useState(false);
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
+
+  // Reset mouse position when external hover changes
+  useEffect(() => {
+    if (!isExternallyHovered && !isHovered) {
+      setMousePos({ x: 0, y: 0 });
+    }
+  }, [isExternallyHovered, isHovered]);
 
   const handleMouseMove = (e: React.MouseEvent) => {
     const rect = e.currentTarget.getBoundingClientRect();
@@ -65,7 +72,7 @@ export const LightHotspot = ({
   const breathingScale = isOn ? [1, 1.08 + (intensityRatio * 0.08), 1] : [0.98, 1.05, 0.98];
 
   return (
-    <AnimatePresence>
+    <>
       {(isContainerHovered || isExternallyHovered) && (
         <motion.div
           key={`hotspot-${id}`}
@@ -75,9 +82,9 @@ export const LightHotspot = ({
             top: `${position.y}%`,
             transform: 'translate(-50%, -50%)',
           }}
-          initial={{ scale: 0.5 }}
-          animate={{ scale: 1 }}
-          exit={{ scale: 0.5 }}
+          initial={{ scale: 0.5, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          exit={{ scale: 0.5, opacity: 0 }}
           transition={{ 
             duration: 0.3, 
             ease: "easeInOut" 
@@ -451,6 +458,6 @@ export const LightHotspot = ({
           </AnimatePresence>
         </motion.div>
       )}
-    </AnimatePresence>
+    </>
   );
 };

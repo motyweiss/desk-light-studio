@@ -8,7 +8,7 @@ interface LightControlCardProps {
   label: string;
   intensity: number;
   onChange: (intensity: number) => void;
-  onHover: (isHovered: boolean) => void;
+  onHover: (lightId: string | null) => void;
 }
 
 export const LightControlCard = ({ id, label, intensity, onChange, onHover }: LightControlCardProps) => {
@@ -71,8 +71,8 @@ export const LightControlCard = ({ id, label, intensity, onChange, onHover }: Li
     <motion.button
       layout
       onClick={handleCardClick}
-      onMouseEnter={() => onHover(true)}
-      onMouseLeave={() => onHover(false)}
+      onMouseEnter={() => onHover(id)}
+      onMouseLeave={() => onHover(null)}
       className="w-full bg-white/8 backdrop-blur-xl rounded-xl md:rounded-2xl px-2.5 md:px-5 py-4 md:py-3.5 hover:bg-white/12 active:bg-white/15 transition-colors duration-200 cursor-pointer text-left"
       transition={{ 
         layout: { duration: 0.25, ease: [0.22, 0.03, 0.26, 1] },
