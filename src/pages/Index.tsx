@@ -492,7 +492,7 @@ const Index = () => {
               <div className="text-base font-light text-white tabular-nums">{humidity}%</div>
             </div>
 
-            {/* Air Quality - Icon + Number only */}
+            {/* PM 2.5 - Icon + Number only */}
             <div className="flex items-center gap-2">
               <Wind className="w-5 h-5 text-white/60" strokeWidth={1.5} />
               <div className="text-base font-light text-white tabular-nums">{airQuality}</div>
