@@ -20,11 +20,11 @@ export const AmbientGlowLayers = ({
 
   return (
     <>
-      {/* Spotlight ambient glow - warm golden orange - centered on image */}
+      {/* Spotlight ambient glow - warm golden orange */}
       <motion.div
         className="fixed inset-0 pointer-events-none z-0"
         style={{
-          background: `radial-gradient(ellipse 70% 70% at 30% 50%, hsl(42 70% 58% / 0.35) 0%, hsl(43 65% 54% / 0.18) 30%, transparent 60%)`,
+          background: `radial-gradient(ellipse 70% 70% at 50% 35%, hsl(42 70% 58% / 0.35) 0%, hsl(43 65% 54% / 0.18) 30%, transparent 60%)`,
           filter: 'blur(70px)',
         }}
         initial={{ opacity: 0 }}
@@ -37,11 +37,11 @@ export const AmbientGlowLayers = ({
         }}
       />
       
-      {/* Desk lamp ambient glow - rich warm gold - centered on image */}
+      {/* Desk lamp ambient glow - rich warm gold */}
       <motion.div
         className="fixed inset-0 pointer-events-none z-0"
         style={{
-          background: `radial-gradient(ellipse 65% 65% at 25% 50%, hsl(44 75% 60% / 0.32) 0%, hsl(45 70% 56% / 0.16) 35%, transparent 58%)`,
+          background: `radial-gradient(ellipse 65% 65% at 30% 55%, hsl(44 75% 60% / 0.32) 0%, hsl(45 70% 56% / 0.16) 35%, transparent 58%)`,
           filter: 'blur(65px)',
         }}
         initial={{ opacity: 0 }}
@@ -54,11 +54,11 @@ export const AmbientGlowLayers = ({
         }}
       />
       
-      {/* Monitor light ambient glow - warm cream beige - centered on image */}
+      {/* Monitor light ambient glow - warm cream beige */}
       <motion.div
         className="fixed inset-0 pointer-events-none z-0"
         style={{
-          background: `radial-gradient(ellipse 75% 75% at 30% 50%, hsl(43 65% 60% / 0.28) 0%, hsl(44 60% 56% / 0.14) 38%, transparent 62%)`,
+          background: `radial-gradient(ellipse 75% 75% at 50% 40%, hsl(43 65% 60% / 0.28) 0%, hsl(44 60% 56% / 0.14) 38%, transparent 62%)`,
           filter: 'blur(60px)',
         }}
         initial={{ opacity: 0 }}
