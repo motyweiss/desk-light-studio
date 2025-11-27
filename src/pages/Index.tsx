@@ -107,22 +107,45 @@ const Index = () => {
               backgroundColor: 'hsl(28 20% 18%)',
             }}
           >
-            {/* Subtle breathing pulse */}
+            {/* Minimalist spinner */}
             <motion.div
-              className="w-16 h-16 rounded-full"
-              style={{
-                background: 'radial-gradient(circle, hsl(42 70% 55% / 0.15) 0%, transparent 70%)',
-              }}
-              animate={{
-                scale: [1, 1.2, 1],
-                opacity: [0.3, 0.6, 0.3],
-              }}
-              transition={{
-                duration: 2,
-                repeat: Infinity,
-                ease: "easeInOut",
-              }}
-            />
+              className="relative w-12 h-12"
+            >
+              {/* Rotating circle with gap */}
+              <motion.div
+                className="absolute inset-0 rounded-full"
+                style={{
+                  border: '2px solid transparent',
+                  borderTopColor: 'hsl(42 70% 55% / 0.6)',
+                  borderRightColor: 'hsl(42 70% 55% / 0.4)',
+                }}
+                animate={{
+                  rotate: 360,
+                }}
+                transition={{
+                  duration: 1.2,
+                  repeat: Infinity,
+                  ease: "linear",
+                }}
+              />
+              
+              {/* Inner subtle glow */}
+              <motion.div
+                className="absolute inset-0 rounded-full"
+                style={{
+                  background: 'radial-gradient(circle, hsl(42 70% 55% / 0.08) 0%, transparent 70%)',
+                }}
+                animate={{
+                  scale: [1, 1.1, 1],
+                  opacity: [0.4, 0.6, 0.4],
+                }}
+                transition={{
+                  duration: 1.5,
+                  repeat: Infinity,
+                  ease: "easeInOut",
+                }}
+              />
+            </motion.div>
           </motion.div>
         )}
       </AnimatePresence>
