@@ -155,10 +155,10 @@ const Index = () => {
       />
 
       {/* Responsive Layout Container */}
-      <div className="flex flex-col md:flex-row items-center gap-6 md:gap-16 max-w-7xl w-full relative z-10 px-5 md:px-0 pb-20 md:pb-0">
+      <div className="flex flex-col md:flex-row items-center gap-6 md:gap-16 max-w-7xl w-full relative z-10 px-10 md:px-0 pb-[120px] md:pb-0">
         {/* Mobile: Room Info Header (Title, Climate, Master Switch) */}
         <motion.div 
-          className="w-full md:hidden pt-12"
+          className="w-full md:hidden"
           initial={{ opacity: 0, y: 30 }}
           animate={{ 
             opacity: isLoaded ? 1 : 0,
@@ -171,9 +171,9 @@ const Index = () => {
           }}
         >
           {/* Room Title with Master Switch */}
-          <div className="flex items-start justify-between mb-5">
+          <div className="flex items-start justify-between mb-6">
             <motion.h1 
-              className="text-[2.5rem] font-light tracking-tight text-foreground leading-tight"
+              className="text-4xl font-light tracking-tight text-foreground leading-tight"
               style={{ fontFamily: "'Cormorant Garamond', serif" }}
               initial={{ opacity: 0, y: 20 }}
               animate={{ 
@@ -223,7 +223,7 @@ const Index = () => {
 
           {/* Climate Data */}
           <motion.div 
-            className="flex gap-10 mb-3"
+            className="flex gap-10 mb-8"
             initial={{ opacity: 0, y: 20 }}
             animate={{ 
               opacity: isLoaded ? 1 : 0,
@@ -241,9 +241,9 @@ const Index = () => {
                 <Thermometer className="w-5 h-5 text-white/50" strokeWidth={1.5} />
               </div>
               <div className="flex flex-col">
-                <div className="text-[9px] uppercase tracking-[0.2em] text-foreground/40 mb-0.5 font-light">Temperature</div>
+                <div className="text-[10px] uppercase tracking-[0.2em] text-foreground/40 mb-1 font-light">Temperature</div>
                 <motion.div 
-                  className="text-lg font-light text-foreground tabular-nums"
+                  className="text-xl font-light text-foreground tabular-nums"
                   initial={{ opacity: 0 }}
                   animate={{ opacity: isLoaded ? 1 : 0 }}
                 >
@@ -258,9 +258,9 @@ const Index = () => {
                 <Droplets className="w-5 h-5 text-white/50" strokeWidth={1.5} />
               </div>
               <div className="flex flex-col">
-                <div className="text-[9px] uppercase tracking-[0.2em] text-foreground/40 mb-0.5 font-light">Humidity</div>
+                <div className="text-[10px] uppercase tracking-[0.2em] text-foreground/40 mb-1 font-light">Humidity</div>
                 <motion.div 
-                  className="text-lg font-light text-foreground tabular-nums"
+                  className="text-xl font-light text-foreground tabular-nums"
                   initial={{ opacity: 0 }}
                   animate={{ opacity: isLoaded ? 1 : 0 }}
                 >
