@@ -223,7 +223,7 @@ export const RoomInfoPanel = ({ roomName, temperature, humidity, airQuality, mas
       {/* Devices Battery Section - Desktop only */}
       {devices && devices.length > 0 && (
         <motion.div 
-          className="hidden md:block rounded-2xl bg-white/[0.02] backdrop-blur-md border border-white/[0.05] p-4"
+          className="hidden md:flex flex-col gap-4 py-2"
           initial={{ opacity: 0, y: 10 }}
           animate={{ 
             opacity: isLoaded ? 1 : 0,
@@ -235,37 +235,32 @@ export const RoomInfoPanel = ({ roomName, temperature, humidity, airQuality, mas
             ease: [0.22, 0.03, 0.26, 1]
           }}
         >
-          <div className="flex flex-col gap-3">
-            {devices.map((device) => (
-              <div 
-                key={device.id} 
-                className="flex items-center gap-3 rounded-xl bg-white/[0.03] backdrop-blur-sm p-3 transition-all duration-300 hover:bg-white/[0.05]"
+          {devices.map((device) => (
+            <div key={device.id} className="flex items-center gap-3">
+              <CircularProgress 
+                value={device.batteryLevel} 
+                min={0} 
+                max={100} 
+                size={44} 
+                strokeWidth={2.5}
+                isLoaded={isLoaded}
+                colorType="battery"
               >
-                <CircularProgress 
-                  value={device.batteryLevel} 
-                  min={0} 
-                  max={100} 
-                  size={44} 
-                  strokeWidth={2.5}
-                  isLoaded={isLoaded}
-                  colorType="battery"
-                >
-                  <Smartphone className="w-5 h-5 text-white/60" strokeWidth={1.5} />
-                </CircularProgress>
-                <div className="flex flex-col">
-                  <span className="text-[9px] text-white/55 font-light tracking-[0.2em] uppercase mb-1">
-                    {device.name}
-                  </span>
-                  <div className="text-base font-light text-white tabular-nums flex items-center gap-1.5">
-                    <span>{device.batteryLevel}%</span>
-                    {device.isCharging && (
-                      <Zap className="w-3.5 h-3.5 text-[hsl(45_90%_55%)]" fill="currentColor" />
-                    )}
-                  </div>
+                <Smartphone className="w-5 h-5 text-white/60" strokeWidth={1.5} />
+              </CircularProgress>
+              <div className="flex flex-col">
+                <span className="text-[9px] text-white/55 font-light tracking-[0.2em] uppercase mb-1">
+                  {device.name}
+                </span>
+                <div className="text-base font-light text-white tabular-nums flex items-center gap-1.5">
+                  <span>{device.batteryLevel}%</span>
+                  {device.isCharging && (
+                    <Zap className="w-3.5 h-3.5 text-[hsl(45_90%_55%)]" fill="currentColor" />
+                  )}
                 </div>
               </div>
-            ))}
-          </div>
+            </div>
+          ))}
         </motion.div>
       )}
 
@@ -337,9 +332,9 @@ export const RoomInfoPanel = ({ roomName, temperature, humidity, airQuality, mas
       </motion.div>
 
       {/* Light Controls Section */}
-      <div>
+      <div className="rounded-2xl bg-white/[0.02] backdrop-blur-md border border-white/[0.05] p-4">
         <motion.div 
-          className="space-y-2 md:space-y-4 md:-ml-5"
+          className="space-y-3 md:-ml-1"
           variants={{
             hidden: { opacity: 0 },
             show: {
@@ -361,6 +356,7 @@ export const RoomInfoPanel = ({ roomName, temperature, humidity, airQuality, mas
                 show: { opacity: 1, y: 0, scale: 1, filter: 'blur(0px)' }
               }}
               transition={{ duration: 0.7, ease: [0.22, 0.03, 0.26, 1] }}
+              className="rounded-xl bg-white/[0.03] backdrop-blur-sm p-3 transition-all duration-300 hover:bg-white/[0.05]"
             >
               <LightControlCard
                 id={light.id}
