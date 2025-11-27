@@ -1,5 +1,5 @@
 import { motion, useMotionValue, useTransform, animate } from "framer-motion";
-import { Thermometer, Droplets, Power } from "lucide-react";
+import { Thermometer, Droplets, Sun } from "lucide-react";
 import { LightControlCard } from "./LightControlCard";
 import { useEffect } from "react";
 
@@ -101,7 +101,7 @@ export const RoomInfoPanel = ({ roomName, temperature, humidity, masterSwitchOn,
             transition={{ duration: 0.5, ease: [0.22, 0.03, 0.26, 1] }}
             className="flex items-center justify-center"
           >
-            <Power className="w-4 h-4 md:w-5 md:h-5" strokeWidth={2.5} />
+            <Sun className="w-4 h-4 md:w-5 md:h-5" strokeWidth={2.5} />
           </motion.div>
         </motion.button>
       </motion.div>
