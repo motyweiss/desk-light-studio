@@ -361,14 +361,13 @@ export const LightHotspot = ({
                 {/* שכבת זוהר פנימית */}
                 <motion.div 
                   className="absolute inset-0 rounded-full pointer-events-none"
-                  initial={{ opacity: 0, scale: 0.8 }}
+                  initial={{ opacity: 0 }}
                   animate={{ 
                     opacity: 1,
-                    scale: 1,
                     transition: { 
-                      delay: 0.12,
-                      duration: 0.35,
-                      ease: [0.34, 1.56, 0.64, 1]
+                      delay: 0.2,
+                      duration: 0.4,
+                      ease: [0.4, 0, 0.2, 1]
                     }
                   }}
                   style={{
