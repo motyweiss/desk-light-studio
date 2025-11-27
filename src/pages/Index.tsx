@@ -146,13 +146,14 @@ const Index = () => {
           background: 'linear-gradient(135deg, hsl(38 15% 45% / 0.03) 0%, hsl(35 12% 42% / 0.05) 100%)',
         }}
       />
+      
       {/* Enhanced ambient page glow layers - synchronized positions with soft spill */}
       
       {/* Spotlight ambient glow - warm golden orange */}
       <motion.div
         className="fixed inset-0 pointer-events-none z-0"
         style={{
-          background: `radial-gradient(ellipse 70% 70% at 50% 35%, hsl(32 65% 58% / 0.18) 0%, hsl(35 60% 52% / 0.08) 30%, transparent 60%)`,
+          background: `radial-gradient(ellipse 70% 70% at 50% 35%, hsl(32 65% 58% / 0.22) 0%, hsl(35 60% 52% / 0.12) 30%, transparent 60%)`,
           filter: 'blur(70px)',
         }}
         animate={{
@@ -168,7 +169,7 @@ const Index = () => {
       <motion.div
         className="fixed inset-0 pointer-events-none z-0"
         style={{
-          background: `radial-gradient(ellipse 65% 65% at 30% 55%, hsl(42 75% 60% / 0.15) 0%, hsl(40 70% 55% / 0.07) 35%, transparent 58%)`,
+          background: `radial-gradient(ellipse 65% 65% at 30% 55%, hsl(42 75% 60% / 0.20) 0%, hsl(40 70% 55% / 0.10) 35%, transparent 58%)`,
           filter: 'blur(65px)',
         }}
         animate={{
@@ -184,7 +185,7 @@ const Index = () => {
       <motion.div
         className="fixed inset-0 pointer-events-none z-0"
         style={{
-          background: `radial-gradient(ellipse 75% 75% at 50% 40%, hsl(38 50% 60% / 0.14) 0%, hsl(35 45% 55% / 0.06) 38%, transparent 62%)`,
+          background: `radial-gradient(ellipse 75% 75% at 50% 40%, hsl(38 50% 60% / 0.18) 0%, hsl(35 45% 55% / 0.09) 38%, transparent 62%)`,
           filter: 'blur(60px)',
         }}
         animate={{
@@ -193,6 +194,24 @@ const Index = () => {
         transition={{
           duration: 1.2,
           ease: [0.4, 0, 0.2, 1]
+        }}
+      />
+      
+      {/* Additional subtle pulsing glow layer - creates living, breathing atmosphere */}
+      <motion.div
+        className="fixed inset-0 pointer-events-none z-0"
+        style={{
+          background: `radial-gradient(ellipse 80% 80% at 50% 50%, hsl(38 60% 55% / 0.08) 0%, transparent 70%)`,
+          filter: 'blur(100px)',
+        }}
+        animate={{
+          opacity: [(allLightsOn ? 0.3 : 0), (allLightsOn ? 0.5 : 0), (allLightsOn ? 0.3 : 0)],
+          scale: [1, 1.05, 1],
+        }}
+        transition={{
+          duration: 4,
+          repeat: Infinity,
+          ease: "easeInOut",
         }}
       />
 
@@ -367,19 +386,36 @@ const Index = () => {
             />
           </div>
 
-          {/* Soft shadow layer underneath image */}
+          {/* Dynamic shadow layer underneath image - responds to light intensity */}
           <motion.div 
             className="absolute -bottom-8 left-1/2 -translate-x-1/2 w-[85%] h-[12%] pointer-events-none z-0"
             initial={{ opacity: 0 }}
-            animate={{ opacity: isLoaded ? 1 : 0 }}
+            animate={{ 
+              opacity: isLoaded ? (allLightsOn ? 0.6 : 1) : 0,
+            }}
             transition={{ 
-              duration: 0.8,
-              delay: 0.6,
+              duration: 1.2,
               ease: [0.22, 0.03, 0.26, 1]
             }}
             style={{
-              background: 'radial-gradient(ellipse 100% 100% at 50% 50%, rgba(0,0,0,0.4) 0%, rgba(0,0,0,0.15) 50%, transparent 80%)',
+              background: 'radial-gradient(ellipse 100% 100% at 50% 50%, rgba(0,0,0,0.5) 0%, rgba(0,0,0,0.2) 50%, transparent 80%)',
               filter: 'blur(25px)',
+            }}
+          />
+          
+          {/* Warm glow reflection beneath image when lights are on */}
+          <motion.div 
+            className="absolute -bottom-6 left-1/2 -translate-x-1/2 w-[75%] h-[10%] pointer-events-none z-0"
+            animate={{ 
+              opacity: (spotlightIntensity + deskLampIntensity + monitorLightIntensity) / 300 * 0.4,
+            }}
+            transition={{ 
+              duration: 1.2,
+              ease: [0.22, 0.03, 0.26, 1]
+            }}
+            style={{
+              background: 'radial-gradient(ellipse 100% 100% at 50% 50%, hsl(38 70% 60% / 0.3) 0%, hsl(40 65% 55% / 0.15) 40%, transparent 70%)',
+              filter: 'blur(30px)',
             }}
           />
           <DeskDisplay
