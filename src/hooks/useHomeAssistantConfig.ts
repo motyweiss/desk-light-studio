@@ -11,6 +11,8 @@ const DEFAULT_ENTITY_MAPPING: EntityMapping = {
   temperatureSensor: "sensor.dyson_pure_temperature",
   humiditySensor: "sensor.dyson_pure_humidity",
   airQualitySensor: "sensor.dyson_pure_pm_2_5",
+  iphoneBatteryLevel: "sensor.motys_iphone_battery_level",
+  iphoneBatteryState: "sensor.motys_iphone_battery_state",
 };
 
 export const useHomeAssistantConfig = () => {

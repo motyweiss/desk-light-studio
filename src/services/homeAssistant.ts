@@ -10,6 +10,8 @@ export interface EntityMapping {
   temperatureSensor?: string;
   humiditySensor?: string;
   airQualitySensor?: string;
+  iphoneBatteryLevel?: string;
+  iphoneBatteryState?: string;
 }
 
 export interface HAEntity {
