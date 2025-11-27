@@ -165,7 +165,7 @@ export const DeskDisplay = ({
             position={{ x: 79, y: 11 }}
             onIntensityChange={onSpotlightChange}
             isContainerHovered={isHovered}
-            isExternallyHovered={false}
+            isExternallyHovered={hoveredLightId === 'spotlight'}
           />
           <LightHotspot
             id="deskLamp"
@@ -174,7 +174,7 @@ export const DeskDisplay = ({
             position={{ x: 25, y: 51 }}
             onIntensityChange={onDeskLampChange}
             isContainerHovered={isHovered}
-            isExternallyHovered={false}
+            isExternallyHovered={hoveredLightId === 'deskLamp'}
           />
           <LightHotspot
             id="monitorLight"
@@ -183,7 +183,7 @@ export const DeskDisplay = ({
             position={{ x: 55, y: 38 }}
             onIntensityChange={onMonitorLightChange}
             isContainerHovered={isHovered}
-            isExternallyHovered={false}
+            isExternallyHovered={hoveredLightId === 'monitorLight'}
           />
         </div>
       </div>
