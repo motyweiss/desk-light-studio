@@ -51,8 +51,12 @@ export const DeskDisplay = ({
   const [isHovered, setIsHovered] = useState(false);
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
 
-  // Track mouse movement across entire window
+  // Track mouse movement across entire window (desktop only)
   useEffect(() => {
+    // Disable on mobile/touch devices
+    const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+    if (isTouchDevice) return;
+
     const handleMouseMove = (e: MouseEvent) => {
       // Calculate position relative to viewport center
       const x = (e.clientX / window.innerWidth) - 0.5; // -0.5 to 0.5
@@ -158,8 +162,8 @@ export const DeskDisplay = ({
         })}
       </motion.div>
 
-      {/* Interactive Light Hotspots Layer */}
-      <div className="absolute inset-0 z-30 pointer-events-none">
+      {/* Interactive Light Hotspots Layer - Desktop Only */}
+      <div className="hidden md:block absolute inset-0 z-30 pointer-events-none">
         <div className="relative w-full h-full pointer-events-none">
           <LightHotspot
             id="spotlight"
