@@ -316,18 +316,24 @@ export const LightHotspot = ({
                   border border-white/20
                   overflow-hidden mr-10`}
                 initial={{ 
-                  scale: 0.92,
+                  opacity: 0,
+                  scale: 0.94,
                   originX: id === 'spotlight' ? 1 : 0.5,
                   originY: id === 'spotlight' ? 0.5 : 0
                 }}
                 animate={{ 
+                  opacity: 1,
                   scale: 1,
                   x: mousePos.x,
                   y: mousePos.y,
                   transition: {
+                    opacity: {
+                      duration: 0.2,
+                      ease: [0.25, 0.1, 0.25, 1]
+                    },
                     scale: {
-                      duration: 0.3,
-                      ease: [0.4, 0, 0.2, 1]
+                      duration: 0.35,
+                      ease: [0.34, 1.26, 0.64, 1]
                     },
                     x: {
                       type: "spring",
@@ -342,10 +348,11 @@ export const LightHotspot = ({
                   }
                 }}
                 exit={{ 
-                  scale: 0.92,
+                  opacity: 0,
+                  scale: 0.94,
                   transition: {
-                    duration: 0.2,
-                    ease: [0.4, 0, 0.2, 1]
+                    duration: 0.15,
+                    ease: [0.4, 0, 1, 1]
                   }
                 }}
                 style={{
@@ -360,9 +367,9 @@ export const LightHotspot = ({
                   animate={{ 
                     opacity: 1,
                     transition: { 
-                      delay: 0.2,
-                      duration: 0.4,
-                      ease: [0.4, 0, 0.2, 1]
+                      delay: 0.12,
+                      duration: 0.3,
+                      ease: [0.25, 0.1, 0.25, 1]
                     }
                   }}
                   style={{
@@ -378,16 +385,15 @@ export const LightHotspot = ({
                   {/* Lamp icon circle - Exactly 42x42 pixels with frosted glass effect, no fill */}
                   <motion.div
                     className="w-[42px] h-[42px] rounded-full flex items-center justify-center cursor-pointer flex-shrink-0 backdrop-blur-xl"
-                    initial={{ scale: 0.5, opacity: 0, rotate: -20 }}
+                    initial={{ scale: 0.7, opacity: 0 }}
                     animate={{
                       scale: 1,
-                      opacity: 1,
-                      rotate: 0
+                      opacity: 1
                     }}
                     transition={{
-                      delay: 0.15,
-                      duration: 0.45,
-                      ease: [0.34, 1.56, 0.64, 1]
+                      delay: 0.08,
+                      duration: 0.3,
+                      ease: [0.34, 1.26, 0.64, 1]
                     }}
                     onClick={(e) => {
                       e.stopPropagation();
@@ -407,15 +413,15 @@ export const LightHotspot = ({
                   <div className="flex flex-col items-start gap-1.5">
                     <motion.span 
                       className="font-medium text-white text-sm leading-tight whitespace-nowrap"
-                      initial={{ opacity: 0, x: -8 }}
+                      initial={{ opacity: 0, x: -6 }}
                       animate={{ 
                         opacity: 1, 
                         x: 0 
                       }}
                       transition={{
-                        delay: 0.22,
-                        duration: 0.4,
-                        ease: [0.34, 1.56, 0.64, 1]
+                        delay: 0.12,
+                        duration: 0.28,
+                        ease: [0.25, 0.1, 0.25, 1]
                       }}
                     >
                       {label}
@@ -424,15 +430,15 @@ export const LightHotspot = ({
                       className={`text-xs leading-tight ${
                         intensity > 0 ? 'text-[hsl(43_90%_60%)]' : 'text-white/60'
                       }`}
-                      initial={{ opacity: 0, x: -8 }}
+                      initial={{ opacity: 0, x: -6 }}
                       animate={{ 
                         opacity: 1, 
                         x: 0 
                       }}
                       transition={{
-                        delay: 0.3,
-                        duration: 0.4,
-                        ease: [0.34, 1.56, 0.64, 1]
+                        delay: 0.16,
+                        duration: 0.28,
+                        ease: [0.25, 0.1, 0.25, 1]
                       }}
                     >
                       {intensity > 0 ? `${Math.round(intensity)}%` : 'Off'}
