@@ -475,7 +475,7 @@ export const LightHotspot = ({
                     <motion.div
                       initial={{ scale: 0.6, opacity: 0 }}
                       animate={{
-                        scale: intensity > 0 ? 1 : 0.88,
+                        scale: 1,
                         opacity: 1
                       }}
                       transition={{
