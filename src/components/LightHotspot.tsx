@@ -426,7 +426,9 @@ export const LightHotspot = ({
                       {label}
                     </motion.span>
                     <motion.span 
-                      className="text-xs text-white/60 leading-tight"
+                      className={`text-xs leading-tight ${
+                        intensity > 0 ? 'text-[hsl(43_90%_60%)]' : 'text-white/60'
+                      }`}
                       initial={{ opacity: 0, x: -8 }}
                       animate={{ 
                         opacity: 1, 
