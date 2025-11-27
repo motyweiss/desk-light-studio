@@ -22,7 +22,7 @@ const Index = () => {
       setTimeout(() => {
         setIsLoaded(true);
       }, 100);
-    }, 2000); // Loading phase duration
+    }, 3000); // Loading phase duration
 
     return () => clearTimeout(loadingTimer);
   }, []);
@@ -104,7 +104,7 @@ const Index = () => {
             exit={{ opacity: 0 }}
             transition={{ duration: 0.6, ease: [0.22, 0.03, 0.26, 1] }}
             style={{
-              backgroundColor: 'hsl(30 22% 22%)',
+              backgroundColor: 'hsl(28 20% 18%)',
             }}
           >
             {/* Subtle breathing pulse */}
@@ -220,14 +220,14 @@ const Index = () => {
         {/* Mobile: Room Info Header (Title, Climate, Master Switch) */}
         <motion.div 
           className="w-full md:hidden px-[40px]"
-          initial={{ opacity: 0, y: 20 }}
+          initial={{ opacity: 0, y: 30 }}
           animate={{ 
             opacity: isLoaded ? 1 : 0,
-            y: isLoaded ? 0 : 20
+            y: isLoaded ? 0 : 30
           }}
           transition={{ 
             duration: 0.8,
-            delay: 0.3,
+            delay: 0.2,
             ease: [0.22, 0.03, 0.26, 1]
           }}
         >
@@ -236,14 +236,14 @@ const Index = () => {
             <motion.h1 
               className="text-4xl font-light tracking-tight text-foreground"
               style={{ fontFamily: "'Cormorant Garamond', serif" }}
-              initial={{ opacity: 0, y: 10 }}
+              initial={{ opacity: 0, y: 20 }}
               animate={{ 
                 opacity: isLoaded ? 1 : 0,
-                y: isLoaded ? 0 : 10
+                y: isLoaded ? 0 : 20
               }}
               transition={{ 
-                duration: 0.6,
-                delay: 0.4,
+                duration: 0.8,
+                delay: 0.3,
                 ease: [0.22, 0.03, 0.26, 1]
               }}
             >
@@ -265,8 +265,8 @@ const Index = () => {
                 scale: isLoaded ? 1 : 0.8
               }}
               transition={{ 
-                duration: 0.5,
-                delay: 0.6,
+                duration: 0.6,
+                delay: 0.5,
                 ease: [0.22, 0.03, 0.26, 1]
               }}
             >
@@ -285,14 +285,14 @@ const Index = () => {
           {/* Climate Data */}
           <motion.div 
             className="flex items-center gap-12 mb-6"
-            initial={{ opacity: 0, y: 10 }}
+            initial={{ opacity: 0, y: 20 }}
             animate={{ 
               opacity: isLoaded ? 1 : 0,
-              y: isLoaded ? 0 : 10
+              y: isLoaded ? 0 : 20
             }}
             transition={{ 
-              duration: 0.6,
-              delay: 0.5,
+              duration: 0.8,
+              delay: 0.4,
               ease: [0.22, 0.03, 0.26, 1]
             }}
           >
@@ -323,15 +323,16 @@ const Index = () => {
         {/* Desk Display Panel */}
         <motion.div 
           className="w-full md:w-[50%] relative"
-          initial={{ opacity: 0, y: 20, scale: 0.95 }}
+          initial={{ opacity: 0, y: 40, scale: 0.92, filter: 'blur(10px)' }}
           animate={{ 
             opacity: isLoaded ? 1 : 0,
-            y: isLoaded ? 0 : 20,
-            scale: isLoaded ? 1 : 0.95
+            y: isLoaded ? 0 : 40,
+            scale: isLoaded ? 1 : 0.92,
+            filter: isLoaded ? 'blur(0px)' : 'blur(10px)'
           }}
           transition={{ 
-            duration: 0.8,
-            delay: 0.4,
+            duration: 1.2,
+            delay: 0.3,
             ease: [0.22, 0.03, 0.26, 1]
           }}
         >
@@ -395,6 +396,7 @@ const Index = () => {
             }}
             transition={{ 
               duration: 1.2,
+              delay: 1.0,
               ease: [0.22, 0.03, 0.26, 1]
             }}
             style={{
@@ -433,14 +435,14 @@ const Index = () => {
         {/* Room Info Panel - Full on desktop, Light cards only on mobile */}
         <motion.div 
           className="w-full md:w-[42%] md:pl-6"
-          initial={{ opacity: 0, y: 20 }}
+          initial={{ opacity: 0, x: 30 }}
           animate={{ 
             opacity: isLoaded ? 1 : 0,
-            y: isLoaded ? 0 : 20
+            x: isLoaded ? 0 : 30
           }}
           transition={{ 
-            duration: 0.8,
-            delay: 0.5,
+            duration: 1.0,
+            delay: 0.6,
             ease: [0.22, 0.03, 0.26, 1]
           }}
         >
