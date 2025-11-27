@@ -1,8 +1,10 @@
-import { useState, useEffect } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { useState, useEffect, useMemo, useCallback } from "react";
+import { motion } from "framer-motion";
 import { Sun } from "lucide-react";
 import { DeskDisplay } from "@/components/DeskDisplay";
 import { RoomInfoPanel } from "@/components/RoomInfoPanel";
+import { LoadingOverlay } from "@/components/LoadingOverlay";
+import { AmbientGlowLayers } from "@/components/AmbientGlowLayers";
 
 const Index = () => {
   const [isLoading, setIsLoading] = useState(true);
@@ -31,12 +33,12 @@ const Index = () => {
   const allLightsOn = spotlightIntensity > 0 || deskLampIntensity > 0 || monitorLightIntensity > 0;
   const masterSwitchOn = allLightsOn;
 
-  const handleMasterToggle = (checked: boolean) => {
+  const handleMasterToggle = useCallback((checked: boolean) => {
     const targetIntensity = checked ? 100 : 0;
     setSpotlightIntensity(targetIntensity);
     setDeskLampIntensity(targetIntensity);
     setMonitorLightIntensity(targetIntensity);
-  };
+  }, []);
 
   // Keyboard shortcuts
   useEffect(() => {
@@ -71,8 +73,8 @@ const Index = () => {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [masterSwitchOn]);
 
-  // Calculate page background color based on light intensities
-  const getPageBackgroundColor = () => {
+  // Calculate page background color based on light intensities - memoized for performance
+  const pageBackgroundColor = useMemo(() => {
     const spotlightBit = spotlightIntensity > 0 ? "1" : "0";
     const deskLampBit = deskLampIntensity > 0 ? "1" : "0";
     const monitorLightBit = monitorLightIntensity > 0 ? "1" : "0";
@@ -91,69 +93,16 @@ const Index = () => {
     };
     
     return stateColors[state] || "28 20% 18%";
-  };
+  }, [spotlightIntensity, deskLampIntensity, monitorLightIntensity]);
 
   return (
     <>
-      {/* Loading Overlay */}
-      <AnimatePresence>
-        {isLoading && (
-          <motion.div
-            className="fixed inset-0 z-50 flex items-center justify-center"
-            initial={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.6, ease: [0.22, 0.03, 0.26, 1] }}
-            style={{
-              backgroundColor: 'hsl(28 20% 18%)',
-            }}
-          >
-            {/* Minimalist spinner */}
-            <motion.div
-              className="relative w-12 h-12"
-            >
-              {/* Rotating circle with gap */}
-              <motion.div
-                className="absolute inset-0 rounded-full"
-                style={{
-                  border: '2px solid transparent',
-                  borderTopColor: 'hsl(42 70% 55% / 0.6)',
-                  borderRightColor: 'hsl(42 70% 55% / 0.4)',
-                }}
-                animate={{
-                  rotate: 360,
-                }}
-                transition={{
-                  duration: 1.2,
-                  repeat: Infinity,
-                  ease: "linear",
-                }}
-              />
-              
-              {/* Inner subtle glow */}
-              <motion.div
-                className="absolute inset-0 rounded-full"
-                style={{
-                  background: 'radial-gradient(circle, hsl(42 70% 55% / 0.08) 0%, transparent 70%)',
-                }}
-                animate={{
-                  scale: [1, 1.1, 1],
-                  opacity: [0.4, 0.6, 0.4],
-                }}
-                transition={{
-                  duration: 1.5,
-                  repeat: Infinity,
-                  ease: "easeInOut",
-                }}
-              />
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      <LoadingOverlay isLoading={isLoading} />
 
       <motion.div 
         className="min-h-[100dvh] flex items-center justify-center p-4 md:p-8 relative overflow-hidden"
         animate={{
-          backgroundColor: `hsl(${getPageBackgroundColor()})`,
+          backgroundColor: `hsl(${pageBackgroundColor})`,
         }}
         transition={{
           duration: 1.2,
@@ -170,72 +119,11 @@ const Index = () => {
         }}
       />
       
-      {/* Enhanced ambient page glow layers - synchronized positions with soft spill */}
-      
-      {/* Spotlight ambient glow - warm golden orange */}
-      <motion.div
-        className="fixed inset-0 pointer-events-none z-0"
-        style={{
-          background: `radial-gradient(ellipse 70% 70% at 50% 35%, hsl(32 65% 58% / 0.22) 0%, hsl(35 60% 52% / 0.12) 30%, transparent 60%)`,
-          filter: 'blur(70px)',
-        }}
-        animate={{
-          opacity: Math.pow(spotlightIntensity / 100, 0.8),
-        }}
-        transition={{
-          duration: 1.2,
-          ease: [0.4, 0, 0.2, 1]
-        }}
-      />
-      
-      {/* Desk lamp ambient glow - rich warm gold */}
-      <motion.div
-        className="fixed inset-0 pointer-events-none z-0"
-        style={{
-          background: `radial-gradient(ellipse 65% 65% at 30% 55%, hsl(42 75% 60% / 0.20) 0%, hsl(40 70% 55% / 0.10) 35%, transparent 58%)`,
-          filter: 'blur(65px)',
-        }}
-        animate={{
-          opacity: Math.pow(deskLampIntensity / 100, 0.8),
-        }}
-        transition={{
-          duration: 1.2,
-          ease: [0.4, 0, 0.2, 1]
-        }}
-      />
-      
-      {/* Monitor light ambient glow - warm cream beige */}
-      <motion.div
-        className="fixed inset-0 pointer-events-none z-0"
-        style={{
-          background: `radial-gradient(ellipse 75% 75% at 50% 40%, hsl(38 50% 60% / 0.18) 0%, hsl(35 45% 55% / 0.09) 38%, transparent 62%)`,
-          filter: 'blur(60px)',
-        }}
-        animate={{
-          opacity: Math.pow(monitorLightIntensity / 100, 0.8),
-        }}
-        transition={{
-          duration: 1.2,
-          ease: [0.4, 0, 0.2, 1]
-        }}
-      />
-      
-      {/* Additional subtle pulsing glow layer - creates living, breathing atmosphere */}
-      <motion.div
-        className="fixed inset-0 pointer-events-none z-0"
-        style={{
-          background: `radial-gradient(ellipse 80% 80% at 50% 50%, hsl(38 60% 55% / 0.08) 0%, transparent 70%)`,
-          filter: 'blur(100px)',
-        }}
-        animate={{
-          opacity: [(allLightsOn ? 0.3 : 0), (allLightsOn ? 0.5 : 0), (allLightsOn ? 0.3 : 0)],
-          scale: [1, 1.05, 1],
-        }}
-        transition={{
-          duration: 4,
-          repeat: Infinity,
-          ease: "easeInOut",
-        }}
+      <AmbientGlowLayers
+        spotlightIntensity={spotlightIntensity}
+        deskLampIntensity={deskLampIntensity}
+        monitorLightIntensity={monitorLightIntensity}
+        allLightsOn={allLightsOn}
       />
 
       {/* Responsive Layout Container */}
