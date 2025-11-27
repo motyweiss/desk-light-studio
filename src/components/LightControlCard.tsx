@@ -33,11 +33,19 @@ export const LightControlCard = ({ id, label, intensity, onChange, onHover }: Li
     return controls.stop;
   }, [intensity, displayValue, isAnimating]);
   
+  const triggerHaptic = () => {
+    if ('vibrate' in navigator) {
+      navigator.vibrate(10);
+    }
+  };
+
   const handleCardClick = (e: React.MouseEvent) => {
     // Only toggle if clicking outside the slider
     if ((e.target as HTMLElement).closest('[data-slider]')) {
       return;
     }
+    
+    triggerHaptic();
     
     const currentValue = displayValue.get();
     const targetIntensity = isOn ? 0 : 100;
@@ -115,6 +123,9 @@ export const LightControlCard = ({ id, label, intensity, onChange, onHover }: Li
             value={[displayNumber]}
             onValueChange={(values) => {
               const newValue = values[0];
+              if (Math.abs(newValue - displayNumber) >= 10) {
+                triggerHaptic();
+              }
               displayValue.set(newValue);
               onChange(newValue);
             }}
