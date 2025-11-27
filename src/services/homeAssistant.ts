@@ -22,7 +22,11 @@ class HomeAssistantService {
   private config: HomeAssistantConfig | null = null;
 
   setConfig(config: HomeAssistantConfig) {
-    this.config = config;
+    // Remove trailing slash from baseUrl to prevent double slashes
+    this.config = {
+      ...config,
+      baseUrl: config.baseUrl.replace(/\/+$/, '')
+    };
   }
 
   private getHeaders() {
