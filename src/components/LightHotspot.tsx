@@ -305,7 +305,7 @@ export const LightHotspot = ({
               <motion.div
                 className={`intensity-tooltip absolute z-50
                   ${id === 'spotlight' 
-                    ? 'right-8 top-1/2 -translate-y-1/2' 
+                    ? 'right-3 top-1/2 -translate-y-1/2' 
                     : '-bottom-12 left-1/2 -translate-x-1/2'
                   }
                   bg-white/8
