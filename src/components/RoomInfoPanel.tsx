@@ -164,14 +164,14 @@ export const RoomInfoPanel = ({ roomName, temperature, humidity, airQuality, mas
           </div>
         </div>
 
-        {/* Air Quality */}
+        {/* PM 2.5 */}
         <div className="flex items-center gap-3">
           <div className="flex items-center justify-center w-11 h-11 rounded-full bg-white/5 backdrop-blur-sm">
             <Wind className="w-5 h-5 text-white/60" strokeWidth={1.5} />
           </div>
           <div className="flex flex-col">
             <span className="text-[9px] text-white/55 font-light tracking-[0.2em] uppercase mb-1">
-              Air Quality
+              PM 2.5
             </span>
             <div className="text-base font-light text-white tabular-nums">
               <motion.span>{airQualityDisplay}</motion.span>
@@ -211,7 +211,7 @@ export const RoomInfoPanel = ({ roomName, temperature, humidity, airQuality, mas
           </div>
         </div>
 
-        {/* Air Quality - Icon + Number only */}
+        {/* PM 2.5 - Icon + Number only */}
         <div className="flex items-center gap-2">
           <Wind className="w-5 h-5 text-white/60" strokeWidth={1.5} />
           <div className="text-base font-light text-white tabular-nums">
