@@ -173,7 +173,7 @@ export const RoomInfoPanel = ({ roomName, temperature, humidity, masterSwitchOn,
               opacity: 1,
               transition: {
                 delayChildren: 0.8,
-                staggerChildren: 0.08
+                staggerChildren: 0.15
               }
             }
           }}
@@ -184,10 +184,10 @@ export const RoomInfoPanel = ({ roomName, temperature, humidity, masterSwitchOn,
             <motion.div
               key={light.id}
               variants={{
-                hidden: { opacity: 0, y: 15, scale: 0.95 },
-                show: { opacity: 1, y: 0, scale: 1 }
+                hidden: { opacity: 0, y: 25, scale: 0.94, filter: 'blur(4px)' },
+                show: { opacity: 1, y: 0, scale: 1, filter: 'blur(0px)' }
               }}
-              transition={{ duration: 0.5, ease: [0.22, 0.03, 0.26, 1] }}
+              transition={{ duration: 0.7, ease: [0.22, 0.03, 0.26, 1] }}
             >
               {index > 0 && (
                 <div className="h-px bg-white/10 mb-3" />
