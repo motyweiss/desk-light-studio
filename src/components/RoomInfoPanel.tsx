@@ -137,7 +137,7 @@ export const RoomInfoPanel = ({ roomName, temperature, humidity, airQuality, mas
 
       {/* Climate & Devices Info Card - Desktop only */}
       <motion.div 
-        className="hidden md:block rounded-2xl bg-white/[0.02] backdrop-blur-md border border-white/[0.05] py-5 px-6"
+        className="hidden md:block rounded-2xl bg-white/[0.01] backdrop-blur-md py-4 px-5"
         initial={{ opacity: 0, y: 10 }}
         animate={{ 
           opacity: isLoaded ? 1 : 0,
@@ -150,7 +150,7 @@ export const RoomInfoPanel = ({ roomName, temperature, humidity, airQuality, mas
         }}
       >
         {/* Climate Info */}
-        <div className="flex gap-10 mb-4">
+        <div className="flex gap-8 mb-5">
           {/* Temperature */}
           <div className="flex items-center gap-3">
                 <CircularProgress 
