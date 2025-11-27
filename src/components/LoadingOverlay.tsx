@@ -1,5 +1,5 @@
 import { motion, AnimatePresence } from "framer-motion";
-import { Monitor } from "lucide-react";
+import { Lamp } from "lucide-react";
 
 interface LoadingOverlayProps {
   isLoading: boolean;
@@ -55,19 +55,17 @@ export const LoadingOverlay = ({ isLoading }: LoadingOverlayProps) => {
               }}
             />
 
-            {/* Desk/Monitor Icon in center with entrance animation */}
+            {/* Lamp Icon in center with fade-in animation */}
             <motion.div
               className="absolute inset-0 flex items-center justify-center"
-              initial={{ scale: 0, opacity: 0, rotate: -180 }}
+              initial={{ scale: 0.8, opacity: 0 }}
               animate={{ 
                 scale: 1, 
-                opacity: 1, 
-                rotate: 0 
+                opacity: 1
               }}
               exit={{ 
-                scale: 0, 
-                opacity: 0, 
-                rotate: 180 
+                scale: 0.8, 
+                opacity: 0
               }}
               transition={{
                 duration: 0.6,
@@ -75,7 +73,7 @@ export const LoadingOverlay = ({ isLoading }: LoadingOverlayProps) => {
                 delay: 0.2
               }}
             >
-              <Monitor 
+              <Lamp 
                 className="w-7 h-7 text-white/80"
                 strokeWidth={1.5}
               />
