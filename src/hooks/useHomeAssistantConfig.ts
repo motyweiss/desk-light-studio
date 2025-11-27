@@ -36,9 +36,18 @@ export const useHomeAssistantConfig = () => {
 
     if (savedMapping) {
       try {
-        setEntityMapping(JSON.parse(savedMapping));
+        const parsedMapping = JSON.parse(savedMapping);
+        // Merge with defaults to add any new sensor mappings
+        const mergedMapping = {
+          ...DEFAULT_ENTITY_MAPPING,
+          ...parsedMapping,
+        };
+        setEntityMapping(mergedMapping);
+        // Save the merged mapping back to localStorage
+        localStorage.setItem(ENTITY_MAPPING_KEY, JSON.stringify(mergedMapping));
       } catch (e) {
         console.error("Failed to parse saved mapping:", e);
+        setEntityMapping(DEFAULT_ENTITY_MAPPING);
       }
     } else {
       // Use default mapping if no saved mapping exists
