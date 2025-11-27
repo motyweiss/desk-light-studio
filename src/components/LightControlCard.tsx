@@ -151,14 +151,12 @@ export const LightControlCard = ({ id, label, intensity, onChange, onHover }: Li
             animate={{
               scale: isOn ? 1 : 0.92,
               opacity: 1,
-              color: isOn ? 'rgb(255, 255, 255)' : 'rgb(180, 180, 180)',
-              rotateZ: isOn ? 0 : -8
+              color: isOn ? 'rgb(255, 255, 255)' : 'rgb(180, 180, 180)'
             }}
             transition={{ 
               scale: { duration: 0.4, ease: [0.22, 0.03, 0.26, 1] },
               opacity: { duration: 0.35, ease: [0.22, 0.03, 0.26, 1] },
-              color: { duration: 0.3, ease: [0.22, 0.03, 0.26, 1] },
-              rotateZ: { duration: 0.35, ease: [0.22, 0.03, 0.26, 1] }
+              color: { duration: 0.3, ease: [0.22, 0.03, 0.26, 1] }
             }}
           >
             <IconComponent className="w-7 h-7" />
