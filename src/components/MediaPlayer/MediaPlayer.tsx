@@ -86,9 +86,13 @@ export const MediaPlayer = ({ entityId, isConnected }: MediaPlayerProps) => {
 
   return (
     <motion.div
-      initial={{ y: 100, opacity: 0 }}
+      initial={{ y: 150, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
-      transition={{ duration: 0.4, ease: [0.22, 0.03, 0.26, 1] }}
+      transition={{ 
+        duration: 0.8, 
+        ease: [0.22, 0.03, 0.26, 1],
+        delay: 0.3
+      }}
       className="fixed bottom-0 left-0 right-0 z-50 w-full"
     >
       <div className="bg-white/8 backdrop-blur-[24px] border-t border-white/20 rounded-t-2xl shadow-[0_4px_24px_rgba(0,0,0,0.15)] p-6 max-w-none">

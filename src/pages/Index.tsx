@@ -28,6 +28,7 @@ import desk111 from "@/assets/desk-111.png";
 const Index = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [isLoaded, setIsLoaded] = useState(false);
+  const [showMediaPlayer, setShowMediaPlayer] = useState(false);
   const [spotlightIntensity, setSpotlightIntensity] = useState(0);
   const [deskLampIntensity, setDeskLampIntensity] = useState(0);
   const [monitorLightIntensity, setMonitorLightIntensity] = useState(0);
@@ -89,6 +90,11 @@ const Index = () => {
         // Small delay before starting entrance animations
         setTimeout(() => {
           setIsLoaded(true);
+          
+          // Show media player after page content settles (2 seconds after content loads)
+          setTimeout(() => {
+            setShowMediaPlayer(true);
+          }, 2000);
         }, 100);
         
         // Preload remaining images in background after primary loads
@@ -872,7 +878,13 @@ const Index = () => {
         />
 
       {/* Responsive Layout Container */}
-      <div className="flex flex-col md:flex-row items-center gap-4 md:gap-8 max-w-7xl w-full relative z-10 px-5 md:px-0 pb-20 md:pb-0">
+      <motion.div 
+        className="flex flex-col md:flex-row items-center gap-4 md:gap-8 max-w-7xl w-full relative z-10 px-5 md:px-0 md:pb-0 transition-all duration-700 ease-out"
+        animate={{
+          paddingBottom: showMediaPlayer ? '200px' : '80px'
+        }}
+        transition={{ duration: 0.7, ease: [0.22, 0.03, 0.26, 1] }}
+      >
         {/* Mobile: Room Info Header (Title, Climate, Master Switch) */}
         <motion.div 
           className="w-full md:hidden pt-8"
@@ -1123,14 +1135,16 @@ const Index = () => {
             isLoaded={isLoaded}
           />
         </motion.div>
-      </div>
+      </motion.div>
       </motion.div>
 
-      {/* Media Player - Sticky bottom player */}
-      <MediaPlayer 
-        entityId={entityMapping.mediaPlayer} 
-        isConnected={isConnected}
-      />
+      {/* Media Player - Sticky bottom player with delayed entrance */}
+      {showMediaPlayer && (
+        <MediaPlayer 
+          entityId={entityMapping.mediaPlayer} 
+          isConnected={isConnected}
+        />
+      )}
     </>
   );
 };
