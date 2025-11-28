@@ -1,6 +1,6 @@
 import { motion, AnimatePresence } from 'framer-motion';
 import { useState } from 'react';
-import { ChevronUp, Music } from 'lucide-react';
+import { Music } from 'lucide-react';
 import { homeAssistant } from '@/services/homeAssistant';
 import { useMediaPlayerSync } from '@/hooks/useMediaPlayerSync';
 import { ProgressBar } from './ProgressBar';
@@ -192,57 +192,36 @@ export const MediaPlayer = ({ entityId, isConnected }: MediaPlayerProps) => {
 
   return (
     <motion.div
-      initial={{ y: 120, opacity: 0 }}
+      initial={{ y: 100, opacity: 0 }}
       animate={{ 
         y: 0, 
         opacity: 1,
       }}
       transition={{ 
-        duration: 0.8, 
-        ease: [0.19, 1, 0.22, 1],
+        duration: 1, 
+        ease: [0.16, 1, 0.3, 1],
         delay: 0.3
       }}
       className="fixed bottom-0 left-0 right-0 z-50 w-full"
     >
       <motion.div 
-        className="bg-white/8 backdrop-blur-[24px] border-t border-white/20 rounded-t-2xl shadow-[0_4px_24px_rgba(0,0,0,0.15)] relative"
+        onClick={() => setIsMinimized(!isMinimized)}
+        className="bg-white/8 backdrop-blur-[24px] border-t border-white/20 rounded-t-2xl shadow-[0_4px_24px_rgba(0,0,0,0.15)] relative cursor-pointer"
         initial={false}
         animate={{ 
           height: isMinimized ? 80 : 'auto',
         }}
         transition={{ 
-          duration: 0.4, 
-          ease: [0.32, 0.72, 0, 1]
+          duration: 0.5, 
+          ease: [0.25, 0.1, 0.25, 1]
+        }}
+        whileHover={{ 
+          backgroundColor: 'rgba(255, 255, 255, 0.09)'
         }}
       >
-        {/* Chevron Button */}
-        <motion.button
-          onClick={() => setIsMinimized(!isMinimized)}
-          className="absolute -top-3 left-1/2 -translate-x-1/2 z-20 w-7 h-7 rounded-full bg-[hsl(28_18%_20%)] border border-white/20 flex items-center justify-center"
-          whileHover={{ 
-            backgroundColor: 'hsl(28 18% 25%)',
-            scale: 1.05,
-          }}
-          whileTap={{ 
-            scale: 0.95,
-          }}
-        >
-          <motion.div
-            initial={false}
-            animate={{ 
-              rotate: isMinimized ? 0 : 180
-            }}
-            transition={{ 
-              duration: 0.35, 
-              ease: [0.32, 0.72, 0, 1]
-            }}
-          >
-            <ChevronUp className="w-3.5 h-3.5 text-white" />
-          </motion.div>
-        </motion.button>
 
         {/* Content Container */}
-        <div className="px-6 py-3 max-w-7xl mx-auto">
+        <div className="px-6 py-3 max-w-7xl mx-auto" onClick={(e) => e.stopPropagation()}>
           <div className="flex items-center gap-4 relative" style={{ minHeight: isMinimized ? 56 : 'auto' }}>
             {/* Album Art - Shared Element */}
             <motion.div
@@ -251,8 +230,8 @@ export const MediaPlayer = ({ entityId, isConnected }: MediaPlayerProps) => {
               initial={false}
               animate={albumArtSize}
               transition={{ 
-                duration: 0.4, 
-                ease: [0.32, 0.72, 0, 1]
+                duration: 0.5, 
+                ease: [0.25, 0.1, 0.25, 1]
               }}
             >
               {albumArtUrl ? (
@@ -281,7 +260,7 @@ export const MediaPlayer = ({ entityId, isConnected }: MediaPlayerProps) => {
                   fontSize: titleFontSize,
                   lineHeight: titleLineHeight
                 }}
-                transition={{ duration: 0.3, ease: [0.32, 0.72, 0, 1] }}
+                transition={{ duration: 0.4, ease: [0.25, 0.1, 0.25, 1] }}
               >
                 {currentTrack?.title || 'No media playing'}
               </motion.h3>
@@ -292,7 +271,7 @@ export const MediaPlayer = ({ entityId, isConnected }: MediaPlayerProps) => {
                   fontSize: artistFontSize,
                   lineHeight: artistLineHeight
                 }}
-                transition={{ duration: 0.3, ease: [0.32, 0.72, 0, 1] }}
+                transition={{ duration: 0.4, ease: [0.25, 0.1, 0.25, 1] }}
               >
                 {currentTrack?.artist || 'Unknown Artist'}
               </motion.p>
@@ -304,7 +283,7 @@ export const MediaPlayer = ({ entityId, isConnected }: MediaPlayerProps) => {
                     initial={{ opacity: 0, height: 0 }}
                     animate={{ opacity: 1, height: 'auto' }}
                     exit={{ opacity: 0, height: 0 }}
-                    transition={{ duration: 0.25 }}
+                    transition={{ duration: 0.35, ease: [0.25, 0.1, 0.25, 1] }}
                     className="text-white/30 text-xs truncate mt-0.5"
                   >
                     {currentTrack.album}
@@ -319,7 +298,7 @@ export const MediaPlayer = ({ entityId, isConnected }: MediaPlayerProps) => {
                 initial={{ opacity: 0, x: 20 }}
                 animate={{ opacity: 1, x: 0 }}
                 exit={{ opacity: 0, x: 20 }}
-                transition={{ duration: 0.3, ease: [0.32, 0.72, 0, 1] }}
+                transition={{ duration: 0.4, ease: [0.25, 0.1, 0.25, 1] }}
                 className="flex items-center gap-6"
               >
                 <PlaybackControls
@@ -353,8 +332,8 @@ export const MediaPlayer = ({ entityId, isConnected }: MediaPlayerProps) => {
                 animate={{ opacity: 1, height: 'auto' }}
                 exit={{ opacity: 0, height: 0 }}
                 transition={{ 
-                  duration: 0.35,
-                  ease: [0.32, 0.72, 0, 1]
+                  duration: 0.45,
+                  ease: [0.25, 0.1, 0.25, 1]
                 }}
                 className="space-y-4 mt-4 overflow-hidden"
               >
