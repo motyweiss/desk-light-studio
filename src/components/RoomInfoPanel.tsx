@@ -11,6 +11,7 @@ interface Light {
   label: string;
   intensity: number;
   isPending?: boolean;
+  isLoading?: boolean;
   onChange: (intensity: number) => void;
 }
 
@@ -365,6 +366,7 @@ export const RoomInfoPanel = ({ roomName, temperature, humidity, airQuality, mas
               label={light.label}
               intensity={light.intensity}
               isPending={light.isPending}
+              isLoading={light.isLoading}
               onChange={light.onChange}
               onHover={(isHovered) => onLightHover(isHovered ? light.id : null)}
             />

@@ -32,6 +32,9 @@ const Index = () => {
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
   
+  // Track if initial HA state has been loaded
+  const [hasLoadedInitialState, setHasLoadedInitialState] = useState(false);
+  
   // Climate sensor states
   const [temperature, setTemperature] = useState(21.0);
   const [humidity, setHumidity] = useState(49);
@@ -57,6 +60,13 @@ const Index = () => {
   // Home Assistant integration
   const { toast } = useToast();
   const { config, entityMapping, isConnected, saveConfig } = useHomeAssistantConfig();
+
+  // Reset initial state loading flag when connection changes
+  useEffect(() => {
+    if (!isConnected) {
+      setHasLoadedInitialState(false);
+    }
+  }, [isConnected]);
 
   // Optimized image loading - preload primary "all lights off" image first
   useEffect(() => {
@@ -323,6 +333,9 @@ const Index = () => {
           setIphoneBatteryCharging(isCharging);
           console.log(`⚡ iPhone Charging initial: ${state.state} → ${isCharging}`);
         }
+        
+        // Mark initial state as loaded
+        setHasLoadedInitialState(true);
       } catch (error) {
         console.error("❌ Failed to perform initial sync:", error);
         
@@ -1050,6 +1063,7 @@ const Index = () => {
                 label: 'Desk Lamp', 
                 intensity: deskLampIntensity,
                 isPending: pendingLights.has('deskLamp'),
+                isLoading: isConnected && !hasLoadedInitialState,
                 onChange: createLightChangeHandler('deskLamp', setDeskLampIntensity)
               },
               { 
@@ -1057,6 +1071,7 @@ const Index = () => {
                 label: 'Monitor Back Light', 
                 intensity: monitorLightIntensity,
                 isPending: pendingLights.has('monitorLight'),
+                isLoading: isConnected && !hasLoadedInitialState,
                 onChange: createLightChangeHandler('monitorLight', setMonitorLightIntensity)
               },
               { 
@@ -1064,6 +1079,7 @@ const Index = () => {
                 label: 'Spotlight', 
                 intensity: spotlightIntensity,
                 isPending: pendingLights.has('spotlight'),
+                isLoading: isConnected && !hasLoadedInitialState,
                 onChange: createLightChangeHandler('spotlight', setSpotlightIntensity)
               },
             ]}
