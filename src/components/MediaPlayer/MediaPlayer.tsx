@@ -1,7 +1,8 @@
 import { motion } from 'framer-motion';
 import { useState } from 'react';
-import { ChevronDown, ChevronUp } from 'lucide-react';
+import { ChevronUp, Music } from 'lucide-react';
 import { homeAssistant } from '@/services/homeAssistant';
+import { useMediaPlayerSync } from '@/hooks/useMediaPlayerSync';
 import { AlbumArt } from './AlbumArt';
 import { ProgressBar } from './ProgressBar';
 import { PlaybackControls } from './PlaybackControls';
@@ -15,78 +16,108 @@ interface MediaPlayerProps {
 }
 
 export const MediaPlayer = ({ entityId, isConnected }: MediaPlayerProps) => {
-  const [isMinimized, setIsMinimized] = useState(true); // Start minimized by default
-  
-  // For demo purposes, we'll always show the player with demo data
-  // Real Home Assistant integration can be added later
-  const demoPlayerState = {
-    isPlaying: true,
-    isPaused: false,
-    isIdle: false,
-    isOff: false,
-    volume: 0.65,
-    isMuted: false,
-    currentTrack: {
-      title: 'Bohemian Rhapsody',
-      artist: 'Queen',
-      album: 'A Night at the Opera',
-      albumArt: 'https://upload.wikimedia.org/wikipedia/en/4/4d/Queen_A_Night_At_The_Opera.png',
-      duration: 354,
-      position: 127,
-    },
-    shuffle: false,
-    repeat: 'off' as const,
-    source: 'Living Room',
-    availableSources: ['Living Room', 'Bedroom', 'Kitchen', 'Bathroom'],
-    groupedSpeakers: [],
-    appName: 'Spotify',
-    isPending: false,
-    isLoading: false,
-    entityId: 'media_player.demo',
-  };
+  const [isMinimized, setIsMinimized] = useState(true);
 
-  const playerState = demoPlayerState;
+  const { playerState, isLoading, syncFromRemote, setPlayerState } = useMediaPlayerSync({
+    entityId,
+    enabled: isConnected && !!entityId,
+    pollInterval: 1500,
+  });
 
+  // Optimistic handlers with immediate UI update
   const handlePlayPause = async () => {
-    if (!isConnected || !entityId) return;
+    if (!entityId || !playerState) return;
+    
+    setPlayerState(prev => prev ? { ...prev, isPlaying: !prev.isPlaying, isPaused: prev.isPlaying } : null);
     await homeAssistant.mediaPlayPause(entityId);
-  };
-
-  const handlePrevious = async () => {
-    if (!isConnected || !entityId) return;
-    await homeAssistant.mediaPreviousTrack(entityId);
+    setTimeout(syncFromRemote, 300);
   };
 
   const handleNext = async () => {
-    if (!isConnected || !entityId) return;
+    if (!entityId) return;
     await homeAssistant.mediaNextTrack(entityId);
+    setTimeout(syncFromRemote, 300);
+  };
+
+  const handlePrevious = async () => {
+    if (!entityId) return;
+    await homeAssistant.mediaPreviousTrack(entityId);
+    setTimeout(syncFromRemote, 300);
   };
 
   const handleVolumeChange = async (volume: number) => {
-    if (!isConnected || !entityId) return;
+    if (!entityId || !playerState) return;
+    
+    setPlayerState(prev => prev ? { ...prev, volume } : null);
     await homeAssistant.setMediaVolume(entityId, volume);
   };
 
   const handleMuteToggle = async () => {
-    if (!isConnected || !entityId) return;
-    await homeAssistant.toggleMediaMute(entityId);
+    if (!entityId || !playerState) return;
+    
+    setPlayerState(prev => prev ? { ...prev, isMuted: !prev.isMuted } : null);
+    await homeAssistant.toggleMediaMute(entityId, playerState.isMuted);
+    setTimeout(syncFromRemote, 300);
   };
 
   const handleShuffleToggle = async () => {
-    if (!isConnected || !entityId) return;
+    if (!entityId || !playerState) return;
+    
+    setPlayerState(prev => prev ? { ...prev, shuffle: !prev.shuffle } : null);
     await homeAssistant.setMediaShuffle(entityId, !playerState.shuffle);
+    setTimeout(syncFromRemote, 300);
   };
 
   const handleRepeatToggle = async () => {
-    if (!isConnected || !entityId) return;
+    if (!entityId || !playerState) return;
+    
     const nextRepeat = playerState.repeat === 'off' ? 'all' : playerState.repeat === 'all' ? 'one' : 'off';
+    setPlayerState(prev => prev ? { ...prev, repeat: nextRepeat } : null);
     await homeAssistant.setMediaRepeat(entityId, nextRepeat);
+    setTimeout(syncFromRemote, 300);
   };
 
   const handleSourceChange = async (source: string) => {
-    if (!isConnected || !entityId) return;
+    if (!entityId || !playerState) return;
+    
+    setPlayerState(prev => prev ? { ...prev, source } : null);
     await homeAssistant.setMediaSource(entityId, source);
+    setTimeout(syncFromRemote, 500);
   };
+
+  const handleSeek = async (position: number) => {
+    if (!entityId || !playerState?.currentTrack) return;
+    
+    setPlayerState(prev => prev?.currentTrack ? {
+      ...prev,
+      currentTrack: { ...prev.currentTrack, position }
+    } : null);
+    await homeAssistant.mediaSeek(entityId, position);
+  };
+
+  // Show loading state
+  if (isLoading) {
+    return (
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="fixed bottom-6 right-6 bg-white/5 backdrop-blur-2xl border border-white/15 rounded-2xl p-4 shadow-lg"
+      >
+        <div className="flex items-center gap-3 text-white/60">
+          <Music className="w-5 h-5 animate-pulse" />
+          <span className="text-sm">Loading media player...</span>
+        </div>
+      </motion.div>
+    );
+  }
+
+  // Don't render if not connected or no entity
+  if (!isConnected || !entityId || !playerState) {
+    return null;
+  }
+
+  const currentTrack = playerState.currentTrack;
+  const albumArtUrl = currentTrack?.albumArt ? homeAssistant.getFullImageUrl(currentTrack.albumArt) : null;
 
   return (
     <motion.div
@@ -97,7 +128,7 @@ export const MediaPlayer = ({ entityId, isConnected }: MediaPlayerProps) => {
       }}
       transition={{ 
         duration: 0.9, 
-        ease: [0.19, 1, 0.22, 1], // Smooth expo ease out
+        ease: [0.19, 1, 0.22, 1],
         delay: 0.2
       }}
       className="fixed bottom-0 left-0 right-0 z-50 w-full"
@@ -113,7 +144,7 @@ export const MediaPlayer = ({ entityId, isConnected }: MediaPlayerProps) => {
           ease: [0.25, 0.1, 0.25, 1]
         }}
       >
-        {/* Minimize/Maximize Button - Centered at top */}
+        {/* Minimize/Maximize Button */}
         <motion.button
           onClick={() => setIsMinimized(!isMinimized)}
           className="absolute left-1/2 -translate-x-1/2 z-10 w-9 h-9 rounded-full bg-white/5 backdrop-blur-2xl border border-white/15 flex items-center justify-center shadow-sm"
@@ -159,9 +190,9 @@ export const MediaPlayer = ({ entityId, isConnected }: MediaPlayerProps) => {
           >
             {/* Album Art - smaller */}
             <div className="relative w-14 h-14 rounded-lg overflow-hidden bg-white/5 flex-shrink-0">
-              {playerState.currentTrack?.albumArt ? (
+              {albumArtUrl ? (
                 <img 
-                  src={playerState.currentTrack.albumArt} 
+                  src={albumArtUrl} 
                   alt="Album art" 
                   className="w-full h-full object-cover"
                 />
@@ -171,10 +202,10 @@ export const MediaPlayer = ({ entityId, isConnected }: MediaPlayerProps) => {
             {/* Track Info */}
             <div className="flex-1 min-w-0">
               <h3 className="text-white font-light text-base truncate">
-                {playerState.currentTrack?.title || 'No media playing'}
+                {currentTrack?.title || 'No media playing'}
               </h3>
               <p className="text-white/40 text-xs truncate">
-                {playerState.currentTrack?.artist || 'Unknown Artist'}
+                {currentTrack?.artist || 'Unknown Artist'}
               </p>
             </div>
 
@@ -217,20 +248,20 @@ export const MediaPlayer = ({ entityId, isConnected }: MediaPlayerProps) => {
             {/* Top Row: Album Art + Track Info + Source */}
             <div className="flex items-start gap-4">
               <AlbumArt 
-                albumArt={playerState.currentTrack?.albumArt || null} 
+                albumArt={albumArtUrl} 
                 isPlaying={playerState.isPlaying}
               />
               
               <div className="flex-1 min-w-0">
                 <h3 className="text-white font-light text-lg truncate">
-                  {playerState.currentTrack?.title || 'No media playing'}
+                  {currentTrack?.title || 'No media playing'}
                 </h3>
                 <p className="text-white/40 text-sm truncate">
-                  {playerState.currentTrack?.artist || 'Unknown Artist'}
+                  {currentTrack?.artist || 'Unknown Artist'}
                 </p>
-                {playerState.currentTrack?.album && (
+                {currentTrack?.album && (
                   <p className="text-white/30 text-xs truncate">
-                    {playerState.currentTrack.album}
+                    {currentTrack.album}
                   </p>
                 )}
               </div>
@@ -241,10 +272,11 @@ export const MediaPlayer = ({ entityId, isConnected }: MediaPlayerProps) => {
             </div>
 
             {/* Progress Bar */}
-            {playerState.currentTrack && (
+            {currentTrack && (
               <ProgressBar
-                position={playerState.currentTrack.position}
-                duration={playerState.currentTrack.duration}
+                position={currentTrack.position}
+                duration={currentTrack.duration}
+                onSeek={handleSeek}
               />
             )}
 

@@ -1,7 +1,7 @@
 import { Volume2, VolumeX, Volume1 } from 'lucide-react';
 import { Slider } from '@/components/ui/slider';
 import { motion } from 'framer-motion';
-import { useRef } from 'react';
+import { useRef, useState, useEffect } from 'react';
 
 interface VolumeControlProps {
   volume: number;
@@ -12,10 +12,15 @@ interface VolumeControlProps {
 
 export const VolumeControl = ({ volume, isMuted, onVolumeChange, onMuteToggle }: VolumeControlProps) => {
   const debounceTimerRef = useRef<NodeJS.Timeout>();
+  const [localVolume, setLocalVolume] = useState(volume);
+
+  useEffect(() => {
+    setLocalVolume(volume);
+  }, [volume]);
 
   const getVolumeIcon = () => {
-    if (isMuted || volume === 0) return VolumeX;
-    if (volume < 0.5) return Volume1;
+    if (isMuted || localVolume === 0) return VolumeX;
+    if (localVolume < 0.5) return Volume1;
     return Volume2;
   };
 
@@ -23,6 +28,9 @@ export const VolumeControl = ({ volume, isMuted, onVolumeChange, onMuteToggle }:
 
   const handleVolumeChange = (values: number[]) => {
     const newVolume = values[0] / 100;
+    
+    // Immediate UI update
+    setLocalVolume(newVolume);
     
     // Clear existing timer
     if (debounceTimerRef.current) {
@@ -47,7 +55,7 @@ export const VolumeControl = ({ volume, isMuted, onVolumeChange, onMuteToggle }:
       </motion.button>
       <div className="w-24">
         <Slider
-          value={[isMuted ? 0 : volume * 100]}
+          value={[isMuted ? 0 : localVolume * 100]}
           max={100}
           step={1}
           onValueChange={handleVolumeChange}

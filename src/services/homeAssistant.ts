@@ -338,14 +338,14 @@ class HomeAssistantService {
     });
   }
 
-  async toggleMediaMute(entityId: string): Promise<boolean> {
+  async toggleMediaMute(entityId: string, currentMuteState: boolean): Promise<boolean> {
     return this.retryWithBackoff(async () => {
       const response = await fetch(`${this.config?.baseUrl}/api/services/media_player/volume_mute`, {
         method: "POST",
         headers: this.getHeaders(),
         body: JSON.stringify({ 
           entity_id: entityId,
-          is_volume_muted: true 
+          is_volume_muted: !currentMuteState
         }),
       });
 
@@ -358,6 +358,36 @@ class HomeAssistantService {
       console.error("Failed to toggle mute:", error);
       return false;
     });
+  }
+
+  async mediaSeek(entityId: string, position: number): Promise<boolean> {
+    return this.retryWithBackoff(async () => {
+      const response = await fetch(`${this.config?.baseUrl}/api/services/media_player/media_seek`, {
+        method: "POST",
+        headers: this.getHeaders(),
+        body: JSON.stringify({
+          entity_id: entityId,
+          seek_position: position
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to seek: ${response.statusText}`);
+      }
+
+      return true;
+    }, `mediaSeek(${entityId}, ${position})`).catch(error => {
+      console.error("Failed to seek:", error);
+      return false;
+    });
+  }
+
+  getFullImageUrl(relativePath: string | null): string | null {
+    if (!relativePath) return null;
+    if (relativePath.startsWith('http://') || relativePath.startsWith('https://')) {
+      return relativePath;
+    }
+    return `${this.config?.baseUrl}${relativePath}`;
   }
 
   async setMediaShuffle(entityId: string, shuffle: boolean): Promise<boolean> {
