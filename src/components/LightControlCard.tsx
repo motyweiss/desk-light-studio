@@ -73,44 +73,49 @@ export const LightControlCard = ({ id, label, intensity, onChange, onHover }: Li
       onClick={handleCardClick}
       onMouseEnter={() => onHover(id)}
       onMouseLeave={() => onHover(null)}
-      className="w-full bg-transparent rounded-none px-6 py-4 hover:bg-white/[0.03] active:bg-white/[0.02] transition-colors duration-300 cursor-pointer text-left"
+      className="w-full rounded-3xl px-8 py-6 cursor-pointer text-left border transition-all duration-500"
+      style={{
+        backgroundColor: 'rgba(0, 0, 0, 0.15)',
+        borderColor: 'rgba(255, 255, 255, 0.08)',
+      }}
       transition={{
         layout: { duration: 0.25, ease: [0.22, 0.03, 0.26, 1] },
-        scale: { duration: 0.35, ease: [0.22, 0.03, 0.26, 1] }
       }}
-      whileTap={{ scale: 0.98 }}
+      whileHover={{
+        backgroundColor: 'rgba(0, 0, 0, 0.25)',
+        borderColor: 'rgba(255, 255, 255, 0.12)',
+        transition: { duration: 0.4, ease: [0.22, 0.03, 0.26, 1] }
+      }}
+      whileTap={{ scale: 0.985 }}
     >
-      <div className="flex items-center gap-2 md:gap-4">
-        {/* Icon Circle - Exactly 42x42 pixels with frosted glass effect, no fill */}
-        <div
-          className="w-12 h-12 md:w-[42px] md:h-[42px] rounded-full flex items-center justify-center pointer-events-none flex-shrink-0 backdrop-blur-xl"
+      <div className="flex items-center gap-6">
+        {/* Icon - Larger size */}
+        <motion.div
+          className="flex-shrink-0"
+          initial={{ scale: 0.5, opacity: 0 }}
+          animate={{
+            scale: 1,
+            opacity: 1,
+            color: isOn ? 'hsl(44 92% 62%)' : 'rgba(255, 255, 255, 0.3)'
+          }}
+          transition={{ 
+            scale: { duration: 0.4, ease: [0.22, 0.03, 0.26, 1] },
+            opacity: { duration: 0.35, ease: [0.22, 0.03, 0.26, 1] },
+            color: { duration: 0.5, ease: [0.22, 0.03, 0.26, 1] }
+          }}
         >
-          <motion.div
-            initial={{ scale: 0.5, opacity: 0 }}
-            animate={{
-              scale: 1,
-              opacity: 1,
-              color: isOn ? 'hsl(43 90% 60%)' : 'rgb(180, 180, 180)'
-            }}
-            transition={{ 
-              scale: { duration: 0.4, ease: [0.22, 0.03, 0.26, 1] },
-              opacity: { duration: 0.35, ease: [0.22, 0.03, 0.26, 1] },
-              color: { duration: 0.3, ease: [0.22, 0.03, 0.26, 1] }
-            }}
-          >
-            <IconComponent className="w-7 h-7 md:w-7 md:h-7" />
-          </motion.div>
-        </div>
+          <IconComponent className="w-12 h-12" />
+        </motion.div>
 
         {/* Text Info */}
-        <div className="flex-1 text-left min-w-0 space-y-1">
-          <div className="font-light text-sm md:text-base text-foreground tracking-wide">{label}</div>
+        <div className="flex-1 text-left min-w-0 space-y-0.5">
+          <div className="font-normal text-xl text-white tracking-wide">{label}</div>
           <motion.div 
-            className="text-xs md:text-xs font-light tracking-wider tabular-nums"
+            className="text-base font-light tracking-wide tabular-nums"
             animate={{
-              color: isOn ? 'rgba(255, 255, 255, 0.4)' : 'rgba(255, 255, 255, 0.25)'
+              color: isOn ? 'rgba(255, 255, 255, 0.4)' : 'rgba(255, 255, 255, 0.3)'
             }}
-            transition={{ duration: 0.3 }}
+            transition={{ duration: 0.5 }}
           >
             {isOn ? `${displayNumber}%` : 'Off'}
           </motion.div>
@@ -118,7 +123,7 @@ export const LightControlCard = ({ id, label, intensity, onChange, onHover }: Li
 
         {/* Slider - Always Visible on Right */}
         <div 
-          className="w-24 md:w-32 flex-shrink-0 pr-4"
+          className="w-48 flex-shrink-0"
           data-slider
           onClick={(e) => e.stopPropagation()}
           onPointerDown={(e) => e.stopPropagation()}

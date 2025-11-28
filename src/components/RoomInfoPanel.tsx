@@ -349,7 +349,6 @@ export const RoomInfoPanel = ({ roomName, temperature, humidity, airQuality, mas
         {lights.map((light) => (
           <motion.div
             key={light.id}
-            className="rounded-2xl bg-white/[0.02] backdrop-blur-md border border-white/[0.05]"
             variants={{
               hidden: { opacity: 0, y: 25, scale: 0.94, filter: 'blur(4px)' },
               show: { opacity: 1, y: 0, scale: 1, filter: 'blur(0px)' }
