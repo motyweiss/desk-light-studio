@@ -879,7 +879,7 @@ const Index = () => {
 
       {/* Responsive Layout Container */}
       <motion.div 
-        className="flex flex-col md:flex-row items-center gap-4 md:gap-8 max-w-7xl w-full relative z-10 px-5 md:px-0 md:pb-0 transition-all duration-700 ease-out"
+        className="flex flex-col md:flex-row items-center gap-4 md:gap-8 max-w-7xl w-full relative z-10 px-5 md:px-0 md:pb-0"
         animate={{
           paddingBottom: showMediaPlayer ? '200px' : '80px'
         }}
