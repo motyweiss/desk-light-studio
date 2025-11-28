@@ -8,6 +8,7 @@ import { LoadingOverlay } from "@/components/LoadingOverlay";
 import { SettingsButton } from "@/components/SettingsButton";
 import { ConnectionStatusIndicator } from "@/components/ConnectionStatusIndicator";
 import { SettingsDialog } from "@/components/SettingsDialog";
+import { MediaPlayer } from "@/components/MediaPlayer/MediaPlayer";
 import { Toaster } from "@/components/ui/toaster";
 import { useToast } from "@/hooks/use-toast";
 import { useHomeAssistantConfig } from "@/hooks/useHomeAssistantConfig";
@@ -1124,6 +1125,12 @@ const Index = () => {
         </motion.div>
       </div>
       </motion.div>
+
+      {/* Media Player - Sticky bottom player */}
+      <MediaPlayer 
+        entityId={entityMapping.mediaPlayer} 
+        isConnected={isConnected}
+      />
     </>
   );
 };

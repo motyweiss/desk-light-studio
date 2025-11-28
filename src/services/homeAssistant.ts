@@ -12,6 +12,30 @@ export interface EntityMapping {
   airQualitySensor?: string;
   iphoneBatteryLevel?: string;
   iphoneBatteryState?: string;
+  mediaPlayer?: string;
+}
+
+export interface MediaPlayerEntity {
+  entity_id: string;
+  state: 'playing' | 'paused' | 'idle' | 'off' | 'standby' | 'unavailable';
+  attributes: {
+    friendly_name?: string;
+    volume_level?: number;
+    is_volume_muted?: boolean;
+    media_title?: string;
+    media_artist?: string;
+    media_album_name?: string;
+    entity_picture?: string;
+    media_duration?: number;
+    media_position?: number;
+    media_position_updated_at?: string;
+    shuffle?: boolean;
+    repeat?: 'off' | 'one' | 'all';
+    source?: string;
+    source_list?: string[];
+    group_members?: string[];
+    app_name?: string;
+  };
 }
 
 export interface HAEntity {
@@ -202,6 +226,245 @@ class HomeAssistantService {
 
       return stateMap;
     }, "getAllEntityStates");
+  }
+
+  // Media Player Functions
+  async getMediaPlayers(): Promise<MediaPlayerEntity[]> {
+    try {
+      const response = await fetch(`${this.config?.baseUrl}/api/states`, {
+        headers: this.getHeaders(),
+      });
+
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+
+      const entities: MediaPlayerEntity[] = await response.json();
+      return entities.filter(e => e.entity_id.startsWith("media_player."));
+    } catch (error) {
+      console.error("Failed to get media players:", error);
+      return [];
+    }
+  }
+
+  async getMediaPlayerState(entityId: string): Promise<MediaPlayerEntity | null> {
+    try {
+      const response = await fetch(`${this.config?.baseUrl}/api/states/${entityId}`, {
+        headers: this.getHeaders(),
+      });
+
+      if (!response.ok) return null;
+      return await response.json();
+    } catch (error) {
+      console.error("Failed to get media player state:", error);
+      return null;
+    }
+  }
+
+  async mediaPlayPause(entityId: string): Promise<boolean> {
+    return this.retryWithBackoff(async () => {
+      const response = await fetch(`${this.config?.baseUrl}/api/services/media_player/media_play_pause`, {
+        method: "POST",
+        headers: this.getHeaders(),
+        body: JSON.stringify({ entity_id: entityId }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to play/pause: ${response.statusText}`);
+      }
+      
+      return true;
+    }, `mediaPlayPause(${entityId})`).catch(error => {
+      console.error("Failed to play/pause media player:", error);
+      return false;
+    });
+  }
+
+  async mediaNextTrack(entityId: string): Promise<boolean> {
+    return this.retryWithBackoff(async () => {
+      const response = await fetch(`${this.config?.baseUrl}/api/services/media_player/media_next_track`, {
+        method: "POST",
+        headers: this.getHeaders(),
+        body: JSON.stringify({ entity_id: entityId }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to skip to next track: ${response.statusText}`);
+      }
+      
+      return true;
+    }, `mediaNextTrack(${entityId})`).catch(error => {
+      console.error("Failed to skip to next track:", error);
+      return false;
+    });
+  }
+
+  async mediaPreviousTrack(entityId: string): Promise<boolean> {
+    return this.retryWithBackoff(async () => {
+      const response = await fetch(`${this.config?.baseUrl}/api/services/media_player/media_previous_track`, {
+        method: "POST",
+        headers: this.getHeaders(),
+        body: JSON.stringify({ entity_id: entityId }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to skip to previous track: ${response.statusText}`);
+      }
+      
+      return true;
+    }, `mediaPreviousTrack(${entityId})`).catch(error => {
+      console.error("Failed to skip to previous track:", error);
+      return false;
+    });
+  }
+
+  async setMediaVolume(entityId: string, volumeLevel: number): Promise<boolean> {
+    return this.retryWithBackoff(async () => {
+      const response = await fetch(`${this.config?.baseUrl}/api/services/media_player/volume_set`, {
+        method: "POST",
+        headers: this.getHeaders(),
+        body: JSON.stringify({ 
+          entity_id: entityId,
+          volume_level: volumeLevel 
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to set volume: ${response.statusText}`);
+      }
+      
+      return true;
+    }, `setMediaVolume(${entityId}, ${volumeLevel})`).catch(error => {
+      console.error("Failed to set media volume:", error);
+      return false;
+    });
+  }
+
+  async toggleMediaMute(entityId: string): Promise<boolean> {
+    return this.retryWithBackoff(async () => {
+      const response = await fetch(`${this.config?.baseUrl}/api/services/media_player/volume_mute`, {
+        method: "POST",
+        headers: this.getHeaders(),
+        body: JSON.stringify({ 
+          entity_id: entityId,
+          is_volume_muted: true 
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to toggle mute: ${response.statusText}`);
+      }
+      
+      return true;
+    }, `toggleMediaMute(${entityId})`).catch(error => {
+      console.error("Failed to toggle mute:", error);
+      return false;
+    });
+  }
+
+  async setMediaShuffle(entityId: string, shuffle: boolean): Promise<boolean> {
+    return this.retryWithBackoff(async () => {
+      const response = await fetch(`${this.config?.baseUrl}/api/services/media_player/shuffle_set`, {
+        method: "POST",
+        headers: this.getHeaders(),
+        body: JSON.stringify({ 
+          entity_id: entityId,
+          shuffle 
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to set shuffle: ${response.statusText}`);
+      }
+      
+      return true;
+    }, `setMediaShuffle(${entityId}, ${shuffle})`).catch(error => {
+      console.error("Failed to set shuffle:", error);
+      return false;
+    });
+  }
+
+  async setMediaRepeat(entityId: string, repeat: 'off' | 'one' | 'all'): Promise<boolean> {
+    return this.retryWithBackoff(async () => {
+      const response = await fetch(`${this.config?.baseUrl}/api/services/media_player/repeat_set`, {
+        method: "POST",
+        headers: this.getHeaders(),
+        body: JSON.stringify({ 
+          entity_id: entityId,
+          repeat 
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to set repeat: ${response.statusText}`);
+      }
+      
+      return true;
+    }, `setMediaRepeat(${entityId}, ${repeat})`).catch(error => {
+      console.error("Failed to set repeat:", error);
+      return false;
+    });
+  }
+
+  async setMediaSource(entityId: string, source: string): Promise<boolean> {
+    return this.retryWithBackoff(async () => {
+      const response = await fetch(`${this.config?.baseUrl}/api/services/media_player/select_source`, {
+        method: "POST",
+        headers: this.getHeaders(),
+        body: JSON.stringify({ 
+          entity_id: entityId,
+          source 
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to set source: ${response.statusText}`);
+      }
+      
+      return true;
+    }, `setMediaSource(${entityId}, ${source})`).catch(error => {
+      console.error("Failed to set source:", error);
+      return false;
+    });
+  }
+
+  async joinMediaPlayers(masterEntityId: string, groupMembers: string[]): Promise<boolean> {
+    return this.retryWithBackoff(async () => {
+      const response = await fetch(`${this.config?.baseUrl}/api/services/media_player/join`, {
+        method: "POST",
+        headers: this.getHeaders(),
+        body: JSON.stringify({ 
+          entity_id: masterEntityId,
+          group_members: groupMembers
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to join speakers: ${response.statusText}`);
+      }
+      
+      return true;
+    }, `joinMediaPlayers(${masterEntityId})`).catch(error => {
+      console.error("Failed to join speakers:", error);
+      return false;
+    });
+  }
+
+  async unjoinMediaPlayer(entityId: string): Promise<boolean> {
+    return this.retryWithBackoff(async () => {
+      const response = await fetch(`${this.config?.baseUrl}/api/services/media_player/unjoin`, {
+        method: "POST",
+        headers: this.getHeaders(),
+        body: JSON.stringify({ entity_id: entityId }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to unjoin speaker: ${response.statusText}`);
+      }
+      
+      return true;
+    }, `unjoinMediaPlayer(${entityId})`).catch(error => {
+      console.error("Failed to unjoin speaker:", error);
+      return false;
+    });
   }
 }
 

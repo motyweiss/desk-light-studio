@@ -13,6 +13,7 @@ const DEFAULT_ENTITY_MAPPING: EntityMapping = {
   airQualitySensor: "sensor.dyson_pure_pm_2_5",
   iphoneBatteryLevel: "sensor.motys_iphone_battery_level",
   iphoneBatteryState: "sensor.motys_iphone_battery_state",
+  mediaPlayer: "media_player.living_room",
 };
 
 export const useHomeAssistantConfig = () => {
