@@ -7,11 +7,23 @@ interface LightControlCardProps {
   id: string;
   label: string;
   intensity: number;
+  isPending?: boolean;
+  hasError?: boolean;
   onChange: (intensity: number) => void;
   onHover: (lightId: string | null) => void;
+  onRetry?: () => void;
 }
 
-export const LightControlCard = ({ id, label, intensity, onChange, onHover }: LightControlCardProps) => {
+export const LightControlCard = ({ 
+  id, 
+  label, 
+  intensity, 
+  isPending = false,
+  hasError = false,
+  onChange, 
+  onHover,
+  onRetry 
+}: LightControlCardProps) => {
   const IconComponent = getIconForLight(id);
   const isOn = intensity > 0;
   const displayValue = useMotionValue(intensity);
@@ -73,7 +85,7 @@ export const LightControlCard = ({ id, label, intensity, onChange, onHover }: Li
       onClick={handleCardClick}
       onMouseEnter={() => onHover(id)}
       onMouseLeave={() => onHover(null)}
-      className="w-full rounded-3xl px-8 py-6 cursor-pointer text-left border transition-all duration-500 backdrop-blur-xl"
+      className="w-full rounded-3xl px-8 py-6 cursor-pointer text-left border transition-all duration-500 backdrop-blur-xl relative overflow-hidden"
       animate={{
         backgroundColor: isOn ? 'rgba(255, 255, 255, 0.12)' : 'rgba(255, 255, 255, 0.03)',
         borderColor: isOn ? 'rgba(255, 255, 255, 0.2)' : 'rgba(255, 255, 255, 0.1)',
@@ -91,7 +103,34 @@ export const LightControlCard = ({ id, label, intensity, onChange, onHover }: Li
       }}
       whileTap={{ scale: 0.985 }}
     >
-      <div className="flex items-center gap-6">
+      {/* Pending State Overlay */}
+      {isPending && (
+        <motion.div
+          className="absolute inset-0 bg-white/5"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: [0.3, 0.6, 0.3] }}
+          transition={{ 
+            duration: 1.5, 
+            repeat: Infinity,
+            ease: "easeInOut"
+          }}
+        />
+      )}
+
+      {/* Error State Overlay */}
+      {hasError && (
+        <motion.div
+          className="absolute inset-0 bg-red-500/10 border-2 border-red-500/30 rounded-3xl"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          onClick={(e) => {
+            e.stopPropagation();
+            onRetry?.();
+          }}
+        />
+      )}
+
+      <div className="flex items-center gap-6 relative z-10">
         {/* Icon - Original size */}
         <motion.div
           className="flex-shrink-0"

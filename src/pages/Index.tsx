@@ -26,7 +26,7 @@ import desk111 from "@/assets/desk-111.png";
 const Index = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [isLoaded, setIsLoaded] = useState(false);
-  const [spotlightIntensity, setSpotlightIntensity] = useState(0); // 0-100
+  const [spotlightIntensity, setSpotlightIntensity] = useState(0);
   const [deskLampIntensity, setDeskLampIntensity] = useState(0);
   const [monitorLightIntensity, setMonitorLightIntensity] = useState(0);
   const [isTransitioning, setIsTransitioning] = useState(false);
@@ -44,7 +44,7 @@ const Index = () => {
   // Hover states for coordinated UI
   const [hoveredLight, setHoveredLight] = useState<string | null>(null);
   
-  // Ref to track last manual change timestamp (instead of boolean)
+  // Ref to track last manual change timestamp
   const lastManualChangeRef = useRef<number>(0);
   
   // Connection retry state
