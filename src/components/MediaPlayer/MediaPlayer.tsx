@@ -1,5 +1,5 @@
 import { motion, AnimatePresence } from 'framer-motion';
-import { useState, useMemo } from 'react';
+import { useState } from 'react';
 import { ChevronUp, Music } from 'lucide-react';
 import { homeAssistant } from '@/services/homeAssistant';
 import { useMediaPlayerSync } from '@/hooks/useMediaPlayerSync';
@@ -179,27 +179,16 @@ export const MediaPlayer = ({ entityId, isConnected }: MediaPlayerProps) => {
   const currentTrack = playerState.currentTrack;
   const albumArtUrl = currentTrack?.albumArt ? homeAssistant.getFullImageUrl(currentTrack.albumArt) : null;
 
-  // Memoize animation configurations to prevent re-creation on every render
-  const albumArtSize = useMemo(() => ({
+  // Calculate sizes directly without useMemo to avoid hooks issues
+  const albumArtSize = {
     width: isMinimized ? 56 : 64,
     height: isMinimized ? 56 : 64,
-  }), [isMinimized]);
+  };
 
-  const titleFontSize = useMemo(() => 
-    isMinimized ? '16px' : '18px'
-  , [isMinimized]);
-
-  const titleLineHeight = useMemo(() => 
-    isMinimized ? '24px' : '28px'
-  , [isMinimized]);
-
-  const artistFontSize = useMemo(() => 
-    isMinimized ? '12px' : '14px'
-  , [isMinimized]);
-
-  const artistLineHeight = useMemo(() => 
-    isMinimized ? '16px' : '20px'
-  , [isMinimized]);
+  const titleFontSize = isMinimized ? '16px' : '18px';
+  const titleLineHeight = isMinimized ? '24px' : '28px';
+  const artistFontSize = isMinimized ? '12px' : '14px';
+  const artistLineHeight = isMinimized ? '16px' : '20px';
 
   return (
     <motion.div
