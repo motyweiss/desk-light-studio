@@ -15,76 +15,79 @@ interface MediaPlayerProps {
 }
 
 export const MediaPlayer = ({ entityId, isConnected }: MediaPlayerProps) => {
-  const { playerState, isLoading } = useMediaPlayerSync({
+  const { playerState: realPlayerState, isLoading } = useMediaPlayerSync({
     entityId,
     enabled: isConnected && !!entityId,
   });
 
-  console.log('MediaPlayer Debug:', { 
-    isConnected, 
-    entityId, 
-    hasPlayerState: !!playerState,
-    playerState: playerState ? {
-      isPlaying: playerState.isPlaying,
-      isOff: playerState.isOff,
-      hasTrack: !!playerState.currentTrack
-    } : null
-  });
+  // Mock demo data for display when not connected
+  const demoPlayerState = {
+    isPlaying: true,
+    isPaused: false,
+    isIdle: false,
+    isOff: false,
+    volume: 0.65,
+    isMuted: false,
+    currentTrack: {
+      title: 'Bohemian Rhapsody',
+      artist: 'Queen',
+      album: 'A Night at the Opera',
+      albumArt: 'https://upload.wikimedia.org/wikipedia/en/4/4d/Queen_A_Night_At_The_Opera.png',
+      duration: 354,
+      position: 127,
+    },
+    shuffle: false,
+    repeat: 'off' as const,
+    source: 'Living Room',
+    availableSources: ['Living Room', 'Bedroom', 'Kitchen', 'Bathroom'],
+    groupedSpeakers: [],
+    appName: 'Spotify',
+    isPending: false,
+    isLoading: false,
+    entityId: entityId || 'media_player.demo',
+  };
 
-  // Don't show if not connected or no entity configured
-  if (!isConnected || !entityId) return null;
-  
-  // Show loading state while fetching initial data
-  if (!playerState && isLoading) {
-    return (
-      <motion.div
-        initial={{ y: 100, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        transition={{ duration: 0.4, ease: [0.22, 0.03, 0.26, 1] }}
-        className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 w-full max-w-3xl px-4"
-      >
-        <div className="bg-white/8 backdrop-blur-[24px] border border-white/20 rounded-2xl shadow-[0_4px_24px_rgba(0,0,0,0.15)] p-6">
-          <div className="flex items-center justify-center py-8">
-            <Loader2 className="w-6 h-6 animate-spin text-white/40" />
-          </div>
-        </div>
-      </motion.div>
-    );
-  }
-
-  // If no state yet, don't show
-  if (!playerState) return null;
+  // Use real state if connected and available, otherwise use demo state
+  const playerState = (isConnected && realPlayerState) ? realPlayerState : demoPlayerState;
 
   const handlePlayPause = async () => {
+    if (!isConnected || !entityId) return;
     await homeAssistant.mediaPlayPause(entityId);
   };
 
   const handlePrevious = async () => {
+    if (!isConnected || !entityId) return;
     await homeAssistant.mediaPreviousTrack(entityId);
   };
 
   const handleNext = async () => {
+    if (!isConnected || !entityId) return;
     await homeAssistant.mediaNextTrack(entityId);
   };
 
   const handleVolumeChange = async (volume: number) => {
+    if (!isConnected || !entityId) return;
     await homeAssistant.setMediaVolume(entityId, volume);
   };
 
   const handleMuteToggle = async () => {
+    if (!isConnected || !entityId) return;
     await homeAssistant.toggleMediaMute(entityId);
   };
 
   const handleShuffleToggle = async () => {
+    if (!isConnected || !entityId) return;
     await homeAssistant.setMediaShuffle(entityId, !playerState.shuffle);
   };
 
   const handleRepeatToggle = async () => {
+    if (!isConnected || !entityId) return;
     const nextRepeat = playerState.repeat === 'off' ? 'all' : playerState.repeat === 'all' ? 'one' : 'off';
     await homeAssistant.setMediaRepeat(entityId, nextRepeat);
   };
 
   const handleSourceChange = async (source: string) => {
+    if (!isConnected || !entityId) return;
     await homeAssistant.setMediaSource(entityId, source);
   };
 
