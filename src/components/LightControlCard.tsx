@@ -117,7 +117,7 @@ export const LightControlCard = ({
     return (
       <motion.div
         layout
-        className="w-full rounded-3xl px-8 py-6 text-left transition-all duration-500 relative overflow-hidden border-0"
+        className="w-full rounded-3xl px-8 py-4 text-left transition-all duration-500 relative overflow-hidden border-0"
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4 }}
@@ -198,7 +198,7 @@ export const LightControlCard = ({
       onClick={handleCardClick}
       onMouseEnter={() => onHover(id)}
       onMouseLeave={() => onHover(null)}
-      className="w-full rounded-3xl px-8 py-6 cursor-pointer text-left border transition-all duration-500 backdrop-blur-xl relative overflow-hidden"
+      className="w-full rounded-3xl px-8 py-4 cursor-pointer text-left border transition-all duration-500 backdrop-blur-xl relative overflow-hidden"
       animate={{
         backgroundColor: isOn ? 'rgba(255, 255, 255, 0.12)' : 'rgba(255, 255, 255, 0.03)',
         borderColor: isOn ? 'rgba(255, 255, 255, 0.2)' : 'rgba(255, 255, 255, 0.1)',
