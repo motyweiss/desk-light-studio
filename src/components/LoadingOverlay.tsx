@@ -13,9 +13,9 @@ export const LoadingOverlay = ({ isLoading }: LoadingOverlayProps) => {
           className="fixed inset-0 z-50 flex items-center justify-center"
           initial={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          transition={{ duration: 0.6, ease: [0.22, 0.03, 0.26, 1] }}
+          transition={{ duration: 0.8, ease: [0.22, 0.03, 0.26, 1] }}
           style={{
-            backgroundColor: 'hsl(28 20% 18%)',
+            backgroundColor: '#96856e',
           }}
         >
           {/* Minimalist spinner - larger with white color */}
