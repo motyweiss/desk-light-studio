@@ -699,6 +699,10 @@ const Index = () => {
         className="min-h-[100dvh] flex items-center justify-center p-4 md:p-8 relative overflow-hidden"
         style={{
           backgroundColor: "hsl(28 20% 18%)",
+          backgroundImage: "url('/bg.png')",
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+          backgroundRepeat: "no-repeat",
         }}
       >
       {/* Frosted glass blur layer for smooth background */}
