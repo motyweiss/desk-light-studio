@@ -883,7 +883,10 @@ const Index = () => {
         animate={{
           paddingBottom: showMediaPlayer ? '120px' : '80px'
         }}
-        transition={{ duration: 0.7, ease: [0.22, 0.03, 0.26, 1] }}
+        transition={{ 
+          duration: 0.8, 
+          ease: [0.19, 1, 0.22, 1] 
+        }}
       >
         {/* Mobile: Room Info Header (Title, Climate, Master Switch) */}
         <motion.div 
