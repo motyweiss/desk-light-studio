@@ -15,7 +15,7 @@ interface MediaPlayerProps {
 }
 
 export const MediaPlayer = ({ entityId, isConnected }: MediaPlayerProps) => {
-  const { playerState: realPlayerState, isLoading } = useMediaPlayerSync({
+  const { playerState: realPlayerState, isLoading: realIsLoading } = useMediaPlayerSync({
     entityId,
     enabled: isConnected && !!entityId,
   });
@@ -49,6 +49,9 @@ export const MediaPlayer = ({ entityId, isConnected }: MediaPlayerProps) => {
 
   // Use real state if connected and available, otherwise use demo state
   const playerState = (isConnected && realPlayerState) ? realPlayerState : demoPlayerState;
+  
+  // Only show loading if we're actually waiting for real data
+  const isLoading = isConnected && !!entityId && realIsLoading && !realPlayerState;
 
   const handlePlayPause = async () => {
     if (!isConnected || !entityId) return;
