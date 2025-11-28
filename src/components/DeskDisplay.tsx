@@ -121,21 +121,15 @@ export const DeskDisplay = ({
           className="absolute inset-0"
           style={{
             maskImage: `
-              radial-gradient(
-                ellipse 92% 92% at 50% 50%,
-                black 55%,
-                rgba(0, 0, 0, 0.2) 75%,
-                transparent 92%
-              )
+              linear-gradient(to right, transparent 0%, black 8%, black 92%, transparent 100%),
+              linear-gradient(to bottom, transparent 0%, black 8%, black 92%, transparent 100%)
             `,
             WebkitMaskImage: `
-              radial-gradient(
-                ellipse 92% 92% at 50% 50%,
-                black 55%,
-                rgba(0, 0, 0, 0.2) 75%,
-                transparent 92%
-              )
+              linear-gradient(to right, transparent 0%, black 8%, black 92%, transparent 100%),
+              linear-gradient(to bottom, transparent 0%, black 8%, black 92%, transparent 100%)
             `,
+            maskComposite: 'intersect',
+            WebkitMaskComposite: 'source-in',
           }}
         >
           {Object.entries(lightingStates).map(([state, image]) => {
