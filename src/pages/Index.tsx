@@ -871,10 +871,10 @@ const Index = () => {
         />
 
       {/* Responsive Layout Container */}
-      <div className="flex flex-col md:flex-row items-center gap-6 md:gap-12 max-w-7xl w-full relative z-10 px-5 md:px-0 pb-20 md:pb-0">
+      <div className="flex flex-col md:flex-row items-center gap-4 md:gap-12 max-w-7xl w-full relative z-10 px-5 md:px-0 pb-20 md:pb-0">
         {/* Mobile: Room Info Header (Title, Climate, Master Switch) */}
         <motion.div 
-          className="w-full md:hidden pt-12"
+          className="w-full md:hidden pt-8"
           initial={{ opacity: 0, y: 30 }}
           animate={{ 
             opacity: isLoaded ? 1 : 0,
@@ -887,7 +887,7 @@ const Index = () => {
           }}
         >
           {/* Room Title with Master Switch */}
-          <div className="flex items-start justify-between mb-5">
+          <div className="flex items-start justify-between mb-3">
             <motion.h1 
               className="text-[2.5rem] font-light tracking-tight text-foreground leading-tight"
               style={{ fontFamily: "'Cormorant Garamond', serif" }}
@@ -941,13 +941,13 @@ const Index = () => {
 
           {/* Climate Data - Minimal inline version */}
           <motion.div 
-            className="flex gap-10 mb-3"
+            className="flex gap-6 mb-2"
             initial={{ opacity: 0, y: 20 }}
             animate={{ 
               opacity: isLoaded ? 1 : 0,
               y: isLoaded ? 0 : 20
             }}
-            transition={{ 
+            transition={{
               duration: 0.8,
               delay: 0.4,
               ease: [0.22, 0.03, 0.26, 1]
