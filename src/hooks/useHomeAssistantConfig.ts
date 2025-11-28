@@ -5,6 +5,7 @@ const CONFIG_KEY = "ha_config";
 const ENTITY_MAPPING_KEY = "ha_entity_mapping";
 
 const DEFAULT_ENTITY_MAPPING: EntityMapping = {
+  // Office entities
   deskLamp: "light.go",
   monitorLight: "light.screen",
   spotlight: "light.door",
@@ -13,6 +14,18 @@ const DEFAULT_ENTITY_MAPPING: EntityMapping = {
   airQualitySensor: "sensor.dyson_pure_pm_2_5",
   iphoneBatteryLevel: "sensor.motys_iphone_battery_level",
   iphoneBatteryState: "sensor.motys_iphone_battery_state",
+  
+  // Living Room entities
+  livingRoomCeilingLight: "light.living_room_ceiling",
+  livingRoomFloorLamp: "light.living_room_floor_lamp",
+  livingRoomTvBacklight: "light.living_room_tv_backlight",
+  livingRoomTemperatureSensor: "sensor.living_room_temperature",
+  livingRoomHumiditySensor: "sensor.living_room_humidity",
+  livingRoomAirQualitySensor: "sensor.living_room_pm_2_5",
+  airpodsMaxBatteryLevel: "sensor.airpods_max_battery_level",
+  airpodsMaxBatteryState: "sensor.airpods_max_battery_state",
+  
+  // Shared entities
   mediaPlayer: "media_player.spotify",
 };
 

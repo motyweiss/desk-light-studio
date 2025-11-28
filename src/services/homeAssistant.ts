@@ -4,6 +4,7 @@ export interface HomeAssistantConfig {
 }
 
 export interface EntityMapping {
+  // Office entities
   deskLamp?: string;
   monitorLight?: string;
   spotlight?: string;
@@ -12,6 +13,18 @@ export interface EntityMapping {
   airQualitySensor?: string;
   iphoneBatteryLevel?: string;
   iphoneBatteryState?: string;
+  
+  // Living Room entities
+  livingRoomCeilingLight?: string;
+  livingRoomFloorLamp?: string;
+  livingRoomTvBacklight?: string;
+  livingRoomTemperatureSensor?: string;
+  livingRoomHumiditySensor?: string;
+  livingRoomAirQualitySensor?: string;
+  airpodsMaxBatteryLevel?: string;
+  airpodsMaxBatteryState?: string;
+  
+  // Shared entities
   mediaPlayer?: string;
 }
 
