@@ -227,6 +227,36 @@ export const MediaPlayer = ({ entityId, isConnected }: MediaPlayerProps) => {
           ease: [0.25, 0.1, 0.25, 1]
         }}
       >
+        {/* Chevron Button - Fixed Position */}
+        <motion.button
+          onClick={() => setIsMinimized(!isMinimized)}
+          className="absolute -top-3 left-1/2 -translate-x-1/2 z-20 w-7 h-7 rounded-full bg-[hsl(28_18%_20%)] border border-white/20 flex items-center justify-center"
+          whileHover={{ 
+            backgroundColor: 'hsl(28 18% 25%)',
+            scale: 1.05,
+            borderColor: 'rgba(255, 255, 255, 0.3)'
+          }}
+          whileTap={{ 
+            scale: 0.95,
+            backgroundColor: 'hsl(28 18% 22%)'
+          }}
+          transition={{
+            duration: 0.15,
+            ease: "easeOut"
+          }}
+        >
+          <motion.div
+            animate={{ 
+              rotate: isMinimized ? 0 : 180
+            }}
+            transition={{ 
+              duration: 0.3, 
+              ease: [0.34, 1.56, 0.64, 1]
+            }}
+          >
+            <ChevronUp className="w-3.5 h-3.5 text-white" />
+          </motion.div>
+        </motion.button>
 
         {isMinimized ? (
           /* Mini Player */
@@ -237,38 +267,8 @@ export const MediaPlayer = ({ entityId, isConnected }: MediaPlayerProps) => {
             variants={containerVariants}
             className="flex items-center gap-4 px-6 py-3 max-w-7xl mx-auto"
           >
-            {/* Album Art with Chevron Button */}
+            {/* Album Art */}
             <motion.div variants={itemVariants} className="relative flex-shrink-0">
-              <motion.button
-                onClick={() => setIsMinimized(!isMinimized)}
-                className="absolute -top-5 left-1/2 -translate-x-1/2 z-10 w-9 h-9 rounded-full bg-[hsl(28_18%_20%)] border border-white/20 flex items-center justify-center"
-                whileHover={{ 
-                  backgroundColor: 'hsl(28 18% 25%)',
-                  scale: 1.05,
-                  borderColor: 'rgba(255, 255, 255, 0.3)'
-                }}
-                whileTap={{ 
-                  scale: 0.95,
-                  backgroundColor: 'hsl(28 18% 22%)'
-                }}
-                transition={{
-                  duration: 0.15,
-                  ease: "easeOut"
-                }}
-              >
-                <motion.div
-                  animate={{ 
-                    rotate: isMinimized ? 0 : 180
-                  }}
-                  transition={{ 
-                    duration: 0.3, 
-                    ease: [0.34, 1.56, 0.64, 1]
-                  }}
-                >
-                  <ChevronUp className="w-4 h-4 text-white" />
-                </motion.div>
-              </motion.button>
-
               <div className="w-14 h-14 rounded-lg overflow-hidden bg-white/5">
                 {albumArtUrl ? (
                   <img 
@@ -324,43 +324,11 @@ export const MediaPlayer = ({ entityId, isConnected }: MediaPlayerProps) => {
           >
             {/* Top Row: Album Art + Track Info + Source */}
             <motion.div variants={itemVariants} className="flex items-start gap-4">
-              {/* Album Art with Chevron Button */}
-              <div className="relative">
-                <motion.button
-                  onClick={() => setIsMinimized(!isMinimized)}
-                  className="absolute -top-5 left-1/2 -translate-x-1/2 z-10 w-9 h-9 rounded-full bg-[hsl(28_18%_20%)] border border-white/20 flex items-center justify-center"
-                  whileHover={{ 
-                    backgroundColor: 'hsl(28 18% 25%)',
-                    scale: 1.05,
-                    borderColor: 'rgba(255, 255, 255, 0.3)'
-                  }}
-                  whileTap={{ 
-                    scale: 0.95,
-                    backgroundColor: 'hsl(28 18% 22%)'
-                  }}
-                  transition={{
-                    duration: 0.15,
-                    ease: "easeOut"
-                  }}
-                >
-                  <motion.div
-                    animate={{ 
-                      rotate: isMinimized ? 0 : 180
-                    }}
-                    transition={{ 
-                      duration: 0.3, 
-                      ease: [0.34, 1.56, 0.64, 1]
-                    }}
-                  >
-                    <ChevronUp className="w-4 h-4 text-white" />
-                  </motion.div>
-                </motion.button>
-
-                <AlbumArt 
-                  albumArt={albumArtUrl} 
-                  isPlaying={playerState.isPlaying}
-                />
-              </div>
+              {/* Album Art */}
+              <AlbumArt 
+                albumArt={albumArtUrl} 
+                isPlaying={playerState.isPlaying}
+              />
               
               <div className="flex-1 min-w-0">
                 <h3 className="text-white font-light text-lg truncate">
