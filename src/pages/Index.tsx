@@ -70,31 +70,40 @@ const Index = () => {
 
   // Optimized image loading - preload primary "all lights off" image first
   useEffect(() => {
+    const startTime = Date.now();
+    const minLoadTime = 500; // Minimum 500ms loading time
+    
     // Preload the initial "all lights off" image first for fast perceived loading
     const primaryImage = new Image();
     primaryImage.src = desk000;
     
     const handlePrimaryLoad = () => {
-      setIsLoading(false);
-      // Small delay before starting entrance animations
-      setTimeout(() => {
-        setIsLoaded(true);
-      }, 100);
+      const elapsed = Date.now() - startTime;
+      const remainingTime = Math.max(0, minLoadTime - elapsed);
       
-      // Preload remaining images in background after primary loads
-      const remainingImages = [desk001, desk010, desk011, desk100, desk101, desk110, desk111];
-      remainingImages.forEach(src => {
-        const img = new Image();
-        img.src = src;
-      });
+      // Wait for minimum load time before hiding spinner
+      setTimeout(() => {
+        setIsLoading(false);
+        // Small delay before starting entrance animations
+        setTimeout(() => {
+          setIsLoaded(true);
+        }, 100);
+        
+        // Preload remaining images in background after primary loads
+        const remainingImages = [desk001, desk010, desk011, desk100, desk101, desk110, desk111];
+        remainingImages.forEach(src => {
+          const img = new Image();
+          img.src = src;
+        });
+      }, remainingTime);
     };
     
     primaryImage.onload = handlePrimaryLoad;
     
-    // Fallback timeout in case image takes too long (8 seconds max)
+    // Fallback timeout in case image takes too long (8 seconds max + min load time)
     const fallbackTimer = setTimeout(() => {
       handlePrimaryLoad();
-    }, 8000);
+    }, 8000 + minLoadTime);
     
     return () => clearTimeout(fallbackTimer);
   }, []);
