@@ -3,7 +3,6 @@ import { useState } from 'react';
 import { ChevronUp, Music } from 'lucide-react';
 import { homeAssistant } from '@/services/homeAssistant';
 import { useMediaPlayerSync } from '@/hooks/useMediaPlayerSync';
-import { AlbumArt } from './AlbumArt';
 import { ProgressBar } from './ProgressBar';
 import { PlaybackControls } from './PlaybackControls';
 import { VolumeControl } from './VolumeControl';
@@ -180,42 +179,28 @@ export const MediaPlayer = ({ entityId, isConnected }: MediaPlayerProps) => {
   const currentTrack = playerState.currentTrack;
   const albumArtUrl = currentTrack?.albumArt ? homeAssistant.getFullImageUrl(currentTrack.albumArt) : null;
 
-  // Animation variants for staggered entry
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: {
-        when: "beforeChildren",
-        staggerChildren: 0.05,
-        delayChildren: 0.1
-      }
-    },
-    exit: {
-      opacity: 0,
-      transition: {
-        when: "afterChildren",
-        staggerChildren: 0.03,
-        staggerDirection: -1
-      }
-    }
+  // Shared transition for layoutId elements
+  const sharedTransition = {
+    duration: 0.45,
+    ease: [0.32, 0.72, 0, 1] as any
   };
 
-  const itemVariants = {
-    hidden: { opacity: 0, y: 12 },
+  // Mode-specific content variants
+  const modeContentVariants = {
+    hidden: { opacity: 0, y: 10 },
     visible: { 
       opacity: 1, 
       y: 0,
       transition: { 
-        duration: 0.35, 
+        duration: 0.3,
         ease: [0.32, 0.72, 0, 1] as any 
       }
     },
     exit: {
       opacity: 0,
-      y: -8,
+      y: -10,
       transition: { 
-        duration: 0.2, 
+        duration: 0.25,
         ease: [0.32, 0.72, 0, 1] as any 
       }
     }
@@ -242,12 +227,11 @@ export const MediaPlayer = ({ entityId, isConnected }: MediaPlayerProps) => {
           height: isMinimized ? '80px' : 'auto',
         }}
         transition={{ 
-          duration: 0.4, 
+          duration: 0.45, 
           ease: [0.32, 0.72, 0, 1]
         }}
-        layout
       >
-        {/* Chevron Button - Fixed Position */}
+        {/* Chevron Button */}
         <motion.button
           onClick={() => setIsMinimized(!isMinimized)}
           className="absolute -top-3 left-1/2 -translate-x-1/2 z-20 w-7 h-7 rounded-full bg-[hsl(28_18%_20%)] border border-white/20 flex items-center justify-center"
@@ -278,161 +262,188 @@ export const MediaPlayer = ({ entityId, isConnected }: MediaPlayerProps) => {
           </motion.div>
         </motion.button>
 
-        <AnimatePresence mode="wait">
-          {isMinimized ? (
-          /* Mini Player */
-          <motion.div
-            key="mini"
-            initial="hidden"
-            animate="visible"
-            exit="exit"
-            variants={containerVariants}
-            transition={{ duration: 0.3 }}
-            className="flex items-center gap-4 px-6 py-3 max-w-7xl mx-auto"
-          >
-            {/* Album Art */}
-            <motion.div 
-              variants={itemVariants} 
-              layoutId="album-art"
-              className="relative flex-shrink-0"
-            >
-              <div className="w-14 h-14 rounded-lg overflow-hidden bg-white/5">
+        {/* Content Container */}
+        <div className={`px-6 max-w-7xl mx-auto ${isMinimized ? 'py-3' : 'py-6'}`}>
+          <div className={`flex ${isMinimized ? 'items-center' : 'items-start flex-col'} gap-4`}>
+            
+            {/* Top Row: Shared Elements */}
+            <div className="flex items-start gap-4 w-full">
+              {/* Album Art - Shared Element with layoutId */}
+              <motion.div
+                layoutId="player-album-art"
+                className="relative flex-shrink-0 rounded-xl overflow-hidden bg-white/5"
+                animate={{
+                  width: isMinimized ? 56 : 64,
+                  height: isMinimized ? 56 : 64,
+                }}
+                transition={sharedTransition}
+                layout
+              >
                 {albumArtUrl ? (
-                  <img 
+                  <motion.img 
                     src={albumArtUrl} 
                     alt="Album art" 
                     className="w-full h-full object-cover"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ duration: 0.3 }}
                   />
-                ) : null}
-              </div>
-            </motion.div>
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center">
+                    <Music className="w-8 h-8 text-white/20" />
+                  </div>
+                )}
+              </motion.div>
 
-            {/* Track Info */}
-            <motion.div 
-              variants={itemVariants} 
-              layoutId="track-info"
-              className="flex-1 min-w-0"
-            >
-              <h3 className="text-white font-light text-base truncate">
-                {currentTrack?.title || 'No media playing'}
-              </h3>
-              <p className="text-white/40 text-xs truncate">
-                {currentTrack?.artist || 'Unknown Artist'}
-              </p>
-            </motion.div>
-
-            {/* Mini Controls */}
-            <motion.div variants={itemVariants} className="flex items-center gap-6">
-              <PlaybackControls
-                isPlaying={playerState.isPlaying}
-                shuffle={playerState.shuffle}
-                repeat={playerState.repeat}
-                onPlayPause={handlePlayPause}
-                onPrevious={handlePrevious}
-                onNext={handleNext}
-                onShuffleToggle={handleShuffleToggle}
-                onRepeatToggle={handleRepeatToggle}
-              />
-
-              <VolumeControl
-                volume={playerState.volume}
-                isMuted={playerState.isMuted}
-                onVolumeChange={handleVolumeChange}
-                onMuteToggle={handleMuteToggle}
-              />
-
-              <SourceIndicator appName={playerState.appName} />
-            </motion.div>
-          </motion.div>
-          ) : (
-            /* Full Player */
-            <motion.div
-              key="full"
-              initial="hidden"
-              animate="visible"
-              exit="exit"
-              variants={containerVariants}
-              transition={{ duration: 0.3 }}
-              className="space-y-4 px-6 py-6 max-w-7xl mx-auto"
-            >
-              {/* Top Row: Album Art + Track Info + Source */}
-              <motion.div variants={itemVariants} className="flex items-start gap-4">
-                {/* Album Art */}
-                <motion.div layoutId="album-art">
-                  <AlbumArt 
-                    albumArt={albumArtUrl} 
-                    isPlaying={playerState.isPlaying}
-                  />
-                </motion.div>
+              {/* Track Info - Shared Element with layoutId */}
+              <motion.div
+                layoutId="player-track-info"
+                className="flex-1 min-w-0"
+                layout
+                transition={sharedTransition}
+              >
+                <motion.h3
+                  className="text-white font-light truncate"
+                  animate={{ 
+                    fontSize: isMinimized ? '16px' : '18px',
+                    lineHeight: isMinimized ? '24px' : '28px'
+                  }}
+                  transition={{ duration: 0.35, ease: [0.32, 0.72, 0, 1] as any }}
+                >
+                  {currentTrack?.title || 'No media playing'}
+                </motion.h3>
+                <motion.p 
+                  className="text-white/40 truncate"
+                  animate={{ 
+                    fontSize: isMinimized ? '12px' : '14px',
+                    lineHeight: isMinimized ? '16px' : '20px'
+                  }}
+                  transition={{ duration: 0.35, ease: [0.32, 0.72, 0, 1] as any }}
+                >
+                  {currentTrack?.artist || 'Unknown Artist'}
+                </motion.p>
                 
-                 <motion.div layoutId="track-info" className="flex-1 min-w-0">
-                  <h3 className="text-white font-light text-lg truncate">
-                    {currentTrack?.title || 'No media playing'}
-                  </h3>
-                  <p className="text-white/40 text-sm truncate">
-                    {currentTrack?.artist || 'Unknown Artist'}
-                  </p>
-                  {currentTrack?.album && (
-                    <p className="text-white/30 text-xs truncate">
+                {/* Album name - Only in full mode */}
+                <AnimatePresence>
+                  {!isMinimized && currentTrack?.album && (
+                    <motion.p
+                      initial={{ opacity: 0, height: 0, marginTop: 0 }}
+                      animate={{ opacity: 1, height: 'auto', marginTop: 2 }}
+                      exit={{ opacity: 0, height: 0, marginTop: 0 }}
+                      transition={{ duration: 0.3 }}
+                      className="text-white/30 text-xs truncate"
+                    >
                       {currentTrack.album}
-                    </p>
+                    </motion.p>
                   )}
-                </motion.div>
+                </AnimatePresence>
+              </motion.div>
 
-                <motion.div variants={itemVariants}>
-                  <div className="flex items-center gap-3">
+              {/* Source Indicator - Always visible */}
+              {isMinimized && (
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.9 }}
+                  transition={{ duration: 0.2 }}
+                >
+                  <SourceIndicator appName={playerState.appName} />
+                </motion.div>
+              )}
+            </div>
+
+            {/* Mode-specific Controls with AnimatePresence */}
+            <AnimatePresence mode="wait">
+              {isMinimized ? (
+                /* Mini Player Controls */
+                <motion.div
+                  key="mini-controls"
+                  variants={modeContentVariants}
+                  initial="hidden"
+                  animate="visible"
+                  exit="exit"
+                  className="absolute right-6 top-1/2 -translate-y-1/2 flex items-center gap-6"
+                >
+                  <PlaybackControls
+                    isPlaying={playerState.isPlaying}
+                    shuffle={playerState.shuffle}
+                    repeat={playerState.repeat}
+                    onPlayPause={handlePlayPause}
+                    onPrevious={handlePrevious}
+                    onNext={handleNext}
+                    onShuffleToggle={handleShuffleToggle}
+                    onRepeatToggle={handleRepeatToggle}
+                  />
+
+                  <VolumeControl
+                    volume={playerState.volume}
+                    isMuted={playerState.isMuted}
+                    onVolumeChange={handleVolumeChange}
+                    onMuteToggle={handleMuteToggle}
+                  />
+                </motion.div>
+              ) : (
+                /* Full Player Controls */
+                <motion.div
+                  key="full-controls"
+                  variants={modeContentVariants}
+                  initial="hidden"
+                  animate="visible"
+                  exit="exit"
+                  className="space-y-4 w-full"
+                >
+                  {/* Source Indicator in full mode */}
+                  <div className="flex justify-end -mt-2">
                     <SourceIndicator appName={playerState.appName} />
                   </div>
+
+                  {/* Progress Bar */}
+                  {currentTrack && (
+                    <ProgressBar
+                      position={currentTrack.position}
+                      duration={currentTrack.duration}
+                      onSeek={handleSeek}
+                    />
+                  )}
+
+                  {/* Bottom Row: Playback Controls + Volume + Speaker Selector */}
+                  <div className="flex items-center justify-between">
+                    <div className="flex-1">
+                      <PlaybackControls
+                        isPlaying={playerState.isPlaying}
+                        shuffle={playerState.shuffle}
+                        repeat={playerState.repeat}
+                        onPlayPause={handlePlayPause}
+                        onPrevious={handlePrevious}
+                        onNext={handleNext}
+                        onShuffleToggle={handleShuffleToggle}
+                        onRepeatToggle={handleRepeatToggle}
+                      />
+                    </div>
+
+                    <div className="flex items-center gap-6">
+                      <VolumeControl
+                        volume={playerState.volume}
+                        isMuted={playerState.isMuted}
+                        onVolumeChange={handleVolumeChange}
+                        onMuteToggle={handleMuteToggle}
+                      />
+
+                      {combinedSources.length > 0 && (
+                        <SpeakerSelector
+                          currentSource={playerState.source}
+                          spotifySources={playerState.availableSources}
+                          availableSpeakers={availableSpeakers}
+                          onSourceChange={handleSourceChange}
+                        />
+                      )}
+                    </div>
+                  </div>
                 </motion.div>
-              </motion.div>
-
-            {/* Progress Bar */}
-            {currentTrack && (
-              <motion.div variants={itemVariants}>
-                <ProgressBar
-                  position={currentTrack.position}
-                  duration={currentTrack.duration}
-                  onSeek={handleSeek}
-                />
-              </motion.div>
-            )}
-
-            {/* Bottom Row: Playback Controls + Volume + Speaker Selector */}
-            <motion.div variants={itemVariants} className="flex items-center justify-between">
-              <div className="flex-1">
-                <PlaybackControls
-                  isPlaying={playerState.isPlaying}
-                  shuffle={playerState.shuffle}
-                  repeat={playerState.repeat}
-                  onPlayPause={handlePlayPause}
-                  onPrevious={handlePrevious}
-                  onNext={handleNext}
-                  onShuffleToggle={handleShuffleToggle}
-                  onRepeatToggle={handleRepeatToggle}
-                />
-              </div>
-
-              <div className="flex items-center gap-6">
-                <VolumeControl
-                  volume={playerState.volume}
-                  isMuted={playerState.isMuted}
-                  onVolumeChange={handleVolumeChange}
-                  onMuteToggle={handleMuteToggle}
-                />
-
-                {combinedSources.length > 0 && (
-                  <SpeakerSelector
-                    currentSource={playerState.source}
-                    spotifySources={playerState.availableSources}
-                    availableSpeakers={availableSpeakers}
-                    onSourceChange={handleSourceChange}
-                  />
-                )}
-              </div>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+              )}
+            </AnimatePresence>
+          </div>
+        </div>
       </motion.div>
     </motion.div>
   );
