@@ -11,7 +11,7 @@ import desk011 from "@/assets/desk-011.png"; // Desk Lamp + Monitor Light ON
 import desk100 from "@/assets/desk-100.png"; // Only Spotlight ON
 import desk101 from "@/assets/desk-101.png"; // Spotlight + Monitor Light ON
 import desk110 from "@/assets/desk-110.png"; // Spotlight + Desk Lamp ON
-import desk111 from "@/assets/desk-111-temp.png"; // All lights ON
+import desk111 from "@/assets/desk-111.png"; // All lights ON
 
 interface DeskDisplayProps {
   spotlightIntensity: number;
