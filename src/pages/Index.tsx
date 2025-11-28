@@ -9,7 +9,6 @@ import { SettingsButton } from "@/components/SettingsButton";
 import { ConnectionStatusIndicator } from "@/components/ConnectionStatusIndicator";
 import { SettingsDialog } from "@/components/SettingsDialog";
 import { MediaPlayer } from "@/components/MediaPlayer/MediaPlayer";
-import { RoomNavigation } from "@/components/RoomNavigation";
 import { Toaster } from "@/components/ui/toaster";
 import { useToast } from "@/hooks/use-toast";
 import { useHomeAssistantConfig } from "@/hooks/useHomeAssistantConfig";
