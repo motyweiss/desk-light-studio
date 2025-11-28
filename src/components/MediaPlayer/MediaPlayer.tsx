@@ -303,18 +303,14 @@ export const MediaPlayer = ({ entityId, isConnected }: MediaPlayerProps) => {
                 onRepeatToggle={handleRepeatToggle}
               />
 
-              <motion.div variants={itemVariants}>
-                <VolumeControl
-                  volume={playerState.volume}
-                  isMuted={playerState.isMuted}
-                  onVolumeChange={handleVolumeChange}
-                  onMuteToggle={handleMuteToggle}
-                />
-              </motion.div>
+              <VolumeControl
+                volume={playerState.volume}
+                isMuted={playerState.isMuted}
+                onVolumeChange={handleVolumeChange}
+                onMuteToggle={handleMuteToggle}
+              />
 
-              <motion.div variants={itemVariants}>
-                <SourceIndicator appName={playerState.appName} />
-              </motion.div>
+              <SourceIndicator appName={playerState.appName} />
             </motion.div>
           </motion.div>
         ) : (
