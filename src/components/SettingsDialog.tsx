@@ -45,7 +45,7 @@ export const SettingsDialog = ({ open, onOpenChange, onSave, currentConfig, curr
   const [temperatureSensor, setTemperatureSensor] = useState(currentMapping.temperatureSensor || "sensor.dyson_pure_temperature");
   const [humiditySensor, setHumiditySensor] = useState(currentMapping.humiditySensor || "sensor.dyson_pure_humidity");
   const [airQualitySensor, setAirQualitySensor] = useState(currentMapping.airQualitySensor || "sensor.dyson_pure_pm_2_5");
-  const [mediaPlayer, setMediaPlayer] = useState(currentMapping.mediaPlayer || "media_player.living_room");
+  const [mediaPlayer, setMediaPlayer] = useState(currentMapping.mediaPlayer || "media_player.spotify");
   
   const [isTestingConnection, setIsTestingConnection] = useState(false);
   const [connectionStatus, setConnectionStatus] = useState<{ success: boolean; version?: string; error?: string } | null>(null);
@@ -66,7 +66,7 @@ export const SettingsDialog = ({ open, onOpenChange, onSave, currentConfig, curr
       setTemperatureSensor(currentMapping.temperatureSensor || "sensor.dyson_pure_temperature");
       setHumiditySensor(currentMapping.humiditySensor || "sensor.dyson_pure_humidity");
       setAirQualitySensor(currentMapping.airQualitySensor || "sensor.dyson_pure_pm_2_5");
-      setMediaPlayer(currentMapping.mediaPlayer || "media_player.living_room");
+      setMediaPlayer(currentMapping.mediaPlayer || "media_player.spotify");
     }
   }, [currentConfig, currentMapping]);
 
@@ -90,6 +90,17 @@ export const SettingsDialog = ({ open, onOpenChange, onSave, currentConfig, curr
       setAvailableLights(lights);
       setAvailableSensors(sensors);
       setAvailableMediaPlayers(mediaPlayers);
+      
+      // Auto-detect Spotify if available
+      const spotifyPlayer = mediaPlayers.find(p => 
+        p.entity_id.includes('spotify') || 
+        p.attributes.friendly_name?.toLowerCase().includes('spotify')
+      );
+      if (spotifyPlayer && !currentMapping.mediaPlayer) {
+        console.log('Auto-detected Spotify:', spotifyPlayer.entity_id);
+        setMediaPlayer(spotifyPlayer.entity_id);
+      }
+      
       setIsLoadingEntities(false);
       
       // Auto-switch to entity mapping tab on success
