@@ -186,32 +186,38 @@ export const MediaPlayer = ({ entityId, isConnected }: MediaPlayerProps) => {
     visible: {
       opacity: 1,
       transition: {
-        staggerChildren: 0.06,
+        when: "beforeChildren",
+        staggerChildren: 0.05,
         delayChildren: 0.1
       }
     },
     exit: {
       opacity: 0,
       transition: {
-        staggerChildren: 0.04,
+        when: "afterChildren",
+        staggerChildren: 0.03,
         staggerDirection: -1
       }
     }
   };
 
   const itemVariants = {
-    hidden: { opacity: 0, y: 8, scale: 0.97 },
+    hidden: { opacity: 0, y: 12 },
     visible: { 
       opacity: 1, 
-      y: 0, 
-      scale: 1,
-      transition: { duration: 0.3, ease: [0.25, 0.1, 0.25, 1] as any }
+      y: 0,
+      transition: { 
+        duration: 0.35, 
+        ease: [0.32, 0.72, 0, 1] as any 
+      }
     },
     exit: {
       opacity: 0,
       y: -8,
-      scale: 0.97,
-      transition: { duration: 0.2, ease: [0.25, 0.1, 0.25, 1] as any }
+      transition: { 
+        duration: 0.2, 
+        ease: [0.32, 0.72, 0, 1] as any 
+      }
     }
   };
 
@@ -236,9 +242,10 @@ export const MediaPlayer = ({ entityId, isConnected }: MediaPlayerProps) => {
           height: isMinimized ? '80px' : 'auto',
         }}
         transition={{ 
-          duration: 0.5, 
-          ease: [0.25, 0.1, 0.25, 1]
+          duration: 0.4, 
+          ease: [0.32, 0.72, 0, 1]
         }}
+        layout
       >
         {/* Chevron Button - Fixed Position */}
         <motion.button
@@ -271,7 +278,7 @@ export const MediaPlayer = ({ entityId, isConnected }: MediaPlayerProps) => {
           </motion.div>
         </motion.button>
 
-        <AnimatePresence mode="wait" initial={false}>
+        <AnimatePresence mode="wait">
           {isMinimized ? (
           /* Mini Player */
           <motion.div
@@ -280,6 +287,7 @@ export const MediaPlayer = ({ entityId, isConnected }: MediaPlayerProps) => {
             animate="visible"
             exit="exit"
             variants={containerVariants}
+            transition={{ duration: 0.3 }}
             className="flex items-center gap-4 px-6 py-3 max-w-7xl mx-auto"
           >
             {/* Album Art */}
@@ -344,6 +352,7 @@ export const MediaPlayer = ({ entityId, isConnected }: MediaPlayerProps) => {
               animate="visible"
               exit="exit"
               variants={containerVariants}
+              transition={{ duration: 0.3 }}
               className="space-y-4 px-6 py-6 max-w-7xl mx-auto"
             >
               {/* Top Row: Album Art + Track Info + Source */}
