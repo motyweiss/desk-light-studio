@@ -1,8 +1,9 @@
 import { motion, useMotionValue, useTransform, animate } from "framer-motion";
-import { Thermometer, Droplets, Sun, Wind, Smartphone, Zap } from "lucide-react";
+import { Thermometer, Droplets, Sun, Wind, Zap } from "lucide-react";
 import { LightControlCard } from "./LightControlCard";
 import { CircularProgress } from "./CircularProgress";
 import { AirPodsMaxIcon } from "./icons/AirPodsMaxIcon";
+import { IPhoneIcon } from "./icons/IPhoneIcon";
 import { useEffect } from "react";
 
 interface Light {
@@ -232,7 +233,7 @@ export const RoomInfoPanel = ({ roomName, temperature, humidity, airQuality, mas
         {devices && devices.length > 0 && (
           <div className="flex flex-row gap-10 mt-8">
             {devices.map((device, index) => {
-              const DeviceIcon = device.icon === 'headphones' ? AirPodsMaxIcon : Smartphone;
+              const DeviceIcon = device.icon === 'headphones' ? AirPodsMaxIcon : IPhoneIcon;
               
               return (
                 <div key={device.id} className="flex items-center gap-3">
