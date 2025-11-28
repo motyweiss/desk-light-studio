@@ -75,8 +75,8 @@ export const LightControlCard = ({ id, label, intensity, onChange, onHover }: Li
       onMouseLeave={() => onHover(null)}
       className="w-full rounded-3xl px-8 py-6 cursor-pointer text-left border transition-all duration-500 backdrop-blur-xl"
       animate={{
-        backgroundColor: isOn ? 'rgba(255, 255, 255, 0.18)' : 'rgba(255, 255, 255, 0.03)',
-        borderColor: isOn ? 'rgba(255, 255, 255, 0.3)' : 'rgba(255, 255, 255, 0.1)',
+        backgroundColor: isOn ? 'rgba(255, 255, 255, 0.12)' : 'rgba(255, 255, 255, 0.03)',
+        borderColor: isOn ? 'rgba(255, 255, 255, 0.2)' : 'rgba(255, 255, 255, 0.1)',
       }}
       transition={{
         layout: { duration: 0.25, ease: [0.22, 0.03, 0.26, 1] },
@@ -84,9 +84,9 @@ export const LightControlCard = ({ id, label, intensity, onChange, onHover }: Li
         borderColor: { duration: 0.5, ease: [0.22, 0.03, 0.26, 1] },
       }}
       whileHover={{
-        backgroundColor: isOn ? 'rgba(255, 255, 255, 0.22)' : 'rgba(255, 255, 255, 0.06)',
-        borderColor: isOn ? 'rgba(255, 255, 255, 0.35)' : 'rgba(255, 255, 255, 0.15)',
-        scale: 1.01,
+        backgroundColor: isOn ? 'rgba(255, 255, 255, 0.15)' : 'rgba(255, 255, 255, 0.06)',
+        borderColor: isOn ? 'rgba(255, 255, 255, 0.25)' : 'rgba(255, 255, 255, 0.15)',
+        scale: 1.005,
         transition: { duration: 0.4, ease: [0.22, 0.03, 0.26, 1] }
       }}
       whileTap={{ scale: 0.985 }}
@@ -99,7 +99,7 @@ export const LightControlCard = ({ id, label, intensity, onChange, onHover }: Li
           animate={{
             scale: 1,
             opacity: 1,
-            color: isOn ? 'rgba(255, 255, 255, 0.95)' : 'rgba(255, 255, 255, 0.3)'
+            color: isOn ? 'hsl(44 92% 62%)' : 'rgba(255, 255, 255, 0.3)'
           }}
           transition={{ 
             scale: { duration: 0.4, ease: [0.22, 0.03, 0.26, 1] },
