@@ -4,7 +4,6 @@ import { Sun, Thermometer, Droplets, Wind } from "lucide-react";
 import { DeskDisplay } from "@/components/DeskDisplay";
 import { RoomInfoPanel } from "@/components/RoomInfoPanel";
 import { LoadingOverlay } from "@/components/LoadingOverlay";
-import { AmbientGlowLayers } from "@/components/AmbientGlowLayers";
 import { SettingsButton } from "@/components/SettingsButton";
 import { ConnectionStatusIndicator } from "@/components/ConnectionStatusIndicator";
 import { SettingsDialog } from "@/components/SettingsDialog";
@@ -821,13 +820,6 @@ const Index = () => {
           background: 'linear-gradient(135deg, hsl(38 15% 45% / 0.03) 0%, hsl(35 12% 42% / 0.05) 100%)',
         }}
       />
-      
-      <AmbientGlowLayers
-        spotlightIntensity={spotlightIntensity}
-        deskLampIntensity={deskLampIntensity}
-        monitorLightIntensity={monitorLightIntensity}
-        allLightsOn={allLightsOn}
-      />
 
       {/* Responsive Layout Container */}
       <div className="flex flex-col md:flex-row items-center gap-6 md:gap-12 max-w-7xl w-full relative z-10 px-5 md:px-0 pb-20 md:pb-0">
@@ -1002,39 +994,6 @@ const Index = () => {
             />
           </div>
 
-          {/* Dynamic shadow layer underneath image - responds to light intensity */}
-          <motion.div 
-            className="absolute -bottom-8 left-1/2 -translate-x-1/2 w-[85%] h-[12%] pointer-events-none z-0"
-            initial={{ opacity: 0 }}
-            animate={{ 
-              opacity: isLoaded ? (allLightsOn ? 0.6 : 1) : 0,
-            }}
-            transition={{ 
-              duration: 1.2,
-              delay: 1.0,
-              ease: [0.22, 0.03, 0.26, 1]
-            }}
-            style={{
-              background: 'radial-gradient(ellipse 100% 100% at 50% 50%, rgba(0,0,0,0.5) 0%, rgba(0,0,0,0.2) 50%, transparent 80%)',
-              filter: 'blur(25px)',
-            }}
-          />
-          
-          {/* Warm glow reflection beneath image when lights are on */}
-          <motion.div 
-            className="absolute -bottom-6 left-1/2 -translate-x-1/2 w-[75%] h-[10%] pointer-events-none z-0"
-            animate={{ 
-              opacity: (spotlightIntensity + deskLampIntensity + monitorLightIntensity) / 300 * 0.4,
-            }}
-            transition={{ 
-              duration: 1.2,
-              ease: [0.22, 0.03, 0.26, 1]
-            }}
-            style={{
-              background: 'radial-gradient(ellipse 100% 100% at 50% 50%, hsl(43 70% 58% / 0.28) 0%, hsl(44 65% 54% / 0.14) 40%, transparent 70%)',
-              filter: 'blur(30px)',
-            }}
-          />
           <DeskDisplay
             spotlightIntensity={spotlightIntensity}
             deskLampIntensity={deskLampIntensity}
