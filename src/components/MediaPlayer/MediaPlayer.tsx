@@ -263,18 +263,17 @@ export const MediaPlayer = ({ entityId, isConnected }: MediaPlayerProps) => {
         </motion.button>
 
         {/* Content Container */}
-        <div className={`px-6 max-w-7xl mx-auto ${isMinimized ? 'py-3' : 'py-6'}`}>
-          <div className={`flex ${isMinimized ? 'items-center' : 'items-start flex-col'} gap-4`}>
-            
-            {/* Top Row: Shared Elements */}
-            <div className="flex items-start gap-4 w-full">
+        <div className="px-6 py-3 max-w-7xl mx-auto">
+          {isMinimized ? (
+            /* Mini Player Layout */
+            <div className="flex items-center gap-4 h-[56px]">
               {/* Album Art - Shared Element with layoutId */}
               <motion.div
                 layoutId="player-album-art"
                 className="relative flex-shrink-0 rounded-xl overflow-hidden bg-white/5"
                 animate={{
-                  width: isMinimized ? 56 : 64,
-                  height: isMinimized ? 56 : 64,
+                  width: 56,
+                  height: 56,
                 }}
                 transition={sharedTransition}
                 layout
@@ -304,65 +303,27 @@ export const MediaPlayer = ({ entityId, isConnected }: MediaPlayerProps) => {
               >
                 <motion.h3
                   className="text-white font-light truncate"
-                  animate={{ 
-                    fontSize: isMinimized ? '16px' : '18px',
-                    lineHeight: isMinimized ? '24px' : '28px'
-                  }}
-                  transition={{ duration: 0.35, ease: [0.32, 0.72, 0, 1] as any }}
+                  style={{ fontSize: '16px', lineHeight: '24px' }}
                 >
                   {currentTrack?.title || 'No media playing'}
                 </motion.h3>
                 <motion.p 
                   className="text-white/40 truncate"
-                  animate={{ 
-                    fontSize: isMinimized ? '12px' : '14px',
-                    lineHeight: isMinimized ? '16px' : '20px'
-                  }}
-                  transition={{ duration: 0.35, ease: [0.32, 0.72, 0, 1] as any }}
+                  style={{ fontSize: '12px', lineHeight: '16px' }}
                 >
                   {currentTrack?.artist || 'Unknown Artist'}
                 </motion.p>
-                
-                {/* Album name - Only in full mode */}
-                <AnimatePresence>
-                  {!isMinimized && currentTrack?.album && (
-                    <motion.p
-                      initial={{ opacity: 0, height: 0, marginTop: 0 }}
-                      animate={{ opacity: 1, height: 'auto', marginTop: 2 }}
-                      exit={{ opacity: 0, height: 0, marginTop: 0 }}
-                      transition={{ duration: 0.3 }}
-                      className="text-white/30 text-xs truncate"
-                    >
-                      {currentTrack.album}
-                    </motion.p>
-                  )}
-                </AnimatePresence>
               </motion.div>
 
-              {/* Source Indicator - Always visible */}
-              {isMinimized && (
-                <motion.div
-                  initial={{ opacity: 0, scale: 0.9 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  exit={{ opacity: 0, scale: 0.9 }}
-                  transition={{ duration: 0.2 }}
-                >
-                  <SourceIndicator appName={playerState.appName} />
-                </motion.div>
-              )}
-            </div>
-
-            {/* Mode-specific Controls with AnimatePresence */}
-            <AnimatePresence mode="wait">
-              {isMinimized ? (
-                /* Mini Player Controls */
+              {/* Mini Player Controls */}
+              <AnimatePresence>
                 <motion.div
                   key="mini-controls"
                   variants={modeContentVariants}
                   initial="hidden"
                   animate="visible"
                   exit="exit"
-                  className="absolute right-6 top-1/2 -translate-y-1/2 flex items-center gap-6"
+                  className="flex items-center gap-6"
                 >
                   <PlaybackControls
                     isPlaying={playerState.isPlaying}
@@ -381,22 +342,88 @@ export const MediaPlayer = ({ entityId, isConnected }: MediaPlayerProps) => {
                     onVolumeChange={handleVolumeChange}
                     onMuteToggle={handleMuteToggle}
                   />
+
+                  <SourceIndicator appName={playerState.appName} />
                 </motion.div>
-              ) : (
-                /* Full Player Controls */
+              </AnimatePresence>
+            </div>
+          ) : (
+            /* Full Player Layout */
+            <div className="py-3 space-y-4">
+              {/* Top Row: Album Art + Track Info + Source */}
+              <div className="flex items-start gap-4">
+                {/* Album Art - Shared Element with layoutId */}
+                <motion.div
+                  layoutId="player-album-art"
+                  className="relative flex-shrink-0 rounded-xl overflow-hidden bg-white/5"
+                  animate={{
+                    width: 64,
+                    height: 64,
+                  }}
+                  transition={sharedTransition}
+                  layout
+                >
+                  {albumArtUrl ? (
+                    <motion.img 
+                      src={albumArtUrl} 
+                      alt="Album art" 
+                      className="w-full h-full object-cover"
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      transition={{ duration: 0.3 }}
+                    />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center">
+                      <Music className="w-8 h-8 text-white/20" />
+                    </div>
+                  )}
+                </motion.div>
+
+                {/* Track Info - Shared Element with layoutId */}
+                <motion.div
+                  layoutId="player-track-info"
+                  className="flex-1 min-w-0"
+                  layout
+                  transition={sharedTransition}
+                >
+                  <motion.h3
+                    className="text-white font-light truncate"
+                    style={{ fontSize: '18px', lineHeight: '28px' }}
+                  >
+                    {currentTrack?.title || 'No media playing'}
+                  </motion.h3>
+                  <motion.p 
+                    className="text-white/40 truncate"
+                    style={{ fontSize: '14px', lineHeight: '20px' }}
+                  >
+                    {currentTrack?.artist || 'Unknown Artist'}
+                  </motion.p>
+                  {currentTrack?.album && (
+                    <motion.p
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      transition={{ duration: 0.3, delay: 0.1 }}
+                      className="text-white/30 text-xs truncate mt-0.5"
+                    >
+                      {currentTrack.album}
+                    </motion.p>
+                  )}
+                </motion.div>
+
+                {/* Source Indicator */}
+                <SourceIndicator appName={playerState.appName} />
+              </div>
+
+              {/* Full Player Controls */}
+              <AnimatePresence>
                 <motion.div
                   key="full-controls"
                   variants={modeContentVariants}
                   initial="hidden"
                   animate="visible"
                   exit="exit"
-                  className="space-y-4 w-full"
+                  className="space-y-4"
                 >
-                  {/* Source Indicator in full mode */}
-                  <div className="flex justify-end -mt-2">
-                    <SourceIndicator appName={playerState.appName} />
-                  </div>
-
                   {/* Progress Bar */}
                   {currentTrack && (
                     <ProgressBar
@@ -440,9 +467,9 @@ export const MediaPlayer = ({ entityId, isConnected }: MediaPlayerProps) => {
                     </div>
                   </div>
                 </motion.div>
-              )}
-            </AnimatePresence>
-          </div>
+              </AnimatePresence>
+            </div>
+          )}
         </div>
       </motion.div>
     </motion.div>
