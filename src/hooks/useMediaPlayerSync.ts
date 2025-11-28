@@ -95,7 +95,14 @@ export const useMediaPlayerSync = (config: UseMediaPlayerSyncConfig) => {
       }
       
       if (!entity) {
-        console.log('useMediaPlayerSync: no entity found');
+        console.log('useMediaPlayerSync: no entity found - checking available media players...');
+        // Get all available media players to help debug
+        const availablePlayers = await homeAssistant.getMediaPlayers();
+        console.log('📺 AVAILABLE MEDIA PLAYERS:');
+        availablePlayers.forEach(p => {
+          console.log(`  - ${p.entity_id}: ${p.attributes.friendly_name || 'No name'} (${p.state})`);
+        });
+        console.log('\n⚠️  To fix: Open Settings (⚙️ icon) → Entity Mapping → Select your Spotify player');
         setIsLoading(false);
         return;
       }
