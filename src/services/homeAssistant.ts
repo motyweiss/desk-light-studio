@@ -154,7 +154,7 @@ class HomeAssistantService {
   }
 
   async setLightBrightness(entityId: string, brightnessPct: number): Promise<boolean> {
-    try {
+    return this.retryWithBackoff(async () => {
       const service = brightnessPct === 0 ? "turn_off" : "turn_on";
       const body: any = { entity_id: entityId };
       
@@ -168,11 +168,15 @@ class HomeAssistantService {
         body: JSON.stringify(body),
       });
 
-      return response.ok;
-    } catch (error) {
+      if (!response.ok) {
+        throw new Error(`Failed to set brightness: ${response.statusText}`);
+      }
+      
+      return true;
+    }, `setLightBrightness(${entityId}, ${brightnessPct}%)`).catch(error => {
       console.error("Failed to set light brightness:", error);
       return false;
-    }
+    });
   }
 
   async getAllEntityStates(entityIds: string[]): Promise<Map<string, { state: string; brightness?: number }>> {
