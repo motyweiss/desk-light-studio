@@ -175,25 +175,27 @@ export const LightControlCard = ({
 
         {/* Slider with Pending Indicator */}
         <div 
-          className="w-32 flex-shrink-0 flex items-center gap-2.5"
+          className="flex-shrink-0 flex items-center gap-3"
           data-slider
           onClick={(e) => e.stopPropagation()}
           onPointerDown={(e) => e.stopPropagation()}
         >
-          {/* Subtle Spinner - Left of Slider */}
-          {isPending && (
-            <motion.div
-              initial={{ opacity: 0, scale: 0.7 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.7 }}
-              transition={{ duration: 0.2 }}
-            >
-              <Loader2 
-                className="w-3.5 h-3.5 text-white/40 animate-spin" 
-                strokeWidth={2}
-              />
-            </motion.div>
-          )}
+          {/* Subtle Spinner - Left of Slider with fixed width */}
+          <div className="w-4 h-4 flex items-center justify-center flex-shrink-0">
+            {isPending && (
+              <motion.div
+                initial={{ opacity: 0, scale: 0.7 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.7 }}
+                transition={{ duration: 0.2 }}
+              >
+                <Loader2 
+                  className="w-4 h-4 text-white/40 animate-spin" 
+                  strokeWidth={2}
+                />
+              </motion.div>
+            )}
+          </div>
           
           <Slider
             value={[displayNumber]}
@@ -218,7 +220,7 @@ export const LightControlCard = ({
             }, [displayNumber, onChange, displayValue])}
             max={100}
             step={1}
-            className="w-full"
+            className="w-32"
           />
         </div>
       </div>
