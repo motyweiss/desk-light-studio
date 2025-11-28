@@ -103,7 +103,8 @@ export const MediaPlayer = ({ entityId, isConnected }: MediaPlayerProps) => {
       className="fixed bottom-0 left-0 right-0 z-50 w-full"
     >
       <motion.div 
-        className="bg-white/8 backdrop-blur-[24px] border-t border-white/20 rounded-t-2xl shadow-[0_4px_24px_rgba(0,0,0,0.15)] overflow-hidden max-w-none relative"
+        className="bg-white/8 backdrop-blur-[24px] border-t border-white/20 rounded-t-2xl shadow-[0_4px_24px_rgba(0,0,0,0.15)] max-w-none relative"
+        style={{ overflow: 'visible' }}
         animate={{ 
           height: isMinimized ? '80px' : 'auto',
         }}
@@ -115,35 +116,30 @@ export const MediaPlayer = ({ entityId, isConnected }: MediaPlayerProps) => {
         {/* Minimize/Maximize Button - Centered at top */}
         <motion.button
           onClick={() => setIsMinimized(!isMinimized)}
-          className="absolute left-1/2 -translate-x-1/2 z-10 w-12 h-12 rounded-full bg-white/10 backdrop-blur-xl border border-white/30 flex items-center justify-center shadow-[0_4px_16px_rgba(0,0,0,0.1)]"
-          style={{ top: '-30%' }}
+          className="absolute left-1/2 -translate-x-1/2 z-10 w-9 h-9 rounded-full bg-white/8 backdrop-blur-xl border border-white/20 flex items-center justify-center shadow-sm"
+          style={{ top: '-18px' }}
           whileHover={{ 
-            scale: 1.12,
-            backgroundColor: 'rgba(255, 255, 255, 0.15)',
-            borderColor: 'rgba(255, 255, 255, 0.4)',
-            boxShadow: '0 6px 20px rgba(0, 0, 0, 0.15)'
+            backgroundColor: 'rgba(255, 255, 255, 0.12)',
+            borderColor: 'rgba(255, 255, 255, 0.3)'
           }}
           whileTap={{ 
-            scale: 0.92,
-            backgroundColor: 'rgba(255, 255, 255, 0.2)'
+            scale: 0.95,
+            backgroundColor: 'rgba(255, 255, 255, 0.15)'
           }}
           transition={{
-            type: "spring",
-            stiffness: 500,
-            damping: 20
+            duration: 0.2
           }}
         >
           <motion.div
             animate={{ 
-              rotate: isMinimized ? 0 : 180,
-              scale: isMinimized ? 1 : 1.05
+              rotate: isMinimized ? 0 : 180
             }}
             transition={{ 
               duration: 0.5, 
               ease: [0.19, 1, 0.22, 1]
             }}
           >
-            <ChevronUp className="w-6 h-6 text-white drop-shadow-sm" />
+            <ChevronUp className="w-4 h-4 text-white/80" />
           </motion.div>
         </motion.button>
 
