@@ -91,7 +91,28 @@ export const LightControlCard = ({
     });
   };
 
-  // Skeleton loading state
+  // Define slider change handler before any conditional returns
+  const handleSliderChange = useCallback((values: number[]) => {
+    const newValue = values[0];
+    if (Math.abs(newValue - displayNumber) >= 10) {
+      triggerHaptic();
+    }
+    
+    // Update display immediately
+    displayValue.set(newValue);
+    
+    // Clear existing debounce timer
+    if (debounceTimerRef.current) {
+      clearTimeout(debounceTimerRef.current);
+    }
+    
+    // Debounce the HA call - only send after 300ms of no changes
+    debounceTimerRef.current = setTimeout(() => {
+      onChange(newValue);
+    }, 300);
+  }, [displayNumber, onChange, displayValue]);
+
+  // Skeleton loading state - render different UI but all hooks must be called first
   if (isLoading) {
     return (
       <motion.div
@@ -277,25 +298,7 @@ export const LightControlCard = ({
           
           <Slider
             value={[displayNumber]}
-            onValueChange={useCallback((values: number[]) => {
-              const newValue = values[0];
-              if (Math.abs(newValue - displayNumber) >= 10) {
-                triggerHaptic();
-              }
-              
-              // Update display immediately
-              displayValue.set(newValue);
-              
-              // Clear existing debounce timer
-              if (debounceTimerRef.current) {
-                clearTimeout(debounceTimerRef.current);
-              }
-              
-              // Debounce the HA call - only send after 300ms of no changes
-              debounceTimerRef.current = setTimeout(() => {
-                onChange(newValue);
-              }, 300);
-            }, [displayNumber, onChange, displayValue])}
+            onValueChange={handleSliderChange}
             max={100}
             step={1}
             className="w-32"
