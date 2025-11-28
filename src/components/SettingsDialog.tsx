@@ -20,6 +20,7 @@ interface SettingsDialogProps {
       temperatureSensor?: string;
       humiditySensor?: string;
       airQualitySensor?: string;
+      mediaPlayer?: string;
     }
   ) => void;
   currentConfig: { baseUrl: string; accessToken: string } | null;
@@ -30,6 +31,7 @@ interface SettingsDialogProps {
     temperatureSensor?: string;
     humiditySensor?: string;
     airQualitySensor?: string;
+    mediaPlayer?: string;
   };
 }
 
@@ -43,11 +45,13 @@ export const SettingsDialog = ({ open, onOpenChange, onSave, currentConfig, curr
   const [temperatureSensor, setTemperatureSensor] = useState(currentMapping.temperatureSensor || "sensor.dyson_pure_temperature");
   const [humiditySensor, setHumiditySensor] = useState(currentMapping.humiditySensor || "sensor.dyson_pure_humidity");
   const [airQualitySensor, setAirQualitySensor] = useState(currentMapping.airQualitySensor || "sensor.dyson_pure_pm_2_5");
+  const [mediaPlayer, setMediaPlayer] = useState(currentMapping.mediaPlayer || "media_player.living_room");
   
   const [isTestingConnection, setIsTestingConnection] = useState(false);
   const [connectionStatus, setConnectionStatus] = useState<{ success: boolean; version?: string; error?: string } | null>(null);
   const [availableLights, setAvailableLights] = useState<HAEntity[]>([]);
   const [availableSensors, setAvailableSensors] = useState<HAEntity[]>([]);
+  const [availableMediaPlayers, setAvailableMediaPlayers] = useState<HAEntity[]>([]);
   const [isLoadingEntities, setIsLoadingEntities] = useState(false);
 
   useEffect(() => {
@@ -62,6 +66,7 @@ export const SettingsDialog = ({ open, onOpenChange, onSave, currentConfig, curr
       setTemperatureSensor(currentMapping.temperatureSensor || "sensor.dyson_pure_temperature");
       setHumiditySensor(currentMapping.humiditySensor || "sensor.dyson_pure_humidity");
       setAirQualitySensor(currentMapping.airQualitySensor || "sensor.dyson_pure_pm_2_5");
+      setMediaPlayer(currentMapping.mediaPlayer || "media_player.living_room");
     }
   }, [currentConfig, currentMapping]);
 
@@ -77,12 +82,14 @@ export const SettingsDialog = ({ open, onOpenChange, onSave, currentConfig, curr
     
     if (result.success) {
       setIsLoadingEntities(true);
-      const [lights, sensors] = await Promise.all([
+      const [lights, sensors, mediaPlayers] = await Promise.all([
         homeAssistant.getLights(),
-        homeAssistant.getSensors()
+        homeAssistant.getSensors(),
+        homeAssistant.getMediaPlayers()
       ]);
       setAvailableLights(lights);
       setAvailableSensors(sensors);
+      setAvailableMediaPlayers(mediaPlayers);
       setIsLoadingEntities(false);
       
       // Auto-switch to entity mapping tab on success
@@ -97,12 +104,12 @@ export const SettingsDialog = ({ open, onOpenChange, onSave, currentConfig, curr
     
     onSave(
       { baseUrl: normalizedUrl, accessToken },
-      { deskLamp, monitorLight, spotlight, temperatureSensor, humiditySensor, airQualitySensor }
+      { deskLamp, monitorLight, spotlight, temperatureSensor, humiditySensor, airQualitySensor, mediaPlayer }
     );
     onOpenChange(false);
   };
 
-  const isFormValid = baseUrl && accessToken && deskLamp && monitorLight && spotlight && temperatureSensor && humiditySensor && airQualitySensor;
+  const isFormValid = baseUrl && accessToken && deskLamp && monitorLight && spotlight && temperatureSensor && humiditySensor && airQualitySensor && mediaPlayer;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -335,6 +342,31 @@ export const SettingsDialog = ({ open, onOpenChange, onSave, currentConfig, curr
                           {availableSensors.map((sensor) => (
                             <SelectItem key={sensor.entity_id} value={sensor.entity_id}>
                               {sensor.attributes.friendly_name || sensor.entity_id}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+
+                  {/* Separator */}
+                  <div className="h-px bg-white/10" />
+
+                  {/* Media Player Section */}
+                  <div className="space-y-4">
+                    <h3 className="text-base font-light text-white/80 tracking-wide">Media Player</h3>
+
+                    {/* Media Player */}
+                    <div className="space-y-2">
+                      <label className="text-sm font-light text-white/60">Sonos/Media Player</label>
+                      <Select value={mediaPlayer} onValueChange={setMediaPlayer}>
+                        <SelectTrigger className="h-11">
+                          <SelectValue placeholder="Select media player..." />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {availableMediaPlayers.map((player) => (
+                            <SelectItem key={player.entity_id} value={player.entity_id}>
+                              {player.attributes.friendly_name || player.entity_id}
                             </SelectItem>
                           ))}
                         </SelectContent>
