@@ -13,7 +13,7 @@ const DEFAULT_ENTITY_MAPPING: EntityMapping = {
   airQualitySensor: "sensor.dyson_pure_pm_2_5",
   iphoneBatteryLevel: "sensor.motys_iphone_battery_level",
   iphoneBatteryState: "sensor.motys_iphone_battery_state",
-  mediaPlayer: "media_player.living_room",
+  mediaPlayer: "media_player.spotify",
 };
 
 export const useHomeAssistantConfig = () => {
@@ -40,6 +40,13 @@ export const useHomeAssistantConfig = () => {
     if (savedMapping) {
       try {
         const parsedMapping = JSON.parse(savedMapping);
+        
+        // Fix old media_player.living_room to media_player.spotify
+        if (parsedMapping.mediaPlayer === 'media_player.living_room') {
+          console.log('🔄 Migrating old media player entity to media_player.spotify');
+          parsedMapping.mediaPlayer = 'media_player.spotify';
+        }
+        
         // Merge with defaults to add any new sensor mappings
         const mergedMapping = {
           ...DEFAULT_ENTITY_MAPPING,
