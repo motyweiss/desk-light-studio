@@ -140,7 +140,7 @@ export const MediaPlayer = ({ entityId, isConnected }: MediaPlayerProps) => {
               ease: [0.25, 0.1, 0.25, 1]
             }}
           >
-            <ChevronUp className="w-4 h-4 text-white/70" />
+            <ChevronUp className="w-4 h-4 text-white" />
           </motion.div>
         </motion.button>
 
