@@ -1,5 +1,5 @@
 import { motion, useMotionValue, useTransform, animate } from "framer-motion";
-import { Thermometer, Droplets, Sun, Wind, Zap } from "lucide-react";
+import { Thermometer, Droplets, Power, Wind, Zap } from "lucide-react";
 import { LightControlCard } from "./LightControlCard";
 import { CircularProgress } from "./CircularProgress";
 import { AirPodsMaxIcon } from "./icons/AirPodsMaxIcon";
@@ -137,7 +137,7 @@ export const RoomInfoPanel = ({ roomName, temperature, humidity, airQuality, mas
             transition={{ duration: 0.5, ease: [0.22, 0.03, 0.26, 1] }}
             className="flex items-center justify-center"
           >
-            <Sun className="w-4 h-4" strokeWidth={2} />
+            <Power className="w-4 h-4" strokeWidth={2} />
           </motion.div>
         </motion.button>
       </motion.div>
