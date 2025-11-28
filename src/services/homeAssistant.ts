@@ -499,6 +499,41 @@ class HomeAssistantService {
       return false;
     });
   }
+
+  async getAvailableSpeakers(): Promise<MediaPlayerEntity[]> {
+    const allPlayers = await this.getMediaPlayers();
+    
+    // Filter to only real speakers (Sonos, speakers, etc.) - exclude TV, Spotify entity, unavailable
+    const speakers = allPlayers.filter(player => {
+      const id = player.entity_id.toLowerCase();
+      const name = (player.attributes.friendly_name || '').toLowerCase();
+      
+      // Include: Sonos, speakers, room names
+      const isSpeaker = 
+        id.includes('sonos') || 
+        id.includes('speaker') ||
+        id.includes('play') ||
+        name.includes('sonos') ||
+        name.includes('speaker') ||
+        name.includes('play');
+      
+      // Exclude: Spotify entity, TV, unavailable states
+      const isExcluded = 
+        id.includes('spotify') || 
+        id.includes('tv') ||
+        player.state === 'unavailable';
+      
+      return isSpeaker && !isExcluded;
+    });
+
+    console.log('📻 Available speakers:', speakers.map(s => ({
+      id: s.entity_id,
+      name: s.attributes.friendly_name,
+      state: s.state
+    })));
+
+    return speakers;
+  }
 }
 
 export const homeAssistant = new HomeAssistantService();
