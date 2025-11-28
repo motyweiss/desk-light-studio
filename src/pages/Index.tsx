@@ -12,6 +12,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { useToast } from "@/hooks/use-toast";
 import { useHomeAssistantConfig } from "@/hooks/useHomeAssistantConfig";
 import { homeAssistant } from "@/services/homeAssistant";
+import { syncLogger } from "@/utils/syncLogger";
 
 // Import all desk images for preloading
 import desk000 from "@/assets/desk-000.png";
@@ -91,24 +92,58 @@ const Index = () => {
   const masterSwitchOn = allLightsOn;
 
   const handleMasterToggle = useCallback(async (checked: boolean) => {
-    lastManualChangeRef.current = Date.now();
+    const startTime = Date.now();
+    lastManualChangeRef.current = startTime;
     const targetIntensity = checked ? 100 : 0;
+    
+    console.log(`🎛️  MASTER TOGGLE: ${checked ? 'ON' : 'OFF'} (target: ${targetIntensity}%)`);
+    
     setSpotlightIntensity(targetIntensity);
     setDeskLampIntensity(targetIntensity);
     setMonitorLightIntensity(targetIntensity);
 
     // Sync with Home Assistant if connected
     if (isConnected && entityMapping) {
-      if (entityMapping.spotlight) await homeAssistant.setLightBrightness(entityMapping.spotlight, targetIntensity);
-      if (entityMapping.deskLamp) await homeAssistant.setLightBrightness(entityMapping.deskLamp, targetIntensity);
-      if (entityMapping.monitorLight) await homeAssistant.setLightBrightness(entityMapping.monitorLight, targetIntensity);
+      console.log('📤 Sending master toggle to Home Assistant...');
+      const promises = [];
+      
+      if (entityMapping.spotlight) {
+        promises.push(
+          homeAssistant.setLightBrightness(entityMapping.spotlight, targetIntensity)
+            .then(() => console.log(`  ✅ Spotlight → ${targetIntensity}%`))
+            .catch(err => console.error(`  ❌ Spotlight failed:`, err))
+        );
+      }
+      if (entityMapping.deskLamp) {
+        promises.push(
+          homeAssistant.setLightBrightness(entityMapping.deskLamp, targetIntensity)
+            .then(() => console.log(`  ✅ Desk Lamp → ${targetIntensity}%`))
+            .catch(err => console.error(`  ❌ Desk Lamp failed:`, err))
+        );
+      }
+      if (entityMapping.monitorLight) {
+        promises.push(
+          homeAssistant.setLightBrightness(entityMapping.monitorLight, targetIntensity)
+            .then(() => console.log(`  ✅ Monitor Light → ${targetIntensity}%`))
+            .catch(err => console.error(`  ❌ Monitor Light failed:`, err))
+        );
+      }
+      
+      await Promise.all(promises);
+      const duration = Date.now() - startTime;
+      console.log(`⏱️  Master toggle completed in ${duration}ms`);
+    } else {
+      console.log('⚠️  Master toggle: Not connected to HA, local only');
     }
   }, [isConnected, entityMapping]);
 
   // Handle individual light intensity changes with Home Assistant sync
   const createLightChangeHandler = useCallback((lightId: string, setter: (value: number) => void) => {
     return async (newIntensity: number) => {
-      lastManualChangeRef.current = Date.now();
+      const startTime = Date.now();
+      lastManualChangeRef.current = startTime;
+      
+      console.log(`💡 MANUAL CHANGE: ${lightId} → ${newIntensity}%`);
       setter(newIntensity);
 
       // Sync with Home Assistant if connected
@@ -120,8 +155,17 @@ const Index = () => {
           : entityMapping.monitorLight;
 
         if (entityId) {
-          await homeAssistant.setLightBrightness(entityId, newIntensity);
+          console.log(`📤 Sending to HA: ${entityId} → ${newIntensity}%`);
+          try {
+            await homeAssistant.setLightBrightness(entityId, newIntensity);
+            const duration = Date.now() - startTime;
+            console.log(`  ✅ Success in ${duration}ms`);
+          } catch (error) {
+            console.error(`  ❌ Failed to sync ${lightId}:`, error);
+          }
         }
+      } else {
+        console.log(`  ⚠️  Not connected to HA, local only`);
       }
     };
   }, [isConnected, entityMapping]);
@@ -392,11 +436,21 @@ const Index = () => {
     console.log("🌡️ Sensor entities:", sensorEntityIds);
 
     const syncStates = async () => {
+      const syncStartTime = Date.now();
       try {
         const states = await homeAssistant.getAllEntityStates(allEntityIds);
+        const fetchDuration = Date.now() - syncStartTime;
+        
+        syncLogger.logSync(fetchDuration, true);
+        
+        if (fetchDuration > 1000) {
+          console.warn(`⚠️  Slow sync: ${fetchDuration}ms (threshold: 1000ms)`);
+        }
         
         // Connection successful - reset reconnection state
         if (isReconnecting) {
+          console.log("✅ Connection restored!");
+          syncLogger.printSummary();
           setIsReconnecting(false);
           reconnectAttemptRef.current = 0;
           toast({
@@ -417,12 +471,14 @@ const Index = () => {
             // Only skip update if manual change happened in last 200ms
             const timeSinceManualChange = Date.now() - lastManualChangeRef.current;
             if (timeSinceManualChange < 200) {
+              syncLogger.logBlockedUpdate();
+              console.log(`🚫 BLOCKED: Spotlight update blocked (manual change ${timeSinceManualChange}ms ago)`);
               return current;
             }
             
             // Always update when state changes (on/off) or when there's any brightness difference
             if (current !== newIntensity) {
-              console.log(`💡 Spotlight synced: ${current} → ${newIntensity}% (state: ${state.state})`);
+              console.log(`💡 Spotlight synced: ${current}% → ${newIntensity}% (remote state: ${state.state})`);
               return newIntensity;
             }
             return current;
@@ -440,12 +496,14 @@ const Index = () => {
             // Only skip update if manual change happened in last 200ms
             const timeSinceManualChange = Date.now() - lastManualChangeRef.current;
             if (timeSinceManualChange < 200) {
+              syncLogger.logBlockedUpdate();
+              console.log(`🚫 BLOCKED: Desk Lamp update blocked (manual change ${timeSinceManualChange}ms ago)`);
               return current;
             }
             
             // Always update when state changes (on/off) or when there's any brightness difference
             if (current !== newIntensity) {
-              console.log(`💡 Desk Lamp synced: ${current} → ${newIntensity}% (state: ${state.state})`);
+              console.log(`💡 Desk Lamp synced: ${current}% → ${newIntensity}% (remote state: ${state.state})`);
               return newIntensity;
             }
             return current;
@@ -463,12 +521,14 @@ const Index = () => {
             // Only skip update if manual change happened in last 200ms
             const timeSinceManualChange = Date.now() - lastManualChangeRef.current;
             if (timeSinceManualChange < 200) {
+              syncLogger.logBlockedUpdate();
+              console.log(`🚫 BLOCKED: Monitor Light update blocked (manual change ${timeSinceManualChange}ms ago)`);
               return current;
             }
             
             // Always update when state changes (on/off) or when there's any brightness difference
             if (current !== newIntensity) {
-              console.log(`💡 Monitor Light synced: ${current} → ${newIntensity}% (state: ${state.state})`);
+              console.log(`💡 Monitor Light synced: ${current}% → ${newIntensity}% (remote state: ${state.state})`);
               return newIntensity;
             }
             return current;
@@ -576,6 +636,7 @@ const Index = () => {
     };
 
     // Initial sync
+    console.log("🚀 Starting initial sync...");
     syncStates();
 
     // Poll every 500ms for real-time updates
@@ -620,40 +681,49 @@ const Index = () => {
         return;
       }
 
+      const startTime = Date.now();
+      
       switch (e.key) {
         case '1':
           // Toggle Desk Lamp with HA sync
           e.preventDefault();
+          console.log('⌨️  Keyboard: Toggle Desk Lamp (key "1")');
           const newDeskLampIntensity = deskLampIntensity > 0 ? 0 : 100;
           lastManualChangeRef.current = Date.now();
           setDeskLampIntensity(newDeskLampIntensity);
           if (isConnected && entityMapping?.deskLamp) {
             await homeAssistant.setLightBrightness(entityMapping.deskLamp, newDeskLampIntensity);
+            console.log(`  ✅ Synced in ${Date.now() - startTime}ms`);
           }
           break;
         case '2':
           // Toggle Monitor Light with HA sync
           e.preventDefault();
+          console.log('⌨️  Keyboard: Toggle Monitor Light (key "2")');
           const newMonitorIntensity = monitorLightIntensity > 0 ? 0 : 100;
           lastManualChangeRef.current = Date.now();
           setMonitorLightIntensity(newMonitorIntensity);
           if (isConnected && entityMapping?.monitorLight) {
             await homeAssistant.setLightBrightness(entityMapping.monitorLight, newMonitorIntensity);
+            console.log(`  ✅ Synced in ${Date.now() - startTime}ms`);
           }
           break;
         case '3':
           // Toggle Spotlight with HA sync
           e.preventDefault();
+          console.log('⌨️  Keyboard: Toggle Spotlight (key "3")');
           const newSpotlightIntensity = spotlightIntensity > 0 ? 0 : 100;
           lastManualChangeRef.current = Date.now();
           setSpotlightIntensity(newSpotlightIntensity);
           if (isConnected && entityMapping?.spotlight) {
             await homeAssistant.setLightBrightness(entityMapping.spotlight, newSpotlightIntensity);
+            console.log(`  ✅ Synced in ${Date.now() - startTime}ms`);
           }
           break;
         case ' ':
           // Master toggle with spacebar
           e.preventDefault(); // Prevent page scroll
+          console.log('⌨️  Keyboard: Master Toggle (spacebar)');
           handleMasterToggle(!masterSwitchOn);
           break;
       }
