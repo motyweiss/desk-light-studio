@@ -11,11 +11,12 @@ interface UseMediaPlayerSyncConfig {
 export const useMediaPlayerSync = (config: UseMediaPlayerSyncConfig) => {
   const { entityId, enabled, pollInterval = 1500 } = config;
   const [playerState, setPlayerState] = useState<MediaPlayerState | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(enabled && !!entityId);
   const pollTimerRef = useRef<NodeJS.Timeout>();
   const positionIntervalRef = useRef<NodeJS.Timeout>();
   const lastPositionUpdateRef = useRef<Date | null>(null);
   const localPositionRef = useRef<number>(0);
+  const loadingTimeoutRef = useRef<NodeJS.Timeout>();
 
   const calculateCurrentPosition = useCallback((
     basePosition: number,
@@ -78,23 +79,55 @@ export const useMediaPlayerSync = (config: UseMediaPlayerSyncConfig) => {
   }, [calculateCurrentPosition]);
 
   const syncFromRemote = useCallback(async () => {
-    if (!enabled || !entityId) return;
+    if (!enabled || !entityId) {
+      console.log('useMediaPlayerSync: sync skipped', { enabled, entityId });
+      return;
+    }
+
+    console.log('useMediaPlayerSync: syncing from HA...', entityId);
 
     try {
       const entity = await homeAssistant.getMediaPlayerState(entityId);
-      if (!entity) return;
+      
+      // Clear loading timeout on successful response
+      if (loadingTimeoutRef.current) {
+        clearTimeout(loadingTimeoutRef.current);
+      }
+      
+      if (!entity) {
+        console.log('useMediaPlayerSync: no entity found');
+        setIsLoading(false);
+        return;
+      }
 
+      console.log('useMediaPlayerSync: entity received', entity);
       const state = entityToState(entity);
       setPlayerState(state);
       setIsLoading(false);
     } catch (error) {
       console.error(`Failed to sync media player ${entityId}:`, error);
+      setIsLoading(false);
+      // Clear loading timeout on error
+      if (loadingTimeoutRef.current) {
+        clearTimeout(loadingTimeoutRef.current);
+      }
     }
   }, [entityId, enabled, entityToState]);
 
   // Polling effect
   useEffect(() => {
-    if (!enabled || !entityId) return;
+    if (!enabled || !entityId) {
+      setIsLoading(false);
+      setPlayerState(null);
+      return;
+    }
+
+    // Set timeout for loading state - if no response after 5 seconds, give up
+    loadingTimeoutRef.current = setTimeout(() => {
+      console.log('useMediaPlayerSync: loading timeout - no media player found');
+      setIsLoading(false);
+      setPlayerState(null);
+    }, 5000);
 
     syncFromRemote(); // Initial sync
     pollTimerRef.current = setInterval(syncFromRemote, pollInterval);
@@ -102,6 +135,9 @@ export const useMediaPlayerSync = (config: UseMediaPlayerSyncConfig) => {
     return () => {
       if (pollTimerRef.current) {
         clearInterval(pollTimerRef.current);
+      }
+      if (loadingTimeoutRef.current) {
+        clearTimeout(loadingTimeoutRef.current);
       }
     };
   }, [enabled, syncFromRemote, pollInterval, entityId]);

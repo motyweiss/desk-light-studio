@@ -24,6 +24,8 @@ export const MediaPlayer = ({ entityId, isConnected }: MediaPlayerProps) => {
     pollInterval: 1500,
   });
 
+  console.log('MediaPlayer render:', { entityId, isConnected, isLoading, hasPlayerState: !!playerState });
+
   // Optimistic handlers with immediate UI update
   const handlePlayPause = async () => {
     if (!entityId || !playerState) return;
@@ -111,8 +113,18 @@ export const MediaPlayer = ({ entityId, isConnected }: MediaPlayerProps) => {
     );
   }
 
-  // Don't render if not connected or no entity
-  if (!isConnected || !entityId || !playerState) {
+  // Don't render if not connected
+  if (!isConnected) {
+    return null;
+  }
+
+  // Show message if no entity configured
+  if (!entityId) {
+    return null;
+  }
+
+  // Don't render if no player state
+  if (!playerState) {
     return null;
   }
 
