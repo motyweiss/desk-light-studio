@@ -19,11 +19,7 @@ export const LoadingOverlay = ({ isLoading }: LoadingOverlayProps) => {
             ease: [0.22, 0.03, 0.26, 1]
           }}
           style={{
-            backgroundImage: "url('/bg.png')",
-            backgroundSize: "cover",
-            backgroundPosition: "center",
-            backgroundRepeat: "no-repeat",
-            backgroundColor: "hsl(28 20% 18%)",
+            backgroundColor: "hsl(0 0% 8%)",
           }}
         >
           {/* Minimalist spinner - larger with white color */}
