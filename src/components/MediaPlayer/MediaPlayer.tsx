@@ -18,13 +18,27 @@ interface MediaPlayerProps {
 export const MediaPlayer = ({ entityId, isConnected }: MediaPlayerProps) => {
   const [isMinimized, setIsMinimized] = useState(true);
 
-  const { playerState, isLoading, syncFromRemote, setPlayerState } = useMediaPlayerSync({
+  const { 
+    playerState, 
+    isLoading, 
+    syncFromRemote, 
+    setPlayerState,
+    availableSpeakers,
+    combinedSources 
+  } = useMediaPlayerSync({
     entityId,
     enabled: isConnected && !!entityId,
     pollInterval: 1500,
   });
 
-  console.log('MediaPlayer render:', { entityId, isConnected, isLoading, hasPlayerState: !!playerState });
+  console.log('MediaPlayer render:', { 
+    entityId, 
+    isConnected, 
+    isLoading, 
+    hasPlayerState: !!playerState,
+    availableSpeakers: availableSpeakers.length,
+    combinedSources: combinedSources.length
+  });
 
   // Optimistic handlers with immediate UI update
   const handlePlayPause = async () => {
@@ -346,10 +360,11 @@ export const MediaPlayer = ({ entityId, isConnected }: MediaPlayerProps) => {
                   onMuteToggle={handleMuteToggle}
                 />
 
-                {playerState.availableSources.length > 0 && (
+                {combinedSources.length > 0 && (
                   <SpeakerSelector
                     currentSource={playerState.source}
-                    availableSources={playerState.availableSources}
+                    spotifySources={playerState.availableSources}
+                    availableSpeakers={availableSpeakers}
                     onSourceChange={handleSourceChange}
                   />
                 )}

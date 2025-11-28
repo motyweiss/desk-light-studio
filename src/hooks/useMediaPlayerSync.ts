@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { homeAssistant, type MediaPlayerEntity } from '@/services/homeAssistant';
 import type { MediaPlayerState } from '@/types/mediaPlayer';
 
@@ -12,6 +12,7 @@ export const useMediaPlayerSync = (config: UseMediaPlayerSyncConfig) => {
   const { entityId, enabled, pollInterval = 1500 } = config;
   const [playerState, setPlayerState] = useState<MediaPlayerState | null>(null);
   const [isLoading, setIsLoading] = useState(enabled && !!entityId);
+  const [availableSpeakers, setAvailableSpeakers] = useState<MediaPlayerEntity[]>([]);
   const pollTimerRef = useRef<NodeJS.Timeout>();
   const positionIntervalRef = useRef<NodeJS.Timeout>();
   const lastPositionUpdateRef = useRef<Date | null>(null);
@@ -198,10 +199,38 @@ export const useMediaPlayerSync = (config: UseMediaPlayerSyncConfig) => {
     return () => window.removeEventListener('focus', handleFocus);
   }, [enabled, syncFromRemote]);
 
+  // Load available speakers on mount
+  useEffect(() => {
+    const loadSpeakers = async () => {
+      if (!enabled) return;
+      
+      try {
+        const speakers = await homeAssistant.getAvailableSpeakers();
+        setAvailableSpeakers(speakers);
+      } catch (error) {
+        console.error('Failed to load available speakers:', error);
+      }
+    };
+
+    loadSpeakers();
+  }, [enabled]);
+
+  // Combine Spotify sources with available speakers
+  const combinedSources = useMemo(() => {
+    const spotifySources = playerState?.availableSources || [];
+    const speakerNames = availableSpeakers
+      .map(s => s.attributes.friendly_name || s.entity_id)
+      .filter(name => !spotifySources.includes(name)); // Avoid duplicates
+    
+    return [...spotifySources, ...speakerNames];
+  }, [playerState?.availableSources, availableSpeakers]);
+
   return { 
     playerState, 
     isLoading, 
     syncFromRemote,
-    setPlayerState 
+    setPlayerState,
+    availableSpeakers,
+    combinedSources
   };
 };
