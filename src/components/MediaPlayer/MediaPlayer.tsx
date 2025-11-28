@@ -112,26 +112,38 @@ export const MediaPlayer = ({ entityId, isConnected }: MediaPlayerProps) => {
           ease: [0.19, 1, 0.22, 1] // Smooth expo ease out
         }}
       >
-        {/* Minimize/Maximize Button */}
+        {/* Minimize/Maximize Button - Centered at top */}
         <motion.button
           onClick={() => setIsMinimized(!isMinimized)}
-          className="absolute top-3 right-6 z-10 w-10 h-10 rounded-full bg-white/15 hover:bg-white/25 flex items-center justify-center transition-all duration-300 backdrop-blur-sm border border-white/20"
+          className="absolute left-1/2 -translate-x-1/2 z-10 w-12 h-12 rounded-full bg-white/10 backdrop-blur-xl border border-white/30 flex items-center justify-center shadow-[0_4px_16px_rgba(0,0,0,0.1)]"
+          style={{ top: '-30%' }}
           whileHover={{ 
-            scale: 1.15,
-            backgroundColor: 'rgba(255, 255, 255, 0.3)'
+            scale: 1.12,
+            backgroundColor: 'rgba(255, 255, 255, 0.15)',
+            borderColor: 'rgba(255, 255, 255, 0.4)',
+            boxShadow: '0 6px 20px rgba(0, 0, 0, 0.15)'
           }}
-          whileTap={{ scale: 0.9 }}
+          whileTap={{ 
+            scale: 0.92,
+            backgroundColor: 'rgba(255, 255, 255, 0.2)'
+          }}
           transition={{
             type: "spring",
-            stiffness: 400,
-            damping: 17
+            stiffness: 500,
+            damping: 20
           }}
         >
           <motion.div
-            animate={{ rotate: isMinimized ? 0 : 180 }}
-            transition={{ duration: 0.4, ease: [0.19, 1, 0.22, 1] }}
+            animate={{ 
+              rotate: isMinimized ? 0 : 180,
+              scale: isMinimized ? 1 : 1.05
+            }}
+            transition={{ 
+              duration: 0.5, 
+              ease: [0.19, 1, 0.22, 1]
+            }}
           >
-            <ChevronUp className="w-5 h-5 text-white" />
+            <ChevronUp className="w-6 h-6 text-white drop-shadow-sm" />
           </motion.div>
         </motion.button>
 
@@ -189,9 +201,7 @@ export const MediaPlayer = ({ entityId, isConnected }: MediaPlayerProps) => {
                 onMuteToggle={handleMuteToggle}
               />
 
-              <div className="mr-16">
-                <SourceIndicator appName={playerState.appName} />
-              </div>
+              <SourceIndicator appName={playerState.appName} />
             </div>
           </motion.div>
         ) : (
