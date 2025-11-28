@@ -114,20 +114,9 @@ export const MediaPlayer = ({ entityId, isConnected }: MediaPlayerProps) => {
     setTimeout(syncFromRemote, 200);
   };
 
-  // Show loading state
+  // Show loading state - return null to hide loading message
   if (isLoading) {
-    return (
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="fixed bottom-6 right-6 bg-white/5 backdrop-blur-2xl border border-white/15 rounded-2xl p-4 shadow-lg"
-      >
-        <div className="flex items-center gap-3 text-white/60">
-          <Music className="w-5 h-5 animate-pulse" />
-          <span className="text-sm">Loading media player...</span>
-        </div>
-      </motion.div>
-    );
+    return null;
   }
 
   // Don't render if not connected
