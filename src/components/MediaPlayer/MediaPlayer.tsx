@@ -180,6 +180,28 @@ export const MediaPlayer = ({ entityId, isConnected }: MediaPlayerProps) => {
   const currentTrack = playerState.currentTrack;
   const albumArtUrl = currentTrack?.albumArt ? homeAssistant.getFullImageUrl(currentTrack.albumArt) : null;
 
+  // Animation variants for staggered entry
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.08,
+        delayChildren: 0.2
+      }
+    }
+  };
+
+  const itemVariants = {
+    hidden: { opacity: 0, y: 10, scale: 0.95 },
+    visible: { 
+      opacity: 1, 
+      y: 0, 
+      scale: 1,
+      transition: { duration: 0.4, ease: [0.25, 0.1, 0.25, 1] as any }
+    }
+  };
+
   return (
     <motion.div
       initial={{ y: 150, opacity: 0 }}
@@ -205,73 +227,71 @@ export const MediaPlayer = ({ entityId, isConnected }: MediaPlayerProps) => {
           ease: [0.25, 0.1, 0.25, 1]
         }}
       >
-        {/* Minimize/Maximize Button */}
-        <motion.button
-          onClick={() => setIsMinimized(!isMinimized)}
-          className="absolute left-1/2 -translate-x-1/2 z-10 w-9 h-9 rounded-full bg-white/5 backdrop-blur-2xl border border-white/15 flex items-center justify-center shadow-sm"
-          style={{ top: '-18px' }}
-          whileHover={{ 
-            backgroundColor: 'rgba(255, 255, 255, 0.08)',
-            borderColor: 'rgba(255, 255, 255, 0.25)'
-          }}
-          whileTap={{ 
-            scale: 0.95,
-            backgroundColor: 'rgba(255, 255, 255, 0.1)'
-          }}
-          transition={{
-            duration: 0.15,
-            ease: "easeOut"
-          }}
-        >
-          <motion.div
-            animate={{ 
-              rotate: isMinimized ? 0 : 180
-            }}
-            transition={{ 
-              duration: 0.4, 
-              ease: [0.25, 0.1, 0.25, 1]
-            }}
-          >
-            <ChevronUp className="w-4 h-4 text-white" />
-          </motion.div>
-        </motion.button>
 
         {isMinimized ? (
           /* Mini Player */
           <motion.div
             key="mini"
-            initial={{ opacity: 0, y: 5 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -5 }}
-            transition={{ 
-              duration: 0.3,
-              ease: [0.25, 0.1, 0.25, 1]
-            }}
+            initial="hidden"
+            animate="visible"
+            variants={containerVariants}
             className="flex items-center gap-4 px-6 py-3 max-w-7xl mx-auto"
           >
-            {/* Album Art - smaller */}
-            <div className="relative w-14 h-14 rounded-lg overflow-hidden bg-white/5 flex-shrink-0">
-              {albumArtUrl ? (
-                <img 
-                  src={albumArtUrl} 
-                  alt="Album art" 
-                  className="w-full h-full object-cover"
-                />
-              ) : null}
-            </div>
+            {/* Album Art with Chevron Button */}
+            <motion.div variants={itemVariants} className="relative flex-shrink-0">
+              <motion.button
+                onClick={() => setIsMinimized(!isMinimized)}
+                className="absolute -top-5 left-1/2 -translate-x-1/2 z-10 w-9 h-9 rounded-full bg-[hsl(28_18%_20%)] border border-white/20 flex items-center justify-center"
+                whileHover={{ 
+                  backgroundColor: 'hsl(28 18% 25%)',
+                  scale: 1.05,
+                  borderColor: 'rgba(255, 255, 255, 0.3)'
+                }}
+                whileTap={{ 
+                  scale: 0.95,
+                  backgroundColor: 'hsl(28 18% 22%)'
+                }}
+                transition={{
+                  duration: 0.15,
+                  ease: "easeOut"
+                }}
+              >
+                <motion.div
+                  animate={{ 
+                    rotate: isMinimized ? 0 : 180
+                  }}
+                  transition={{ 
+                    duration: 0.3, 
+                    ease: [0.34, 1.56, 0.64, 1]
+                  }}
+                >
+                  <ChevronUp className="w-4 h-4 text-white" />
+                </motion.div>
+              </motion.button>
+
+              <div className="w-14 h-14 rounded-lg overflow-hidden bg-white/5">
+                {albumArtUrl ? (
+                  <img 
+                    src={albumArtUrl} 
+                    alt="Album art" 
+                    className="w-full h-full object-cover"
+                  />
+                ) : null}
+              </div>
+            </motion.div>
 
             {/* Track Info */}
-            <div className="flex-1 min-w-0">
+            <motion.div variants={itemVariants} className="flex-1 min-w-0">
               <h3 className="text-white font-light text-base truncate">
                 {currentTrack?.title || 'No media playing'}
               </h3>
               <p className="text-white/40 text-xs truncate">
                 {currentTrack?.artist || 'Unknown Artist'}
               </p>
-            </div>
+            </motion.div>
 
             {/* Mini Controls */}
-            <div className="flex items-center gap-6">
+            <motion.div variants={itemVariants} className="flex items-center gap-6">
               <PlaybackControls
                 isPlaying={playerState.isPlaying}
                 shuffle={playerState.shuffle}
@@ -283,35 +303,68 @@ export const MediaPlayer = ({ entityId, isConnected }: MediaPlayerProps) => {
                 onRepeatToggle={handleRepeatToggle}
               />
 
-              <VolumeControl
-                volume={playerState.volume}
-                isMuted={playerState.isMuted}
-                onVolumeChange={handleVolumeChange}
-                onMuteToggle={handleMuteToggle}
-              />
+              <motion.div variants={itemVariants}>
+                <VolumeControl
+                  volume={playerState.volume}
+                  isMuted={playerState.isMuted}
+                  onVolumeChange={handleVolumeChange}
+                  onMuteToggle={handleMuteToggle}
+                />
+              </motion.div>
 
-              <SourceIndicator appName={playerState.appName} />
-            </div>
+              <motion.div variants={itemVariants}>
+                <SourceIndicator appName={playerState.appName} />
+              </motion.div>
+            </motion.div>
           </motion.div>
         ) : (
           /* Full Player */
           <motion.div
             key="full"
-            initial={{ opacity: 0, y: -5 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 5 }}
-            transition={{ 
-              duration: 0.3,
-              ease: [0.25, 0.1, 0.25, 1]
-            }}
+            initial="hidden"
+            animate="visible"
+            variants={containerVariants}
             className="space-y-4 px-6 py-6 max-w-7xl mx-auto"
           >
             {/* Top Row: Album Art + Track Info + Source */}
-            <div className="flex items-start gap-4">
-              <AlbumArt 
-                albumArt={albumArtUrl} 
-                isPlaying={playerState.isPlaying}
-              />
+            <motion.div variants={itemVariants} className="flex items-start gap-4">
+              {/* Album Art with Chevron Button */}
+              <div className="relative">
+                <motion.button
+                  onClick={() => setIsMinimized(!isMinimized)}
+                  className="absolute -top-5 left-1/2 -translate-x-1/2 z-10 w-9 h-9 rounded-full bg-[hsl(28_18%_20%)] border border-white/20 flex items-center justify-center"
+                  whileHover={{ 
+                    backgroundColor: 'hsl(28 18% 25%)',
+                    scale: 1.05,
+                    borderColor: 'rgba(255, 255, 255, 0.3)'
+                  }}
+                  whileTap={{ 
+                    scale: 0.95,
+                    backgroundColor: 'hsl(28 18% 22%)'
+                  }}
+                  transition={{
+                    duration: 0.15,
+                    ease: "easeOut"
+                  }}
+                >
+                  <motion.div
+                    animate={{ 
+                      rotate: isMinimized ? 0 : 180
+                    }}
+                    transition={{ 
+                      duration: 0.3, 
+                      ease: [0.34, 1.56, 0.64, 1]
+                    }}
+                  >
+                    <ChevronUp className="w-4 h-4 text-white" />
+                  </motion.div>
+                </motion.button>
+
+                <AlbumArt 
+                  albumArt={albumArtUrl} 
+                  isPlaying={playerState.isPlaying}
+                />
+              </div>
               
               <div className="flex-1 min-w-0">
                 <h3 className="text-white font-light text-lg truncate">
@@ -330,19 +383,21 @@ export const MediaPlayer = ({ entityId, isConnected }: MediaPlayerProps) => {
               <div className="flex items-center gap-3">
                 <SourceIndicator appName={playerState.appName} />
               </div>
-            </div>
+            </motion.div>
 
             {/* Progress Bar */}
             {currentTrack && (
-              <ProgressBar
-                position={currentTrack.position}
-                duration={currentTrack.duration}
-                onSeek={handleSeek}
-              />
+              <motion.div variants={itemVariants}>
+                <ProgressBar
+                  position={currentTrack.position}
+                  duration={currentTrack.duration}
+                  onSeek={handleSeek}
+                />
+              </motion.div>
             )}
 
             {/* Bottom Row: Playback Controls + Volume + Speaker Selector */}
-            <div className="flex items-center justify-between">
+            <motion.div variants={itemVariants} className="flex items-center justify-between">
               <div className="flex-1">
                 <PlaybackControls
                   isPlaying={playerState.isPlaying}
@@ -373,7 +428,7 @@ export const MediaPlayer = ({ entityId, isConnected }: MediaPlayerProps) => {
                   />
                 )}
               </div>
-            </div>
+            </motion.div>
           </motion.div>
         )}
       </motion.div>
