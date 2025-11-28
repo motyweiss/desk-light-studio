@@ -3,6 +3,7 @@ import { motion } from "framer-motion";
 import { Sun, Thermometer, Droplets, Wind } from "lucide-react";
 import { DeskDisplay } from "@/components/DeskDisplay";
 import { RoomInfoPanel } from "@/components/RoomInfoPanel";
+import { AmbientGlowLayers } from "@/components/AmbientGlowLayers";
 import { LoadingOverlay } from "@/components/LoadingOverlay";
 import { SettingsButton } from "@/components/SettingsButton";
 import { ConnectionStatusIndicator } from "@/components/ConnectionStatusIndicator";
@@ -825,43 +826,49 @@ const Index = () => {
 
       <motion.div
         className="min-h-[100dvh] flex items-center justify-center p-4 md:p-8 relative overflow-hidden"
-        animate={{
-          backgroundColor: lightingState === "000" 
-            ? "hsl(28 20% 18%)" // All off - darkest
-            : lightingState === "001" 
-            ? "hsl(32 22% 20%)" // Monitor only - subtle warm
-            : lightingState === "010"
-            ? "hsl(34 24% 21%)" // Desk lamp only - warm
-            : lightingState === "011"
-            ? "hsl(36 25% 23%)" // Desk + Monitor - warmer
-            : lightingState === "100"
-            ? "hsl(35 23% 22%)" // Spotlight only - bright warm
-            : lightingState === "101"
-            ? "hsl(37 26% 24%)" // Spotlight + Monitor - brighter
-            : lightingState === "110"
-            ? "hsl(38 27% 25%)" // Spotlight + Desk - very warm
-            : "hsl(40 28% 26%)" // All on - brightest and warmest
-        }}
-        transition={{
-          duration: spotlightIntensity > 0 || deskLampIntensity > 0 || monitorLightIntensity > 0 ? 1.8 : 0.8,
-          ease: spotlightIntensity > 0 || deskLampIntensity > 0 || monitorLightIntensity > 0 
-            ? [0.22, 0.03, 0.26, 1] 
-            : [0.33, 0.0, 0.2, 1]
-        }}
         style={{
           backgroundImage: "url('/bg.png')",
           backgroundSize: "cover",
           backgroundPosition: "center",
           backgroundRepeat: "no-repeat",
+          backgroundColor: "hsl(28 20% 18%)",
         }}
       >
-      {/* Subtle ambient overlay for depth */}
-      <div 
-        className="fixed inset-0 pointer-events-none z-0"
-        style={{
-          background: 'linear-gradient(135deg, hsl(38 15% 45% / 0.02) 0%, hsl(35 12% 42% / 0.03) 100%)',
-        }}
-      />
+        {/* Dynamic color overlay that responds to lighting */}
+        <motion.div
+          className="fixed inset-0 pointer-events-none z-0"
+          animate={{
+            backgroundColor: lightingState === "000" 
+              ? "hsl(28 20% 18% / 0)" // All off - transparent (show base bg)
+              : lightingState === "001" 
+              ? "hsl(32 22% 20% / 0.15)" // Monitor only - subtle warm overlay
+              : lightingState === "010"
+              ? "hsl(34 24% 21% / 0.2)" // Desk lamp only - warm overlay
+              : lightingState === "011"
+              ? "hsl(36 25% 23% / 0.25)" // Desk + Monitor - warmer overlay
+              : lightingState === "100"
+              ? "hsl(35 23% 22% / 0.22)" // Spotlight only - bright warm overlay
+              : lightingState === "101"
+              ? "hsl(37 26% 24% / 0.28)" // Spotlight + Monitor - brighter overlay
+              : lightingState === "110"
+              ? "hsl(38 27% 25% / 0.3)" // Spotlight + Desk - very warm overlay
+              : "hsl(40 28% 26% / 0.35)" // All on - brightest overlay
+          }}
+          transition={{
+            duration: spotlightIntensity > 0 || deskLampIntensity > 0 || monitorLightIntensity > 0 ? 1.8 : 0.8,
+            ease: spotlightIntensity > 0 || deskLampIntensity > 0 || monitorLightIntensity > 0 
+              ? [0.22, 0.03, 0.26, 1] 
+              : [0.33, 0.0, 0.2, 1]
+          }}
+        />
+
+        {/* Ambient glow effects */}
+        <AmbientGlowLayers
+          spotlightIntensity={spotlightIntensity}
+          deskLampIntensity={deskLampIntensity}
+          monitorLightIntensity={monitorLightIntensity}
+          allLightsOn={masterSwitchOn}
+        />
 
       {/* Responsive Layout Container */}
       <div className="flex flex-col md:flex-row items-center gap-6 md:gap-12 max-w-7xl w-full relative z-10 px-5 md:px-0 pb-20 md:pb-0">
