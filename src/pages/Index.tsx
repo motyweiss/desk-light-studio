@@ -21,7 +21,7 @@ import desk011 from "@/assets/desk-011.png";
 import desk100 from "@/assets/desk-100.png";
 import desk101 from "@/assets/desk-101.png";
 import desk110 from "@/assets/desk-110.png";
-import desk111 from "@/assets/desk-111.png";
+import desk111 from "@/assets/desk-111-temp.png";
 
 const Index = () => {
   const [isLoading, setIsLoading] = useState(true);
