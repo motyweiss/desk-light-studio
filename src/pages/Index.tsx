@@ -763,7 +763,7 @@ const Index = () => {
               className="w-12 h-12 rounded-full backdrop-blur-xl border-2 transition-all duration-500 flex-shrink-0"
               whileHover={{
                 backgroundColor: masterSwitchOn ? 'rgba(255, 255, 255, 0.22)' : 'rgba(255, 255, 255, 0.05)',
-                borderColor: masterSwitchOn ? 'rgba(255, 255, 255, 0.35)' : 'rgba(255, 255, 255, 0.3)',
+                borderColor: masterSwitchOn ? 'rgba(255, 255, 255, 0.35)' : 'rgba(255, 255, 255, 0.15)',
               }}
               whileTap={{ scale: 0.92 }}
               initial={{ opacity: 0, scale: 0.8 }}
@@ -771,7 +771,7 @@ const Index = () => {
                 opacity: isLoaded ? 1 : 0,
                 scale: isLoaded ? 1 : 0.8,
                 backgroundColor: masterSwitchOn ? 'rgba(255, 255, 255, 0.18)' : 'rgba(255, 255, 255, 0)',
-                borderColor: masterSwitchOn ? 'rgba(255, 255, 255, 0.3)' : 'rgba(255, 255, 255, 0.2)'
+                borderColor: masterSwitchOn ? 'rgba(255, 255, 255, 0.3)' : 'rgba(255, 255, 255, 0.1)'
               }}
               transition={{ 
                 duration: 0.6,
