@@ -46,6 +46,7 @@ export const DeskDisplay = ({
   isLoaded
 }: DeskDisplayProps) => {
   const [currentState, setCurrentState] = useState("000");
+  const [previousState, setPreviousState] = useState("000");
   const [isHovered, setIsHovered] = useState(false);
   const [isTransitioning, setIsTransitioning] = useState(false);
 
@@ -57,6 +58,11 @@ export const DeskDisplay = ({
     setIsHovered(false);
   };
 
+  // Count how many lights are on in a state
+  const countLightsOn = (state: string) => {
+    return state.split('').filter(bit => bit === '1').length;
+  };
+
   // Calculate current lighting state based on intensity
   const getCurrentState = () => {
     const spotlightBit = spotlightIntensity > 0 ? "1" : "0";
@@ -65,28 +71,41 @@ export const DeskDisplay = ({
     return `${spotlightBit}${deskLampBit}${monitorLightBit}`;
   };
 
+  // Determine if we're turning on or off
+  const isTurningOn = countLightsOn(currentState) > countLightsOn(previousState);
+
   // Update state with smooth transition and transition indicator
   useEffect(() => {
     const newState = getCurrentState();
     if (newState !== currentState) {
+      setPreviousState(currentState);
       setIsTransitioning(true);
       setCurrentState(newState);
       
       // Reset transition state after animation completes
+      const lightsOnNew = countLightsOn(newState);
+      const lightsOnCurrent = countLightsOn(currentState);
+      const duration = lightsOnNew > lightsOnCurrent ? 1800 : 800;
+      
       const timer = setTimeout(() => {
         setIsTransitioning(false);
-      }, 1500);
+      }, duration);
       
       return () => clearTimeout(timer);
     }
   }, [spotlightIntensity, deskLampIntensity, monitorLightIntensity, currentState]);
 
-  // Unified easing and transition system for smooth crossfades
-  const lightEasing = [0.25, 0.1, 0.25, 1] as const;
-  const transitionDuration = {
-    fast: 0.5,
-    medium: 1.0,
-    slow: 2.0
+  // Smooth easing for transitions
+  const lightEasingOn = [0.22, 0.03, 0.26, 1] as const; // Soft on
+  const lightEasingOff = [0.33, 0.0, 0.2, 1] as const; // Quick soft off
+  
+  // Dynamic transition durations
+  const getTransitionDuration = () => {
+    return isTurningOn ? 1.8 : 0.8;
+  };
+  
+  const getEasing = () => {
+    return isTurningOn ? lightEasingOn : lightEasingOff;
   };
 
   return (
@@ -134,30 +153,28 @@ export const DeskDisplay = ({
         >
           {Object.entries(lightingStates).map(([state, image]) => {
             const isActive = state === currentState;
+            const duration = getTransitionDuration();
+            const easing = getEasing();
+            
             return (
               <motion.img
                 key={state}
                 src={image}
                 alt={`Desk lighting state ${state}`}
                 className="absolute inset-0 w-full h-full object-cover"
-                initial={{ opacity: 0, scale: 1.01 }}
+                initial={{ opacity: 0 }}
                 animate={{ 
                   opacity: isActive && isLoaded ? 1 : 0,
-                  scale: isActive && isLoaded ? 1 : 1.01,
                 }}
                 transition={{ 
                   opacity: {
-                    duration: transitionDuration.slow,
-                    ease: lightEasing,
+                    duration: duration,
+                    ease: easing,
                   },
-                  scale: {
-                    duration: transitionDuration.slow,
-                    ease: lightEasing,
-                  }
                 }}
                 style={{
                   pointerEvents: isActive ? 'auto' : 'none',
-                  willChange: 'opacity, transform',
+                  willChange: 'opacity',
                 }}
               />
             );
