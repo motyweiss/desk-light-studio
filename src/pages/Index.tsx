@@ -1089,19 +1089,22 @@ const Index = () => {
               { 
                 id: 'deskLamp', 
                 label: 'Desk Lamp', 
-                intensity: deskLampIntensity, 
+                intensity: deskLampIntensity,
+                isPending: pendingLights.has('deskLamp'),
                 onChange: createLightChangeHandler('deskLamp', setDeskLampIntensity)
               },
               { 
                 id: 'monitorLight', 
                 label: 'Monitor Back Light', 
-                intensity: monitorLightIntensity, 
+                intensity: monitorLightIntensity,
+                isPending: pendingLights.has('monitorLight'),
                 onChange: createLightChangeHandler('monitorLight', setMonitorLightIntensity)
               },
               { 
                 id: 'spotlight', 
                 label: 'Spotlight', 
-                intensity: spotlightIntensity, 
+                intensity: spotlightIntensity,
+                isPending: pendingLights.has('spotlight'),
                 onChange: createLightChangeHandler('spotlight', setSpotlightIntensity)
               },
             ]}
