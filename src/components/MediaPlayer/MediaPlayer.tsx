@@ -96,9 +96,9 @@ export const MediaPlayer = ({ entityId, isConnected }: MediaPlayerProps) => {
         opacity: 1,
       }}
       transition={{ 
-        duration: 0.8, 
-        ease: [0.22, 0.03, 0.26, 1],
-        delay: 0.3
+        duration: 0.9, 
+        ease: [0.19, 1, 0.22, 1], // Smooth expo ease out
+        delay: 0.2
       }}
       className="fixed bottom-0 left-0 right-0 z-50 w-full"
     >
@@ -106,33 +106,47 @@ export const MediaPlayer = ({ entityId, isConnected }: MediaPlayerProps) => {
         className="bg-white/8 backdrop-blur-[24px] border-t border-white/20 rounded-t-2xl shadow-[0_4px_24px_rgba(0,0,0,0.15)] overflow-hidden max-w-none relative"
         animate={{ 
           height: isMinimized ? '80px' : 'auto',
-          paddingTop: isMinimized ? '12px' : '24px',
-          paddingBottom: isMinimized ? '12px' : '24px',
         }}
-        transition={{ duration: 0.5, ease: [0.22, 0.03, 0.26, 1] }}
+        transition={{ 
+          duration: 0.6, 
+          ease: [0.19, 1, 0.22, 1] // Smooth expo ease out
+        }}
       >
         {/* Minimize/Maximize Button */}
         <motion.button
           onClick={() => setIsMinimized(!isMinimized)}
-          className="absolute top-3 right-6 z-10 w-10 h-10 rounded-full bg-white/15 hover:bg-white/25 flex items-center justify-center transition-colors backdrop-blur-sm border border-white/20"
-          whileHover={{ scale: 1.1 }}
-          whileTap={{ scale: 0.95 }}
+          className="absolute top-3 right-6 z-10 w-10 h-10 rounded-full bg-white/15 hover:bg-white/25 flex items-center justify-center transition-all duration-300 backdrop-blur-sm border border-white/20"
+          whileHover={{ 
+            scale: 1.15,
+            backgroundColor: 'rgba(255, 255, 255, 0.3)'
+          }}
+          whileTap={{ scale: 0.9 }}
+          transition={{
+            type: "spring",
+            stiffness: 400,
+            damping: 17
+          }}
         >
-          {isMinimized ? (
+          <motion.div
+            animate={{ rotate: isMinimized ? 0 : 180 }}
+            transition={{ duration: 0.4, ease: [0.19, 1, 0.22, 1] }}
+          >
             <ChevronUp className="w-5 h-5 text-white" />
-          ) : (
-            <ChevronDown className="w-5 h-5 text-white" />
-          )}
+          </motion.div>
         </motion.button>
 
         {isMinimized ? (
           /* Mini Player */
           <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.3 }}
-            className="flex items-center gap-4 px-6 max-w-7xl mx-auto"
+            key="mini"
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            transition={{ 
+              duration: 0.4,
+              ease: [0.19, 1, 0.22, 1]
+            }}
+            className="flex items-center gap-4 px-6 py-3 max-w-7xl mx-auto"
           >
             {/* Album Art - smaller */}
             <div className="relative w-14 h-14 rounded-lg overflow-hidden bg-white/5 flex-shrink-0">
@@ -183,11 +197,15 @@ export const MediaPlayer = ({ entityId, isConnected }: MediaPlayerProps) => {
         ) : (
           /* Full Player */
           <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.3 }}
-            className="space-y-4 px-6 max-w-7xl mx-auto"
+            key="full"
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 10 }}
+            transition={{ 
+              duration: 0.4,
+              ease: [0.19, 1, 0.22, 1]
+            }}
+            className="space-y-4 px-6 py-6 max-w-7xl mx-auto"
           >
             {/* Top Row: Album Art + Track Info + Source */}
             <div className="flex items-start gap-4">
