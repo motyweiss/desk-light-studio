@@ -82,11 +82,11 @@ export const DeskDisplay = ({
   }, [spotlightIntensity, deskLampIntensity, monitorLightIntensity, currentState]);
 
   // Unified easing and transition system for smooth crossfades
-  const lightEasing = [0.22, 0.03, 0.26, 1] as const;
+  const lightEasing = [0.25, 0.1, 0.25, 1] as const;
   const transitionDuration = {
     fast: 0.5,
     medium: 1.0,
-    slow: 1.5
+    slow: 2.0
   };
 
   return (
@@ -105,19 +105,24 @@ export const DeskDisplay = ({
               src={image}
               alt={`Desk lighting state ${state}`}
               className="absolute inset-0 w-full h-full object-cover"
-              initial={{ opacity: 0 }}
+              initial={{ opacity: 0, scale: 1.01 }}
               animate={{ 
                 opacity: isActive && isLoaded ? 1 : 0,
+                scale: isActive && isLoaded ? 1 : 1.01,
               }}
               transition={{ 
                 opacity: {
                   duration: transitionDuration.slow,
                   ease: lightEasing,
                 },
+                scale: {
+                  duration: transitionDuration.slow,
+                  ease: lightEasing,
+                }
               }}
               style={{
                 pointerEvents: isActive ? 'auto' : 'none',
-                willChange: 'opacity',
+                willChange: 'opacity, transform',
               }}
             />
           );
