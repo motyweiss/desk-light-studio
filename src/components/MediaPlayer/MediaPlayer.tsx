@@ -1,4 +1,4 @@
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useState } from 'react';
 import { ChevronUp, Music } from 'lucide-react';
 import { homeAssistant } from '@/services/homeAssistant';
@@ -186,19 +186,32 @@ export const MediaPlayer = ({ entityId, isConnected }: MediaPlayerProps) => {
     visible: {
       opacity: 1,
       transition: {
-        staggerChildren: 0.08,
-        delayChildren: 0.2
+        staggerChildren: 0.06,
+        delayChildren: 0.1
+      }
+    },
+    exit: {
+      opacity: 0,
+      transition: {
+        staggerChildren: 0.04,
+        staggerDirection: -1
       }
     }
   };
 
   const itemVariants = {
-    hidden: { opacity: 0, y: 10, scale: 0.95 },
+    hidden: { opacity: 0, y: 8, scale: 0.97 },
     visible: { 
       opacity: 1, 
       y: 0, 
       scale: 1,
-      transition: { duration: 0.4, ease: [0.25, 0.1, 0.25, 1] as any }
+      transition: { duration: 0.3, ease: [0.25, 0.1, 0.25, 1] as any }
+    },
+    exit: {
+      opacity: 0,
+      y: -8,
+      scale: 0.97,
+      transition: { duration: 0.2, ease: [0.25, 0.1, 0.25, 1] as any }
     }
   };
 
@@ -250,7 +263,7 @@ export const MediaPlayer = ({ entityId, isConnected }: MediaPlayerProps) => {
               rotate: isMinimized ? 0 : 180
             }}
             transition={{ 
-              duration: 0.3, 
+              duration: 0.4, 
               ease: [0.34, 1.56, 0.64, 1]
             }}
           >
@@ -258,17 +271,23 @@ export const MediaPlayer = ({ entityId, isConnected }: MediaPlayerProps) => {
           </motion.div>
         </motion.button>
 
-        {isMinimized ? (
+        <AnimatePresence mode="wait" initial={false}>
+          {isMinimized ? (
           /* Mini Player */
           <motion.div
             key="mini"
             initial="hidden"
             animate="visible"
+            exit="exit"
             variants={containerVariants}
             className="flex items-center gap-4 px-6 py-3 max-w-7xl mx-auto"
           >
             {/* Album Art */}
-            <motion.div variants={itemVariants} className="relative flex-shrink-0">
+            <motion.div 
+              variants={itemVariants} 
+              layoutId="album-art"
+              className="relative flex-shrink-0"
+            >
               <div className="w-14 h-14 rounded-lg overflow-hidden bg-white/5">
                 {albumArtUrl ? (
                   <img 
@@ -281,7 +300,11 @@ export const MediaPlayer = ({ entityId, isConnected }: MediaPlayerProps) => {
             </motion.div>
 
             {/* Track Info */}
-            <motion.div variants={itemVariants} className="flex-1 min-w-0">
+            <motion.div 
+              variants={itemVariants} 
+              layoutId="track-info"
+              className="flex-1 min-w-0"
+            >
               <h3 className="text-white font-light text-base truncate">
                 {currentTrack?.title || 'No media playing'}
               </h3>
@@ -313,41 +336,46 @@ export const MediaPlayer = ({ entityId, isConnected }: MediaPlayerProps) => {
               <SourceIndicator appName={playerState.appName} />
             </motion.div>
           </motion.div>
-        ) : (
-          /* Full Player */
-          <motion.div
-            key="full"
-            initial="hidden"
-            animate="visible"
-            variants={containerVariants}
-            className="space-y-4 px-6 py-6 max-w-7xl mx-auto"
-          >
-            {/* Top Row: Album Art + Track Info + Source */}
-            <motion.div variants={itemVariants} className="flex items-start gap-4">
-              {/* Album Art */}
-              <AlbumArt 
-                albumArt={albumArtUrl} 
-                isPlaying={playerState.isPlaying}
-              />
-              
-              <div className="flex-1 min-w-0">
-                <h3 className="text-white font-light text-lg truncate">
-                  {currentTrack?.title || 'No media playing'}
-                </h3>
-                <p className="text-white/40 text-sm truncate">
-                  {currentTrack?.artist || 'Unknown Artist'}
-                </p>
-                {currentTrack?.album && (
-                  <p className="text-white/30 text-xs truncate">
-                    {currentTrack.album}
+          ) : (
+            /* Full Player */
+            <motion.div
+              key="full"
+              initial="hidden"
+              animate="visible"
+              exit="exit"
+              variants={containerVariants}
+              className="space-y-4 px-6 py-6 max-w-7xl mx-auto"
+            >
+              {/* Top Row: Album Art + Track Info + Source */}
+              <motion.div variants={itemVariants} className="flex items-start gap-4">
+                {/* Album Art */}
+                <motion.div layoutId="album-art">
+                  <AlbumArt 
+                    albumArt={albumArtUrl} 
+                    isPlaying={playerState.isPlaying}
+                  />
+                </motion.div>
+                
+                 <motion.div layoutId="track-info" className="flex-1 min-w-0">
+                  <h3 className="text-white font-light text-lg truncate">
+                    {currentTrack?.title || 'No media playing'}
+                  </h3>
+                  <p className="text-white/40 text-sm truncate">
+                    {currentTrack?.artist || 'Unknown Artist'}
                   </p>
-                )}
-              </div>
+                  {currentTrack?.album && (
+                    <p className="text-white/30 text-xs truncate">
+                      {currentTrack.album}
+                    </p>
+                  )}
+                </motion.div>
 
-              <div className="flex items-center gap-3">
-                <SourceIndicator appName={playerState.appName} />
-              </div>
-            </motion.div>
+                <motion.div variants={itemVariants}>
+                  <div className="flex items-center gap-3">
+                    <SourceIndicator appName={playerState.appName} />
+                  </div>
+                </motion.div>
+              </motion.div>
 
             {/* Progress Bar */}
             {currentTrack && (
@@ -395,6 +423,7 @@ export const MediaPlayer = ({ entityId, isConnected }: MediaPlayerProps) => {
             </motion.div>
           </motion.div>
         )}
+      </AnimatePresence>
       </motion.div>
     </motion.div>
   );
