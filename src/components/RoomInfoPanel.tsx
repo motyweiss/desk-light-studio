@@ -113,8 +113,8 @@ export const RoomInfoPanel = ({ roomName, temperature, humidity, airQuality, mas
           animate={{ 
             opacity: isLoaded ? 1 : 0,
             scale: isLoaded ? 1 : 0.9,
-            backgroundColor: masterSwitchOn ? 'rgba(255, 255, 255, 0.18)' : 'rgba(255, 255, 255, 0)',
-            borderColor: masterSwitchOn ? 'rgba(255, 255, 255, 0.3)' : 'rgba(255, 255, 255, 0.1)'
+            backgroundColor: masterSwitchOn ? 'rgba(255, 255, 255, 0.08)' : 'rgba(255, 255, 255, 0)',
+            borderColor: masterSwitchOn ? 'rgba(255, 255, 255, 0.25)' : 'rgba(255, 255, 255, 0.1)'
           }}
           transition={{ 
             duration: 0.6,
@@ -124,8 +124,8 @@ export const RoomInfoPanel = ({ roomName, temperature, humidity, airQuality, mas
           onClick={() => onMasterToggle(!masterSwitchOn)}
           className="w-10 h-10 rounded-full backdrop-blur-xl border transition-all duration-500 flex-shrink-0"
           whileHover={{
-            backgroundColor: masterSwitchOn ? 'rgba(255, 255, 255, 0.22)' : 'rgba(255, 255, 255, 0.05)',
-            borderColor: masterSwitchOn ? 'rgba(255, 255, 255, 0.35)' : 'rgba(255, 255, 255, 0.15)',
+            backgroundColor: masterSwitchOn ? 'rgba(255, 255, 255, 0.12)' : 'rgba(255, 255, 255, 0.05)',
+            borderColor: masterSwitchOn ? 'rgba(255, 255, 255, 0.3)' : 'rgba(255, 255, 255, 0.15)',
           }}
           whileTap={{ scale: 0.92 }}
           aria-label="Toggle all lights"
