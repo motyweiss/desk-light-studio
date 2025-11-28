@@ -95,38 +95,80 @@ export const DeskDisplay = ({
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
     >
-      <div className="relative w-full h-full">
+      <div className="relative w-full h-full overflow-hidden rounded-[2rem]">
+        {/* Gradient mask overlay for smooth fade out to background */}
+        <div 
+          className="absolute inset-0 z-20 pointer-events-none"
+          style={{
+            maskImage: `
+              radial-gradient(
+                ellipse 92% 92% at 50% 50%,
+                black 60%,
+                transparent 100%
+              )
+            `,
+            WebkitMaskImage: `
+              radial-gradient(
+                ellipse 92% 92% at 50% 50%,
+                black 60%,
+                transparent 100%
+              )
+            `,
+          }}
+        />
         {/* Stack all 8 images with smooth crossfade transitions */}
-        {Object.entries(lightingStates).map(([state, image]) => {
-          const isActive = state === currentState;
-          return (
-            <motion.img
-              key={state}
-              src={image}
-              alt={`Desk lighting state ${state}`}
-              className="absolute inset-0 w-full h-full object-cover"
-              initial={{ opacity: 0, scale: 1.01 }}
-              animate={{ 
-                opacity: isActive && isLoaded ? 1 : 0,
-                scale: isActive && isLoaded ? 1 : 1.01,
-              }}
-              transition={{ 
-                opacity: {
-                  duration: transitionDuration.slow,
-                  ease: lightEasing,
-                },
-                scale: {
-                  duration: transitionDuration.slow,
-                  ease: lightEasing,
-                }
-              }}
-              style={{
-                pointerEvents: isActive ? 'auto' : 'none',
-                willChange: 'opacity, transform',
-              }}
-            />
-          );
-        })}
+        <div 
+          className="absolute inset-0"
+          style={{
+            maskImage: `
+              radial-gradient(
+                ellipse 95% 95% at 50% 50%,
+                black 65%,
+                rgba(0, 0, 0, 0.3) 85%,
+                transparent 100%
+              )
+            `,
+            WebkitMaskImage: `
+              radial-gradient(
+                ellipse 95% 95% at 50% 50%,
+                black 65%,
+                rgba(0, 0, 0, 0.3) 85%,
+                transparent 100%
+              )
+            `,
+          }}
+        >
+          {Object.entries(lightingStates).map(([state, image]) => {
+            const isActive = state === currentState;
+            return (
+              <motion.img
+                key={state}
+                src={image}
+                alt={`Desk lighting state ${state}`}
+                className="absolute inset-0 w-full h-full object-cover"
+                initial={{ opacity: 0, scale: 1.01 }}
+                animate={{ 
+                  opacity: isActive && isLoaded ? 1 : 0,
+                  scale: isActive && isLoaded ? 1 : 1.01,
+                }}
+                transition={{ 
+                  opacity: {
+                    duration: transitionDuration.slow,
+                    ease: lightEasing,
+                  },
+                  scale: {
+                    duration: transitionDuration.slow,
+                    ease: lightEasing,
+                  }
+                }}
+                style={{
+                  pointerEvents: isActive ? 'auto' : 'none',
+                  willChange: 'opacity, transform',
+                }}
+              />
+            );
+          })}
+        </div>
         
       </div>
 
