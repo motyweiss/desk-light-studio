@@ -115,30 +115,16 @@ export const LightControlCard = ({
     >
       {/* Pending State Overlay */}
       {isPending && (
-        <>
-          <motion.div
-            className="absolute inset-0 bg-white/5"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: [0.3, 0.6, 0.3] }}
-            transition={{ 
-              duration: 1.5, 
-              repeat: Infinity,
-              ease: "easeInOut"
-            }}
-          />
-          {/* Subtle Spinner Indicator */}
-          <motion.div
-            className="absolute top-4 right-4 z-20"
-            initial={{ opacity: 0, scale: 0.8 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.8 }}
-          >
-            <Loader2 
-              className="w-4 h-4 text-white/60 animate-spin" 
-              strokeWidth={2.5}
-            />
-          </motion.div>
-        </>
+        <motion.div
+          className="absolute inset-0 bg-white/5"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: [0.3, 0.6, 0.3] }}
+          transition={{ 
+            duration: 1.5, 
+            repeat: Infinity,
+            ease: "easeInOut"
+          }}
+        />
       )}
 
       {/* Error State Overlay */}
@@ -187,13 +173,28 @@ export const LightControlCard = ({
           </motion.div>
         </div>
 
-        {/* Slider - Always Visible on Right */}
+        {/* Slider with Pending Indicator */}
         <div 
-          className="w-32 flex-shrink-0"
+          className="w-32 flex-shrink-0 flex items-center gap-2.5"
           data-slider
           onClick={(e) => e.stopPropagation()}
           onPointerDown={(e) => e.stopPropagation()}
         >
+          {/* Subtle Spinner - Left of Slider */}
+          {isPending && (
+            <motion.div
+              initial={{ opacity: 0, scale: 0.7 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.7 }}
+              transition={{ duration: 0.2 }}
+            >
+              <Loader2 
+                className="w-3.5 h-3.5 text-white/40 animate-spin" 
+                strokeWidth={2}
+              />
+            </motion.div>
+          )}
+          
           <Slider
             value={[displayNumber]}
             onValueChange={useCallback((values: number[]) => {
