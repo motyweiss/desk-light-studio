@@ -1,6 +1,6 @@
 import { motion, useMotionValue, animate, useMotionValueEvent } from "framer-motion";
 import { Slider } from "@/components/ui/slider";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef, useCallback } from "react";
 import { getIconForLight } from "@/components/icons/LightIcons";
 
 interface LightControlCardProps {
@@ -29,6 +29,7 @@ export const LightControlCard = ({
   const displayValue = useMotionValue(intensity);
   const [displayNumber, setDisplayNumber] = useState(intensity);
   const [isAnimating, setIsAnimating] = useState(false);
+  const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
   
   useMotionValueEvent(displayValue, "change", (latest) => {
     setDisplayNumber(Math.round(latest));
@@ -45,6 +46,15 @@ export const LightControlCard = ({
     
     return controls.stop;
   }, [intensity, displayValue, isAnimating]);
+  
+  // Cleanup debounce timer on unmount
+  useEffect(() => {
+    return () => {
+      if (debounceTimerRef.current) {
+        clearTimeout(debounceTimerRef.current);
+      }
+    };
+  }, []);
   
   const triggerHaptic = () => {
     if ('vibrate' in navigator) {
@@ -66,15 +76,14 @@ export const LightControlCard = ({
     
     setIsAnimating(true);
     
-    // Animate from current to target - faster when turning off
+    // Animate ONLY the display value - don't call onChange during animation
     animate(displayValue, targetIntensity, {
       duration: isTurningOff ? 0.6 : 1.2,
       ease: [0.22, 0.03, 0.26, 1],
-      onUpdate: (latest) => {
-        onChange(Math.round(latest));
-      },
       onComplete: () => {
         setIsAnimating(false);
+        // Send to HA ONCE at the end
+        onChange(targetIntensity);
       }
     });
   };
@@ -172,14 +181,25 @@ export const LightControlCard = ({
         >
           <Slider
             value={[displayNumber]}
-            onValueChange={(values) => {
+            onValueChange={useCallback((values: number[]) => {
               const newValue = values[0];
               if (Math.abs(newValue - displayNumber) >= 10) {
                 triggerHaptic();
               }
+              
+              // Update display immediately
               displayValue.set(newValue);
-              onChange(newValue);
-            }}
+              
+              // Clear existing debounce timer
+              if (debounceTimerRef.current) {
+                clearTimeout(debounceTimerRef.current);
+              }
+              
+              // Debounce the HA call - only send after 300ms of no changes
+              debounceTimerRef.current = setTimeout(() => {
+                onChange(newValue);
+              }, 300);
+            }, [displayNumber, onChange, displayValue])}
             max={100}
             step={1}
             className="w-full"

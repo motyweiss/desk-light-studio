@@ -48,6 +48,9 @@ const Index = () => {
   // Ref to track last manual change timestamp
   const lastManualChangeRef = useRef<number>(0);
   
+  // Track lights with pending HA commands to prevent polling overwrites
+  const [pendingLights, setPendingLights] = useState<Set<string>>(new Set());
+  
   // Connection retry state
   const [isReconnecting, setIsReconnecting] = useState(false);
   const reconnectAttemptRef = useRef(0);
@@ -98,6 +101,9 @@ const Index = () => {
     
     console.log(`🎛️  MASTER TOGGLE: ${checked ? 'ON' : 'OFF'} (target: ${targetIntensity}%)`);
     
+    // Mark all lights as pending
+    setPendingLights(new Set(['spotlight', 'deskLamp', 'monitorLight']));
+    
     setSpotlightIntensity(targetIntensity);
     setDeskLampIntensity(targetIntensity);
     setMonitorLightIntensity(targetIntensity);
@@ -132,8 +138,14 @@ const Index = () => {
       await Promise.all(promises);
       const duration = Date.now() - startTime;
       console.log(`⏱️  Master toggle completed in ${duration}ms`);
+      
+      // Wait 500ms for HA to update its state, then clear pending
+      setTimeout(() => {
+        setPendingLights(new Set());
+      }, 500);
     } else {
       console.log('⚠️  Master toggle: Not connected to HA, local only');
+      setPendingLights(new Set());
     }
   }, [isConnected, entityMapping]);
 
@@ -144,6 +156,10 @@ const Index = () => {
       lastManualChangeRef.current = startTime;
       
       console.log(`💡 MANUAL CHANGE: ${lightId} → ${newIntensity}%`);
+      
+      // Mark light as pending immediately
+      setPendingLights(prev => new Set(prev).add(lightId));
+      
       setter(newIntensity);
 
       // Sync with Home Assistant if connected
@@ -160,12 +176,32 @@ const Index = () => {
             await homeAssistant.setLightBrightness(entityId, newIntensity);
             const duration = Date.now() - startTime;
             console.log(`  ✅ Success in ${duration}ms`);
+            
+            // Wait 500ms for HA to update its state, then clear pending
+            setTimeout(() => {
+              setPendingLights(prev => {
+                const next = new Set(prev);
+                next.delete(lightId);
+                return next;
+              });
+            }, 500);
           } catch (error) {
             console.error(`  ❌ Failed to sync ${lightId}:`, error);
+            // Clear pending on error too
+            setPendingLights(prev => {
+              const next = new Set(prev);
+              next.delete(lightId);
+              return next;
+            });
           }
         }
       } else {
         console.log(`  ⚠️  Not connected to HA, local only`);
+        setPendingLights(prev => {
+          const next = new Set(prev);
+          next.delete(lightId);
+          return next;
+        });
       }
     };
   }, [isConnected, entityMapping]);
@@ -468,9 +504,15 @@ const Index = () => {
             : 0;
           
           setSpotlightIntensity(current => {
-            // Only skip update if manual change happened in last 200ms
+            // Skip if light is pending HA confirmation
+            if (pendingLights.has('spotlight')) {
+              console.log(`🚫 Spotlight: skipped (pending HA confirmation)`);
+              return current;
+            }
+            
+            // Only skip update if manual change happened in last 1500ms
             const timeSinceManualChange = Date.now() - lastManualChangeRef.current;
-            if (timeSinceManualChange < 200) {
+            if (timeSinceManualChange < 1500) {
               syncLogger.logBlockedUpdate();
               console.log(`🚫 BLOCKED: Spotlight update blocked (manual change ${timeSinceManualChange}ms ago)`);
               return current;
@@ -493,9 +535,15 @@ const Index = () => {
             : 0;
           
           setDeskLampIntensity(current => {
-            // Only skip update if manual change happened in last 200ms
+            // Skip if light is pending HA confirmation
+            if (pendingLights.has('deskLamp')) {
+              console.log(`🚫 Desk Lamp: skipped (pending HA confirmation)`);
+              return current;
+            }
+            
+            // Only skip update if manual change happened in last 1500ms
             const timeSinceManualChange = Date.now() - lastManualChangeRef.current;
-            if (timeSinceManualChange < 200) {
+            if (timeSinceManualChange < 1500) {
               syncLogger.logBlockedUpdate();
               console.log(`🚫 BLOCKED: Desk Lamp update blocked (manual change ${timeSinceManualChange}ms ago)`);
               return current;
@@ -518,9 +566,15 @@ const Index = () => {
             : 0;
           
           setMonitorLightIntensity(current => {
-            // Only skip update if manual change happened in last 200ms
+            // Skip if light is pending HA confirmation
+            if (pendingLights.has('monitorLight')) {
+              console.log(`🚫 Monitor Light: skipped (pending HA confirmation)`);
+              return current;
+            }
+            
+            // Only skip update if manual change happened in last 1500ms
             const timeSinceManualChange = Date.now() - lastManualChangeRef.current;
-            if (timeSinceManualChange < 200) {
+            if (timeSinceManualChange < 1500) {
               syncLogger.logBlockedUpdate();
               console.log(`🚫 BLOCKED: Monitor Light update blocked (manual change ${timeSinceManualChange}ms ago)`);
               return current;
@@ -681,44 +735,27 @@ const Index = () => {
         return;
       }
 
-      const startTime = Date.now();
-      
       switch (e.key) {
         case '1':
           // Toggle Desk Lamp with HA sync
           e.preventDefault();
           console.log('⌨️  Keyboard: Toggle Desk Lamp (key "1")');
           const newDeskLampIntensity = deskLampIntensity > 0 ? 0 : 100;
-          lastManualChangeRef.current = Date.now();
-          setDeskLampIntensity(newDeskLampIntensity);
-          if (isConnected && entityMapping?.deskLamp) {
-            await homeAssistant.setLightBrightness(entityMapping.deskLamp, newDeskLampIntensity);
-            console.log(`  ✅ Synced in ${Date.now() - startTime}ms`);
-          }
+          await createLightChangeHandler('deskLamp', setDeskLampIntensity)(newDeskLampIntensity);
           break;
         case '2':
           // Toggle Monitor Light with HA sync
           e.preventDefault();
           console.log('⌨️  Keyboard: Toggle Monitor Light (key "2")');
           const newMonitorIntensity = monitorLightIntensity > 0 ? 0 : 100;
-          lastManualChangeRef.current = Date.now();
-          setMonitorLightIntensity(newMonitorIntensity);
-          if (isConnected && entityMapping?.monitorLight) {
-            await homeAssistant.setLightBrightness(entityMapping.monitorLight, newMonitorIntensity);
-            console.log(`  ✅ Synced in ${Date.now() - startTime}ms`);
-          }
+          await createLightChangeHandler('monitorLight', setMonitorLightIntensity)(newMonitorIntensity);
           break;
         case '3':
           // Toggle Spotlight with HA sync
           e.preventDefault();
           console.log('⌨️  Keyboard: Toggle Spotlight (key "3")');
           const newSpotlightIntensity = spotlightIntensity > 0 ? 0 : 100;
-          lastManualChangeRef.current = Date.now();
-          setSpotlightIntensity(newSpotlightIntensity);
-          if (isConnected && entityMapping?.spotlight) {
-            await homeAssistant.setLightBrightness(entityMapping.spotlight, newSpotlightIntensity);
-            console.log(`  ✅ Synced in ${Date.now() - startTime}ms`);
-          }
+          await createLightChangeHandler('spotlight', setSpotlightIntensity)(newSpotlightIntensity);
           break;
         case ' ':
           // Master toggle with spacebar
@@ -731,7 +768,7 @@ const Index = () => {
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [masterSwitchOn, deskLampIntensity, monitorLightIntensity, spotlightIntensity, isConnected, entityMapping, handleMasterToggle]);
+  }, [masterSwitchOn, deskLampIntensity, monitorLightIntensity, spotlightIntensity, isConnected, entityMapping, handleMasterToggle, createLightChangeHandler]);
 
   // Calculate binary lighting state (on/off only, not intensity)
   const lightingState = useMemo(() => {
