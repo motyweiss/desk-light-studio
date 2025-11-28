@@ -17,6 +17,17 @@ export const useMediaPlayerSync = (config: UseMediaPlayerSyncConfig) => {
   const lastPositionUpdateRef = useRef<Date | null>(null);
   const localPositionRef = useRef<number>(0);
 
+  const calculateCurrentPosition = useCallback((
+    basePosition: number,
+    updatedAt: Date | null,
+    duration: number,
+    isPlaying: boolean
+  ): number => {
+    if (!isPlaying || !updatedAt) return basePosition;
+    const elapsed = (Date.now() - updatedAt.getTime()) / 1000;
+    return Math.min(basePosition + elapsed, duration);
+  }, []);
+
   const entityToState = useCallback((entity: MediaPlayerEntity): MediaPlayerState => {
     const attrs = entity.attributes;
     const isPlaying = entity.state === 'playing';
@@ -32,6 +43,13 @@ export const useMediaPlayerSync = (config: UseMediaPlayerSyncConfig) => {
       }
     }
 
+    const currentPosition = calculateCurrentPosition(
+      attrs.media_position || 0,
+      lastPositionUpdateRef.current,
+      attrs.media_duration || 0,
+      isPlaying
+    );
+
     return {
       isPlaying,
       isPaused,
@@ -45,7 +63,7 @@ export const useMediaPlayerSync = (config: UseMediaPlayerSyncConfig) => {
         album: attrs.media_album_name || '',
         albumArt: attrs.entity_picture || null,
         duration: attrs.media_duration || 0,
-        position: attrs.media_position || 0,
+        position: currentPosition,
       } : null,
       shuffle: attrs.shuffle ?? false,
       repeat: attrs.repeat || 'off',
@@ -57,7 +75,7 @@ export const useMediaPlayerSync = (config: UseMediaPlayerSyncConfig) => {
       isLoading: false,
       entityId: entity.entity_id,
     };
-  }, []);
+  }, [calculateCurrentPosition]);
 
   const syncFromRemote = useCallback(async () => {
     if (!enabled || !entityId) return;
