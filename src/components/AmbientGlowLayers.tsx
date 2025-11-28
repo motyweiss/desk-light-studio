@@ -18,6 +18,15 @@ export const AmbientGlowLayers = ({
   const deskLampOpacity = useMemo(() => Math.pow(deskLampIntensity / 100, 2.2) * 0.5, [deskLampIntensity]);
   const monitorLightOpacity = useMemo(() => Math.pow(monitorLightIntensity / 100, 2.2) * 0.5, [monitorLightIntensity]);
 
+  // Dynamic duration based on whether lights are turning on or off
+  const getDuration = (targetOpacity: number) => {
+    return targetOpacity > 0 ? 1.8 : 0.8;
+  };
+
+  const getEasing = (targetOpacity: number) => {
+    return targetOpacity > 0 ? ([0.22, 0.03, 0.26, 1] as const) : ([0.33, 0.0, 0.2, 1] as const);
+  };
+
   return (
     <>
       {/* Spotlight ambient glow - warm golden orange */}
@@ -33,9 +42,9 @@ export const AmbientGlowLayers = ({
           scale: spotlightOpacity > 0 ? 1 : 1.02,
         }}
         transition={{
-          duration: 2.0,
-          delay: 0.3,
-          ease: [0.25, 0.1, 0.25, 1]
+          duration: getDuration(spotlightOpacity),
+          delay: 0.15,
+          ease: getEasing(spotlightOpacity)
         }}
       />
       
@@ -52,9 +61,9 @@ export const AmbientGlowLayers = ({
           scale: deskLampOpacity > 0 ? 1 : 1.02,
         }}
         transition={{
-          duration: 2.0,
-          delay: 0.3,
-          ease: [0.25, 0.1, 0.25, 1]
+          duration: getDuration(deskLampOpacity),
+          delay: 0.15,
+          ease: getEasing(deskLampOpacity)
         }}
       />
       
@@ -71,9 +80,9 @@ export const AmbientGlowLayers = ({
           scale: monitorLightOpacity > 0 ? 1 : 1.02,
         }}
         transition={{
-          duration: 2.0,
-          delay: 0.3,
-          ease: [0.25, 0.1, 0.25, 1]
+          duration: getDuration(monitorLightOpacity),
+          delay: 0.15,
+          ease: getEasing(monitorLightOpacity)
         }}
       />
       
