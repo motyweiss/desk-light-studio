@@ -10,6 +10,7 @@ interface LightControlCardProps {
   intensity: number;
   isPending?: boolean;
   hasError?: boolean;
+  isLoading?: boolean;
   onChange: (intensity: number) => void;
   onHover: (lightId: string | null) => void;
   onRetry?: () => void;
@@ -21,6 +22,7 @@ export const LightControlCard = ({
   intensity, 
   isPending = false,
   hasError = false,
+  isLoading = false,
   onChange, 
   onHover,
   onRetry 
@@ -88,6 +90,82 @@ export const LightControlCard = ({
       }
     });
   };
+
+  // Skeleton loading state
+  if (isLoading) {
+    return (
+      <motion.div
+        layout
+        className="w-full rounded-3xl px-8 py-6 text-left border transition-all duration-500 backdrop-blur-xl relative overflow-hidden bg-white/3 border-white/10"
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4 }}
+      >
+        {/* Pulsing overlay animation */}
+        <motion.div
+          className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent"
+          animate={{ x: ['-100%', '100%'] }}
+          transition={{ 
+            duration: 1.5, 
+            repeat: Infinity,
+            ease: "easeInOut"
+          }}
+        />
+
+        <div className="flex items-center gap-6 relative z-10">
+          {/* Icon skeleton */}
+          <motion.div
+            className="flex-shrink-0 w-7 h-7 rounded-full bg-white/10"
+            animate={{ opacity: [0.3, 0.5, 0.3] }}
+            transition={{ 
+              duration: 1.5, 
+              repeat: Infinity,
+              ease: "easeInOut"
+            }}
+          />
+
+          {/* Text skeleton */}
+          <div className="flex-1 space-y-2">
+            <motion.div 
+              className="h-4 w-24 bg-white/10 rounded"
+              animate={{ opacity: [0.3, 0.5, 0.3] }}
+              transition={{ 
+                duration: 1.5, 
+                repeat: Infinity,
+                ease: "easeInOut",
+                delay: 0.1
+              }}
+            />
+            <motion.div 
+              className="h-3 w-12 bg-white/10 rounded"
+              animate={{ opacity: [0.3, 0.5, 0.3] }}
+              transition={{ 
+                duration: 1.5, 
+                repeat: Infinity,
+                ease: "easeInOut",
+                delay: 0.2
+              }}
+            />
+          </div>
+
+          {/* Slider skeleton */}
+          <div className="flex-shrink-0 flex items-center gap-3">
+            <div className="w-4 h-4" />
+            <motion.div 
+              className="w-32 h-2 bg-white/10 rounded-full"
+              animate={{ opacity: [0.3, 0.5, 0.3] }}
+              transition={{ 
+                duration: 1.5, 
+                repeat: Infinity,
+                ease: "easeInOut",
+                delay: 0.3
+              }}
+            />
+          </div>
+        </div>
+      </motion.div>
+    );
+  }
 
   return (
     <motion.button
