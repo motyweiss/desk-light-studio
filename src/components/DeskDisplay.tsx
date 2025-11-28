@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { LightHotspot } from "./LightHotspot";
 
@@ -47,29 +47,7 @@ export const DeskDisplay = ({
 }: DeskDisplayProps) => {
   const [currentState, setCurrentState] = useState("000");
   const [isHovered, setIsHovered] = useState(false);
-  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
   const [isTransitioning, setIsTransitioning] = useState(false);
-
-  // Track mouse movement across entire window (desktop only)
-  useEffect(() => {
-    // Disable on mobile/touch devices
-    const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
-    if (isTouchDevice) return;
-
-    const handleMouseMove = (e: MouseEvent) => {
-      // Calculate position relative to viewport center
-      const x = (e.clientX / window.innerWidth) - 0.5; // -0.5 to 0.5
-      const y = (e.clientY / window.innerHeight) - 0.5; // -0.5 to 0.5
-      
-      setMousePosition({ x, y });
-    };
-
-    window.addEventListener('mousemove', handleMouseMove);
-    
-    return () => {
-      window.removeEventListener('mousemove', handleMouseMove);
-    };
-  }, []);
 
   const handleMouseEnter = () => {
     setIsHovered(true);
@@ -116,26 +94,8 @@ export const DeskDisplay = ({
       className="relative w-full aspect-square"
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
-      style={{
-        perspective: '1000px',
-      }}
     >
-      <motion.div 
-        className="relative w-full h-full"
-        animate={{
-          rotateY: mousePosition.x * 8,
-          rotateX: mousePosition.y * -8,
-        }}
-        transition={{
-          type: "spring",
-          stiffness: 80,
-          damping: 25,
-          mass: 0.5,
-        }}
-        style={{
-          transformStyle: 'preserve-3d',
-        }}
-      >
+      <div className="relative w-full h-full">
         {/* Stack all 8 images with smooth crossfade transitions */}
         {Object.entries(lightingStates).map(([state, image]) => {
           const isActive = state === currentState;
@@ -163,7 +123,7 @@ export const DeskDisplay = ({
           );
         })}
         
-      </motion.div>
+      </div>
 
       {/* Interactive Light Hotspots Layer - Desktop Only */}
       <div className="hidden md:block absolute inset-0 z-30 pointer-events-none">
