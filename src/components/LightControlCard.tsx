@@ -73,17 +73,18 @@ export const LightControlCard = ({ id, label, intensity, onChange, onHover }: Li
       onClick={handleCardClick}
       onMouseEnter={() => onHover(id)}
       onMouseLeave={() => onHover(null)}
-      className="w-full rounded-3xl px-8 py-6 cursor-pointer text-left border transition-all duration-500"
+      className="w-full rounded-3xl px-8 py-6 cursor-pointer text-left border transition-all duration-500 backdrop-blur-xl"
       style={{
-        backgroundColor: 'rgba(0, 0, 0, 0.15)',
-        borderColor: 'rgba(255, 255, 255, 0.08)',
+        backgroundColor: 'rgba(255, 255, 255, 0.08)',
+        borderColor: 'rgba(255, 255, 255, 0.15)',
       }}
       transition={{
         layout: { duration: 0.25, ease: [0.22, 0.03, 0.26, 1] },
       }}
       whileHover={{
-        backgroundColor: 'rgba(0, 0, 0, 0.25)',
-        borderColor: 'rgba(255, 255, 255, 0.12)',
+        backgroundColor: 'rgba(255, 255, 255, 0.12)',
+        borderColor: 'rgba(255, 255, 255, 0.25)',
+        scale: 1.01,
         transition: { duration: 0.4, ease: [0.22, 0.03, 0.26, 1] }
       }}
       whileTap={{ scale: 0.985 }}
