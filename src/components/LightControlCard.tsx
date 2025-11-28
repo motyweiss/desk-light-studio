@@ -123,7 +123,6 @@ export const LightControlCard = ({
         transition={{ duration: 0.4 }}
         style={{
           backgroundColor: 'rgba(255, 255, 255, 0.03)',
-          border: 'none'
         }}
       >
         {/* Pulsing overlay animation */}
@@ -140,7 +139,7 @@ export const LightControlCard = ({
         <div className="flex items-center gap-6 relative z-10">
           {/* Icon skeleton */}
           <motion.div
-            className="flex-shrink-0 w-7 h-7 rounded-full bg-white/10"
+            className="flex-shrink-0 w-7 h-7 rounded-full bg-white/5"
             animate={{ opacity: [0.3, 0.5, 0.3] }}
             transition={{ 
               duration: 1.5, 
@@ -152,7 +151,7 @@ export const LightControlCard = ({
           {/* Text skeleton */}
           <div className="flex-1 space-y-2">
             <motion.div 
-              className="h-4 w-24 bg-white/10 rounded"
+              className="h-4 w-24 bg-white/5 rounded"
               animate={{ opacity: [0.3, 0.5, 0.3] }}
               transition={{ 
                 duration: 1.5, 
@@ -162,7 +161,7 @@ export const LightControlCard = ({
               }}
             />
             <motion.div 
-              className="h-3 w-12 bg-white/10 rounded"
+              className="h-3 w-12 bg-white/5 rounded"
               animate={{ opacity: [0.3, 0.5, 0.3] }}
               transition={{ 
                 duration: 1.5, 
@@ -177,7 +176,7 @@ export const LightControlCard = ({
           <div className="flex-shrink-0 flex items-center gap-3">
             <div className="w-4 h-4" />
             <motion.div 
-              className="w-32 h-2 bg-white/10 rounded-full"
+              className="w-32 h-2 bg-white/5 rounded-full"
               animate={{ opacity: [0.3, 0.5, 0.3] }}
               transition={{ 
                 duration: 1.5, 
