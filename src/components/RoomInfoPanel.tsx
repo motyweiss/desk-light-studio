@@ -108,7 +108,9 @@ export const RoomInfoPanel = ({ roomName, temperature, humidity, airQuality, mas
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ 
             opacity: isLoaded ? 1 : 0,
-            scale: isLoaded ? 1 : 0.9
+            scale: isLoaded ? 1 : 0.9,
+            backgroundColor: masterSwitchOn ? 'rgba(255, 255, 255, 0.18)' : 'rgba(255, 255, 255, 0)',
+            borderColor: masterSwitchOn ? 'rgba(255, 255, 255, 0.3)' : 'rgba(255, 255, 255, 0.2)'
           }}
           transition={{ 
             duration: 0.6,
@@ -116,17 +118,17 @@ export const RoomInfoPanel = ({ roomName, temperature, humidity, airQuality, mas
             ease: [0.22, 0.03, 0.26, 1]
           }}
           onClick={() => onMasterToggle(!masterSwitchOn)}
-          className={`w-10 h-10 rounded-full backdrop-blur-xl border transition-all duration-500 flex-shrink-0 ${
-            masterSwitchOn 
-              ? 'border-[hsl(43_90%_60%/0.7)]' 
-              : 'border-white/20 hover:border-white/30'
-          }`}
+          className="w-10 h-10 rounded-full backdrop-blur-xl border transition-all duration-500 flex-shrink-0"
+          whileHover={{
+            backgroundColor: masterSwitchOn ? 'rgba(255, 255, 255, 0.22)' : 'rgba(255, 255, 255, 0.05)',
+            borderColor: masterSwitchOn ? 'rgba(255, 255, 255, 0.35)' : 'rgba(255, 255, 255, 0.3)',
+          }}
           whileTap={{ scale: 0.92 }}
           aria-label="Toggle all lights"
         >
           <motion.div
             animate={{
-              color: masterSwitchOn ? 'hsl(44 92% 62%)' : 'rgba(255, 255, 255, 0.4)',
+              color: masterSwitchOn ? 'rgba(255, 255, 255, 0.95)' : 'rgba(255, 255, 255, 0.4)',
             }}
             transition={{ duration: 0.5, ease: [0.22, 0.03, 0.26, 1] }}
             className="flex items-center justify-center"
