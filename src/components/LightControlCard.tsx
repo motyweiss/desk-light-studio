@@ -2,6 +2,7 @@ import { motion, useMotionValue, animate, useMotionValueEvent } from "framer-mot
 import { Slider } from "@/components/ui/slider";
 import { useEffect, useState, useRef, useCallback } from "react";
 import { getIconForLight } from "@/components/icons/LightIcons";
+import { Loader2 } from "lucide-react";
 
 interface LightControlCardProps {
   id: string;
@@ -114,16 +115,30 @@ export const LightControlCard = ({
     >
       {/* Pending State Overlay */}
       {isPending && (
-        <motion.div
-          className="absolute inset-0 bg-white/5"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: [0.3, 0.6, 0.3] }}
-          transition={{ 
-            duration: 1.5, 
-            repeat: Infinity,
-            ease: "easeInOut"
-          }}
-        />
+        <>
+          <motion.div
+            className="absolute inset-0 bg-white/5"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: [0.3, 0.6, 0.3] }}
+            transition={{ 
+              duration: 1.5, 
+              repeat: Infinity,
+              ease: "easeInOut"
+            }}
+          />
+          {/* Subtle Spinner Indicator */}
+          <motion.div
+            className="absolute top-4 right-4 z-20"
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.8 }}
+          >
+            <Loader2 
+              className="w-4 h-4 text-white/60 animate-spin" 
+              strokeWidth={2.5}
+            />
+          </motion.div>
+        </>
       )}
 
       {/* Error State Overlay */}
