@@ -117,12 +117,13 @@ export const LightControlCard = ({
     return (
       <motion.div
         layout
-        className="w-full rounded-3xl px-8 py-6 text-left transition-all duration-500 relative overflow-hidden"
+        className="w-full rounded-3xl px-8 py-6 text-left transition-all duration-500 relative overflow-hidden border-0"
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4 }}
         style={{
-          backgroundColor: 'rgba(255, 255, 255, 0.03)',
+          backgroundColor: 'rgba(255, 255, 255, 0.05)',
+          borderColor: 'transparent',
         }}
       >
         {/* Pulsing overlay animation */}
