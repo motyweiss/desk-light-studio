@@ -98,15 +98,15 @@ export const MediaPlayer = ({ entityId, isConnected }: MediaPlayerProps) => {
         animate={{ y: 0, opacity: 1 }}
         exit={{ y: 100, opacity: 0 }}
         transition={{ duration: 0.4, ease: [0.22, 0.03, 0.26, 1] }}
-        className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 w-full max-w-3xl px-4"
+        className="fixed bottom-0 left-0 right-0 z-50 w-full"
       >
-        <div className="bg-white/8 backdrop-blur-[24px] border border-white/20 rounded-2xl shadow-[0_4px_24px_rgba(0,0,0,0.15)] p-6">
+        <div className="bg-white/8 backdrop-blur-[24px] border-t border-white/20 rounded-t-2xl shadow-[0_4px_24px_rgba(0,0,0,0.15)] p-6 max-w-none">
           {isLoading ? (
             <div className="flex items-center justify-center py-8">
               <Loader2 className="w-6 h-6 animate-spin text-white/40" />
             </div>
           ) : (
-            <div className="space-y-4">
+            <div className="space-y-4 max-w-7xl mx-auto">
               {/* Top Row: Album Art + Track Info + Shuffle/Repeat */}
               <div className="flex items-start gap-4">
                 <AlbumArt 
