@@ -89,7 +89,7 @@ export const LightControlCard = ({ id, label, intensity, onChange, onHover }: Li
       whileTap={{ scale: 0.985 }}
     >
       <div className="flex items-center gap-6">
-        {/* Icon - Larger size */}
+        {/* Icon - Original size */}
         <motion.div
           className="flex-shrink-0"
           initial={{ scale: 0.5, opacity: 0 }}
@@ -104,14 +104,14 @@ export const LightControlCard = ({ id, label, intensity, onChange, onHover }: Li
             color: { duration: 0.5, ease: [0.22, 0.03, 0.26, 1] }
           }}
         >
-          <IconComponent className="w-12 h-12" />
+          <IconComponent className="w-7 h-7" />
         </motion.div>
 
         {/* Text Info */}
         <div className="flex-1 text-left min-w-0 space-y-0.5">
-          <div className="font-normal text-xl text-white tracking-wide">{label}</div>
+          <div className="font-light text-base text-white tracking-wide">{label}</div>
           <motion.div 
-            className="text-base font-light tracking-wide tabular-nums"
+            className="text-xs font-light tracking-wide tabular-nums"
             animate={{
               color: isOn ? 'rgba(255, 255, 255, 0.4)' : 'rgba(255, 255, 255, 0.3)'
             }}
@@ -123,7 +123,7 @@ export const LightControlCard = ({ id, label, intensity, onChange, onHover }: Li
 
         {/* Slider - Always Visible on Right */}
         <div 
-          className="w-48 flex-shrink-0"
+          className="w-32 flex-shrink-0"
           data-slider
           onClick={(e) => e.stopPropagation()}
           onPointerDown={(e) => e.stopPropagation()}
