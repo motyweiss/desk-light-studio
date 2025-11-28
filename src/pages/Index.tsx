@@ -28,6 +28,7 @@ import desk111 from "@/assets/desk-111.png";
 const Index = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [isLoaded, setIsLoaded] = useState(false);
+  const [backgroundLoaded, setBackgroundLoaded] = useState(false);
   const [showMediaPlayer, setShowMediaPlayer] = useState(false);
   const [spotlightIntensity, setSpotlightIntensity] = useState(0);
   const [deskLampIntensity, setDeskLampIntensity] = useState(0);
@@ -76,11 +77,18 @@ const Index = () => {
     const startTime = Date.now();
     const minLoadTime = 500; // Minimum 500ms loading time
     
-    // Preload the initial "all lights off" image first for fast perceived loading
+    // Preload both the desk image and background
     const primaryImage = new Image();
+    const backgroundImage = new Image();
     primaryImage.src = desk000;
+    backgroundImage.src = '/bg.png';
     
-    const handlePrimaryLoad = () => {
+    let primaryLoaded = false;
+    let bgLoaded = false;
+    
+    const checkAllLoaded = () => {
+      if (!primaryLoaded || !bgLoaded) return;
+      
       const elapsed = Date.now() - startTime;
       const remainingTime = Math.max(0, minLoadTime - elapsed);
       
@@ -90,6 +98,7 @@ const Index = () => {
         // Small delay before starting entrance animations
         setTimeout(() => {
           setIsLoaded(true);
+          setBackgroundLoaded(true);
           
           // Show media player after page content settles (2 seconds after content loads)
           setTimeout(() => {
@@ -106,11 +115,21 @@ const Index = () => {
       }, remainingTime);
     };
     
-    primaryImage.onload = handlePrimaryLoad;
+    primaryImage.onload = () => {
+      primaryLoaded = true;
+      checkAllLoaded();
+    };
     
-    // Fallback timeout in case image takes too long (8 seconds max + min load time)
+    backgroundImage.onload = () => {
+      bgLoaded = true;
+      checkAllLoaded();
+    };
+    
+    // Fallback timeout in case images take too long (8 seconds max + min load time)
     const fallbackTimer = setTimeout(() => {
-      handlePrimaryLoad();
+      primaryLoaded = true;
+      bgLoaded = true;
+      checkAllLoaded();
     }, 8000 + minLoadTime);
     
     return () => clearTimeout(fallbackTimer);
@@ -834,11 +853,18 @@ const Index = () => {
       <motion.div
         className="min-h-[100dvh] flex items-center justify-center p-4 md:p-8 relative overflow-hidden"
         style={{
-          backgroundImage: "url('/bg.png')",
+          backgroundImage: backgroundLoaded ? "url('/bg.png')" : "none",
           backgroundSize: "cover",
           backgroundPosition: "center",
           backgroundRepeat: "no-repeat",
-          backgroundColor: "hsl(28 20% 18%)",
+          backgroundColor: "hsl(0 0% 8%)",
+        }}
+        animate={{
+          opacity: backgroundLoaded ? 1 : 0
+        }}
+        transition={{
+          duration: 0.8,
+          ease: [0.25, 0.1, 0.25, 1]
         }}
       >
         {/* Dynamic color overlay that responds to lighting */}
