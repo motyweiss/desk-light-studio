@@ -18,39 +18,48 @@ export const useMediaPlayerSync = (config: UseMediaPlayerSyncConfig) => {
   const lastPositionUpdateRef = useRef<Date | null>(null);
   const localPositionRef = useRef<number>(0);
   const loadingTimeoutRef = useRef<NodeJS.Timeout>();
+  const lastTrackIdRef = useRef<string>('');
+  const isPlayingRef = useRef<boolean>(false);
+  const lastSyncedPositionRef = useRef<number>(0);
 
-  const calculateCurrentPosition = useCallback((
-    basePosition: number,
-    updatedAt: Date | null,
-    duration: number,
-    isPlaying: boolean
-  ): number => {
-    if (!isPlaying || !updatedAt) return basePosition;
-    const elapsed = (Date.now() - updatedAt.getTime()) / 1000;
-    return Math.min(basePosition + elapsed, duration);
-  }, []);
-
-  const entityToState = useCallback((entity: MediaPlayerEntity): MediaPlayerState => {
+  const entityToState = useCallback((entity: MediaPlayerEntity, forcePositionUpdate: boolean = false): MediaPlayerState => {
     const attrs = entity.attributes;
     const isPlaying = entity.state === 'playing';
     const isPaused = entity.state === 'paused';
     const isIdle = entity.state === 'idle';
     const isOff = entity.state === 'off' || entity.state === 'standby';
 
-    // Update position tracking
-    if (attrs.media_position !== undefined) {
+    // Create track ID for change detection
+    const currentTrackId = `${attrs.media_title}-${attrs.media_artist}-${attrs.media_album_name}`;
+    const trackChanged = currentTrackId !== lastTrackIdRef.current;
+    const stateChanged = isPlaying !== isPlayingRef.current;
+
+    // Only update position from HA if:
+    // 1. Track changed
+    // 2. Playback state changed (play/pause)
+    // 3. Force update requested (user seek)
+    // 4. Position difference is significant (>3 seconds - indicates external seek/skip)
+    let shouldUpdatePosition = forcePositionUpdate || trackChanged || stateChanged;
+    
+    if (!shouldUpdatePosition && attrs.media_position !== undefined) {
+      const positionDiff = Math.abs(attrs.media_position - localPositionRef.current);
+      shouldUpdatePosition = positionDiff > 3; // More than 3 seconds difference
+    }
+
+    if (shouldUpdatePosition && attrs.media_position !== undefined) {
       localPositionRef.current = attrs.media_position;
+      lastSyncedPositionRef.current = attrs.media_position;
       if (attrs.media_position_updated_at) {
         lastPositionUpdateRef.current = new Date(attrs.media_position_updated_at);
       }
     }
 
-    const currentPosition = calculateCurrentPosition(
-      attrs.media_position || 0,
-      lastPositionUpdateRef.current,
-      attrs.media_duration || 0,
-      isPlaying
-    );
+    // Update refs for next comparison
+    lastTrackIdRef.current = currentTrackId;
+    isPlayingRef.current = isPlaying;
+
+    // Use local position for smooth playback
+    const displayPosition = isPlaying ? localPositionRef.current : (attrs.media_position || 0);
 
     return {
       isPlaying,
@@ -65,7 +74,7 @@ export const useMediaPlayerSync = (config: UseMediaPlayerSyncConfig) => {
         album: attrs.media_album_name || '',
         albumArt: attrs.entity_picture || null,
         duration: attrs.media_duration || 0,
-        position: currentPosition,
+        position: displayPosition,
       } : null,
       shuffle: attrs.shuffle ?? false,
       repeat: attrs.repeat || 'off',
@@ -77,15 +86,13 @@ export const useMediaPlayerSync = (config: UseMediaPlayerSyncConfig) => {
       isLoading: false,
       entityId: entity.entity_id,
     };
-  }, [calculateCurrentPosition]);
+  }, []);
 
-  const syncFromRemote = useCallback(async () => {
+  const syncFromRemote = useCallback(async (forcePositionUpdate: boolean = false) => {
     if (!enabled || !entityId) {
       console.log('useMediaPlayerSync: sync skipped', { enabled, entityId });
       return;
     }
-
-    console.log('useMediaPlayerSync: syncing from HA...', entityId);
 
     try {
       const entity = await homeAssistant.getMediaPlayerState(entityId);
@@ -108,8 +115,7 @@ export const useMediaPlayerSync = (config: UseMediaPlayerSyncConfig) => {
         return;
       }
 
-      console.log('useMediaPlayerSync: entity received', entity);
-      const state = entityToState(entity);
+      const state = entityToState(entity, forcePositionUpdate);
       setPlayerState(state);
       setIsLoading(false);
     } catch (error) {
@@ -150,7 +156,7 @@ export const useMediaPlayerSync = (config: UseMediaPlayerSyncConfig) => {
     };
   }, [enabled, syncFromRemote, pollInterval, entityId]);
 
-  // Real-time position tracking for playing media
+  // Real-time position tracking for playing media - smooth 100ms updates
   useEffect(() => {
     if (!playerState?.isPlaying || !playerState.currentTrack) {
       if (positionIntervalRef.current) {
@@ -159,13 +165,13 @@ export const useMediaPlayerSync = (config: UseMediaPlayerSyncConfig) => {
       return;
     }
 
-    // Update position every second while playing
+    // Update position every 100ms for ultra-smooth progress bar
     positionIntervalRef.current = setInterval(() => {
       setPlayerState(prev => {
         if (!prev || !prev.currentTrack || !prev.isPlaying) return prev;
         
         const newPosition = Math.min(
-          localPositionRef.current + 1,
+          localPositionRef.current + 0.1, // Increment by 0.1 seconds (100ms)
           prev.currentTrack.duration
         );
         localPositionRef.current = newPosition;
@@ -178,7 +184,7 @@ export const useMediaPlayerSync = (config: UseMediaPlayerSyncConfig) => {
           },
         };
       });
-    }, 1000);
+    }, 100); // Update every 100ms for smooth animation
 
     return () => {
       if (positionIntervalRef.current) {

@@ -104,11 +104,15 @@ export const MediaPlayer = ({ entityId, isConnected }: MediaPlayerProps) => {
   const handleSeek = async (position: number) => {
     if (!entityId || !playerState?.currentTrack) return;
     
+    // Update local state immediately for responsive UI
     setPlayerState(prev => prev?.currentTrack ? {
       ...prev,
       currentTrack: { ...prev.currentTrack, position }
     } : null);
+    
+    // Seek on HA and force sync after to ensure accuracy
     await homeAssistant.mediaSeek(entityId, position);
+    setTimeout(syncFromRemote, 200);
   };
 
   // Show loading state
