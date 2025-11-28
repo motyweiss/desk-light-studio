@@ -20,10 +20,40 @@ export const MediaPlayer = ({ entityId, isConnected }: MediaPlayerProps) => {
     enabled: isConnected && !!entityId,
   });
 
-  if (!isConnected || !entityId || !playerState) return null;
+  console.log('MediaPlayer Debug:', { 
+    isConnected, 
+    entityId, 
+    hasPlayerState: !!playerState,
+    playerState: playerState ? {
+      isPlaying: playerState.isPlaying,
+      isOff: playerState.isOff,
+      hasTrack: !!playerState.currentTrack
+    } : null
+  });
 
-  // Don't show player if completely off/unavailable
-  if (playerState.isOff && !playerState.currentTrack) return null;
+  // Don't show if not connected or no entity configured
+  if (!isConnected || !entityId) return null;
+  
+  // Show loading state while fetching initial data
+  if (!playerState && isLoading) {
+    return (
+      <motion.div
+        initial={{ y: 100, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ duration: 0.4, ease: [0.22, 0.03, 0.26, 1] }}
+        className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 w-full max-w-3xl px-4"
+      >
+        <div className="bg-white/8 backdrop-blur-[24px] border border-white/20 rounded-2xl shadow-[0_4px_24px_rgba(0,0,0,0.15)] p-6">
+          <div className="flex items-center justify-center py-8">
+            <Loader2 className="w-6 h-6 animate-spin text-white/40" />
+          </div>
+        </div>
+      </motion.div>
+    );
+  }
+
+  // If no state yet, don't show
+  if (!playerState) return null;
 
   const handlePlayPause = async () => {
     await homeAssistant.mediaPlayPause(entityId);
