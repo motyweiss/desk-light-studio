@@ -238,7 +238,10 @@ class HomeAssistantService {
       if (!response.ok) throw new Error(`HTTP ${response.status}`);
 
       const entities: MediaPlayerEntity[] = await response.json();
-      return entities.filter(e => e.entity_id.startsWith("media_player."));
+      const mediaPlayers = entities.filter(e => e.entity_id.startsWith("media_player."));
+      
+      console.log('Found media players in HA:', mediaPlayers.map(e => e.entity_id));
+      return mediaPlayers;
     } catch (error) {
       console.error("Failed to get media players:", error);
       return [];
