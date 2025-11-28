@@ -195,14 +195,11 @@ export const LightControlCard = ({
       onMouseEnter={() => onHover(id)}
       onMouseLeave={() => onHover(null)}
       className="w-full rounded-3xl px-8 py-6 cursor-pointer text-left border transition-all duration-500 backdrop-blur-xl relative overflow-hidden"
-      initial={{ opacity: 0 }}
       animate={{
-        opacity: 1,
         backgroundColor: isOn ? 'rgba(255, 255, 255, 0.12)' : 'rgba(255, 255, 255, 0.03)',
         borderColor: isOn ? 'rgba(255, 255, 255, 0.2)' : 'rgba(255, 255, 255, 0.1)',
       }}
       transition={{
-        opacity: { duration: 0.4, ease: [0.22, 0.03, 0.26, 1] },
         layout: { duration: 0.25, ease: [0.22, 0.03, 0.26, 1] },
         backgroundColor: { duration: 0.5, ease: [0.22, 0.03, 0.26, 1] },
         borderColor: { duration: 0.5, ease: [0.22, 0.03, 0.26, 1] },
@@ -246,10 +243,15 @@ export const LightControlCard = ({
         {/* Icon - Original size */}
         <motion.div
           className="flex-shrink-0"
+          initial={{ scale: 0.5, opacity: 0 }}
           animate={{
+            scale: 1,
+            opacity: 1,
             color: isOn ? 'hsl(44 92% 62%)' : 'rgba(255, 255, 255, 0.3)'
           }}
           transition={{ 
+            scale: { duration: 0.4, ease: [0.22, 0.03, 0.26, 1] },
+            opacity: { duration: 0.35, ease: [0.22, 0.03, 0.26, 1] },
             color: { duration: 0.5, ease: [0.22, 0.03, 0.26, 1] }
           }}
         >
