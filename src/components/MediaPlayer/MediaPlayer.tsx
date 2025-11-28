@@ -109,25 +109,26 @@ export const MediaPlayer = ({ entityId, isConnected }: MediaPlayerProps) => {
           height: isMinimized ? '80px' : 'auto',
         }}
         transition={{ 
-          duration: 0.6, 
-          ease: [0.19, 1, 0.22, 1] // Smooth expo ease out
+          duration: 0.5, 
+          ease: [0.25, 0.1, 0.25, 1]
         }}
       >
         {/* Minimize/Maximize Button - Centered at top */}
         <motion.button
           onClick={() => setIsMinimized(!isMinimized)}
-          className="absolute left-1/2 -translate-x-1/2 z-10 w-9 h-9 rounded-full bg-white/8 backdrop-blur-xl border border-white/20 flex items-center justify-center shadow-sm"
+          className="absolute left-1/2 -translate-x-1/2 z-10 w-9 h-9 rounded-full bg-white/5 backdrop-blur-2xl border border-white/15 flex items-center justify-center shadow-sm"
           style={{ top: '-18px' }}
           whileHover={{ 
-            backgroundColor: 'rgba(255, 255, 255, 0.12)',
-            borderColor: 'rgba(255, 255, 255, 0.3)'
+            backgroundColor: 'rgba(255, 255, 255, 0.08)',
+            borderColor: 'rgba(255, 255, 255, 0.25)'
           }}
           whileTap={{ 
             scale: 0.95,
-            backgroundColor: 'rgba(255, 255, 255, 0.15)'
+            backgroundColor: 'rgba(255, 255, 255, 0.1)'
           }}
           transition={{
-            duration: 0.2
+            duration: 0.15,
+            ease: "easeOut"
           }}
         >
           <motion.div
@@ -135,11 +136,11 @@ export const MediaPlayer = ({ entityId, isConnected }: MediaPlayerProps) => {
               rotate: isMinimized ? 0 : 180
             }}
             transition={{ 
-              duration: 0.5, 
-              ease: [0.19, 1, 0.22, 1]
+              duration: 0.4, 
+              ease: [0.25, 0.1, 0.25, 1]
             }}
           >
-            <ChevronUp className="w-4 h-4 text-white/80" />
+            <ChevronUp className="w-4 h-4 text-white/70" />
           </motion.div>
         </motion.button>
 
@@ -147,12 +148,12 @@ export const MediaPlayer = ({ entityId, isConnected }: MediaPlayerProps) => {
           /* Mini Player */
           <motion.div
             key="mini"
-            initial={{ opacity: 0, y: 10 }}
+            initial={{ opacity: 0, y: 5 }}
             animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -10 }}
+            exit={{ opacity: 0, y: -5 }}
             transition={{ 
-              duration: 0.4,
-              ease: [0.19, 1, 0.22, 1]
+              duration: 0.3,
+              ease: [0.25, 0.1, 0.25, 1]
             }}
             className="flex items-center gap-4 px-6 py-3 max-w-7xl mx-auto"
           >
@@ -204,12 +205,12 @@ export const MediaPlayer = ({ entityId, isConnected }: MediaPlayerProps) => {
           /* Full Player */
           <motion.div
             key="full"
-            initial={{ opacity: 0, y: -10 }}
+            initial={{ opacity: 0, y: -5 }}
             animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 10 }}
+            exit={{ opacity: 0, y: 5 }}
             transition={{ 
-              duration: 0.4,
-              ease: [0.19, 1, 0.22, 1]
+              duration: 0.3,
+              ease: [0.25, 0.1, 0.25, 1]
             }}
             className="space-y-4 px-6 py-6 max-w-7xl mx-auto"
           >
