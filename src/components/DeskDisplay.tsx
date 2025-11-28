@@ -122,18 +122,18 @@ export const DeskDisplay = ({
           style={{
             maskImage: `
               radial-gradient(
-                ellipse 95% 95% at 50% 50%,
-                black 65%,
-                rgba(0, 0, 0, 0.3) 85%,
-                transparent 100%
+                ellipse 92% 92% at 50% 50%,
+                black 55%,
+                rgba(0, 0, 0, 0.2) 75%,
+                transparent 92%
               )
             `,
             WebkitMaskImage: `
               radial-gradient(
-                ellipse 95% 95% at 50% 50%,
-                black 65%,
-                rgba(0, 0, 0, 0.3) 85%,
-                transparent 100%
+                ellipse 92% 92% at 50% 50%,
+                black 55%,
+                rgba(0, 0, 0, 0.2) 75%,
+                transparent 92%
               )
             `,
           }}
