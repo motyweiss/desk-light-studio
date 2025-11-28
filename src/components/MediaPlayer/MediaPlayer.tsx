@@ -15,7 +15,7 @@ interface MediaPlayerProps {
 }
 
 export const MediaPlayer = ({ entityId, isConnected }: MediaPlayerProps) => {
-  const [isMinimized, setIsMinimized] = useState(false);
+  const [isMinimized, setIsMinimized] = useState(true); // Start minimized by default
   
   // For demo purposes, we'll always show the player with demo data
   // Real Home Assistant integration can be added later
@@ -114,14 +114,14 @@ export const MediaPlayer = ({ entityId, isConnected }: MediaPlayerProps) => {
         {/* Minimize/Maximize Button */}
         <motion.button
           onClick={() => setIsMinimized(!isMinimized)}
-          className="absolute top-2 right-4 z-10 w-8 h-8 rounded-full bg-white/5 hover:bg-white/10 flex items-center justify-center transition-colors"
-          whileHover={{ scale: 1.05 }}
+          className="absolute top-3 right-6 z-10 w-10 h-10 rounded-full bg-white/15 hover:bg-white/25 flex items-center justify-center transition-colors backdrop-blur-sm border border-white/20"
+          whileHover={{ scale: 1.1 }}
           whileTap={{ scale: 0.95 }}
         >
           {isMinimized ? (
-            <ChevronUp className="w-4 h-4 text-white/60" />
+            <ChevronUp className="w-5 h-5 text-white" />
           ) : (
-            <ChevronDown className="w-4 h-4 text-white/60" />
+            <ChevronDown className="w-5 h-5 text-white" />
           )}
         </motion.button>
 
@@ -156,7 +156,7 @@ export const MediaPlayer = ({ entityId, isConnected }: MediaPlayerProps) => {
             </div>
 
             {/* Mini Controls */}
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-6">
               <PlaybackControls
                 isPlaying={playerState.isPlaying}
                 shuffle={playerState.shuffle}
@@ -168,14 +168,14 @@ export const MediaPlayer = ({ entityId, isConnected }: MediaPlayerProps) => {
                 onRepeatToggle={handleRepeatToggle}
               />
 
-              <div className="flex items-center gap-3">
-                <VolumeControl
-                  volume={playerState.volume}
-                  isMuted={playerState.isMuted}
-                  onVolumeChange={handleVolumeChange}
-                  onMuteToggle={handleMuteToggle}
-                />
+              <VolumeControl
+                volume={playerState.volume}
+                isMuted={playerState.isMuted}
+                onVolumeChange={handleVolumeChange}
+                onMuteToggle={handleMuteToggle}
+              />
 
+              <div className="mr-16">
                 <SourceIndicator appName={playerState.appName} />
               </div>
             </div>

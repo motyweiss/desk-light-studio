@@ -881,7 +881,7 @@ const Index = () => {
       <motion.div 
         className="flex flex-col md:flex-row items-center gap-4 md:gap-8 max-w-7xl w-full relative z-10 px-5 md:px-0 md:pb-0"
         animate={{
-          paddingBottom: showMediaPlayer ? '200px' : '80px'
+          paddingBottom: showMediaPlayer ? '120px' : '80px'
         }}
         transition={{ duration: 0.7, ease: [0.22, 0.03, 0.26, 1] }}
       >
