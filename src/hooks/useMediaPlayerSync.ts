@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { homeAssistant, type MediaPlayerEntity } from '@/services/homeAssistant';
 import type { MediaPlayerState } from '@/types/mediaPlayer';
+import { POLL_INTERVAL } from '@/constants/animations';
 
 interface UseMediaPlayerSyncConfig {
   entityId: string | undefined;
@@ -9,7 +10,7 @@ interface UseMediaPlayerSyncConfig {
 }
 
 export const useMediaPlayerSync = (config: UseMediaPlayerSyncConfig) => {
-  const { entityId, enabled, pollInterval = 1500 } = config;
+  const { entityId, enabled, pollInterval = POLL_INTERVAL.mediaPlayer } = config;
   const [playerState, setPlayerState] = useState<MediaPlayerState | null>(null);
   const [isLoading, setIsLoading] = useState(enabled && !!entityId);
   const [availableSpeakers, setAvailableSpeakers] = useState<MediaPlayerEntity[]>([]);

@@ -1,5 +1,6 @@
 import { motion } from "framer-motion";
-import { useMemo } from "react";
+import { useMemo, useCallback } from "react";
+import { EASING, DURATION } from "@/constants/animations";
 
 interface AmbientGlowLayersProps {
   spotlightIntensity: number;
@@ -19,13 +20,13 @@ export const AmbientGlowLayers = ({
   const monitorLightOpacity = useMemo(() => Math.pow(monitorLightIntensity / 100, 2.2) * 0.5, [monitorLightIntensity]);
 
   // Dynamic duration based on whether lights are turning on or off
-  const getDuration = (targetOpacity: number) => {
-    return targetOpacity > 0 ? 1.8 : 0.8;
-  };
+  const getDuration = useCallback((targetOpacity: number) => {
+    return targetOpacity > 0 ? DURATION.glowOn : DURATION.glowOff;
+  }, []);
 
-  const getEasing = (targetOpacity: number) => {
-    return targetOpacity > 0 ? ([0.22, 0.03, 0.26, 1] as const) : ([0.33, 0.0, 0.2, 1] as const);
-  };
+  const getEasing = useCallback((targetOpacity: number) => {
+    return targetOpacity > 0 ? EASING.smooth : EASING.quickOut;
+  }, []);
 
   return (
     <>
@@ -43,7 +44,7 @@ export const AmbientGlowLayers = ({
         }}
         transition={{
           duration: getDuration(spotlightOpacity),
-          delay: 0.15,
+          delay: DURATION.glowDelay,
           ease: getEasing(spotlightOpacity)
         }}
       />
@@ -62,7 +63,7 @@ export const AmbientGlowLayers = ({
         }}
         transition={{
           duration: getDuration(deskLampOpacity),
-          delay: 0.15,
+          delay: DURATION.glowDelay,
           ease: getEasing(deskLampOpacity)
         }}
       />
@@ -81,7 +82,7 @@ export const AmbientGlowLayers = ({
         }}
         transition={{
           duration: getDuration(monitorLightOpacity),
-          delay: 0.15,
+          delay: DURATION.glowDelay,
           ease: getEasing(monitorLightOpacity)
         }}
       />

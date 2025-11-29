@@ -13,7 +13,8 @@ import { Toaster } from "@/components/ui/toaster";
 import { useToast } from "@/hooks/use-toast";
 import { useHomeAssistantConfig } from "@/hooks/useHomeAssistantConfig";
 import { homeAssistant } from "@/services/homeAssistant";
-import { syncLogger } from "@/utils/syncLogger";
+import { useHomeAssistantSync } from "@/hooks/useHomeAssistantSync";
+import { EASING, DURATION, BLOCKING_WINDOW } from "@/constants/animations";
 
 // Import all desk images for preloading
 import desk000 from "@/assets/desk-000.png";
@@ -51,19 +52,35 @@ const Index = () => {
   // Hover states for coordinated UI
   const [hoveredLight, setHoveredLight] = useState<string | null>(null);
   
-  // Ref to track last manual change timestamp
-  const lastManualChangeRef = useRef<number>(0);
-  
   // Track lights with pending HA commands to prevent polling overwrites
   const [pendingLights, setPendingLights] = useState<Set<string>>(new Set());
   
-  // Connection retry state
+  // Connection retry state  
   const [isReconnecting, setIsReconnecting] = useState(false);
-  const reconnectAttemptRef = useRef(0);
   
   // Home Assistant integration
   const { toast } = useToast();
   const { config, entityMapping, isConnected, saveConfig } = useHomeAssistantConfig();
+
+  // Use new sync hook
+  const { forceSyncStates, markManualChange } = useHomeAssistantSync({
+    isConnected,
+    entityMapping,
+    pendingLights,
+    onLightsUpdate: (lights) => {
+      if (lights.spotlight !== undefined) setSpotlightIntensity(lights.spotlight);
+      if (lights.deskLamp !== undefined) setDeskLampIntensity(lights.deskLamp);
+      if (lights.monitorLight !== undefined) setMonitorLightIntensity(lights.monitorLight);
+    },
+    onSensorsUpdate: (sensors) => {
+      if (sensors.temperature !== undefined) setTemperature(sensors.temperature);
+      if (sensors.humidity !== undefined) setHumidity(sensors.humidity);
+      if (sensors.airQuality !== undefined) setAirQuality(sensors.airQuality);
+      if (sensors.iphoneBatteryLevel !== undefined) setIphoneBatteryLevel(sensors.iphoneBatteryLevel);
+      if (sensors.iphoneBatteryCharging !== undefined) setIphoneBatteryCharging(sensors.iphoneBatteryCharging);
+    },
+    onReconnectingChange: setIsReconnecting,
+  });
 
   // Reset initial state loading flag when connection changes
   useEffect(() => {
@@ -140,9 +157,8 @@ const Index = () => {
   const masterSwitchOn = allLightsOn;
 
   const handleMasterToggle = useCallback(async (checked: boolean) => {
-    const startTime = Date.now();
-    lastManualChangeRef.current = startTime;
     const targetIntensity = checked ? 100 : 0;
+    markManualChange();
     
     console.log(`🎛️  MASTER TOGGLE: ${checked ? 'ON' : 'OFF'} (target: ${targetIntensity}%)`);
     
@@ -181,24 +197,21 @@ const Index = () => {
       }
       
       await Promise.all(promises);
-      const duration = Date.now() - startTime;
-      console.log(`⏱️  Master toggle completed in ${duration}ms`);
       
-      // Wait 500ms for HA to update its state, then clear pending
+      // Wait for HA to confirm, then clear pending
       setTimeout(() => {
         setPendingLights(new Set());
-      }, 500);
+      }, BLOCKING_WINDOW.pendingConfirm);
     } else {
       console.log('⚠️  Master toggle: Not connected to HA, local only');
       setPendingLights(new Set());
     }
-  }, [isConnected, entityMapping]);
+  }, [isConnected, entityMapping, markManualChange]);
 
   // Handle individual light intensity changes with Home Assistant sync
   const createLightChangeHandler = useCallback((lightId: string, setter: (value: number) => void) => {
     return async (newIntensity: number) => {
-      const startTime = Date.now();
-      lastManualChangeRef.current = startTime;
+      markManualChange();
       
       console.log(`💡 MANUAL CHANGE: ${lightId} → ${newIntensity}%`);
       
@@ -219,17 +232,16 @@ const Index = () => {
           console.log(`📤 Sending to HA: ${entityId} → ${newIntensity}%`);
           try {
             await homeAssistant.setLightBrightness(entityId, newIntensity);
-            const duration = Date.now() - startTime;
-            console.log(`  ✅ Success in ${duration}ms`);
+            console.log(`  ✅ Success`);
             
-            // Wait 500ms for HA to update its state, then clear pending
+            // Wait for HA to confirm, then clear pending
             setTimeout(() => {
               setPendingLights(prev => {
                 const next = new Set(prev);
                 next.delete(lightId);
                 return next;
               });
-            }, 500);
+            }, BLOCKING_WINDOW.pendingConfirm);
           } catch (error) {
             console.error(`  ❌ Failed to sync ${lightId}:`, error);
             // Clear pending on error too
@@ -249,7 +261,7 @@ const Index = () => {
         });
       }
     };
-  }, [isConnected, entityMapping]);
+  }, [isConnected, entityMapping, markManualChange]);
 
   const handleSaveSettings = (
     newConfig: { baseUrl: string; accessToken: string },
@@ -374,9 +386,6 @@ const Index = () => {
         setHasLoadedInitialState(true);
       } catch (error) {
         console.error("❌ Failed to perform initial sync:", error);
-        
-        // Mark as reconnecting on initial sync failure
-        setIsReconnecting(true);
         toast({
           title: "Connection Failed",
           description: "Unable to connect to Home Assistant. Retrying...",
@@ -386,369 +395,7 @@ const Index = () => {
     };
 
     initialSync();
-  }, [isConnected, entityMapping]); // Run once when connected
-
-  // Force sync function - immediate sync without conditions
-  const forceSyncStates = useCallback(async () => {
-    if (!isConnected || !entityMapping) return;
-
-    const lightEntityIds = [
-      entityMapping.spotlight,
-      entityMapping.deskLamp,
-      entityMapping.monitorLight,
-    ].filter(Boolean) as string[];
-    
-    const sensorEntityIds = [
-      entityMapping.temperatureSensor,
-      entityMapping.humiditySensor,
-      entityMapping.airQualitySensor,
-      entityMapping.iphoneBatteryLevel,
-      entityMapping.iphoneBatteryState,
-    ].filter(Boolean) as string[];
-
-    const allEntityIds = [...lightEntityIds, ...sensorEntityIds];
-    if (allEntityIds.length === 0) return;
-
-    console.log("⚡ Force sync triggered");
-
-    try {
-      const states = await homeAssistant.getAllEntityStates(allEntityIds);
-      
-      // Update spotlight
-      if (entityMapping.spotlight && states.has(entityMapping.spotlight)) {
-        const state = states.get(entityMapping.spotlight)!;
-        const newIntensity = state.state === "on" 
-          ? Math.round((state.brightness || 255) / 255 * 100)
-          : 0;
-        setSpotlightIntensity(newIntensity);
-        console.log(`💡 Spotlight force synced: ${newIntensity}%`);
-      }
-
-      // Update desk lamp
-      if (entityMapping.deskLamp && states.has(entityMapping.deskLamp)) {
-        const state = states.get(entityMapping.deskLamp)!;
-        const newIntensity = state.state === "on" 
-          ? Math.round((state.brightness || 255) / 255 * 100)
-          : 0;
-        setDeskLampIntensity(newIntensity);
-        console.log(`💡 Desk Lamp force synced: ${newIntensity}%`);
-      }
-
-      // Update monitor light
-      if (entityMapping.monitorLight && states.has(entityMapping.monitorLight)) {
-        const state = states.get(entityMapping.monitorLight)!;
-        const newIntensity = state.state === "on" 
-          ? Math.round((state.brightness || 255) / 255 * 100)
-          : 0;
-        setMonitorLightIntensity(newIntensity);
-        console.log(`💡 Monitor Light force synced: ${newIntensity}%`);
-      }
-      
-      // Update sensors
-      if (entityMapping.temperatureSensor && states.has(entityMapping.temperatureSensor)) {
-        const state = states.get(entityMapping.temperatureSensor)!;
-        const tempValue = parseFloat(state.state);
-        if (!isNaN(tempValue)) {
-          setTemperature(tempValue);
-        }
-      }
-      
-      if (entityMapping.humiditySensor && states.has(entityMapping.humiditySensor)) {
-        const state = states.get(entityMapping.humiditySensor)!;
-        const humidityValue = parseFloat(state.state);
-        if (!isNaN(humidityValue)) {
-          setHumidity(Math.round(humidityValue));
-        }
-      }
-      
-      if (entityMapping.airQualitySensor && states.has(entityMapping.airQualitySensor)) {
-        const state = states.get(entityMapping.airQualitySensor)!;
-        const aqValue = parseFloat(state.state);
-        if (!isNaN(aqValue)) {
-          setAirQuality(Math.round(aqValue));
-        }
-      }
-      
-      // Update battery sensors
-      if (entityMapping.iphoneBatteryLevel && states.has(entityMapping.iphoneBatteryLevel)) {
-        const state = states.get(entityMapping.iphoneBatteryLevel)!;
-        const batteryValue = parseFloat(state.state);
-        if (!isNaN(batteryValue)) {
-          setIphoneBatteryLevel(Math.round(batteryValue));
-        }
-      }
-      
-      if (entityMapping.iphoneBatteryState && states.has(entityMapping.iphoneBatteryState)) {
-        const state = states.get(entityMapping.iphoneBatteryState)!;
-        const isCharging = state.state.toLowerCase().includes("charging") && !state.state.toLowerCase().includes("not");
-        setIphoneBatteryCharging(isCharging);
-      }
-    } catch (error) {
-      console.error("❌ Force sync failed:", error);
-      
-      // Mark as reconnecting if force sync fails
-      if (!isReconnecting) {
-        setIsReconnecting(true);
-      }
-    }
-  }, [isConnected, entityMapping]);
-
-  // Bidirectional sync with Home Assistant - poll for state changes
-  useEffect(() => {
-    if (!isConnected || !entityMapping) return;
-
-    const lightEntityIds = [
-      entityMapping.spotlight,
-      entityMapping.deskLamp,
-      entityMapping.monitorLight,
-    ].filter(Boolean) as string[];
-    
-    const sensorEntityIds = [
-      entityMapping.temperatureSensor,
-      entityMapping.humiditySensor,
-      entityMapping.airQualitySensor,
-      entityMapping.iphoneBatteryLevel,
-      entityMapping.iphoneBatteryState,
-    ].filter(Boolean) as string[];
-
-    const allEntityIds = [...lightEntityIds, ...sensorEntityIds];
-
-    if (allEntityIds.length === 0) return;
-
-    console.log("🔄 Starting Home Assistant sync polling");
-    console.log("📡 Light entities:", lightEntityIds);
-    console.log("🌡️ Sensor entities:", sensorEntityIds);
-
-    const syncStates = async () => {
-      const syncStartTime = Date.now();
-      try {
-        const states = await homeAssistant.getAllEntityStates(allEntityIds);
-        const fetchDuration = Date.now() - syncStartTime;
-        
-        syncLogger.logSync(fetchDuration, true);
-        
-        if (fetchDuration > 1000) {
-          console.warn(`⚠️  Slow sync: ${fetchDuration}ms (threshold: 1000ms)`);
-        }
-        
-        // Connection successful - reset reconnection state
-        if (isReconnecting) {
-          console.log("✅ Connection restored!");
-          syncLogger.printSummary();
-          setIsReconnecting(false);
-          reconnectAttemptRef.current = 0;
-          toast({
-            title: "Reconnected",
-            description: "Successfully reconnected to Home Assistant",
-          });
-        }
-        
-        // Update light entities
-        // Update spotlight
-        if (entityMapping.spotlight && states.has(entityMapping.spotlight)) {
-          const state = states.get(entityMapping.spotlight)!;
-          const newIntensity = state.state === "on" 
-            ? Math.round((state.brightness || 255) / 255 * 100)
-            : 0;
-          
-          setSpotlightIntensity(current => {
-            // Skip if light is pending HA confirmation
-            if (pendingLights.has('spotlight')) {
-              console.log(`🚫 Spotlight: skipped (pending HA confirmation)`);
-              return current;
-            }
-            
-            // Only skip update if manual change happened in last 1500ms
-            const timeSinceManualChange = Date.now() - lastManualChangeRef.current;
-            if (timeSinceManualChange < 1500) {
-              syncLogger.logBlockedUpdate();
-              console.log(`🚫 BLOCKED: Spotlight update blocked (manual change ${timeSinceManualChange}ms ago)`);
-              return current;
-            }
-            
-            // Always update when state changes (on/off) or when there's any brightness difference
-            if (current !== newIntensity) {
-              console.log(`💡 Spotlight synced: ${current}% → ${newIntensity}% (remote state: ${state.state})`);
-              return newIntensity;
-            }
-            return current;
-          });
-        }
-
-        // Update desk lamp
-        if (entityMapping.deskLamp && states.has(entityMapping.deskLamp)) {
-          const state = states.get(entityMapping.deskLamp)!;
-          const newIntensity = state.state === "on" 
-            ? Math.round((state.brightness || 255) / 255 * 100)
-            : 0;
-          
-          setDeskLampIntensity(current => {
-            // Skip if light is pending HA confirmation
-            if (pendingLights.has('deskLamp')) {
-              console.log(`🚫 Desk Lamp: skipped (pending HA confirmation)`);
-              return current;
-            }
-            
-            // Only skip update if manual change happened in last 1500ms
-            const timeSinceManualChange = Date.now() - lastManualChangeRef.current;
-            if (timeSinceManualChange < 1500) {
-              syncLogger.logBlockedUpdate();
-              console.log(`🚫 BLOCKED: Desk Lamp update blocked (manual change ${timeSinceManualChange}ms ago)`);
-              return current;
-            }
-            
-            // Always update when state changes (on/off) or when there's any brightness difference
-            if (current !== newIntensity) {
-              console.log(`💡 Desk Lamp synced: ${current}% → ${newIntensity}% (remote state: ${state.state})`);
-              return newIntensity;
-            }
-            return current;
-          });
-        }
-
-        // Update monitor light
-        if (entityMapping.monitorLight && states.has(entityMapping.monitorLight)) {
-          const state = states.get(entityMapping.monitorLight)!;
-          const newIntensity = state.state === "on" 
-            ? Math.round((state.brightness || 255) / 255 * 100)
-            : 0;
-          
-          setMonitorLightIntensity(current => {
-            // Skip if light is pending HA confirmation
-            if (pendingLights.has('monitorLight')) {
-              console.log(`🚫 Monitor Light: skipped (pending HA confirmation)`);
-              return current;
-            }
-            
-            // Only skip update if manual change happened in last 1500ms
-            const timeSinceManualChange = Date.now() - lastManualChangeRef.current;
-            if (timeSinceManualChange < 1500) {
-              syncLogger.logBlockedUpdate();
-              console.log(`🚫 BLOCKED: Monitor Light update blocked (manual change ${timeSinceManualChange}ms ago)`);
-              return current;
-            }
-            
-            // Always update when state changes (on/off) or when there's any brightness difference
-            if (current !== newIntensity) {
-              console.log(`💡 Monitor Light synced: ${current}% → ${newIntensity}% (remote state: ${state.state})`);
-              return newIntensity;
-            }
-            return current;
-          });
-        }
-        
-        // Update sensor entities
-        // Update temperature
-        if (entityMapping.temperatureSensor && states.has(entityMapping.temperatureSensor)) {
-          const state = states.get(entityMapping.temperatureSensor)!;
-          const tempValue = parseFloat(state.state);
-          
-          if (!isNaN(tempValue)) {
-            setTemperature(current => {
-              if (Math.abs(current - tempValue) > 0.1) {
-                console.log(`🌡️ Temperature synced: ${current} → ${tempValue}°C`);
-                return tempValue;
-              }
-              return current;
-            });
-          }
-        }
-        
-        // Update humidity
-        if (entityMapping.humiditySensor && states.has(entityMapping.humiditySensor)) {
-          const state = states.get(entityMapping.humiditySensor)!;
-          const humidityValue = parseFloat(state.state);
-          
-          if (!isNaN(humidityValue)) {
-            setHumidity(current => {
-              if (Math.abs(current - humidityValue) > 1) {
-                console.log(`💧 Humidity synced: ${current} → ${humidityValue}%`);
-                return Math.round(humidityValue);
-              }
-              return current;
-            });
-          }
-        }
-        
-        // Update air quality (PM2.5)
-        if (entityMapping.airQualitySensor && states.has(entityMapping.airQualitySensor)) {
-          const state = states.get(entityMapping.airQualitySensor)!;
-          const aqValue = parseFloat(state.state);
-          
-          if (!isNaN(aqValue)) {
-            setAirQuality(current => {
-              if (Math.abs(current - aqValue) > 1) {
-                console.log(`🌬️ Air Quality synced: ${current} → ${aqValue}`);
-                return Math.round(aqValue);
-              }
-              return current;
-            });
-          }
-        }
-        
-        // Update battery sensors
-        if (entityMapping.iphoneBatteryLevel && states.has(entityMapping.iphoneBatteryLevel)) {
-          const state = states.get(entityMapping.iphoneBatteryLevel)!;
-          const batteryValue = parseFloat(state.state);
-          
-          if (!isNaN(batteryValue)) {
-            setIphoneBatteryLevel(current => {
-              if (Math.abs(current - batteryValue) > 1) {
-                console.log(`🔋 iPhone Battery synced: ${current} → ${batteryValue}%`);
-                return Math.round(batteryValue);
-              }
-              return current;
-            });
-          }
-        }
-        
-        if (entityMapping.iphoneBatteryState && states.has(entityMapping.iphoneBatteryState)) {
-          const state = states.get(entityMapping.iphoneBatteryState)!;
-          const isCharging = state.state.toLowerCase().includes("charging") && !state.state.toLowerCase().includes("not");
-          setIphoneBatteryCharging(current => {
-            if (current !== isCharging) {
-              console.log(`⚡ iPhone Charging synced: ${current} → ${isCharging} (state: "${state.state}")`);
-              return isCharging;
-            }
-            return current;
-          });
-        }
-      } catch (error) {
-        console.error("❌ Failed to sync with Home Assistant:", error);
-        
-        // Mark as reconnecting if not already
-        if (!isReconnecting) {
-          setIsReconnecting(true);
-          toast({
-            title: "Connection Lost",
-            description: "Attempting to reconnect to Home Assistant...",
-            variant: "destructive",
-          });
-        }
-        
-        // Increment reconnection attempt counter
-        reconnectAttemptRef.current += 1;
-        const retryCount = homeAssistant.getRetryCount();
-        
-        // Log reconnection attempt
-        if (reconnectAttemptRef.current % 5 === 0) {
-          console.warn(`🔄 Reconnection attempt ${reconnectAttemptRef.current} (retry count: ${retryCount})`);
-        }
-      }
-    };
-
-    // Initial sync
-    console.log("🚀 Starting initial sync...");
-    syncStates();
-
-    // Poll every 500ms for real-time updates
-    const interval = setInterval(syncStates, 500);
-
-    return () => {
-      console.log("🛑 Stopping Home Assistant sync polling");
-      clearInterval(interval);
-    };
-  }, [isConnected, entityMapping]);
+  }, [isConnected, entityMapping, toast]); // Run once when connected
 
   // Window focus/visibility sync - sync immediately when user returns to tab
   useEffect(() => {
@@ -888,10 +535,8 @@ const Index = () => {
               : "hsl(40 28% 26% / 0.35)" // All on - brightest overlay
           }}
           transition={{
-            duration: spotlightIntensity > 0 || deskLampIntensity > 0 || monitorLightIntensity > 0 ? 1.8 : 0.8,
-            ease: spotlightIntensity > 0 || deskLampIntensity > 0 || monitorLightIntensity > 0 
-              ? [0.22, 0.03, 0.26, 1] 
-              : [0.33, 0.0, 0.2, 1]
+            duration: DURATION.lightOn,
+            ease: EASING.smooth
           }}
         />
 
@@ -1046,10 +691,10 @@ const Index = () => {
               animate={{
                 opacity: Math.pow(spotlightIntensity / 100, 2.0),
               }}
-              transition={{
-                duration: 1.5,
-                ease: [0.22, 0.03, 0.26, 1]
-              }}
+          transition={{
+            duration: DURATION.lightOn * 1000,
+            ease: EASING.smooth
+          }}
             />
 
             {/* Desk lamp glow - rich warm golden from left side */}
@@ -1062,10 +707,10 @@ const Index = () => {
               animate={{
                 opacity: Math.pow(deskLampIntensity / 100, 2.0),
               }}
-              transition={{
-                duration: 1.5,
-                ease: [0.22, 0.03, 0.26, 1]
-              }}
+          transition={{
+            duration: DURATION.lightOn * 1000,
+            ease: EASING.smooth
+          }}
             />
 
             {/* Monitor light glow - warm beige cream from center */}
@@ -1078,10 +723,10 @@ const Index = () => {
               animate={{
                 opacity: Math.pow(monitorLightIntensity / 100, 2.0),
               }}
-              transition={{
-                duration: 1.5,
-                ease: [0.22, 0.03, 0.26, 1]
-              }}
+          transition={{
+            duration: DURATION.lightOn * 1000,
+            ease: EASING.smooth
+          }}
             />
           </div>
 
