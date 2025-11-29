@@ -1,17 +1,18 @@
-import React, { createContext, useContext, useState, useCallback, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useCallback, ReactNode, useEffect } from 'react';
 import { useMediaPlayerSync } from '@/hooks/useMediaPlayerSync';
 import { homeAssistant } from '@/services/homeAssistant';
-import type { MediaPlayerState } from '@/types/mediaPlayer';
+import type { MediaPlayerState, PlaybackTarget } from '@/types/mediaPlayer';
 import type { MediaPlayerEntity } from '@/services/homeAssistant';
+import { PREDEFINED_GROUPS, SPEAKER_ENTITY_MAP, type SpeakerGroup } from '@/config/speakerGroups';
 
 interface MediaPlayerContextType {
   playerState: MediaPlayerState | null;
   isLoading: boolean;
   availableSpeakers: MediaPlayerEntity[];
-  combinedSources: string[];
+  predefinedGroups: SpeakerGroup[];
+  currentPlaybackTarget: PlaybackTarget | null;
   entityId: string | undefined;
   isConnected: boolean;
-  activeGroup: string[];
   handlePlayPause: () => Promise<void>;
   handleNext: () => Promise<void>;
   handlePrevious: () => Promise<void>;
@@ -19,9 +20,10 @@ interface MediaPlayerContextType {
   handleMuteToggle: () => Promise<void>;
   handleShuffleToggle: () => Promise<void>;
   handleRepeatToggle: () => Promise<void>;
-  handleSourceChange: (source: string) => Promise<void>;
+  handleSpotifySourceChange: (source: string) => Promise<void>;
+  handleSpeakerSelect: (entityId: string, friendlyName: string) => Promise<void>;
+  handleGroupSelect: (group: SpeakerGroup) => Promise<void>;
   handleSeek: (position: number) => Promise<void>;
-  handleGroupSelect: (groupMembers: string[]) => Promise<void>;
 }
 
 const MediaPlayerContext = createContext<MediaPlayerContextType | undefined>(undefined);
@@ -33,7 +35,7 @@ interface MediaPlayerProviderProps {
 }
 
 export const MediaPlayerProvider = ({ children, entityId, isConnected }: MediaPlayerProviderProps) => {
-  const [activeGroup, setActiveGroup] = useState<string[]>([]);
+  const [currentPlaybackTarget, setCurrentPlaybackTarget] = useState<PlaybackTarget | null>(null);
   
   const { 
     playerState, 
@@ -41,7 +43,7 @@ export const MediaPlayerProvider = ({ children, entityId, isConnected }: MediaPl
     syncFromRemote, 
     setPlayerState,
     availableSpeakers,
-    combinedSources 
+    detectActiveTarget
   } = useMediaPlayerSync({
     entityId,
     enabled: isConnected && !!entityId,
@@ -101,13 +103,60 @@ export const MediaPlayerProvider = ({ children, entityId, isConnected }: MediaPl
     setTimeout(syncFromRemote, 300);
   }, [entityId, playerState, setPlayerState, syncFromRemote]);
 
-  const handleSourceChange = useCallback(async (source: string) => {
-    if (!entityId || !playerState) return;
+  // Handler for Spotify Connect source selection
+  const handleSpotifySourceChange = useCallback(async (source: string) => {
+    if (!entityId) return;
     
-    setPlayerState(prev => prev ? { ...prev, source } : null);
+    console.log('🎵 Selecting Spotify Connect source:', source);
+    
+    setCurrentPlaybackTarget({ 
+      type: 'spotify', 
+      name: source, 
+      entityIds: [] 
+    });
+    
     await homeAssistant.setMediaSource(entityId, source);
     setTimeout(syncFromRemote, 500);
-  }, [entityId, playerState, setPlayerState, syncFromRemote]);
+  }, [entityId, syncFromRemote]);
+
+  // Handler for individual Sonos speaker selection
+  const handleSpeakerSelect = useCallback(async (speakerEntityId: string, friendlyName: string) => {
+    if (!entityId) return;
+    
+    console.log('🔊 Selecting speaker:', friendlyName, speakerEntityId);
+    
+    setCurrentPlaybackTarget({ 
+      type: 'speaker', 
+      name: friendlyName, 
+      entityIds: [speakerEntityId] 
+    });
+    
+    // Transfer playback to the selected Sonos speaker
+    await homeAssistant.transferPlaybackToSonos(entityId, speakerEntityId, friendlyName);
+    setTimeout(syncFromRemote, 800);
+  }, [entityId, syncFromRemote]);
+
+  // Handler for speaker group selection
+  const handleGroupSelect = useCallback(async (group: SpeakerGroup) => {
+    if (!entityId) return;
+    
+    console.log('👥 Selecting speaker group:', group.name, group.entityIds);
+    
+    setCurrentPlaybackTarget({ 
+      type: 'group', 
+      name: group.name, 
+      entityIds: group.entityIds,
+      groupId: group.id
+    });
+    
+    // First, create the speaker group
+    await homeAssistant.playOnSpeakerGroup(group.masterEntityId, group.entityIds, group.name);
+    
+    // Then, transfer Spotify playback to the group master
+    await homeAssistant.transferPlaybackToSonos(entityId, group.masterEntityId, group.name);
+    
+    setTimeout(syncFromRemote, 800);
+  }, [entityId, syncFromRemote]);
 
   const handleSeek = useCallback(async (position: number) => {
     if (!entityId || !playerState?.currentTrack) return;
@@ -123,27 +172,38 @@ export const MediaPlayerProvider = ({ children, entityId, isConnected }: MediaPl
     setTimeout(syncFromRemote, 200);
   }, [entityId, playerState, setPlayerState, syncFromRemote]);
 
-  const handleGroupSelect = useCallback(async (groupMembers: string[]) => {
-    if (!entityId || groupMembers.length === 0) return;
+  // Set default group on initial load if no source detected
+  useEffect(() => {
+    if (!playerState || !isConnected || !entityId) return;
     
-    setActiveGroup(groupMembers);
-    
-    // Join speakers into group if more than one
-    if (groupMembers.length > 1) {
-      await homeAssistant.joinMediaPlayers(entityId, groupMembers);
+    // Only auto-select if no playback target is currently set
+    if (!currentPlaybackTarget) {
+      const defaultGroup = PREDEFINED_GROUPS.find(g => g.isDefault);
+      if (defaultGroup) {
+        console.log('🎯 Auto-selecting default group:', defaultGroup.name);
+        handleGroupSelect(defaultGroup);
+      }
     }
+  }, [playerState, isConnected, entityId, currentPlaybackTarget, handleGroupSelect]);
+
+  // Update playback target when player state changes
+  useEffect(() => {
+    if (!playerState) return;
     
-    setTimeout(syncFromRemote, 500);
-  }, [entityId, syncFromRemote]);
+    const detectedTarget = detectActiveTarget(playerState);
+    if (detectedTarget && !currentPlaybackTarget) {
+      setCurrentPlaybackTarget(detectedTarget);
+    }
+  }, [playerState, detectActiveTarget, currentPlaybackTarget]);
 
   const value: MediaPlayerContextType = {
     playerState,
     isLoading,
     availableSpeakers,
-    combinedSources,
+    predefinedGroups: PREDEFINED_GROUPS,
+    currentPlaybackTarget,
     entityId,
     isConnected,
-    activeGroup,
     handlePlayPause,
     handleNext,
     handlePrevious,
@@ -151,9 +211,10 @@ export const MediaPlayerProvider = ({ children, entityId, isConnected }: MediaPl
     handleMuteToggle,
     handleShuffleToggle,
     handleRepeatToggle,
-    handleSourceChange,
-    handleSeek,
+    handleSpotifySourceChange,
+    handleSpeakerSelect,
     handleGroupSelect,
+    handleSeek,
   };
 
   return (

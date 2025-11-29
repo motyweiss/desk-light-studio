@@ -21,10 +21,10 @@ export const MediaPlayer = () => {
     playerState,
     isLoading,
     availableSpeakers,
-    combinedSources,
+    predefinedGroups,
+    currentPlaybackTarget,
     entityId,
     isConnected,
-    activeGroup,
     handlePlayPause,
     handleNext,
     handlePrevious,
@@ -32,7 +32,9 @@ export const MediaPlayer = () => {
     handleMuteToggle,
     handleShuffleToggle,
     handleRepeatToggle,
-    handleSourceChange,
+    handleSpotifySourceChange,
+    handleSpeakerSelect,
+    handleGroupSelect,
     handleSeek,
   } = useMediaPlayer();
 
@@ -133,7 +135,7 @@ export const MediaPlayer = () => {
     height: isMinimized ? 56 : 64,
   };
 
-  const isGroup = activeGroup.length > 1;
+  
 
   return (
     <>
@@ -321,9 +323,7 @@ export const MediaPlayer = () => {
 
                   <MiniSpeakerBadge
                     ref={speakerBadgeRef}
-                    speakerName={playerState.source}
-                    groupMembers={activeGroup}
-                    isGroup={isGroup}
+                    playbackTarget={currentPlaybackTarget}
                     onClick={(e) => {
                       e.stopPropagation();
                       setSpeakerPopoverOpen(true);
@@ -394,18 +394,14 @@ export const MediaPlayer = () => {
                         onMuteToggle={handleMuteToggle}
                       />
 
-                      {combinedSources.length > 0 && (
-                        <MiniSpeakerBadge
-                          ref={speakerBadgeRef}
-                          speakerName={playerState.source}
-                          groupMembers={activeGroup}
-                          isGroup={isGroup}
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setSpeakerPopoverOpen(true);
-                          }}
-                        />
-                      )}
+                      <MiniSpeakerBadge
+                        ref={speakerBadgeRef}
+                        playbackTarget={currentPlaybackTarget}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setSpeakerPopoverOpen(true);
+                        }}
+                      />
                     </div>
                   </div>
                 </motion.div>
@@ -419,10 +415,13 @@ export const MediaPlayer = () => {
       <SpeakerPopover
         isOpen={speakerPopoverOpen}
         onClose={() => setSpeakerPopoverOpen(false)}
-        currentSource={playerState.source}
+        currentPlaybackTarget={currentPlaybackTarget}
         spotifySources={playerState.availableSources}
         availableSpeakers={availableSpeakers}
-        onSourceChange={handleSourceChange}
+        predefinedGroups={predefinedGroups}
+        onSpotifySourceSelect={handleSpotifySourceChange}
+        onSpeakerSelect={handleSpeakerSelect}
+        onGroupSelect={handleGroupSelect}
         anchorRef={speakerBadgeRef}
       />
     </>
