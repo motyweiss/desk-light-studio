@@ -36,7 +36,8 @@ export const MiniSpeakerBadge = forwardRef<HTMLButtonElement, MiniSpeakerBadgePr
       <motion.button
         ref={ref}
         onClick={onClick}
-        className={`flex items-center gap-2 rounded-full backdrop-blur-sm border border-white/10 hover:bg-white/10 hover:border-white/20 transition-all ${
+        type="button"
+        className={`flex items-center gap-2 rounded-full backdrop-blur-sm border border-white/10 hover:bg-white/10 hover:border-white/20 transition-all relative z-10 ${
           compact 
             ? 'px-2 py-1 bg-white/5' 
             : 'px-3 py-1.5 bg-white/5'
