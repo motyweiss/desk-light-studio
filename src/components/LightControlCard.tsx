@@ -1,8 +1,9 @@
-import { motion, useMotionValue, animate, useMotionValueEvent } from "framer-motion";
+import { motion, useMotionValue, animate, useMotionValueEvent, AnimatePresence } from "framer-motion";
 import { Slider } from "@/components/ui/slider";
 import { useEffect, useState, useRef, useCallback } from "react";
 import { getIconForLight } from "@/components/icons/LightIcons";
 import { Loader2 } from "lucide-react";
+import { EASING, DURATION } from "@/constants/animations";
 
 interface LightControlCardProps {
   id: string;
@@ -43,8 +44,8 @@ export const LightControlCard = ({
     if (isAnimating) return;
     
     const controls = animate(displayValue, intensity, {
-      duration: 1.2,
-      ease: [0.22, 0.03, 0.26, 1]
+      duration: DURATION.lightOn,
+      ease: EASING.smooth
     });
     
     return controls.stop;
@@ -81,8 +82,8 @@ export const LightControlCard = ({
     
     // Animate ONLY the display value - don't call onChange during animation
     animate(displayValue, targetIntensity, {
-      duration: isTurningOff ? 0.6 : 1.2,
-      ease: [0.22, 0.03, 0.26, 1],
+      duration: isTurningOff ? DURATION.lightOff : DURATION.lightOn,
+      ease: EASING.smooth,
       onComplete: () => {
         setIsAnimating(false);
         // Send to HA ONCE at the end
@@ -204,15 +205,15 @@ export const LightControlCard = ({
         borderColor: isOn ? 'rgba(255, 255, 255, 0.2)' : 'rgba(255, 255, 255, 0.1)',
       }}
       transition={{
-        layout: { duration: 0.25, ease: [0.22, 0.03, 0.26, 1] },
-        backgroundColor: { duration: 0.5, ease: [0.22, 0.03, 0.26, 1] },
-        borderColor: { duration: 0.5, ease: [0.22, 0.03, 0.26, 1] },
+        layout: { duration: 0.25, ease: EASING.smooth },
+        backgroundColor: { duration: DURATION.medium, ease: EASING.smooth },
+        borderColor: { duration: DURATION.medium, ease: EASING.smooth },
       }}
-      whileHover={{
+        whileHover={{
         backgroundColor: isOn ? 'rgba(255, 255, 255, 0.15)' : 'rgba(255, 255, 255, 0.06)',
         borderColor: isOn ? 'rgba(255, 255, 255, 0.25)' : 'rgba(255, 255, 255, 0.15)',
         scale: 1.005,
-        transition: { duration: 0.4, ease: [0.22, 0.03, 0.26, 1] }
+        transition: { duration: 0.4, ease: EASING.smooth }
       }}
       whileTap={{ scale: 0.985 }}
     >
@@ -254,9 +255,9 @@ export const LightControlCard = ({
             color: isOn ? 'hsl(44 92% 62%)' : 'rgba(255, 255, 255, 0.3)'
           }}
           transition={{ 
-            scale: { duration: 0.4, ease: [0.22, 0.03, 0.26, 1] },
-            opacity: { duration: 0.35, ease: [0.22, 0.03, 0.26, 1] },
-            color: { duration: 0.5, ease: [0.22, 0.03, 0.26, 1] }
+            scale: { duration: 0.4, ease: EASING.smooth },
+            opacity: { duration: 0.35, ease: EASING.smooth },
+            color: { duration: DURATION.medium, ease: EASING.smooth }
           }}
         >
           <IconComponent className="w-7 h-7" />
@@ -270,7 +271,7 @@ export const LightControlCard = ({
             animate={{
               color: isOn ? 'rgba(255, 255, 255, 0.65)' : 'rgba(255, 255, 255, 0.5)'
             }}
-            transition={{ duration: 0.5 }}
+            transition={{ duration: DURATION.medium }}
           >
             {isOn ? `${displayNumber}%` : 'Off'}
           </motion.div>
@@ -285,19 +286,21 @@ export const LightControlCard = ({
         >
           {/* Subtle Spinner - Left of Slider with fixed width */}
           <div className="w-4 h-4 flex items-center justify-center flex-shrink-0">
-            {isPending && (
-              <motion.div
-                initial={{ opacity: 0, scale: 0.7 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.7 }}
-                transition={{ duration: 0.2 }}
-              >
-                <Loader2 
-                  className="w-4 h-4 text-white/40 animate-spin" 
-                  strokeWidth={2}
-                />
-              </motion.div>
-            )}
+            <AnimatePresence>
+              {isPending && (
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.7 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.7 }}
+                  transition={{ duration: 0.2 }}
+                >
+                  <Loader2 
+                    className="w-4 h-4 text-white/40 animate-spin" 
+                    strokeWidth={2}
+                  />
+                </motion.div>
+              )}
+            </AnimatePresence>
           </div>
           
           <Slider
