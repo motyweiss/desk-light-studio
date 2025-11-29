@@ -4,6 +4,7 @@ import { homeAssistant } from '@/services/homeAssistant';
 import type { MediaPlayerState, PlaybackTarget } from '@/types/mediaPlayer';
 import type { MediaPlayerEntity } from '@/services/homeAssistant';
 import { PREDEFINED_GROUPS, SPEAKER_ENTITY_MAP, type SpeakerGroup } from '@/config/speakerGroups';
+import { POLL_INTERVAL } from '@/constants/animations';
 
 interface MediaPlayerContextType {
   playerState: MediaPlayerState | null;
@@ -47,7 +48,7 @@ export const MediaPlayerProvider = ({ children, entityId, isConnected }: MediaPl
   } = useMediaPlayerSync({
     entityId,
     enabled: isConnected && !!entityId,
-    pollInterval: 1500,
+    pollInterval: POLL_INTERVAL.mediaPlayer, // Fast polling for immediate music detection
   });
 
   // Optimistic handlers with immediate UI update

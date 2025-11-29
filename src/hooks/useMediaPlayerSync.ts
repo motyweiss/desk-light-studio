@@ -213,16 +213,29 @@ export const useMediaPlayerSync = (config: UseMediaPlayerSyncConfig) => {
     };
   }, [playerState?.isPlaying, playerState?.currentTrack]);
 
-  // Window focus sync
+  // Window focus and visibility sync for immediate updates
   useEffect(() => {
     if (!enabled) return;
 
     const handleFocus = () => {
-      syncFromRemote();
+      console.log('🎵 Media player window focused - syncing immediately');
+      syncFromRemote(true); // Force position update on focus
+    };
+
+    const handleVisibilityChange = () => {
+      if (!document.hidden) {
+        console.log('🎵 Media player tab visible - syncing immediately');
+        syncFromRemote(true); // Force position update on visibility
+      }
     };
 
     window.addEventListener('focus', handleFocus);
-    return () => window.removeEventListener('focus', handleFocus);
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    
+    return () => {
+      window.removeEventListener('focus', handleFocus);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
   }, [enabled, syncFromRemote]);
 
   // Load available speakers on mount

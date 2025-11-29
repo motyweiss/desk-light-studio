@@ -89,13 +89,13 @@ export const MediaPlayer = () => {
     );
   }
 
-  // Handle edge cases - hide player when error state
-  if (playerState.errorState) {
+  // Hide player only if truly off/idle with no track
+  if (playerState.isOff && !playerState.currentTrack) {
     return null;
   }
 
-  // Hide player when queue ended
-  if (playerState.queueEnded) {
+  // Hide player when queue ended (idle state after playback)
+  if (playerState.queueEnded && !playerState.isPlaying) {
     return null;
   }
 
