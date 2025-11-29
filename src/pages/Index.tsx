@@ -585,94 +585,96 @@ const Index = () => {
             ease: [0.22, 0.03, 0.26, 1]
           }}
         >
-          {/* Room Title with Master Switch */}
-          <div className="flex items-start justify-between mb-3">
-            <motion.h1 
-              className="text-[2.5rem] font-light tracking-tight text-foreground leading-tight"
-              style={{ fontFamily: "'Cormorant Garamond', serif" }}
+          {/* Mobile Only: Room Title with Master Switch */}
+          <div className="md:hidden mb-3">
+            <div className="flex items-start justify-between mb-3">
+              <motion.h1 
+                className="text-[2.5rem] font-light tracking-tight text-foreground leading-tight"
+                style={{ fontFamily: "'Cormorant Garamond', serif" }}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ 
+                  opacity: isLoaded ? 1 : 0,
+                  y: isLoaded ? 0 : 20
+                }}
+                transition={{ 
+                  duration: 0.8,
+                  delay: 0.3,
+                  ease: [0.22, 0.03, 0.26, 1]
+                }}
+              >
+                Office Desk
+              </motion.h1>
+
+              {/* Master Switch - Mobile */}
+              <motion.button
+                onClick={() => handleMasterToggle(!masterSwitchOn)}
+                className="w-12 h-12 rounded-full backdrop-blur-xl border-2 transition-all duration-500 flex-shrink-0"
+                whileHover={{
+                  backgroundColor: masterSwitchOn ? 'rgba(255, 255, 255, 0.22)' : 'rgba(255, 255, 255, 0.05)',
+                  borderColor: masterSwitchOn ? 'rgba(255, 255, 255, 0.35)' : 'rgba(255, 255, 255, 0.15)',
+                }}
+                whileTap={{ scale: 0.92 }}
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ 
+                  opacity: isLoaded ? 1 : 0,
+                  scale: isLoaded ? 1 : 0.8,
+                  backgroundColor: masterSwitchOn ? 'rgba(255, 255, 255, 0.18)' : 'rgba(255, 255, 255, 0)',
+                  borderColor: masterSwitchOn ? 'rgba(255, 255, 255, 0.3)' : 'rgba(255, 255, 255, 0.1)'
+                }}
+                transition={{ 
+                  duration: 0.6,
+                  delay: 0.5,
+                  ease: [0.22, 0.03, 0.26, 1]
+                }}
+              >
+                <motion.div
+                  animate={{
+                    color: masterSwitchOn ? 'rgba(255, 255, 255, 0.95)' : 'rgba(255, 255, 255, 0.4)'
+                  }}
+                  transition={{ duration: 0.5, ease: [0.22, 0.03, 0.26, 1] }}
+                  className="flex items-center justify-center"
+                >
+                  <Sun className="w-5 h-5" strokeWidth={2} />
+                </motion.div>
+              </motion.button>
+            </div>
+
+            {/* Climate Data - Mobile Only */}
+            <motion.div 
+              className="flex gap-6 mb-2"
               initial={{ opacity: 0, y: 20 }}
               animate={{ 
                 opacity: isLoaded ? 1 : 0,
                 y: isLoaded ? 0 : 20
               }}
-              transition={{ 
+              transition={{
                 duration: 0.8,
-                delay: 0.3,
+                delay: 0.4,
                 ease: [0.22, 0.03, 0.26, 1]
               }}
             >
-              Office Desk
-            </motion.h1>
-
-            {/* Master Switch - Identical to desktop */}
-            <motion.button
-              onClick={() => handleMasterToggle(!masterSwitchOn)}
-              className="w-12 h-12 rounded-full backdrop-blur-xl border-2 transition-all duration-500 flex-shrink-0"
-              whileHover={{
-                backgroundColor: masterSwitchOn ? 'rgba(255, 255, 255, 0.22)' : 'rgba(255, 255, 255, 0.05)',
-                borderColor: masterSwitchOn ? 'rgba(255, 255, 255, 0.35)' : 'rgba(255, 255, 255, 0.15)',
-              }}
-              whileTap={{ scale: 0.92 }}
-              initial={{ opacity: 0, scale: 0.8 }}
-              animate={{ 
-                opacity: isLoaded ? 1 : 0,
-                scale: isLoaded ? 1 : 0.8,
-                backgroundColor: masterSwitchOn ? 'rgba(255, 255, 255, 0.18)' : 'rgba(255, 255, 255, 0)',
-                borderColor: masterSwitchOn ? 'rgba(255, 255, 255, 0.3)' : 'rgba(255, 255, 255, 0.1)'
-              }}
-              transition={{ 
-                duration: 0.6,
-                delay: 0.5,
-                ease: [0.22, 0.03, 0.26, 1]
-              }}
-            >
-              <motion.div
-                animate={{
-                  color: masterSwitchOn ? 'rgba(255, 255, 255, 0.95)' : 'rgba(255, 255, 255, 0.4)'
-                }}
-                transition={{ duration: 0.5, ease: [0.22, 0.03, 0.26, 1] }}
-                className="flex items-center justify-center"
-              >
-                <Sun className="w-5 h-5" strokeWidth={2} />
-              </motion.div>
-            </motion.button>
-          </div>
-
-          {/* Climate Data - Minimal inline version */}
-          <motion.div 
-            className="flex gap-6 mb-2"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ 
-              opacity: isLoaded ? 1 : 0,
-              y: isLoaded ? 0 : 20
-            }}
-            transition={{
-              duration: 0.8,
-              delay: 0.4,
-              ease: [0.22, 0.03, 0.26, 1]
-            }}
-          >
-            {/* Temperature - Icon + Number only */}
-            <div className="flex items-center gap-2">
-              <Thermometer className="w-5 h-5 text-white/60" strokeWidth={1.5} />
-              <div className="text-base font-light text-white tabular-nums">{temperature.toFixed(1)}°</div>
-            </div>
-
-            {/* Humidity - Icon + Number only */}
-            <div className="flex items-center gap-2">
-              <Droplets className="w-5 h-5 text-white/60" strokeWidth={1.5} />
-              <div className="text-base font-light text-white tabular-nums">{humidity}%</div>
-            </div>
-
-            {/* PM 2.5 - Icon + Number only */}
-            <div className="flex items-center gap-2">
-              <Wind className="w-5 h-5 text-white/60" strokeWidth={1.5} />
-              <div className="text-base font-light text-white tabular-nums">
-                {airQuality}
-                <span className="text-[10px] text-white/40 ml-1">µg/m³</span>
+              {/* Temperature - Icon + Number only */}
+              <div className="flex items-center gap-2">
+                <Thermometer className="w-5 h-5 text-white/60" strokeWidth={1.5} />
+                <div className="text-base font-light text-white tabular-nums">{temperature.toFixed(1)}°</div>
               </div>
-            </div>
-          </motion.div>
+
+              {/* Humidity - Icon + Number only */}
+              <div className="flex items-center gap-2">
+                <Droplets className="w-5 h-5 text-white/60" strokeWidth={1.5} />
+                <div className="text-base font-light text-white tabular-nums">{humidity}%</div>
+              </div>
+
+              {/* PM 2.5 - Icon + Number only */}
+              <div className="flex items-center gap-2">
+                <Wind className="w-5 h-5 text-white/60" strokeWidth={1.5} />
+                <div className="text-base font-light text-white tabular-nums">
+                  {airQuality}
+                  <span className="text-[10px] text-white/40 ml-1">µg/m³</span>
+                </div>
+              </div>
+            </motion.div>
+          </div>
         </motion.div>
 
         {/* Desk Display Panel */}
