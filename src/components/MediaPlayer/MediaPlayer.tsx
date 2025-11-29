@@ -89,41 +89,14 @@ export const MediaPlayer = () => {
     );
   }
 
-  // Handle edge cases
+  // Handle edge cases - hide player when error state
   if (playerState.errorState) {
-    return (
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="fixed bottom-6 right-6 bg-orange-500/10 backdrop-blur-2xl border border-orange-500/30 rounded-2xl p-4 shadow-lg max-w-sm z-50"
-      >
-        <div className="flex items-center gap-3 text-orange-200/90">
-          <AlertCircle className="w-5 h-5" />
-          <div className="text-sm">
-            <p className="font-medium">{playerState.errorState}</p>
-            <p className="text-xs text-orange-200/60 mt-1">Open Spotify and start playing music</p>
-          </div>
-        </div>
-      </motion.div>
-    );
+    return null;
   }
 
+  // Hide player when queue ended
   if (playerState.queueEnded) {
-    return (
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="fixed bottom-6 right-6 bg-blue-500/10 backdrop-blur-2xl border border-blue-500/30 rounded-2xl p-4 shadow-lg max-w-sm z-50"
-      >
-        <div className="flex items-center gap-3 text-blue-200/90">
-          <Music className="w-5 h-5" />
-          <div className="text-sm">
-            <p className="font-medium">Queue ended</p>
-            <p className="text-xs text-blue-200/60 mt-1">Add more songs to continue</p>
-          </div>
-        </div>
-      </motion.div>
-    );
+    return null;
   }
 
   const currentTrack = playerState.currentTrack;
