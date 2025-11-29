@@ -76,7 +76,7 @@ export const ClimateIndicators = () => {
   return (
     <div 
       ref={containerRef}
-      className="relative flex items-center"
+      className="relative flex items-center cursor-pointer"
       onMouseEnter={() => setIsExpanded(true)}
       onMouseLeave={handleMouseLeave}
       onMouseMove={handleMouseMove}
@@ -86,25 +86,25 @@ export const ClimateIndicators = () => {
         <motion.div
           initial={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className="flex items-center gap-5"
+          className="flex items-center gap-5 px-3 py-1.5 rounded-lg hover:bg-white/5 transition-colors duration-300"
         >
           <div className="flex items-center gap-2">
-            <Thermometer className="w-4 h-4 text-white/60" strokeWidth={1.5} />
-            <span className="text-sm font-light text-white/60 tabular-nums">
+            <Thermometer className="w-4 h-4 text-white/60 transition-colors" strokeWidth={1.5} />
+            <span className="text-sm font-light text-white/70 tabular-nums transition-colors">
               <motion.span>{tempDisplay}</motion.span>°
             </span>
           </div>
           
           <div className="flex items-center gap-2">
-            <Droplets className="w-4 h-4 text-white/60" strokeWidth={1.5} />
-            <span className="text-sm font-light text-white/60 tabular-nums">
+            <Droplets className="w-4 h-4 text-white/60 transition-colors" strokeWidth={1.5} />
+            <span className="text-sm font-light text-white/70 tabular-nums transition-colors">
               <motion.span>{humidityDisplay}</motion.span>%
             </span>
           </div>
           
           <div className="flex items-center gap-2">
-            <Wind className="w-4 h-4 text-white/60" strokeWidth={1.5} />
-            <span className="text-sm font-light text-white/60">
+            <Wind className="w-4 h-4 text-white/60 transition-colors" strokeWidth={1.5} />
+            <span className="text-sm font-light text-white/70 transition-colors">
               {getAirQualityStatus(climate.airQuality).label}
             </span>
           </div>

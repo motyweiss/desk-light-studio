@@ -51,7 +51,7 @@ export const ConnectionStatusIndicator = ({
     <motion.button
       onClick={handleClick}
       disabled={!isClickable}
-      className={`hidden md:flex ${inline ? 'relative' : 'fixed top-6 right-6 z-50'} w-9 h-9 items-center justify-center rounded-lg ${getStatusColor()} transition-colors duration-300 ${isClickable ? 'cursor-pointer hover:bg-white/5' : 'cursor-default'}`}
+      className={`hidden md:flex ${inline ? 'relative' : 'fixed top-6 right-6 z-50'} w-9 h-9 items-center justify-center rounded-lg hover:bg-white/5 transition-all duration-300 ${getStatusColor()} ${isClickable ? 'cursor-pointer' : 'cursor-default'}`}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => {
         setIsHovered(false);
@@ -60,8 +60,8 @@ export const ConnectionStatusIndicator = ({
       onMouseMove={handleMouseMove}
       initial={inline ? false : { opacity: 0, scale: 0.8 }}
       animate={inline ? false : { opacity: 1, scale: 1 }}
-      whileHover={isClickable ? { scale: 1.05 } : {}}
-      whileTap={isClickable ? { scale: 0.95 } : {}}
+      whileHover={{ scale: 1.05 }}
+      whileTap={isClickable ? { scale: 0.95 } : { scale: 1.02 }}
       transition={inline ? undefined : { duration: 0.3, delay: 0.6 }}
       aria-label={getTooltipText()}
     >
