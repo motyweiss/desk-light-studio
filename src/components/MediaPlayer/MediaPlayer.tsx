@@ -125,16 +125,11 @@ export const MediaPlayer = () => {
   const currentTrack = playerState.currentTrack;
   const albumArtUrl = currentTrack?.albumArt ? homeAssistant.getFullImageUrl(currentTrack.albumArt) : null;
 
-  // Calculate sizes
+  // Calculate album art sizes
   const albumArtSize = {
     width: isMinimized ? 56 : 64,
     height: isMinimized ? 56 : 64,
   };
-
-  const titleFontSize = isMinimized ? '16px' : '18px';
-  const titleLineHeight = isMinimized ? '24px' : '28px';
-  const artistFontSize = isMinimized ? '12px' : '14px';
-  const artistLineHeight = isMinimized ? '16px' : '20px';
 
   const isGroup = activeGroup.length > 1;
 
@@ -180,16 +175,17 @@ export const MediaPlayer = () => {
                 animate={albumArtSize}
                 transition={{ 
                   duration: 0.5, 
-                  ease: [0.25, 0.1, 0.25, 1]
+                  ease: [0.32, 0.72, 0, 1]
                 }}
               >
                 <AnimatePresence mode="wait">
                   <motion.div
                     key={currentTrack?.title || 'no-track'}
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
-                    transition={{ duration: 0.3 }}
+                    initial={{ opacity: 0, scale: 0.92 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 1.08 }}
+                    transition={{ duration: 0.4, ease: [0.25, 0.1, 0.25, 1] }}
+                    className="absolute inset-0"
                   >
                     {albumArtUrl ? (
                       <img 
@@ -212,42 +208,50 @@ export const MediaPlayer = () => {
                 className="flex-1 min-w-0"
                 initial={false}
               >
-                <motion.h3
-                  className="text-white font-light truncate"
-                  initial={false}
-                  animate={{ 
-                    fontSize: titleFontSize,
-                    lineHeight: titleLineHeight
-                  }}
-                  transition={{ duration: 0.4, ease: [0.25, 0.1, 0.25, 1] }}
-                >
-                  {currentTrack?.title || 'No media playing'}
-                </motion.h3>
-                <motion.p 
-                  className="text-white/40 truncate"
-                  initial={false}
-                  animate={{ 
-                    fontSize: artistFontSize,
-                    lineHeight: artistLineHeight
-                  }}
-                  transition={{ duration: 0.4, ease: [0.25, 0.1, 0.25, 1] }}
-                >
-                  {currentTrack?.artist || 'Unknown Artist'}
-                </motion.p>
-                
-                {/* Album name - Only in full mode */}
-                <AnimatePresence>
-                  {!isMinimized && currentTrack?.album && (
-                    <motion.p
-                      initial={{ opacity: 0, height: 0 }}
-                      animate={{ opacity: 1, height: 'auto' }}
-                      exit={{ opacity: 0, height: 0 }}
-                      transition={{ duration: 0.35, ease: [0.25, 0.1, 0.25, 1] }}
-                      className="text-white/30 text-xs truncate mt-0.5"
+                <AnimatePresence mode="wait">
+                  <motion.div
+                    key={`${currentTrack?.title}-${currentTrack?.artist}`}
+                    initial={{ opacity: 0, y: 6 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -6 }}
+                    transition={{ duration: 0.35, ease: [0.25, 0.1, 0.25, 1] }}
+                  >
+                    <motion.h3
+                      className="text-white font-light truncate origin-left text-base"
+                      initial={false}
+                      animate={{ 
+                        scale: isMinimized ? 1 : 1.125,
+                        y: isMinimized ? 0 : 1
+                      }}
+                      transition={{ duration: 0.5, ease: [0.32, 0.72, 0, 1] }}
                     >
-                      {currentTrack.album}
+                      {currentTrack?.title || 'No media playing'}
+                    </motion.h3>
+                    <motion.p 
+                      className="text-white/40 truncate origin-left text-xs"
+                      initial={false}
+                      animate={{ 
+                        scale: isMinimized ? 1 : 1.167,
+                        y: isMinimized ? 0 : 1
+                      }}
+                      transition={{ duration: 0.5, ease: [0.32, 0.72, 0, 1] }}
+                    >
+                      {currentTrack?.artist || 'Unknown Artist'}
                     </motion.p>
-                  )}
+                    
+                    {/* Album name - Only in full mode */}
+                    {!isMinimized && currentTrack?.album && (
+                      <motion.p
+                        initial={{ opacity: 0, height: 0 }}
+                        animate={{ opacity: 1, height: 'auto' }}
+                        exit={{ opacity: 0, height: 0 }}
+                        transition={{ duration: 0.35, ease: [0.25, 0.1, 0.25, 1] }}
+                        className="text-white/30 text-xs truncate mt-0.5"
+                      >
+                        {currentTrack.album}
+                      </motion.p>
+                    )}
+                  </motion.div>
                 </AnimatePresence>
               </motion.div>
 
