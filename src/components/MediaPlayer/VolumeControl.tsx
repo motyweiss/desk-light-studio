@@ -8,9 +8,10 @@ interface VolumeControlProps {
   isMuted: boolean;
   onVolumeChange: (volume: number) => void;
   onMuteToggle: () => void;
+  compact?: boolean;
 }
 
-export const VolumeControl = ({ volume, isMuted, onVolumeChange, onMuteToggle }: VolumeControlProps) => {
+export const VolumeControl = ({ volume, isMuted, onVolumeChange, onMuteToggle, compact = false }: VolumeControlProps) => {
   const debounceTimerRef = useRef<NodeJS.Timeout>();
   const [localVolume, setLocalVolume] = useState(volume);
 
@@ -44,16 +45,16 @@ export const VolumeControl = ({ volume, isMuted, onVolumeChange, onMuteToggle }:
   };
 
   return (
-    <div className="flex items-center gap-3">
+    <div className="flex items-center gap-2 sm:gap-3">
       <motion.button
         whileHover={{ scale: 1.1 }}
         whileTap={{ scale: 0.95 }}
         onClick={onMuteToggle}
         className="text-white/60 hover:text-white transition-colors"
       >
-        <VolumeIcon className="w-5 h-5" />
+        <VolumeIcon className={compact ? "w-4 h-4" : "w-5 h-5"} />
       </motion.button>
-      <div className="w-24">
+      <div className={compact ? "w-16 sm:w-20" : "w-20 sm:w-24"}>
         <Slider
           value={[isMuted ? 0 : localVolume * 100]}
           max={100}

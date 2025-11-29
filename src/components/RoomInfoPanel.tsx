@@ -88,10 +88,10 @@ export const RoomInfoPanel = ({ roomName, temperature, humidity, airQuality, mas
   }, [isLoaded, temperature, humidity, airQuality, tempCount, humidityCount, airQualityCount]);
 
   return (
-    <div className="space-y-6 md:space-y-8">
+    <div className="space-y-4 sm:space-y-6 lg:space-y-8">
       {/* Room Title with Master Switch - Hidden on mobile (shown in Index.tsx) */}
       <motion.div 
-        className="hidden md:flex items-start justify-between gap-6"
+        className="hidden lg:flex items-start justify-between gap-6"
         initial={{ opacity: 0, y: 10 }}
         animate={{ 
           opacity: isLoaded ? 1 : 0,
@@ -103,7 +103,7 @@ export const RoomInfoPanel = ({ roomName, temperature, humidity, airQuality, mas
           ease: [0.22, 0.03, 0.26, 1]
         }}
       >
-        <h1 className="text-3xl md:text-4xl font-display font-light tracking-tight md:tracking-tight text-foreground leading-tight">
+        <h1 className="text-2xl sm:text-3xl lg:text-4xl font-display font-light tracking-tight text-foreground leading-tight">
           {roomName}
         </h1>
         
@@ -144,7 +144,7 @@ export const RoomInfoPanel = ({ roomName, temperature, humidity, airQuality, mas
 
       {/* Climate & Devices Info - Desktop only */}
       <motion.div 
-        className="hidden md:block rounded-2xl py-6 px-6"
+        className="hidden lg:block rounded-2xl py-4 sm:py-6 px-4 sm:px-6"
         initial={{ opacity: 0, y: 10 }}
         animate={{ 
           opacity: isLoaded ? 1 : 0,
@@ -157,7 +157,7 @@ export const RoomInfoPanel = ({ roomName, temperature, humidity, airQuality, mas
         }}
       >
         {/* Climate Info */}
-        <div className="flex gap-10 mb-8">
+        <div className="flex flex-wrap gap-6 sm:gap-8 lg:gap-10 mb-6 sm:mb-8">
           {/* Temperature */}
           <div className="flex items-center gap-3">
                 <CircularProgress 
@@ -233,7 +233,7 @@ export const RoomInfoPanel = ({ roomName, temperature, humidity, airQuality, mas
 
         {/* Devices Battery Section */}
         {devices && devices.length > 0 && (
-          <div className="flex flex-row gap-10 mt-8">
+          <div className="flex flex-row flex-wrap gap-6 sm:gap-8 lg:gap-10 mt-6 sm:mt-8">
             {devices.map((device, index) => {
               const DeviceIcon = device.icon === 'headphones' ? AirPodsMaxIcon : IPhoneIcon;
               

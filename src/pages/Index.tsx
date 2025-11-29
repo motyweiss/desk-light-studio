@@ -7,6 +7,7 @@ import { AmbientGlowLayers } from "@/components/AmbientGlowLayers";
 import { LoadingOverlay } from "@/components/LoadingOverlay";
 import { ConnectionStatusIndicator } from "@/components/ConnectionStatusIndicator";
 import { SettingsDialog } from "@/components/SettingsDialog";
+import { CircularProgress } from "@/components/CircularProgress";
 import { Toaster } from "@/components/ui/toaster";
 import { useToast } from "@/hooks/use-toast";
 import { useHomeAssistantConfig } from "@/hooks/useHomeAssistantConfig";
@@ -58,6 +59,14 @@ const Index = () => {
   // Home Assistant integration
   const { toast } = useToast();
   const { config, entityMapping, isConnected, saveConfig } = useHomeAssistantConfig();
+
+  // Helper function for air quality status
+  const getAirQualityStatus = (value: number): { label: string; color: string } => {
+    if (value <= 12) return { label: 'Good', color: 'hsl(142 70% 45%)' };
+    if (value <= 35) return { label: 'Moderate', color: 'hsl(45 90% 55%)' };
+    if (value <= 55) return { label: 'Sensitive', color: 'hsl(25 90% 55%)' };
+    return { label: 'Unhealthy', color: 'hsl(0 75% 55%)' };
+  };
 
   // Use new sync hook
   const { forceSyncStates, markManualChange, attemptReconnect, pendingLights: syncPendingLights } = useHomeAssistantSync({
@@ -547,11 +556,147 @@ const Index = () => {
 
       {/* Responsive Layout Container */}
       <motion.div 
-        className="flex flex-col md:flex-row items-center gap-4 md:gap-8 max-w-7xl w-full relative z-10 px-5 md:px-0 pb-20 md:pb-24"
+        className="flex flex-col lg:flex-row items-start justify-center 
+                   gap-6 sm:gap-8 lg:gap-12 
+                   max-w-7xl w-full relative z-10 
+                   px-4 sm:px-6 lg:px-8
+                   pb-24 sm:pb-28 lg:pb-32"
+        initial={{ opacity: 0 }}
+        animate={{ 
+          opacity: isLoaded ? 1 : 0
+        }}
+        transition={{ 
+          duration: 0.8,
+          delay: 0.2,
+          ease: [0.25, 0.1, 0.25, 1]
+        }}
       >
         {/* Mobile: Room Info Header (Title, Climate, Master Switch) */}
         <motion.div 
-          className="w-full md:hidden pt-8"
+          className="w-full lg:hidden px-6 py-4 space-y-5"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ 
+            opacity: isLoaded ? 1 : 0,
+            y: isLoaded ? 0 : 20
+          }}
+          transition={{ 
+            duration: 0.6,
+            delay: 0.3,
+            ease: [0.22, 0.03, 0.26, 1]
+          }}
+        >
+          {/* Room Title */}
+          <h1 className="text-3xl sm:text-4xl font-display font-light tracking-tight text-foreground leading-tight text-left">
+            Office Desk
+          </h1>
+          
+          {/* Climate Info - Horizontal Row, Left-aligned */}
+          <div className="flex gap-6 sm:gap-8 justify-start flex-wrap">
+            {/* Temperature */}
+            <div className="flex items-center gap-3">
+              <CircularProgress 
+                value={temperature} 
+                min={15} 
+                max={35} 
+                size={44} 
+                strokeWidth={2.5}
+                isLoaded={isLoaded}
+                colorType="temperature"
+                delay={0.4}
+              >
+                <Thermometer className="w-5 h-5 text-white/60" strokeWidth={1.5} />
+              </CircularProgress>
+              <div className="flex flex-col">
+                <span className="text-[9px] text-white/55 font-light tracking-[0.2em] uppercase mb-1">
+                  Temperature
+                </span>
+                <div className="text-base font-light text-white tabular-nums">
+                  {temperature.toFixed(1)}°
+                </div>
+              </div>
+            </div>
+
+            {/* Humidity */}
+            <div className="flex items-center gap-3">
+              <CircularProgress 
+                value={humidity} 
+                min={0} 
+                max={100} 
+                size={44} 
+                strokeWidth={2.5}
+                isLoaded={isLoaded}
+                colorType="humidity"
+                delay={0.6}
+              >
+                <Droplets className="w-5 h-5 text-white/60" strokeWidth={1.5} />
+              </CircularProgress>
+              <div className="flex flex-col">
+                <span className="text-[9px] text-white/55 font-light tracking-[0.2em] uppercase mb-1">
+                  Humidity
+                </span>
+                <div className="text-base font-light text-white tabular-nums">
+                  {humidity}%
+                </div>
+              </div>
+            </div>
+
+            {/* PM 2.5 */}
+            <div className="flex items-center gap-3">
+              <CircularProgress 
+                value={airQuality} 
+                min={0} 
+                max={100} 
+                size={44} 
+                strokeWidth={2.5}
+                isLoaded={isLoaded}
+                colorType="airQuality"
+                delay={0.8}
+              >
+                <Wind className="w-5 h-5 text-white/60" strokeWidth={1.5} />
+              </CircularProgress>
+              <div className="flex flex-col">
+                <span className="text-[9px] text-white/55 font-light tracking-[0.2em] uppercase mb-1">
+                  Air Quality
+                </span>
+                <div className="text-base font-light text-white tabular-nums">
+                  <span>{getAirQualityStatus(airQuality).label}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Master Switch - Mobile Version */}
+          <div className="flex justify-center pt-2">
+            <motion.button
+              onClick={() => handleMasterToggle(!masterSwitchOn)}
+              className="w-12 h-12 rounded-full backdrop-blur-xl border transition-all duration-500"
+              animate={{
+                backgroundColor: masterSwitchOn ? 'rgba(255, 255, 255, 0.08)' : 'rgba(255, 255, 255, 0)',
+                borderColor: masterSwitchOn ? 'rgba(255, 255, 255, 0.25)' : 'rgba(255, 255, 255, 0.1)'
+              }}
+              whileHover={{
+                backgroundColor: masterSwitchOn ? 'rgba(255, 255, 255, 0.12)' : 'rgba(255, 255, 255, 0.05)',
+                borderColor: masterSwitchOn ? 'rgba(255, 255, 255, 0.3)' : 'rgba(255, 255, 255, 0.15)',
+              }}
+              whileTap={{ scale: 0.92 }}
+              aria-label="Toggle all lights"
+            >
+              <motion.div
+                animate={{
+                  color: masterSwitchOn ? 'rgba(255, 255, 255, 0.95)' : 'rgba(255, 255, 255, 0.4)',
+                }}
+                transition={{ duration: 0.5, ease: [0.22, 0.03, 0.26, 1] }}
+                className="flex items-center justify-center"
+              >
+                <Sun className="w-5 h-5" strokeWidth={2} />
+              </motion.div>
+            </motion.button>
+          </div>
+        </motion.div>
+
+        {/* Desk Display (Image) - Desktop: 55%, Tablet/Mobile: 100% */}
+        <motion.div 
+          className="w-full lg:w-[55%]"
           initial={{ opacity: 0, y: 30 }}
           animate={{ 
             opacity: isLoaded ? 1 : 0,
@@ -656,15 +801,14 @@ const Index = () => {
         {/* Desk Display Panel */}
         <motion.div 
           className="w-full md:w-[46%] relative"
-          initial={{ opacity: 0, y: 40, scale: 0.92 }}
+          initial={{ opacity: 0, x: -30 }}
           animate={{ 
             opacity: isLoaded ? 1 : 0,
-            y: isLoaded ? 0 : 40,
-            scale: isLoaded ? 1 : 0.92
+            x: isLoaded ? 0 : -30
           }}
           transition={{ 
-            duration: 1.2,
-            delay: 0.3,
+            duration: 0.8,
+            delay: 0.4,
             ease: [0.22, 0.03, 0.26, 1]
           }}
         >
@@ -731,17 +875,17 @@ const Index = () => {
           />
         </motion.div>
 
-        {/* Room Info Panel - Full on desktop, Light cards only on mobile */}
+        {/* Room Info Panel - Desktop: 45%, Tablet/Mobile: 100% */}
         <motion.div 
-          className="w-full md:w-[44%] md:pl-4"
+          className="w-full lg:w-[45%]"
           initial={{ opacity: 0, x: 30 }}
           animate={{ 
             opacity: isLoaded ? 1 : 0,
             x: isLoaded ? 0 : 30
           }}
           transition={{ 
-            duration: 1.0,
-            delay: 0.6,
+            duration: 0.8,
+            delay: 0.5,
             ease: [0.22, 0.03, 0.26, 1]
           }}
         >
