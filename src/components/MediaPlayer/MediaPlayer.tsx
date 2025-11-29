@@ -9,6 +9,7 @@ import { VolumeControl } from './VolumeControl';
 import { SourceIndicator } from './SourceIndicator';
 import { MiniSpeakerBadge } from './MiniSpeakerBadge';
 import { SpeakerPopover } from './SpeakerPopover';
+import { AudioVisualizer } from './AudioVisualizer';
 
 export const MediaPlayer = () => {
   const [isMinimized, setIsMinimized] = useState(true);
@@ -181,10 +182,18 @@ export const MediaPlayer = () => {
                 <AnimatePresence mode="wait">
                   <motion.div
                     key={currentTrack?.title || 'no-track'}
-                    initial={{ opacity: 0, scale: 0.92 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    exit={{ opacity: 0, scale: 1.08 }}
-                    transition={{ duration: 0.4, ease: [0.25, 0.1, 0.25, 1] }}
+                    initial={{ opacity: 0, scale: 0.88, y: 8 }}
+                    animate={{ 
+                      opacity: 1, 
+                      scale: 1,
+                      y: 0
+                    }}
+                    exit={{ opacity: 0, scale: 1.05, y: -4 }}
+                    transition={{ 
+                      duration: 0.5,
+                      ease: [0.34, 1.56, 0.64, 1], // Spring bounce
+                      opacity: { duration: 0.3 }
+                    }}
                     className="absolute inset-0"
                   >
                     {albumArtUrl ? (
@@ -204,40 +213,37 @@ export const MediaPlayer = () => {
 
               {/* Track Info - Shared Element */}
               <motion.div
-                layoutId="player-track-info"
-                className="flex-1 min-w-0"
+                className="flex-1 min-w-0 relative"
                 initial={false}
               >
                 <AnimatePresence mode="wait">
                   <motion.div
                     key={`${currentTrack?.title}-${currentTrack?.artist}`}
-                    initial={{ opacity: 0, y: 6 }}
+                    initial={{ opacity: 0, y: 8 }}
                     animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -6 }}
-                    transition={{ duration: 0.35, ease: [0.25, 0.1, 0.25, 1] }}
+                    exit={{ opacity: 0, y: -8 }}
+                    transition={{ duration: 0.4, ease: [0.25, 0.1, 0.25, 1] }}
                   >
-                    <motion.h3
-                      className="text-white font-light truncate origin-left text-base"
+                    <motion.div
+                      className="origin-left"
                       initial={false}
                       animate={{ 
                         scale: isMinimized ? 1 : 1.125,
-                        y: isMinimized ? 0 : 1
                       }}
                       transition={{ duration: 0.5, ease: [0.32, 0.72, 0, 1] }}
                     >
-                      {currentTrack?.title || 'No media playing'}
-                    </motion.h3>
-                    <motion.p 
-                      className="text-white/40 truncate origin-left text-xs"
-                      initial={false}
-                      animate={{ 
-                        scale: isMinimized ? 1 : 1.167,
-                        y: isMinimized ? 0 : 1
-                      }}
-                      transition={{ duration: 0.5, ease: [0.32, 0.72, 0, 1] }}
-                    >
-                      {currentTrack?.artist || 'Unknown Artist'}
-                    </motion.p>
+                      <h3 className="text-white font-light truncate text-base">
+                        {currentTrack?.title || 'No media playing'}
+                      </h3>
+                      <div className="flex items-center gap-2">
+                        <p className="text-white/40 truncate text-xs">
+                          {currentTrack?.artist || 'Unknown Artist'}
+                        </p>
+                        {isMinimized && playerState.isPlaying && (
+                          <AudioVisualizer isPlaying={true} barCount={3} />
+                        )}
+                      </div>
+                    </motion.div>
                     
                     {/* Album name - Only in full mode */}
                     {!isMinimized && currentTrack?.album && (
@@ -341,16 +347,22 @@ export const MediaPlayer = () => {
                     <SourceIndicator appName={playerState.appName} />
                   </div>
 
-                  {/* Progress Bar */}
-                  {currentTrack && (
-                    <ProgressBar
-                      position={currentTrack.position}
-                      duration={currentTrack.duration}
-                      isLoading={playerState.isTrackLoading}
-                      isTransitioning={playerState.isTrackTransitioning}
-                      onSeek={handleSeek}
-                    />
-                  )}
+                   {/* Progress Bar with Visualizer */}
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between">
+                      <AudioVisualizer isPlaying={playerState.isPlaying} barCount={5} />
+                      <AudioVisualizer isPlaying={playerState.isPlaying} barCount={5} />
+                    </div>
+                    {currentTrack && (
+                      <ProgressBar
+                        position={currentTrack.position}
+                        duration={currentTrack.duration}
+                        isLoading={playerState.isTrackLoading}
+                        isTransitioning={playerState.isTrackTransitioning}
+                        onSeek={handleSeek}
+                      />
+                    )}
+                  </div>
 
                   {/* Bottom Row: Playback Controls + Volume + Speaker Selector */}
                   <div className="flex items-center justify-between">
