@@ -32,15 +32,27 @@ export const useMediaPlayerSync = (config: UseMediaPlayerSyncConfig) => {
 
     // Create track ID for change detection
     const currentTrackId = `${attrs.media_title}-${attrs.media_artist}-${attrs.media_album_name}`;
-    const trackChanged = currentTrackId !== lastTrackIdRef.current;
+    const trackChanged = currentTrackId !== lastTrackIdRef.current && currentTrackId !== '--';
     const stateChanged = isPlaying !== isPlayingRef.current;
+
+    // Edge case detection
+    const isTrackLoading = !attrs.media_title || attrs.media_duration === 0;
+    const wasExternallyPaused = isPaused && isPlayingRef.current; // Was playing, now paused externally
+    const queueEnded = isIdle && lastSyncedPositionRef.current > 0;
+
+    // Detect position jump (repeat or external seek)
+    const positionJump = attrs.media_position !== undefined 
+      ? Math.abs(attrs.media_position - localPositionRef.current) 
+      : 0;
+    const isRepeatJump = positionJump > 10 && attrs.media_position < 5; // Jump from end to start
 
     // Only update position from HA if:
     // 1. Track changed
     // 2. Playback state changed (play/pause)
     // 3. Force update requested (user seek)
     // 4. Position difference is significant (>3 seconds - indicates external seek/skip)
-    let shouldUpdatePosition = forcePositionUpdate || trackChanged || stateChanged;
+    // 5. Repeat jump detected
+    let shouldUpdatePosition = forcePositionUpdate || trackChanged || stateChanged || isRepeatJump;
     
     if (!shouldUpdatePosition && attrs.media_position !== undefined) {
       const positionDiff = Math.abs(attrs.media_position - localPositionRef.current);
@@ -86,6 +98,12 @@ export const useMediaPlayerSync = (config: UseMediaPlayerSyncConfig) => {
       isPending: false,
       isLoading: false,
       entityId: entity.entity_id,
+      // Edge case states
+      isTrackLoading,
+      isTrackTransitioning: trackChanged,
+      wasExternallyPaused,
+      queueEnded,
+      errorState: isOff ? 'Spotify not active' : null,
     };
   }, []);
 

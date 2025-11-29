@@ -11,6 +11,7 @@ interface MediaPlayerContextType {
   combinedSources: string[];
   entityId: string | undefined;
   isConnected: boolean;
+  activeGroup: string[];
   handlePlayPause: () => Promise<void>;
   handleNext: () => Promise<void>;
   handlePrevious: () => Promise<void>;
@@ -20,6 +21,7 @@ interface MediaPlayerContextType {
   handleRepeatToggle: () => Promise<void>;
   handleSourceChange: (source: string) => Promise<void>;
   handleSeek: (position: number) => Promise<void>;
+  handleGroupSelect: (groupMembers: string[]) => Promise<void>;
 }
 
 const MediaPlayerContext = createContext<MediaPlayerContextType | undefined>(undefined);
@@ -31,6 +33,8 @@ interface MediaPlayerProviderProps {
 }
 
 export const MediaPlayerProvider = ({ children, entityId, isConnected }: MediaPlayerProviderProps) => {
+  const [activeGroup, setActiveGroup] = useState<string[]>([]);
+  
   const { 
     playerState, 
     isLoading, 
@@ -119,6 +123,19 @@ export const MediaPlayerProvider = ({ children, entityId, isConnected }: MediaPl
     setTimeout(syncFromRemote, 200);
   }, [entityId, playerState, setPlayerState, syncFromRemote]);
 
+  const handleGroupSelect = useCallback(async (groupMembers: string[]) => {
+    if (!entityId || groupMembers.length === 0) return;
+    
+    setActiveGroup(groupMembers);
+    
+    // Join speakers into group if more than one
+    if (groupMembers.length > 1) {
+      await homeAssistant.joinMediaPlayers(entityId, groupMembers);
+    }
+    
+    setTimeout(syncFromRemote, 500);
+  }, [entityId, syncFromRemote]);
+
   const value: MediaPlayerContextType = {
     playerState,
     isLoading,
@@ -126,6 +143,7 @@ export const MediaPlayerProvider = ({ children, entityId, isConnected }: MediaPl
     combinedSources,
     entityId,
     isConnected,
+    activeGroup,
     handlePlayPause,
     handleNext,
     handlePrevious,
@@ -135,6 +153,7 @@ export const MediaPlayerProvider = ({ children, entityId, isConnected }: MediaPl
     handleRepeatToggle,
     handleSourceChange,
     handleSeek,
+    handleGroupSelect,
   };
 
   return (
