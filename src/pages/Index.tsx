@@ -557,8 +557,9 @@ const Index = () => {
       {/* Responsive Layout Container */}
       <motion.div 
         className="flex flex-col md:flex-row items-center justify-center 
-                   gap-8 md:gap-12 
-                   max-w-7xl w-full relative z-10
+                   gap-8 md:gap-12 lg:gap-16 
+                   max-w-6xl w-full relative z-10
+                   px-6 md:px-8 lg:px-12
                    pb-24 md:pb-32"
         initial={{ opacity: 0 }}
         animate={{ 
@@ -570,18 +571,17 @@ const Index = () => {
           ease: [0.25, 0.1, 0.25, 1]
         }}
       >
-        {/* Desk Display (Image) */}
+        {/* Desk Display Panel - Image with glow effects */}
         <motion.div 
-          className="w-full md:w-1/2 relative"
-          initial={{ opacity: 0, y: 40, scale: 0.92 }}
+          className="w-full md:w-[52%] lg:w-[48%] relative"
+          initial={{ opacity: 0, x: -30 }}
           animate={{ 
             opacity: isLoaded ? 1 : 0,
-            y: isLoaded ? 0 : 40,
-            scale: isLoaded ? 1 : 0.92
+            x: isLoaded ? 0 : -30
           }}
           transition={{ 
-            duration: 1.2,
-            delay: 0.3,
+            duration: 0.8,
+            delay: 0.4,
             ease: [0.22, 0.03, 0.26, 1]
           }}
         >
@@ -675,22 +675,7 @@ const Index = () => {
               </div>
             </motion.div>
           </div>
-        </motion.div>
 
-        {/* Desk Display Panel */}
-        <motion.div 
-          className="w-full md:w-[46%] relative"
-          initial={{ opacity: 0, x: -30 }}
-          animate={{ 
-            opacity: isLoaded ? 1 : 0,
-            x: isLoaded ? 0 : -30
-          }}
-          transition={{ 
-            duration: 0.8,
-            delay: 0.4,
-            ease: [0.22, 0.03, 0.26, 1]
-          }}
-        >
           {/* Lighting effect layers beneath image */}
           <div className="absolute inset-0 pointer-events-none z-0">
             {/* Spotlight glow - warm golden orange from top center */}
@@ -756,7 +741,7 @@ const Index = () => {
 
         {/* Room Info Panel */}
         <motion.div 
-          className="w-full md:w-1/2"
+          className="w-full md:w-[48%] lg:w-[44%]"
           initial={{ opacity: 0, x: 30 }}
           animate={{ 
             opacity: isLoaded ? 1 : 0,
