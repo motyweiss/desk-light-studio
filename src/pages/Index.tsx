@@ -111,16 +111,17 @@ const Index = () => {
       // Wait for minimum load time before hiding spinner
       setTimeout(() => {
         setIsLoading(false);
-        // Small delay before starting entrance animations
-        setTimeout(() => {
-          setIsLoaded(true);
+        
+        // Coordinate state updates in single frame to prevent flashing
+        requestAnimationFrame(() => {
           setBackgroundLoaded(true);
-          
-          // Show media player after page content settles (2 seconds after content loads)
-          setTimeout(() => {
-            setShowMediaPlayer(true);
-          }, 2000);
-        }, 100);
+          setIsLoaded(true);
+        });
+        
+        // Show media player after page content settles (2 seconds after content loads)
+        const mediaTimer = setTimeout(() => {
+          setShowMediaPlayer(true);
+        }, 2000);
         
         // Preload remaining images in background after primary loads
         const remainingImages = [desk001, desk010, desk011, desk100, desk101, desk110, desk111];
@@ -128,6 +129,8 @@ const Index = () => {
           const img = new Image();
           img.src = src;
         });
+        
+        return () => clearTimeout(mediaTimer);
       }, remainingTime);
     };
     
@@ -473,7 +476,15 @@ const Index = () => {
   }, [spotlightIntensity, deskLampIntensity, monitorLightIntensity]);
 
   // Track binary state changes only (not continuous slider adjustments)
+  const isFirstRenderRef = useRef(true);
+  
   useEffect(() => {
+    // Skip isTransitioning on first render to prevent flickering on page load
+    if (isFirstRenderRef.current) {
+      isFirstRenderRef.current = false;
+      return;
+    }
+    
     setIsTransitioning(true);
     const timer = setTimeout(() => {
       setIsTransitioning(false);
@@ -499,7 +510,7 @@ const Index = () => {
       />
       <Toaster />
 
-      <motion.div
+      <div
         className="min-h-[100dvh] flex items-center justify-center p-4 md:p-8 relative overflow-hidden"
         style={{
           backgroundImage: backgroundLoaded ? "url('/bg.png')" : "none",
@@ -507,13 +518,6 @@ const Index = () => {
           backgroundPosition: "center",
           backgroundRepeat: "no-repeat",
           backgroundColor: "hsl(0 0% 8%)",
-        }}
-        animate={{
-          opacity: backgroundLoaded ? 1 : 0
-        }}
-        transition={{
-          duration: 0.8,
-          ease: [0.25, 0.1, 0.25, 1]
         }}
       >
         {/* Dynamic color overlay that responds to lighting */}
@@ -668,12 +672,11 @@ const Index = () => {
         {/* Desk Display Panel */}
         <motion.div 
           className="w-full md:w-[46%] relative"
-          initial={{ opacity: 0, y: 40, scale: 0.92, filter: 'blur(10px)' }}
+          initial={{ opacity: 0, y: 40, scale: 0.92 }}
           animate={{ 
             opacity: isLoaded ? 1 : 0,
             y: isLoaded ? 0 : 40,
-            scale: isLoaded ? 1 : 0.92,
-            filter: isLoaded ? 'blur(0px)' : 'blur(10px)'
+            scale: isLoaded ? 1 : 0.92
           }}
           transition={{ 
             duration: 1.2,
@@ -694,7 +697,7 @@ const Index = () => {
                 opacity: Math.pow(spotlightIntensity / 100, 2.0),
               }}
           transition={{
-            duration: DURATION.lightOn * 1000,
+            duration: DURATION.lightOn,
             ease: EASING.smooth
           }}
             />
@@ -710,7 +713,7 @@ const Index = () => {
                 opacity: Math.pow(deskLampIntensity / 100, 2.0),
               }}
           transition={{
-            duration: DURATION.lightOn * 1000,
+            duration: DURATION.lightOn,
             ease: EASING.smooth
           }}
             />
@@ -726,7 +729,7 @@ const Index = () => {
                 opacity: Math.pow(monitorLightIntensity / 100, 2.0),
               }}
           transition={{
-            duration: DURATION.lightOn * 1000,
+            duration: DURATION.lightOn,
             ease: EASING.smooth
           }}
             />
@@ -812,7 +815,7 @@ const Index = () => {
           />
         </motion.div>
       </motion.div>
-      </motion.div>
+      </div>
 
       {/* Media Player - Sticky bottom player with delayed entrance */}
       {showMediaPlayer && (

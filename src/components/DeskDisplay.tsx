@@ -86,7 +86,7 @@ export const DeskDisplay = ({
       // Reset transition state after animation completes
       const lightsOnNew = countLightsOn(newState);
       const lightsOnCurrent = countLightsOn(currentState);
-      const duration = lightsOnNew > lightsOnCurrent ? DURATION.lightOn * 1000 : DURATION.lightOff * 1000;
+      const duration = lightsOnNew > lightsOnCurrent ? DURATION.lightOn : DURATION.lightOff;
       
       const timer = setTimeout(() => {
         setIsTransitioning(false);
