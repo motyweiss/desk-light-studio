@@ -1,5 +1,3 @@
-// Animation constants for consistent timing and easing throughout the app
-
 export const EASING = {
   smooth: [0.22, 0.03, 0.26, 1] as const,
   quickOut: [0.33, 0.0, 0.2, 1] as const,
@@ -19,6 +17,7 @@ export const DURATION = {
   medium: 0.5,
   background: 0.8,
   mediaEntry: 1.0,
+  pageTransition: 0.5,
 } as const;
 
 export const POLL_INTERVAL = {
@@ -30,4 +29,14 @@ export const POLL_INTERVAL = {
 export const BLOCKING_WINDOW = {
   manualChange: 1500,  // Block remote updates for 1.5s after manual change
   pendingConfirm: 500, // Wait 500ms for HA to confirm before clearing pending
+} as const;
+
+export const PAGE_TRANSITIONS = {
+  duration: 0.5,
+  ease: [0.22, 0.03, 0.26, 1] as const,
+} as const;
+
+export const SPEAKER_SHEET_TRANSITIONS = {
+  duration: 0.5,
+  ease: [0.25, 0.1, 0.25, 1] as const,
 } as const;
