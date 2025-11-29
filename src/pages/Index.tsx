@@ -573,7 +573,7 @@ const Index = () => {
       >
         {/* Desk Display Panel - Image with glow effects */}
         <motion.div 
-          className="w-full md:w-[42%] lg:w-[40%] relative"
+          className="w-full md:w-[48%] lg:w-[46%] relative"
           initial={{ opacity: 0, x: -30 }}
           animate={{ 
             opacity: isLoaded ? 1 : 0,
