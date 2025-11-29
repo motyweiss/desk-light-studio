@@ -22,6 +22,12 @@ export interface MediaPlayerState {
   isPending: boolean;
   isLoading: boolean;
   entityId: string;
+  // New UI states for edge case handling
+  isTrackLoading: boolean;
+  isTrackTransitioning: boolean;
+  wasExternallyPaused: boolean;
+  queueEnded: boolean;
+  errorState: string | null;
 }
 
 export interface MediaPlayerEntity {

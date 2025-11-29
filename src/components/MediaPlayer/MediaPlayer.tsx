@@ -1,6 +1,6 @@
 import { motion, AnimatePresence } from 'framer-motion';
-import { useState } from 'react';
-import { Music } from 'lucide-react';
+import { useState, useRef } from 'react';
+import { Music, AlertCircle } from 'lucide-react';
 import { homeAssistant } from '@/services/homeAssistant';
 import { useMediaPlayer } from '@/contexts/MediaPlayerContext';
 import { ProgressBar } from './ProgressBar';
@@ -8,11 +8,12 @@ import { PlaybackControls } from './PlaybackControls';
 import { VolumeControl } from './VolumeControl';
 import { SourceIndicator } from './SourceIndicator';
 import { MiniSpeakerBadge } from './MiniSpeakerBadge';
-import { SpeakerSheet } from './SpeakerSheet';
+import { SpeakerPopover } from './SpeakerPopover';
 
 export const MediaPlayer = () => {
   const [isMinimized, setIsMinimized] = useState(true);
-  const [speakerSheetOpen, setSpeakerSheetOpen] = useState(false);
+  const [speakerPopoverOpen, setSpeakerPopoverOpen] = useState(false);
+  const speakerBadgeRef = useRef<HTMLButtonElement>(null);
 
   const {
     playerState,
@@ -21,6 +22,7 @@ export const MediaPlayer = () => {
     combinedSources,
     entityId,
     isConnected,
+    activeGroup,
     handlePlayPause,
     handleNext,
     handlePrevious,
@@ -83,10 +85,47 @@ export const MediaPlayer = () => {
     );
   }
 
+  // Handle edge cases
+  if (playerState.errorState) {
+    return (
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="fixed bottom-6 right-6 bg-orange-500/10 backdrop-blur-2xl border border-orange-500/30 rounded-2xl p-4 shadow-lg max-w-sm z-50"
+      >
+        <div className="flex items-center gap-3 text-orange-200/90">
+          <AlertCircle className="w-5 h-5" />
+          <div className="text-sm">
+            <p className="font-medium">{playerState.errorState}</p>
+            <p className="text-xs text-orange-200/60 mt-1">Open Spotify and start playing music</p>
+          </div>
+        </div>
+      </motion.div>
+    );
+  }
+
+  if (playerState.queueEnded) {
+    return (
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="fixed bottom-6 right-6 bg-blue-500/10 backdrop-blur-2xl border border-blue-500/30 rounded-2xl p-4 shadow-lg max-w-sm z-50"
+      >
+        <div className="flex items-center gap-3 text-blue-200/90">
+          <Music className="w-5 h-5" />
+          <div className="text-sm">
+            <p className="font-medium">Queue ended</p>
+            <p className="text-xs text-blue-200/60 mt-1">Add more songs to continue</p>
+          </div>
+        </div>
+      </motion.div>
+    );
+  }
+
   const currentTrack = playerState.currentTrack;
   const albumArtUrl = currentTrack?.albumArt ? homeAssistant.getFullImageUrl(currentTrack.albumArt) : null;
 
-  // Calculate sizes directly without useMemo to avoid hooks issues
+  // Calculate sizes
   const albumArtSize = {
     width: isMinimized ? 56 : 64,
     height: isMinimized ? 56 : 64,
@@ -96,6 +135,8 @@ export const MediaPlayer = () => {
   const titleLineHeight = isMinimized ? '24px' : '28px';
   const artistFontSize = isMinimized ? '12px' : '14px';
   const artistLineHeight = isMinimized ? '16px' : '20px';
+
+  const isGroup = activeGroup.length > 1;
 
   return (
     <>
@@ -142,17 +183,27 @@ export const MediaPlayer = () => {
                   ease: [0.25, 0.1, 0.25, 1]
                 }}
               >
-                {albumArtUrl ? (
-                  <img 
-                    src={albumArtUrl} 
-                    alt="Album art" 
-                    className="w-full h-full object-cover"
-                  />
-                ) : (
-                  <div className="w-full h-full flex items-center justify-center">
-                    <Music className="w-8 h-8 text-white/20" />
-                  </div>
-                )}
+                <AnimatePresence mode="wait">
+                  <motion.div
+                    key={currentTrack?.title || 'no-track'}
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    transition={{ duration: 0.3 }}
+                  >
+                    {albumArtUrl ? (
+                      <img 
+                        src={albumArtUrl} 
+                        alt="Album art" 
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center">
+                        <Music className="w-8 h-8 text-white/20" />
+                      </div>
+                    )}
+                  </motion.div>
+                </AnimatePresence>
               </motion.div>
 
               {/* Track Info - Shared Element */}
@@ -200,7 +251,7 @@ export const MediaPlayer = () => {
                 </AnimatePresence>
               </motion.div>
 
-              {/* Spotify Logo - Positioned on the right */}
+              {/* Spotify Logo */}
               <motion.div
                 className="absolute right-0 flex items-center justify-center"
                 initial={false}
@@ -223,7 +274,7 @@ export const MediaPlayer = () => {
                 </svg>
               </motion.div>
 
-              {/* Mini Player Controls - Always in DOM, visibility controlled */}
+              {/* Mini Player Controls */}
               {isMinimized && (
                 <motion.div
                   initial={{ opacity: 0, x: 20 }}
@@ -252,10 +303,13 @@ export const MediaPlayer = () => {
                   />
 
                   <MiniSpeakerBadge
+                    ref={speakerBadgeRef}
                     speakerName={playerState.source}
+                    groupMembers={activeGroup}
+                    isGroup={isGroup}
                     onClick={(e) => {
                       e.stopPropagation();
-                      setSpeakerSheetOpen(true);
+                      setSpeakerPopoverOpen(true);
                     }}
                   />
 
@@ -264,7 +318,7 @@ export const MediaPlayer = () => {
               )}
             </div>
 
-            {/* Full Player Controls - Separate section */}
+            {/* Full Player Controls */}
             <AnimatePresence>
               {!isMinimized && (
                 <motion.div
@@ -288,6 +342,8 @@ export const MediaPlayer = () => {
                     <ProgressBar
                       position={currentTrack.position}
                       duration={currentTrack.duration}
+                      isLoading={playerState.isTrackLoading}
+                      isTransitioning={playerState.isTrackTransitioning}
                       onSeek={handleSeek}
                     />
                   )}
@@ -317,10 +373,13 @@ export const MediaPlayer = () => {
 
                       {combinedSources.length > 0 && (
                         <MiniSpeakerBadge
+                          ref={speakerBadgeRef}
                           speakerName={playerState.source}
+                          groupMembers={activeGroup}
+                          isGroup={isGroup}
                           onClick={(e) => {
                             e.stopPropagation();
-                            setSpeakerSheetOpen(true);
+                            setSpeakerPopoverOpen(true);
                           }}
                         />
                       )}
@@ -333,14 +392,15 @@ export const MediaPlayer = () => {
         </motion.div>
       </motion.div>
 
-      {/* Speaker Sheet */}
-      <SpeakerSheet
-        isOpen={speakerSheetOpen}
-        onClose={() => setSpeakerSheetOpen(false)}
+      {/* Speaker Popover */}
+      <SpeakerPopover
+        isOpen={speakerPopoverOpen}
+        onClose={() => setSpeakerPopoverOpen(false)}
         currentSource={playerState.source}
         spotifySources={playerState.availableSources}
         availableSpeakers={availableSpeakers}
         onSourceChange={handleSourceChange}
+        anchorRef={speakerBadgeRef}
       />
     </>
   );
