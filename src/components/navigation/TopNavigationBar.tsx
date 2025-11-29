@@ -40,7 +40,7 @@ export const TopNavigationBar = ({
             transition={{ duration: 0.5, delay: 0.2 }}
           >
             <Home className="w-5 h-5 text-white/60" strokeWidth={1.5} />
-            <span className="text-lg font-light text-white/90">Smart Home</span>
+            <span className="text-lg font-light text-white/90">Moty's Home</span>
           </motion.div>
 
           {/* Center: Climate Indicators */}
@@ -52,22 +52,14 @@ export const TopNavigationBar = ({
             <ClimateIndicators />
           </motion.div>
 
-          {/* Right: Navigation + Status + Settings */}
+          {/* Right: Navigation + Settings + Connection Status */}
           <motion.div 
-            className="flex items-center gap-4"
+            className="flex items-center gap-3"
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.5, delay: 0.2 }}
           >
             <NavigationLinks currentPath={currentPath} />
-            
-            <div className="w-px h-6 bg-white/10" />
-            
-            <ConnectionStatusIndicator
-              isConnected={isConnected}
-              isReconnecting={isReconnecting}
-              onReconnectClick={onReconnectClick}
-            />
             
             <motion.button
               onClick={onSettingsClick}
@@ -78,6 +70,13 @@ export const TopNavigationBar = ({
             >
               <SettingsIcon className="w-4 h-4" strokeWidth={1.5} />
             </motion.button>
+            
+            <ConnectionStatusIndicator
+              isConnected={isConnected}
+              isReconnecting={isReconnecting}
+              onReconnectClick={onReconnectClick}
+              inline={true}
+            />
           </motion.div>
         </div>
       </div>

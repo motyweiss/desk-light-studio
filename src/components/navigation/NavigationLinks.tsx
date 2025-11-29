@@ -8,8 +8,15 @@ interface NavigationLinksProps {
 export const NavigationLinks = ({ currentPath }: NavigationLinksProps) => {
   const links = [
     { path: '/', label: 'Office', icon: Monitor },
-    // Future routes will be added here
+    // Future routes will be added here:
+    // { path: '/living', label: 'Living Room', icon: Sofa },
+    // { path: '/bedroom', label: 'Bedroom', icon: Bed },
   ];
+
+  // Don't render navigation if there's only one page
+  if (links.length <= 1) {
+    return null;
+  }
 
   return (
     <nav className="flex items-center gap-1">
