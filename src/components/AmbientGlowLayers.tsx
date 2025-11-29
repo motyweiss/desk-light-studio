@@ -19,9 +19,9 @@ export const AmbientGlowLayers = ({
   const deskLampOpacity = useMemo(() => Math.pow(deskLampIntensity / 100, 2.2) * 0.5, [deskLampIntensity]);
   const monitorLightOpacity = useMemo(() => Math.pow(monitorLightIntensity / 100, 2.2) * 0.5, [monitorLightIntensity]);
 
-  // Dynamic duration based on whether lights are turning on or off
+  // OPTIMIZED: Faster glow response for immediate feedback
   const getDuration = useCallback((targetOpacity: number) => {
-    return targetOpacity > 0 ? DURATION.glowOn : DURATION.glowOff;
+    return targetOpacity > 0 ? DURATION.glowOn * 0.85 : DURATION.glowOff * 0.85; // 15% faster
   }, []);
 
   const getEasing = useCallback((targetOpacity: number) => {
@@ -43,7 +43,7 @@ export const AmbientGlowLayers = ({
         }}
         transition={{
           duration: getDuration(spotlightOpacity),
-          delay: DURATION.glowDelay,
+          delay: 0, // REMOVED DELAY for instant glow response
           ease: getEasing(spotlightOpacity)
         }}
       />
@@ -61,7 +61,7 @@ export const AmbientGlowLayers = ({
         }}
         transition={{
           duration: getDuration(deskLampOpacity),
-          delay: DURATION.glowDelay,
+          delay: 0, // REMOVED DELAY for instant glow response
           ease: getEasing(deskLampOpacity)
         }}
       />
@@ -79,7 +79,7 @@ export const AmbientGlowLayers = ({
         }}
         transition={{
           duration: getDuration(monitorLightOpacity),
-          delay: DURATION.glowDelay,
+          delay: 0, // REMOVED DELAY for instant glow response
           ease: getEasing(monitorLightOpacity)
         }}
       />

@@ -75,13 +75,17 @@ export const DeskDisplay = ({
   // Determine if we're turning on or off
   const isTurningOn = countLightsOn(currentState) > countLightsOn(previousState);
 
-  // Update state with smooth transition and transition indicator
+  // CRITICAL: Update state immediately when intensity changes (no delay)
   useEffect(() => {
     const newState = getCurrentState;
     if (newState !== currentState) {
       setPreviousState(currentState);
       setIsTransitioning(true);
-      setCurrentState(newState);
+      
+      // Update state in same frame for instant visual response
+      requestAnimationFrame(() => {
+        setCurrentState(newState);
+      });
       
       // Reset transition state after animation completes
       const lightsOnNew = countLightsOn(newState);
@@ -90,15 +94,15 @@ export const DeskDisplay = ({
       
       const timer = setTimeout(() => {
         setIsTransitioning(false);
-      }, duration);
+      }, duration * 1000); // Convert to milliseconds
       
       return () => clearTimeout(timer);
     }
   }, [getCurrentState, currentState]);
 
-  // Dynamic transition durations and easing (memoized)
+  // OPTIMIZED: Faster transitions for instant feedback
   const transitionDuration = useMemo(() => 
-    isTurningOn ? DURATION.lightOn : DURATION.lightOff
+    isTurningOn ? DURATION.lightOn * 0.8 : DURATION.lightOff * 0.8 // 20% faster
   , [isTurningOn]);
   
   const transitionEasing = useMemo(() => 

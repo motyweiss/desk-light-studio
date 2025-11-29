@@ -32,24 +32,34 @@ export const LightControlCard = ({
   const isOn = intensity > 0;
   const displayValue = useMotionValue(intensity);
   const [displayNumber, setDisplayNumber] = useState(intensity);
-  const [isAnimating, setIsAnimating] = useState(false);
   const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const isTogglingRef = useRef(false);
   
   useMotionValueEvent(displayValue, "change", (latest) => {
     setDisplayNumber(Math.round(latest));
   });
   
+  // CRITICAL: Always sync display with intensity state immediately
   useEffect(() => {
-    // Only sync if we're not in the middle of a toggle animation
-    if (isAnimating) return;
+    // If we're toggling, don't interrupt the animation
+    if (isTogglingRef.current) return;
     
-    const controls = animate(displayValue, intensity, {
-      duration: DURATION.lightOn,
-      ease: EASING.smooth
-    });
+    // Snap immediately to new value if it's very different (external change)
+    const currentDisplay = displayValue.get();
+    const diff = Math.abs(currentDisplay - intensity);
     
-    return controls.stop;
-  }, [intensity, displayValue, isAnimating]);
+    if (diff > 5) {
+      // External change detected - snap immediately
+      displayValue.set(intensity);
+    } else {
+      // Small change - smooth animation
+      const controls = animate(displayValue, intensity, {
+        duration: 0.3,
+        ease: EASING.smooth
+      });
+      return controls.stop;
+    }
+  }, [intensity, displayValue]);
   
   // Cleanup debounce timer on unmount
   useEffect(() => {
@@ -74,20 +84,19 @@ export const LightControlCard = ({
     
     triggerHaptic();
     
-    const currentValue = displayValue.get();
     const targetIntensity = isOn ? 0 : 100;
     const isTurningOff = targetIntensity === 0;
     
-    setIsAnimating(true);
+    // CRITICAL FIX: Update state IMMEDIATELY, not after animation
+    isTogglingRef.current = true;
+    onChange(targetIntensity);
     
-    // Animate ONLY the display value - don't call onChange during animation
+    // Animate the display smoothly
     animate(displayValue, targetIntensity, {
       duration: isTurningOff ? DURATION.lightOff : DURATION.lightOn,
       ease: EASING.smooth,
       onComplete: () => {
-        setIsAnimating(false);
-        // Send to HA ONCE at the end
-        onChange(targetIntensity);
+        isTogglingRef.current = false;
       }
     });
   };
@@ -107,10 +116,10 @@ export const LightControlCard = ({
       clearTimeout(debounceTimerRef.current);
     }
     
-    // Debounce the HA call - only send after 300ms of no changes
+    // REDUCED DEBOUNCE: Send to HA after 150ms instead of 300ms for faster response
     debounceTimerRef.current = setTimeout(() => {
       onChange(newValue);
-    }, 300);
+    }, 150);
   }, [displayNumber, onChange, displayValue]);
 
   // Skeleton loading state - render different UI but all hooks must be called first
