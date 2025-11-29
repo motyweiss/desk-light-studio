@@ -259,21 +259,22 @@ export const MediaPlayer = () => {
                   exit={{ opacity: 0 }}
                   transition={{ duration: 0.4 }}
                   className="hidden sm:flex items-center justify-center gap-3 lg:gap-6"
-                  onClick={(e) => e.stopPropagation()}
                 >
-                  <PlaybackControls
-                    isPlaying={playerState.isPlaying}
-                    shuffle={playerState.shuffle}
-                    repeat={playerState.repeat}
-                    onPlayPause={handlePlayPause}
-                    onPrevious={handlePrevious}
-                    onNext={handleNext}
-                    onShuffleToggle={handleShuffleToggle}
-                    onRepeatToggle={handleRepeatToggle}
-                    compact={true}
-                  />
+                  <div onClick={(e) => e.stopPropagation()}>
+                    <PlaybackControls
+                      isPlaying={playerState.isPlaying}
+                      shuffle={playerState.shuffle}
+                      repeat={playerState.repeat}
+                      onPlayPause={handlePlayPause}
+                      onPrevious={handlePrevious}
+                      onNext={handleNext}
+                      onShuffleToggle={handleShuffleToggle}
+                      onRepeatToggle={handleRepeatToggle}
+                      compact={true}
+                    />
+                  </div>
 
-                  <div className="hidden lg:block">
+                  <div className="hidden lg:block" onClick={(e) => e.stopPropagation()}>
                     <VolumeControl
                       volume={playerState.volume}
                       isMuted={playerState.isMuted}
@@ -293,7 +294,6 @@ export const MediaPlayer = () => {
                   exit={{ opacity: 0 }}
                   transition={{ duration: 0.4 }}
                   className="flex items-center gap-3 justify-end"
-                  onClick={(e) => e.stopPropagation()}
                 >
                   <MiniSpeakerBadge
                     ref={speakerBadgeRef}
@@ -330,7 +330,6 @@ export const MediaPlayer = () => {
                     ease: [0.32, 0.72, 0, 1]
                   }}
                   className="space-y-4 mt-4 overflow-hidden"
-                  onClick={(e) => e.stopPropagation()}
                 >
                   {/* Source Indicator */}
                   <div className="flex justify-end">
@@ -339,7 +338,7 @@ export const MediaPlayer = () => {
 
                    {/* Progress Bar */}
                   {currentTrack && (
-                    <div className="pt-1">
+                    <div className="pt-1" onClick={(e) => e.stopPropagation()}>
                       <ProgressBar
                         position={currentTrack.position}
                         duration={currentTrack.duration}
@@ -352,7 +351,7 @@ export const MediaPlayer = () => {
 
                   {/* Bottom Row: Playback Controls + Volume + Speaker Selector */}
                   <div className="flex items-center justify-between">
-                    <div className="flex-1">
+                    <div className="flex-1" onClick={(e) => e.stopPropagation()}>
                       <PlaybackControls
                         isPlaying={playerState.isPlaying}
                         shuffle={playerState.shuffle}
@@ -365,7 +364,7 @@ export const MediaPlayer = () => {
                       />
                     </div>
 
-                    <div className="flex items-center gap-6">
+                    <div className="flex items-center gap-6" onClick={(e) => e.stopPropagation()}>
                       <VolumeControl
                         volume={playerState.volume}
                         isMuted={playerState.isMuted}
