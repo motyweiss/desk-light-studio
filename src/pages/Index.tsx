@@ -556,11 +556,10 @@ const Index = () => {
 
       {/* Responsive Layout Container */}
       <motion.div 
-        className="flex flex-col lg:flex-row items-start justify-center 
-                   gap-6 sm:gap-8 lg:gap-12 
-                   max-w-7xl w-full relative z-10 
-                   px-4 sm:px-6 lg:px-8
-                   pb-24 sm:pb-28 lg:pb-32"
+        className="flex flex-col md:flex-row items-center justify-center 
+                   gap-8 md:gap-12 
+                   max-w-7xl w-full relative z-10
+                   pb-24 md:pb-32"
         initial={{ opacity: 0 }}
         animate={{ 
           opacity: isLoaded ? 1 : 0
@@ -573,7 +572,7 @@ const Index = () => {
       >
         {/* Mobile: Room Info Header (Title, Climate, Master Switch) */}
         <motion.div 
-          className="w-full lg:hidden px-6 py-4 space-y-5"
+          className="w-full md:hidden px-10 py-6"
           initial={{ opacity: 0, y: 20 }}
           animate={{ 
             opacity: isLoaded ? 1 : 0,
@@ -585,13 +584,14 @@ const Index = () => {
             ease: [0.22, 0.03, 0.26, 1]
           }}
         >
-          {/* Room Title */}
-          <h1 className="text-3xl sm:text-4xl font-display font-light tracking-tight text-foreground leading-tight text-left">
-            Office Desk
-          </h1>
-          
-          {/* Climate Info - Horizontal Row, Left-aligned */}
-          <div className="flex gap-6 sm:gap-8 justify-start flex-wrap">
+          <div className="space-y-5">
+            {/* Room Title */}
+            <h1 className="text-4xl font-display font-light tracking-tight text-foreground leading-tight text-left">
+              Office Desk
+            </h1>
+            
+            {/* Climate Info - Horizontal Row, Left-aligned */}
+            <div className="flex gap-8 justify-start">
             {/* Temperature */}
             <div className="flex items-center gap-3">
               <CircularProgress 
@@ -665,46 +665,48 @@ const Index = () => {
             </div>
           </div>
 
-          {/* Master Switch - Mobile Version */}
-          <div className="flex justify-center pt-2">
-            <motion.button
-              onClick={() => handleMasterToggle(!masterSwitchOn)}
-              className="w-12 h-12 rounded-full backdrop-blur-xl border transition-all duration-500"
-              animate={{
-                backgroundColor: masterSwitchOn ? 'rgba(255, 255, 255, 0.08)' : 'rgba(255, 255, 255, 0)',
-                borderColor: masterSwitchOn ? 'rgba(255, 255, 255, 0.25)' : 'rgba(255, 255, 255, 0.1)'
-              }}
-              whileHover={{
-                backgroundColor: masterSwitchOn ? 'rgba(255, 255, 255, 0.12)' : 'rgba(255, 255, 255, 0.05)',
-                borderColor: masterSwitchOn ? 'rgba(255, 255, 255, 0.3)' : 'rgba(255, 255, 255, 0.15)',
-              }}
-              whileTap={{ scale: 0.92 }}
-              aria-label="Toggle all lights"
-            >
-              <motion.div
+            {/* Master Switch - Mobile Version */}
+            <div className="flex justify-center pt-2">
+              <motion.button
+                onClick={() => handleMasterToggle(!masterSwitchOn)}
+                className="w-12 h-12 rounded-full backdrop-blur-xl border transition-all duration-500"
                 animate={{
-                  color: masterSwitchOn ? 'rgba(255, 255, 255, 0.95)' : 'rgba(255, 255, 255, 0.4)',
+                  backgroundColor: masterSwitchOn ? 'rgba(255, 255, 255, 0.08)' : 'rgba(255, 255, 255, 0)',
+                  borderColor: masterSwitchOn ? 'rgba(255, 255, 255, 0.25)' : 'rgba(255, 255, 255, 0.1)'
                 }}
-                transition={{ duration: 0.5, ease: [0.22, 0.03, 0.26, 1] }}
-                className="flex items-center justify-center"
+                whileHover={{
+                  backgroundColor: masterSwitchOn ? 'rgba(255, 255, 255, 0.12)' : 'rgba(255, 255, 255, 0.05)',
+                  borderColor: masterSwitchOn ? 'rgba(255, 255, 255, 0.3)' : 'rgba(255, 255, 255, 0.15)',
+                }}
+                whileTap={{ scale: 0.92 }}
+                aria-label="Toggle all lights"
               >
-                <Sun className="w-5 h-5" strokeWidth={2} />
-              </motion.div>
-            </motion.button>
+                <motion.div
+                  animate={{
+                    color: masterSwitchOn ? 'rgba(255, 255, 255, 0.95)' : 'rgba(255, 255, 255, 0.4)',
+                  }}
+                  transition={{ duration: 0.5, ease: [0.22, 0.03, 0.26, 1] }}
+                  className="flex items-center justify-center"
+                >
+                  <Sun className="w-5 h-5" strokeWidth={2} />
+                </motion.div>
+              </motion.button>
+            </div>
           </div>
         </motion.div>
 
-        {/* Desk Display (Image) - Desktop: 55%, Tablet/Mobile: 100% */}
+        {/* Desk Display (Image) */}
         <motion.div 
-          className="w-full lg:w-[55%]"
-          initial={{ opacity: 0, y: 30 }}
+          className="w-full md:w-1/2 relative"
+          initial={{ opacity: 0, y: 40, scale: 0.92 }}
           animate={{ 
             opacity: isLoaded ? 1 : 0,
-            y: isLoaded ? 0 : 30
+            y: isLoaded ? 0 : 40,
+            scale: isLoaded ? 1 : 0.92
           }}
           transition={{ 
-            duration: 0.8,
-            delay: 0.2,
+            duration: 1.2,
+            delay: 0.3,
             ease: [0.22, 0.03, 0.26, 1]
           }}
         >
@@ -875,9 +877,9 @@ const Index = () => {
           />
         </motion.div>
 
-        {/* Room Info Panel - Desktop: 45%, Tablet/Mobile: 100% */}
+        {/* Room Info Panel */}
         <motion.div 
-          className="w-full lg:w-[45%]"
+          className="w-full md:w-1/2"
           initial={{ opacity: 0, x: 30 }}
           animate={{ 
             opacity: isLoaded ? 1 : 0,
