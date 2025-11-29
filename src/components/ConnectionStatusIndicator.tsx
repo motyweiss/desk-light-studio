@@ -6,12 +6,14 @@ interface ConnectionStatusIndicatorProps {
   isConnected: boolean;
   isReconnecting?: boolean;
   onReconnectClick?: () => void;
+  inline?: boolean;
 }
 
 export const ConnectionStatusIndicator = ({ 
   isConnected,
   isReconnecting = false,
-  onReconnectClick
+  onReconnectClick,
+  inline = false
 }: ConnectionStatusIndicatorProps) => {
   const [isHovered, setIsHovered] = useState(false);
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
@@ -49,20 +51,21 @@ export const ConnectionStatusIndicator = ({
     <motion.button
       onClick={handleClick}
       disabled={!isClickable}
-      className={`hidden md:flex fixed top-6 right-6 z-50 w-10 h-10 items-center justify-center ${getStatusColor()} transition-colors duration-300 ${isClickable ? 'cursor-pointer hover:scale-110' : 'cursor-default'}`}
+      className={`hidden md:flex ${inline ? 'relative' : 'fixed top-6 right-6 z-50'} w-9 h-9 items-center justify-center rounded-lg ${getStatusColor()} transition-colors duration-300 ${isClickable ? 'cursor-pointer hover:bg-white/5' : 'cursor-default'}`}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => {
         setIsHovered(false);
         setMousePos({ x: 0, y: 0 });
       }}
       onMouseMove={handleMouseMove}
-      initial={{ opacity: 0, scale: 0.8 }}
-      animate={{ opacity: 1, scale: 1 }}
-      whileHover={isClickable ? { scale: 1.1 } : {}}
+      initial={inline ? false : { opacity: 0, scale: 0.8 }}
+      animate={inline ? false : { opacity: 1, scale: 1 }}
+      whileHover={isClickable ? { scale: 1.05 } : {}}
       whileTap={isClickable ? { scale: 0.95 } : {}}
-      transition={{ duration: 0.3, delay: 0.6 }}
+      transition={inline ? undefined : { duration: 0.3, delay: 0.6 }}
+      aria-label={getTooltipText()}
     >
-      <Zap className="w-5 h-5" strokeWidth={1.5} />
+      <Zap className="w-4 h-4" strokeWidth={1.5} />
 
       {/* Tooltip */}
       {isHovered && (
