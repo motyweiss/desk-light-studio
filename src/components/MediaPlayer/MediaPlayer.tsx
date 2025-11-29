@@ -294,6 +294,7 @@ export const MediaPlayer = () => {
                   exit={{ opacity: 0 }}
                   transition={{ duration: 0.4 }}
                   className="flex items-center gap-3 justify-end"
+                  onClick={(e) => e.stopPropagation()}
                 >
                   <MiniSpeakerBadge
                     ref={speakerBadgeRef}
