@@ -40,3 +40,18 @@ export const SPEAKER_SHEET_TRANSITIONS = {
   duration: 0.5,
   ease: [0.25, 0.1, 0.25, 1] as const,
 } as const;
+
+export const MEDIA_PLAYER_ANIMATIONS = {
+  trackChange: {
+    duration: 0.4,
+    ease: [0.25, 0.1, 0.25, 1] as const,
+  },
+  modeChange: {
+    duration: 0.5,
+    ease: [0.32, 0.72, 0, 1] as const,
+  },
+  textFade: {
+    duration: 0.35,
+    ease: [0.25, 0.1, 0.25, 1] as const,
+  },
+} as const;
