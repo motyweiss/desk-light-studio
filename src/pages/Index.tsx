@@ -1,16 +1,14 @@
 import { useState, useEffect, useMemo, useCallback, useRef } from "react";
 import { motion } from "framer-motion";
-import { Sun, Thermometer, Droplets, Wind } from "lucide-react";
+import { Sun } from "lucide-react";
 import { DeskDisplay } from "@/components/DeskDisplay";
 import { RoomInfoPanel } from "@/components/RoomInfoPanel";
 import { AmbientGlowLayers } from "@/components/AmbientGlowLayers";
 import { LoadingOverlay } from "@/components/LoadingOverlay";
-import { ConnectionStatusIndicator } from "@/components/ConnectionStatusIndicator";
-import { SettingsDialog } from "@/components/SettingsDialog";
-import { CircularProgress } from "@/components/CircularProgress";
 import { Toaster } from "@/components/ui/toaster";
 import { useToast } from "@/hooks/use-toast";
 import { useHomeAssistantConfig } from "@/hooks/useHomeAssistantConfig";
+import { useClimate } from "@/contexts/ClimateContext";
 import { homeAssistant } from "@/services/homeAssistant";
 import { useHomeAssistantSync } from "@/hooks/useHomeAssistantSync";
 import { EASING, DURATION, BLOCKING_WINDOW } from "@/constants/animations";
@@ -33,19 +31,12 @@ const Index = () => {
   const [deskLampIntensity, setDeskLampIntensity] = useState(0);
   const [monitorLightIntensity, setMonitorLightIntensity] = useState(0);
   const [isTransitioning, setIsTransitioning] = useState(false);
-  const [settingsOpen, setSettingsOpen] = useState(false);
   
   // Track if initial HA state has been loaded
   const [hasLoadedInitialState, setHasLoadedInitialState] = useState(false);
   
-  // Climate sensor states
-  const [temperature, setTemperature] = useState(21.0);
-  const [humidity, setHumidity] = useState(49);
-  const [airQuality, setAirQuality] = useState(85);
-  
-  // Device battery states
-  const [iphoneBatteryLevel, setIphoneBatteryLevel] = useState(0);
-  const [iphoneBatteryCharging, setIphoneBatteryCharging] = useState(false);
+  // Get climate data from global context
+  const climate = useClimate();
 
   // Hover states for coordinated UI
   const [hoveredLight, setHoveredLight] = useState<string | null>(null);
@@ -60,14 +51,6 @@ const Index = () => {
   const { toast } = useToast();
   const { config, entityMapping, isConnected, saveConfig } = useHomeAssistantConfig();
 
-  // Helper function for air quality status
-  const getAirQualityStatus = (value: number): { label: string; color: string } => {
-    if (value <= 12) return { label: 'Good', color: 'hsl(142 70% 45%)' };
-    if (value <= 35) return { label: 'Moderate', color: 'hsl(45 90% 55%)' };
-    if (value <= 55) return { label: 'Sensitive', color: 'hsl(25 90% 55%)' };
-    return { label: 'Unhealthy', color: 'hsl(0 75% 55%)' };
-  };
-
   // Use new sync hook
   const { forceSyncStates, markManualChange, attemptReconnect, pendingLights: syncPendingLights } = useHomeAssistantSync({
     isConnected,
@@ -78,13 +61,7 @@ const Index = () => {
       if (lights.deskLamp !== undefined) setDeskLampIntensity(lights.deskLamp);
       if (lights.monitorLight !== undefined) setMonitorLightIntensity(lights.monitorLight);
     },
-    onSensorsUpdate: (sensors) => {
-      if (sensors.temperature !== undefined) setTemperature(sensors.temperature);
-      if (sensors.humidity !== undefined) setHumidity(sensors.humidity);
-      if (sensors.airQuality !== undefined) setAirQuality(sensors.airQuality);
-      if (sensors.iphoneBatteryLevel !== undefined) setIphoneBatteryLevel(sensors.iphoneBatteryLevel);
-      if (sensors.iphoneBatteryCharging !== undefined) setIphoneBatteryCharging(sensors.iphoneBatteryCharging);
-    },
+    onSensorsUpdate: () => {},
     onReconnectingChange: setIsReconnecting,
   });
 
@@ -310,7 +287,6 @@ const Index = () => {
 
       try {
         const states = await homeAssistant.getAllEntityStates(allEntityIds);
-        
         // Update lights
         if (entityMapping.spotlight && states.has(entityMapping.spotlight)) {
           const state = states.get(entityMapping.spotlight)!;
@@ -337,51 +313,6 @@ const Index = () => {
             : 0;
           setMonitorLightIntensity(newIntensity);
           console.log(`💡 Monitor Light initial: ${newIntensity}%`);
-        }
-        
-        // Update sensors
-        if (entityMapping.temperatureSensor && states.has(entityMapping.temperatureSensor)) {
-          const state = states.get(entityMapping.temperatureSensor)!;
-          const tempValue = parseFloat(state.state);
-          if (!isNaN(tempValue)) {
-            setTemperature(tempValue);
-            console.log(`🌡️ Temperature initial: ${tempValue}°C`);
-          }
-        }
-        
-        if (entityMapping.humiditySensor && states.has(entityMapping.humiditySensor)) {
-          const state = states.get(entityMapping.humiditySensor)!;
-          const humidityValue = parseFloat(state.state);
-          if (!isNaN(humidityValue)) {
-            setHumidity(Math.round(humidityValue));
-            console.log(`💧 Humidity initial: ${humidityValue}%`);
-          }
-        }
-        
-        if (entityMapping.airQualitySensor && states.has(entityMapping.airQualitySensor)) {
-          const state = states.get(entityMapping.airQualitySensor)!;
-          const aqValue = parseFloat(state.state);
-          if (!isNaN(aqValue)) {
-            setAirQuality(Math.round(aqValue));
-            console.log(`🌬️ Air Quality initial: ${aqValue}`);
-          }
-        }
-        
-        // Update battery sensors
-        if (entityMapping.iphoneBatteryLevel && states.has(entityMapping.iphoneBatteryLevel)) {
-          const state = states.get(entityMapping.iphoneBatteryLevel)!;
-          const batteryValue = parseFloat(state.state);
-          if (!isNaN(batteryValue)) {
-            setIphoneBatteryLevel(Math.round(batteryValue));
-            console.log(`🔋 iPhone Battery initial: ${batteryValue}%`);
-          }
-        }
-        
-        if (entityMapping.iphoneBatteryState && states.has(entityMapping.iphoneBatteryState)) {
-          const state = states.get(entityMapping.iphoneBatteryState)!;
-          const isCharging = state.state.toLowerCase().includes("charging") && !state.state.toLowerCase().includes("not");
-          setIphoneBatteryCharging(isCharging);
-          console.log(`⚡ iPhone Charging initial: ${state.state} → ${isCharging}`);
         }
         
         // Mark initial state as loaded
@@ -496,18 +427,6 @@ const Index = () => {
   return (
     <>
       <LoadingOverlay isLoading={isLoading} />
-      <ConnectionStatusIndicator 
-        isConnected={isConnected} 
-        isReconnecting={isReconnecting}
-        onReconnectClick={attemptReconnect}
-      />
-      <SettingsDialog
-        open={settingsOpen}
-        onOpenChange={setSettingsOpen}
-        onSave={handleSaveSettings}
-        currentConfig={config}
-        currentMapping={entityMapping}
-      />
       <Toaster />
 
       <div
@@ -655,21 +574,21 @@ const Index = () => {
             >
               {/* Temperature - Icon + Number only */}
               <div className="flex items-center gap-2">
-                <Thermometer className="w-5 h-5 text-white/60" strokeWidth={1.5} />
-                <div className="text-base font-light text-white tabular-nums">{temperature.toFixed(1)}°</div>
+                <Sun className="w-5 h-5 text-white/60" strokeWidth={1.5} />
+                <div className="text-base font-light text-white tabular-nums">{climate.temperature.toFixed(1)}°</div>
               </div>
 
-              {/* Humidity - Icon + Number only */}
+              {/* Humidity */}
               <div className="flex items-center gap-2">
-                <Droplets className="w-5 h-5 text-white/60" strokeWidth={1.5} />
-                <div className="text-base font-light text-white tabular-nums">{humidity}%</div>
+                <Sun className="w-5 h-5 text-white/60" strokeWidth={1.5} />
+                <div className="text-base font-light text-white tabular-nums">{climate.humidity}%</div>
               </div>
 
-              {/* PM 2.5 - Icon + Number only */}
+              {/* Air Quality */}
               <div className="flex items-center gap-2">
-                <Wind className="w-5 h-5 text-white/60" strokeWidth={1.5} />
+                <Sun className="w-5 h-5 text-white/60" strokeWidth={1.5} />
                 <div className="text-base font-light text-white tabular-nums">
-                  {airQuality}
+                  {climate.airQuality}
                   <span className="text-[10px] text-white/40 ml-1">µg/m³</span>
                 </div>
               </div>
@@ -755,9 +674,6 @@ const Index = () => {
         >
           <RoomInfoPanel
             roomName="Office Desk"
-            temperature={temperature}
-            humidity={humidity}
-            airQuality={airQuality}
             masterSwitchOn={masterSwitchOn}
             onMasterToggle={handleMasterToggle}
             onLightHover={setHoveredLight}
@@ -765,15 +681,15 @@ const Index = () => {
               {
                 id: "iphone",
                 name: "Moty's iPhone",
-                batteryLevel: iphoneBatteryLevel,
-                isCharging: iphoneBatteryCharging,
+                batteryLevel: climate.iphoneBatteryLevel,
+                isCharging: climate.iphoneBatteryCharging,
                 icon: 'smartphone' as const,
               },
               {
                 id: "airpods",
                 name: "AirPods Max",
-                batteryLevel: 80,
-                isCharging: false,
+                batteryLevel: climate.airpodsMaxBatteryLevel,
+                isCharging: climate.airpodsMaxBatteryCharging,
                 icon: 'headphones' as const,
               }
             ]}

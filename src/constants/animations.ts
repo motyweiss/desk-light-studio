@@ -55,3 +55,16 @@ export const MEDIA_PLAYER_ANIMATIONS = {
     ease: [0.25, 0.1, 0.25, 1] as const,
   },
 } as const;
+
+export const HEADER_ANIMATIONS = {
+  entry: {
+    duration: 0.6,
+    delay: 0.1,
+    ease: [0.16, 1, 0.3, 1] as const,
+  },
+  climateExpand: {
+    duration: 0.35,
+    ease: [0.34, 1.56, 0.64, 1] as const,
+  },
+  indicatorStagger: 0.08,
+} as const;

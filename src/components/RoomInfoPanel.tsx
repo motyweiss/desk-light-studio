@@ -25,9 +25,6 @@ interface Device {
 
 interface RoomInfoPanelProps {
   roomName: string;
-  temperature: number;
-  humidity: number;
-  airQuality: number;
   masterSwitchOn: boolean;
   onMasterToggle: (checked: boolean) => void;
   onLightHover: (lightId: string | null) => void;
@@ -36,56 +33,7 @@ interface RoomInfoPanelProps {
   isLoaded: boolean;
 }
 
-export const RoomInfoPanel = ({ roomName, temperature, humidity, airQuality, masterSwitchOn, onMasterToggle, onLightHover, lights, devices, isLoaded }: RoomInfoPanelProps) => {
-  const getAirQualityStatus = (value: number): { label: string; color: string } => {
-    if (value <= 12) return { label: 'Good', color: 'hsl(142 70% 45%)' };
-    if (value <= 35) return { label: 'Moderate', color: 'hsl(45 90% 55%)' };
-    if (value <= 55) return { label: 'Sensitive', color: 'hsl(25 90% 55%)' };
-    return { label: 'Unhealthy', color: 'hsl(0 75% 55%)' };
-  };
-
-  // Animated counter for temperature
-  const tempCount = useMotionValue(0);
-  const tempDisplay = useTransform(tempCount, (latest) => latest.toFixed(1));
-
-  // Animated counter for humidity
-  const humidityCount = useMotionValue(0);
-  const humidityDisplay = useTransform(humidityCount, (latest) => Math.round(latest));
-
-  // Animated counter for air quality
-  const airQualityCount = useMotionValue(0);
-  const airQualityDisplay = useTransform(airQualityCount, (latest) => Math.round(latest));
-
-  useEffect(() => {
-    if (isLoaded) {
-      // Animate temperature counter
-      const tempControls = animate(tempCount, temperature, {
-        duration: 2,
-        delay: 0.5,
-        ease: [0.22, 0.03, 0.26, 1]
-      });
-
-      // Animate humidity counter
-      const humidityControls = animate(humidityCount, humidity, {
-        duration: 2,
-        delay: 0.5,
-        ease: [0.22, 0.03, 0.26, 1]
-      });
-
-      // Animate air quality counter
-      const airQualityControls = animate(airQualityCount, airQuality, {
-        duration: 2,
-        delay: 0.5,
-        ease: [0.22, 0.03, 0.26, 1]
-      });
-
-      return () => {
-        tempControls.stop();
-        humidityControls.stop();
-        airQualityControls.stop();
-      };
-    }
-  }, [isLoaded, temperature, humidity, airQuality, tempCount, humidityCount, airQualityCount]);
+export const RoomInfoPanel = ({ roomName, masterSwitchOn, onMasterToggle, onLightHover, lights, devices, isLoaded }: RoomInfoPanelProps) => {
 
   return (
     <div className="space-y-6 md:space-y-8">
@@ -142,8 +90,8 @@ export const RoomInfoPanel = ({ roomName, temperature, humidity, airQuality, mas
         </motion.button>
       </motion.div>
 
-      {/* Climate & Devices Info - Desktop only */}
-      <motion.div 
+      {/* Devices Battery Section - Desktop only */}
+      <motion.div
         className="hidden md:block rounded-2xl py-6 px-6"
         initial={{ opacity: 0, y: 10 }}
         animate={{ 
@@ -156,84 +104,9 @@ export const RoomInfoPanel = ({ roomName, temperature, humidity, airQuality, mas
           ease: [0.22, 0.03, 0.26, 1]
         }}
       >
-        {/* Climate Info */}
-        <div className="flex gap-10 mb-8">
-          {/* Temperature */}
-          <div className="flex items-center gap-3">
-                <CircularProgress 
-                  value={temperature} 
-                  min={15} 
-                  max={35} 
-                  size={44} 
-                  strokeWidth={2.5}
-                  isLoaded={isLoaded}
-                  colorType="temperature"
-                  delay={0.4}
-                >
-              <Thermometer className="w-5 h-5 text-white/60" strokeWidth={1.5} />
-            </CircularProgress>
-            <div className="flex flex-col">
-              <span className="text-[9px] text-white/55 font-light tracking-[0.2em] uppercase mb-1">
-                Temperature
-              </span>
-              <div className="text-base font-light text-white tabular-nums">
-                <motion.span>{tempDisplay}</motion.span>°
-              </div>
-            </div>
-          </div>
-
-          {/* Humidity */}
-          <div className="flex items-center gap-3">
-                <CircularProgress 
-                  value={humidity} 
-                  min={0} 
-                  max={100} 
-                  size={44} 
-                  strokeWidth={2.5}
-                  isLoaded={isLoaded}
-                  colorType="humidity"
-                  delay={0.6}
-                >
-              <Droplets className="w-5 h-5 text-white/60" strokeWidth={1.5} />
-            </CircularProgress>
-            <div className="flex flex-col">
-              <span className="text-[9px] text-white/55 font-light tracking-[0.2em] uppercase mb-1">
-                Humidity
-              </span>
-              <div className="text-base font-light text-white tabular-nums">
-                <motion.span>{humidityDisplay}</motion.span>%
-              </div>
-            </div>
-          </div>
-
-          {/* PM 2.5 */}
-          <div className="flex items-center gap-3">
-                <CircularProgress 
-                  value={airQuality} 
-                  min={0} 
-                  max={100} 
-                  size={44} 
-                  strokeWidth={2.5}
-                  isLoaded={isLoaded}
-                  colorType="airQuality"
-                  delay={0.8}
-                >
-              <Wind className="w-5 h-5 text-white/60" strokeWidth={1.5} />
-            </CircularProgress>
-            <div className="flex flex-col">
-              <span className="text-[9px] text-white/55 font-light tracking-[0.2em] uppercase mb-1">
-                Air Quality
-              </span>
-              <div className="text-base font-light text-white tabular-nums">
-                <span>{getAirQualityStatus(airQuality).label}</span>
-              </div>
-            </div>
-          </div>
-        </div>
-
         {/* Devices Battery Section */}
         {devices && devices.length > 0 && (
-          <div className="flex flex-row gap-10 mt-8">
+          <div className="flex flex-row gap-10">
             {devices.map((device, index) => {
               const DeviceIcon = device.icon === 'headphones' ? AirPodsMaxIcon : IPhoneIcon;
               
@@ -267,73 +140,6 @@ export const RoomInfoPanel = ({ roomName, temperature, humidity, airQuality, mas
             })}
           </div>
         )}
-      </motion.div>
-
-      {/* Mobile version - Minimal inline */}
-      <motion.div 
-        className="flex md:hidden justify-center gap-8 py-4"
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ 
-          opacity: isLoaded ? 1 : 0,
-          y: isLoaded ? 0 : 10
-        }}
-        transition={{ 
-          duration: 0.6,
-          delay: 0.2,
-          ease: [0.22, 0.03, 0.26, 1]
-        }}
-        style={{ display: 'none' }}
-      >
-        {/* Temperature - Icon + Number only */}
-        <div className="flex items-center gap-2">
-          <CircularProgress 
-            value={temperature} 
-            min={15} 
-            max={35} 
-            size={32} 
-            strokeWidth={2}
-            isLoaded={isLoaded}
-          >
-            <Thermometer className="w-4 h-4 text-white/60" strokeWidth={1.5} />
-          </CircularProgress>
-          <div className="text-base font-light text-white tabular-nums">
-            <motion.span>{tempDisplay}</motion.span>°
-          </div>
-        </div>
-
-        {/* Humidity - Icon + Number only */}
-        <div className="flex items-center gap-2">
-          <CircularProgress 
-            value={humidity} 
-            min={0} 
-            max={100} 
-            size={32} 
-            strokeWidth={2}
-            isLoaded={isLoaded}
-          >
-            <Droplets className="w-4 h-4 text-white/60" strokeWidth={1.5} />
-          </CircularProgress>
-          <div className="text-base font-light text-white tabular-nums">
-            <motion.span>{humidityDisplay}</motion.span>%
-          </div>
-        </div>
-
-        {/* PM 2.5 - Icon + Number only */}
-        <div className="flex items-center gap-2">
-          <CircularProgress 
-            value={airQuality} 
-            min={0} 
-            max={100} 
-            size={32} 
-            strokeWidth={2}
-            isLoaded={isLoaded}
-          >
-            <Wind className="w-4 h-4 text-white/60" strokeWidth={1.5} />
-          </CircularProgress>
-          <div className="text-base font-light text-white tabular-nums">
-            <motion.span>{airQualityDisplay}</motion.span>
-          </div>
-        </div>
       </motion.div>
 
       {/* Light Controls Section */}
