@@ -10,6 +10,7 @@ import { SourceIndicator } from './SourceIndicator';
 import { MiniSpeakerBadge } from './MiniSpeakerBadge';
 import { SpeakerPopover } from './SpeakerPopover';
 import { AudioVisualizer } from './AudioVisualizer';
+import { MusicParticles } from './MusicParticles';
 
 export const MediaPlayer = () => {
   const [isMinimized, setIsMinimized] = useState(true);
@@ -154,7 +155,7 @@ export const MediaPlayer = () => {
           className="bg-white/8 backdrop-blur-[24px] border-t border-white/20 rounded-t-2xl shadow-[0_4px_24px_rgba(0,0,0,0.15)] relative cursor-pointer"
           initial={false}
           animate={{ 
-            height: isMinimized ? 80 : 'auto',
+            height: isMinimized ? 88 : 'auto',
           }}
           transition={{ 
             duration: 0.5, 
@@ -166,8 +167,8 @@ export const MediaPlayer = () => {
         >
 
           {/* Content Container */}
-          <div className="px-6 py-3 max-w-7xl mx-auto relative">
-            <div className="flex items-center gap-4 relative" style={{ minHeight: isMinimized ? 56 : 'auto' }}>
+          <div className="px-6 py-4 max-w-7xl mx-auto relative">
+            <div className="flex items-center gap-4 relative" style={{ minHeight: isMinimized ? 64 : 'auto' }}>
               {/* Album Art - Shared Element */}
               <motion.div
                 layoutId="player-album-art"
@@ -209,6 +210,12 @@ export const MediaPlayer = () => {
                     )}
                   </motion.div>
                 </AnimatePresence>
+                
+                {/* Music Particles Effect */}
+                <MusicParticles 
+                  isPlaying={playerState.isPlaying} 
+                  containerSize={albumArtSize}
+                />
               </motion.div>
 
               {/* Track Info - Shared Element */}
