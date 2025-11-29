@@ -30,15 +30,6 @@ export const MediaPlayer = ({ entityId, isConnected }: MediaPlayerProps) => {
     pollInterval: 1500,
   });
 
-  console.log('MediaPlayer render:', { 
-    entityId, 
-    isConnected, 
-    isLoading, 
-    hasPlayerState: !!playerState,
-    availableSpeakers: availableSpeakers.length,
-    combinedSources: combinedSources.length
-  });
-
   // Optimistic handlers with immediate UI update
   const handlePlayPause = async () => {
     if (!entityId || !playerState) return;
