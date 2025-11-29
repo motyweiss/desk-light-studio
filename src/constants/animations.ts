@@ -23,7 +23,7 @@ export const DURATION = {
 export const POLL_INTERVAL = {
   lights: 1000,        // 1 second for light states
   sensors: 1500,       // 1.5 seconds for sensors
-  mediaPlayer: 1500,   // 1.5 seconds for media player
+  mediaPlayer: 600,    // 600ms for immediate music detection
 } as const;
 
 export const BLOCKING_WINDOW = {
