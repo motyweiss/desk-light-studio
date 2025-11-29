@@ -1,7 +1,8 @@
-import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { homeAssistant, type MediaPlayerEntity } from '@/services/homeAssistant';
-import type { MediaPlayerState } from '@/types/mediaPlayer';
+import type { MediaPlayerState, PlaybackTarget } from '@/types/mediaPlayer';
 import { POLL_INTERVAL } from '@/constants/animations';
+import { PREDEFINED_GROUPS } from '@/config/speakerGroups';
 
 interface UseMediaPlayerSyncConfig {
   entityId: string | undefined;
@@ -240,15 +241,50 @@ export const useMediaPlayerSync = (config: UseMediaPlayerSyncConfig) => {
     loadSpeakers();
   }, [enabled]);
 
-  // Combine Spotify sources with available speakers
-  const combinedSources = useMemo(() => {
-    const spotifySources = playerState?.availableSources || [];
-    const speakerNames = availableSpeakers
-      .map(s => s.attributes.friendly_name || s.entity_id)
-      .filter(name => !spotifySources.includes(name)); // Avoid duplicates
+  // Detect active playback target from HA state
+  const detectActiveTarget = useCallback((state: MediaPlayerState): PlaybackTarget | null => {
+    const groupMembers = state.groupedSpeakers || [];
     
-    return [...spotifySources, ...speakerNames];
-  }, [playerState?.availableSources, availableSpeakers]);
+    // Check if matches a predefined group
+    const matchedGroup = PREDEFINED_GROUPS.find(g => 
+      g.entityIds.length === groupMembers.length &&
+      g.entityIds.every(id => groupMembers.some(member => member === id))
+    );
+    
+    if (matchedGroup) {
+      console.log('🎯 Detected active group:', matchedGroup.name);
+      return { 
+        type: 'group', 
+        name: matchedGroup.name, 
+        entityIds: matchedGroup.entityIds,
+        groupId: matchedGroup.id
+      };
+    }
+    
+    if (groupMembers.length > 1) {
+      // Custom group (not predefined)
+      return { 
+        type: 'speaker', 
+        name: `${groupMembers.length} speakers`, 
+        entityIds: groupMembers 
+      };
+    }
+    
+    if (groupMembers.length === 1) {
+      return { 
+        type: 'speaker', 
+        name: state.source, 
+        entityIds: groupMembers 
+      };
+    }
+    
+    // Default to Spotify Connect
+    return { 
+      type: 'spotify', 
+      name: state.source, 
+      entityIds: [] 
+    };
+  }, []);
 
   return { 
     playerState, 
@@ -256,6 +292,6 @@ export const useMediaPlayerSync = (config: UseMediaPlayerSyncConfig) => {
     syncFromRemote,
     setPlayerState,
     availableSpeakers,
-    combinedSources
+    detectActiveTarget
   };
 };

@@ -534,6 +534,56 @@ class HomeAssistantService {
 
     return speakers;
   }
+
+  // Transfer Spotify playback to a specific Sonos speaker
+  async transferPlaybackToSonos(spotifyEntityId: string, sonosEntityId: string, sonosName: string): Promise<boolean> {
+    try {
+      console.log(`🔄 Transferring playback to ${sonosName} (${sonosEntityId})`);
+      
+      // For Sonos + Spotify, we select the Sonos speaker in Spotify's source list
+      // The speaker name should match what appears in Spotify's source_list
+      const success = await this.setMediaSource(spotifyEntityId, sonosName);
+      
+      if (success) {
+        console.log(`✅ Playback transferred to ${sonosName}`);
+      }
+      
+      return success;
+    } catch (error) {
+      console.error(`Failed to transfer playback to ${sonosName}:`, error);
+      return false;
+    }
+  }
+
+  // Play on a speaker group
+  async playOnSpeakerGroup(masterEntityId: string, memberEntityIds: string[], groupName: string): Promise<boolean> {
+    try {
+      console.log(`🔊 Creating speaker group: ${groupName}`, memberEntityIds);
+      
+      // Join all speakers to the master
+      const success = await this.joinMediaPlayers(masterEntityId, memberEntityIds);
+      
+      if (success) {
+        console.log(`✅ Speaker group created: ${groupName}`);
+      }
+      
+      return success;
+    } catch (error) {
+      console.error(`Failed to create speaker group ${groupName}:`, error);
+      return false;
+    }
+  }
+
+  // Get actively playing speakers (those in a group)
+  async getActiveSpeakers(entityId: string): Promise<string[]> {
+    try {
+      const state = await this.getMediaPlayerState(entityId);
+      return state?.attributes.group_members || [];
+    } catch (error) {
+      console.error('Failed to get active speakers:', error);
+      return [];
+    }
+  }
 }
 
 export const homeAssistant = new HomeAssistantService();

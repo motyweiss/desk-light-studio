@@ -1,3 +1,10 @@
+export interface PlaybackTarget {
+  type: 'spotify' | 'speaker' | 'group';
+  name: string;
+  entityIds: string[];
+  groupId?: string;
+}
+
 export interface MediaPlayerState {
   isPlaying: boolean;
   isPaused: boolean;
