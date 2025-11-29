@@ -7,7 +7,6 @@ import { AmbientGlowLayers } from "@/components/AmbientGlowLayers";
 import { LoadingOverlay } from "@/components/LoadingOverlay";
 import { ConnectionStatusIndicator } from "@/components/ConnectionStatusIndicator";
 import { SettingsDialog } from "@/components/SettingsDialog";
-import { MediaPlayer } from "@/components/MediaPlayer/MediaPlayer";
 import { Toaster } from "@/components/ui/toaster";
 import { useToast } from "@/hooks/use-toast";
 import { useHomeAssistantConfig } from "@/hooks/useHomeAssistantConfig";
@@ -29,7 +28,6 @@ const Index = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [isLoaded, setIsLoaded] = useState(false);
   const [backgroundLoaded, setBackgroundLoaded] = useState(false);
-  const [showMediaPlayer, setShowMediaPlayer] = useState(false);
   const [spotlightIntensity, setSpotlightIntensity] = useState(0);
   const [deskLampIntensity, setDeskLampIntensity] = useState(0);
   const [monitorLightIntensity, setMonitorLightIntensity] = useState(0);
@@ -118,19 +116,12 @@ const Index = () => {
           setIsLoaded(true);
         });
         
-        // Show media player after page content settles (2 seconds after content loads)
-        const mediaTimer = setTimeout(() => {
-          setShowMediaPlayer(true);
-        }, 2000);
-        
         // Preload remaining images in background after primary loads
         const remainingImages = [desk001, desk010, desk011, desk100, desk101, desk110, desk111];
         remainingImages.forEach(src => {
           const img = new Image();
           img.src = src;
         });
-        
-        return () => clearTimeout(mediaTimer);
       }, remainingTime);
     };
     
@@ -556,14 +547,7 @@ const Index = () => {
 
       {/* Responsive Layout Container */}
       <motion.div 
-        className="flex flex-col md:flex-row items-center gap-4 md:gap-8 max-w-7xl w-full relative z-10 px-5 md:px-0 md:pb-0"
-        animate={{
-          paddingBottom: showMediaPlayer ? '120px' : '80px'
-        }}
-        transition={{ 
-          duration: 0.8, 
-          ease: [0.19, 1, 0.22, 1] 
-        }}
+        className="flex flex-col md:flex-row items-center gap-4 md:gap-8 max-w-7xl w-full relative z-10 px-5 md:px-0 pb-20 md:pb-24"
       >
         {/* Mobile: Room Info Header (Title, Climate, Master Switch) */}
         <motion.div 
@@ -816,14 +800,6 @@ const Index = () => {
         </motion.div>
       </motion.div>
       </div>
-
-      {/* Media Player - Sticky bottom player with delayed entrance */}
-      {showMediaPlayer && (
-        <MediaPlayer 
-          entityId={entityMapping.mediaPlayer} 
-          isConnected={isConnected}
-        />
-      )}
     </>
   );
 };
