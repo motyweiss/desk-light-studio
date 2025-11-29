@@ -573,7 +573,7 @@ const Index = () => {
       >
         {/* Desk Display Panel - Image with glow effects */}
         <motion.div 
-          className="w-full md:w-[48%] lg:w-[46%] relative"
+          className="w-full md:w-[50%] lg:w-[48%] relative"
           initial={{ opacity: 0, x: -30 }}
           animate={{ 
             opacity: isLoaded ? 1 : 0,
@@ -741,7 +741,7 @@ const Index = () => {
 
         {/* Room Info Panel */}
         <motion.div 
-          className="w-full md:w-[46%] lg:w-[46%]"
+          className="w-full md:w-[48%] lg:w-[50%]"
           initial={{ opacity: 0, x: 30 }}
           animate={{ 
             opacity: isLoaded ? 1 : 0,
