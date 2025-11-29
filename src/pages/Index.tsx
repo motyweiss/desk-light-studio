@@ -741,7 +741,7 @@ const Index = () => {
 
         {/* Room Info Panel */}
         <motion.div 
-          className="w-full md:w-[52%] lg:w-[52%]"
+          className="w-full md:w-[46%] lg:w-[46%]"
           initial={{ opacity: 0, x: 30 }}
           animate={{ 
             opacity: isLoaded ? 1 : 0,
