@@ -27,8 +27,8 @@ export const POLL_INTERVAL = {
 } as const;
 
 export const BLOCKING_WINDOW = {
-  manualChange: 1500,  // Block remote updates for 1.5s after manual change
-  pendingConfirm: 500, // Wait 500ms for HA to confirm before clearing pending
+  manualChange: 800,   // Block remote updates for 800ms after manual change (reduced for faster sync)
+  pendingConfirm: 400, // Wait 400ms for HA to confirm before clearing pending (faster confirmation)
 } as const;
 
 export const PAGE_TRANSITIONS = {
