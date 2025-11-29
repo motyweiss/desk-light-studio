@@ -202,6 +202,35 @@ export const useHomeAssistantSync = (config: UseHomeAssistantSyncConfig) => {
     lastManualChangeRef.current = Date.now();
   }, []);
 
+  // Manual reconnect attempt
+  const attemptReconnect = useCallback(async () => {
+    if (isReconnecting) return;
+    
+    setIsReconnecting(true);
+    homeAssistant.resetRetryCount();
+    
+    try {
+      const result = await homeAssistant.testConnection();
+      if (result.success) {
+        setIsReconnecting(false);
+        await forceSyncStates();
+        toast({ 
+          title: 'Connected', 
+          description: 'Home Assistant reconnected successfully' 
+        });
+      } else {
+        throw new Error(result.error);
+      }
+    } catch (error) {
+      setIsReconnecting(false);
+      toast({ 
+        title: 'Connection Failed', 
+        description: 'Could not connect to Home Assistant',
+        variant: 'destructive'
+      });
+    }
+  }, [isReconnecting, forceSyncStates, toast]);
+
   // Polling sync effect
   useEffect(() => {
     if (!isConnected || !entityMapping) return;
@@ -382,6 +411,8 @@ export const useHomeAssistantSync = (config: UseHomeAssistantSyncConfig) => {
   return {
     forceSyncStates,
     markManualChange,
+    attemptReconnect,
     isReconnecting,
+    pendingLights,
   };
 };

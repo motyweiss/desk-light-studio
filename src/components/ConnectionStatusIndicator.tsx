@@ -5,11 +5,13 @@ import { Zap } from "lucide-react";
 interface ConnectionStatusIndicatorProps {
   isConnected: boolean;
   isReconnecting?: boolean;
+  onReconnectClick?: () => void;
 }
 
 export const ConnectionStatusIndicator = ({ 
   isConnected,
-  isReconnecting = false
+  isReconnecting = false,
+  onReconnectClick
 }: ConnectionStatusIndicatorProps) => {
   const [isHovered, setIsHovered] = useState(false);
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
@@ -26,33 +28,41 @@ export const ConnectionStatusIndicator = ({
   const getStatusColor = () => {
     if (isReconnecting) return "text-yellow-500 animate-pulse";
     if (!isConnected) return "text-foreground/30";
-    return "text-white"; // White for active connection
+    return "text-white";
   };
 
   const getTooltipText = () => {
     if (isReconnecting) return "Reconnecting to Home Assistant...";
-    if (!isConnected) return "Not connected to Home Assistant";
+    if (!isConnected) return "Not connected - Click to reconnect";
     return "Connected to Home Assistant";
   };
 
+  const handleClick = () => {
+    if (!isConnected && !isReconnecting && onReconnectClick) {
+      onReconnectClick();
+    }
+  };
+
+  const isClickable = !isConnected && !isReconnecting;
+
   return (
-    <div
-      className="hidden md:block fixed top-6 right-20 z-50"
+    <motion.button
+      onClick={handleClick}
+      disabled={!isClickable}
+      className={`hidden md:flex fixed top-6 right-6 z-50 w-10 h-10 items-center justify-center ${getStatusColor()} transition-colors duration-300 ${isClickable ? 'cursor-pointer hover:scale-110' : 'cursor-default'}`}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => {
         setIsHovered(false);
         setMousePos({ x: 0, y: 0 });
       }}
       onMouseMove={handleMouseMove}
+      initial={{ opacity: 0, scale: 0.8 }}
+      animate={{ opacity: 1, scale: 1 }}
+      whileHover={isClickable ? { scale: 1.1 } : {}}
+      whileTap={isClickable ? { scale: 0.95 } : {}}
+      transition={{ duration: 0.3, delay: 0.6 }}
     >
-      <motion.div
-        className={`w-10 h-10 flex items-center justify-center ${getStatusColor()} transition-colors duration-300`}
-        initial={{ opacity: 0, scale: 0.8 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ duration: 0.3, delay: 0.6 }}
-      >
-        <Zap className="w-5 h-5" strokeWidth={1.5} />
-      </motion.div>
+      <Zap className="w-5 h-5" strokeWidth={1.5} />
 
       {/* Tooltip */}
       {isHovered && (
@@ -91,6 +101,6 @@ export const ConnectionStatusIndicator = ({
           </div>
         </motion.div>
       )}
-    </div>
+    </motion.button>
   );
 };

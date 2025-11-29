@@ -5,7 +5,6 @@ import { DeskDisplay } from "@/components/DeskDisplay";
 import { RoomInfoPanel } from "@/components/RoomInfoPanel";
 import { AmbientGlowLayers } from "@/components/AmbientGlowLayers";
 import { LoadingOverlay } from "@/components/LoadingOverlay";
-import { SettingsButton } from "@/components/SettingsButton";
 import { ConnectionStatusIndicator } from "@/components/ConnectionStatusIndicator";
 import { SettingsDialog } from "@/components/SettingsDialog";
 import { MediaPlayer } from "@/components/MediaPlayer/MediaPlayer";
@@ -63,7 +62,7 @@ const Index = () => {
   const { config, entityMapping, isConnected, saveConfig } = useHomeAssistantConfig();
 
   // Use new sync hook
-  const { forceSyncStates, markManualChange } = useHomeAssistantSync({
+  const { forceSyncStates, markManualChange, attemptReconnect, pendingLights: syncPendingLights } = useHomeAssistantSync({
     isConnected,
     entityMapping,
     pendingLights,
@@ -486,8 +485,11 @@ const Index = () => {
   return (
     <>
       <LoadingOverlay isLoading={isLoading} />
-      <ConnectionStatusIndicator isConnected={isConnected} isReconnecting={isReconnecting} />
-      <SettingsButton onClick={() => setSettingsOpen(true)} />
+      <ConnectionStatusIndicator 
+        isConnected={isConnected} 
+        isReconnecting={isReconnecting}
+        onReconnectClick={attemptReconnect}
+      />
       <SettingsDialog
         open={settingsOpen}
         onOpenChange={setSettingsOpen}
