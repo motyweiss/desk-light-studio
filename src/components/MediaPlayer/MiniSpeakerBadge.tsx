@@ -45,10 +45,10 @@ export const MiniSpeakerBadge = forwardRef<HTMLButtonElement, MiniSpeakerBadgePr
         whileTap={{ scale: 0.95 }}
       >
         <Icon className={compact ? "w-3 h-3 text-white/50" : "w-3.5 h-3.5 text-white/50"} />
-        <span className={`font-light text-white/70 truncate ${
+        <span className={`font-light text-white/70 whitespace-nowrap ${
           compact 
-            ? 'text-[10px] max-w-[80px] sm:text-xs sm:max-w-[100px]' 
-            : 'text-xs max-w-[120px]'
+            ? 'text-[10px] sm:text-xs' 
+            : 'text-xs'
         }`}>
           {displayText}
         </span>
