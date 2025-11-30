@@ -209,6 +209,10 @@ export const LightControlCard = ({
       onMouseEnter={() => onHover(id)}
       onMouseLeave={() => onHover(null)}
       className="w-full rounded-3xl px-8 py-4 cursor-pointer text-left border transition-all duration-500 backdrop-blur-xl relative overflow-hidden"
+      initial={{
+        backgroundColor: isOn ? 'rgba(255, 255, 255, 0.18)' : 'rgba(255, 255, 255, 0.08)',
+        borderColor: isOn ? 'rgba(255, 255, 255, 0.25)' : 'rgba(255, 255, 255, 0.15)',
+      }}
       animate={{
         backgroundColor: isOn ? 'rgba(255, 255, 255, 0.18)' : 'rgba(255, 255, 255, 0.08)',
         borderColor: isOn ? 'rgba(255, 255, 255, 0.25)' : 'rgba(255, 255, 255, 0.15)',
