@@ -48,9 +48,9 @@ export const ConnectionStatusIndicator = ({
   };
 
   const getTooltipText = () => {
-    if (isReconnecting) return "Reconnecting to Home Assistant...";
-    if (!isConnected) return "Not connected - Click to reconnect";
-    return "Connected to Home Assistant";
+    if (isReconnecting) return "Reconnecting...";
+    if (!isConnected) return "Disconnected";
+    return "Connected";
   };
 
   const handleClick = () => {
@@ -85,18 +85,17 @@ export const ConnectionStatusIndicator = ({
           <motion.div
             className="absolute pointer-events-none z-50
               bg-white/12 backdrop-blur-[32px]
-              pl-5 pr-8 py-2.5 rounded-full
-              shadow-[0_8px_32px_rgba(0,0,0,0.12),inset_0_1px_1px_rgba(255,255,255,0.15)]
+              px-5 py-2.5 rounded-full
               border border-white/25
               [background:linear-gradient(135deg,rgba(255,255,255,0.15),rgba(255,255,255,0.05))]"
             style={{
-              right: '100%',
-              top: '50%',
-              marginRight: '12px',
+              top: '100%',
+              left: '50%',
+              marginTop: '12px',
               x: mouseX,
               y: mouseY,
-              translateY: '-50%',
-              transformOrigin: 'right center'
+              translateX: '-50%',
+              transformOrigin: 'top center'
             }}
             initial={{ scale: 0.92, opacity: 0 }}
             animate={{ 
@@ -116,13 +115,8 @@ export const ConnectionStatusIndicator = ({
               }
             }}
           >
-            <div className="flex items-center gap-3">
-              <div className={`w-9 h-9 rounded-full backdrop-blur-xl flex items-center justify-center transition-colors duration-500 ${getStatusColor()}`}>
-                <Zap className="w-5 h-5" strokeWidth={1.5} />
-              </div>
-              <div className="text-xs font-light text-foreground whitespace-nowrap pr-[15px]">
-                {getTooltipText()}
-              </div>
+            <div className="text-xs font-light text-foreground whitespace-nowrap">
+              {getTooltipText()}
             </div>
           </motion.div>
         )}
