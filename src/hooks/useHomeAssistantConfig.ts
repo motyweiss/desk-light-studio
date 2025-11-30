@@ -20,7 +20,6 @@ export const useHomeAssistantConfig = () => {
   const [config, setConfig] = useState<HomeAssistantConfig | null>(null);
   const [entityMapping, setEntityMapping] = useState<EntityMapping>(DEFAULT_ENTITY_MAPPING);
   const [isConnected, setIsConnected] = useState(false);
-  const [isConfigured, setIsConfigured] = useState(false);
 
   useEffect(() => {
     // Load from localStorage
@@ -32,13 +31,7 @@ export const useHomeAssistantConfig = () => {
         const parsedConfig = JSON.parse(savedConfig);
         setConfig(parsedConfig);
         homeAssistant.setConfig(parsedConfig);
-        setIsConfigured(true);
-        
-        // Actually test the connection
-        homeAssistant.testConnection().then(result => {
-          console.log('🔌 Initial connection test:', result.success ? '✅ Connected' : '❌ Failed');
-          setIsConnected(result.success);
-        });
+        setIsConnected(true);
       } catch (e) {
         console.error("Failed to parse saved config:", e);
       }
@@ -93,7 +86,6 @@ export const useHomeAssistantConfig = () => {
     config,
     entityMapping,
     isConnected,
-    isConfigured,
     saveConfig,
     clearConfig,
   };
