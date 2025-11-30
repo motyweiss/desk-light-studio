@@ -5,13 +5,15 @@ import { Input } from "@/components/ui/input";
 import { Loader2, CheckCircle2, XCircle, Link2 } from "lucide-react";
 import { SettingsSection } from "./SettingsSection";
 import { SettingsField } from "./SettingsField";
-import { homeAssistant } from "@/services/homeAssistant";
+import { homeAssistant, type HAEntity } from "@/services/homeAssistant";
+import { useToast } from "@/hooks/use-toast";
 
 interface ConnectionTabProps {
   baseUrl: string;
   accessToken: string;
   onBaseUrlChange: (value: string) => void;
   onAccessTokenChange: (value: string) => void;
+  onEntitiesFetched?: (entities: HAEntity[]) => void;
 }
 
 const ConnectionTab = ({
@@ -19,7 +21,9 @@ const ConnectionTab = ({
   accessToken,
   onBaseUrlChange,
   onAccessTokenChange,
+  onEntitiesFetched,
 }: ConnectionTabProps) => {
+  const { toast } = useToast();
   const [testing, setTesting] = useState(false);
   const [testResult, setTestResult] = useState<{
     success: boolean;
@@ -39,17 +43,50 @@ const ConnectionTab = ({
     setTestResult(null);
 
     try {
-      homeAssistant.setConfig({ baseUrl, accessToken });
+      const normalizedUrl = baseUrl.replace(/\/+$/, '');
+      homeAssistant.setConfig({ baseUrl: normalizedUrl, accessToken });
       const result = await homeAssistant.testConnection();
 
-      setTestResult({
-        success: true,
-        message: `Connected successfully! Home Assistant version: ${result.version}`,
-      });
+      if (result.success) {
+        // Fetch entities after successful connection
+        const entities = await homeAssistant.getEntitiesWithContext();
+        
+        // Notify parent component of fetched entities
+        if (onEntitiesFetched) {
+          onEntitiesFetched(entities);
+        }
+
+        setTestResult({
+          success: true,
+          message: `Connected successfully! Home Assistant version: ${result.version}`,
+        });
+
+        toast({
+          title: "Connected",
+          description: `Successfully connected to Home Assistant (${result.version})`,
+        });
+      } else {
+        setTestResult({
+          success: false,
+          message: result.error || "Connection failed",
+        });
+
+        toast({
+          title: "Connection Failed",
+          description: result.error,
+          variant: "destructive",
+        });
+      }
     } catch (error) {
       setTestResult({
         success: false,
         message: error instanceof Error ? error.message : "Connection failed",
+      });
+      
+      toast({
+        title: "Connection Failed",
+        description: error instanceof Error ? error.message : "Connection failed",
+        variant: "destructive",
       });
     } finally {
       setTesting(false);

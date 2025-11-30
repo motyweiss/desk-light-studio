@@ -1,8 +1,10 @@
 import { useState, useEffect } from "react";
 import { homeAssistant, type HomeAssistantConfig, type EntityMapping } from "@/services/homeAssistant";
+import { DevicesMapping, DeviceConfig } from "@/types/settings";
 
 const CONFIG_KEY = "ha_config";
 const ENTITY_MAPPING_KEY = "ha_entity_mapping";
+const DEVICES_MAPPING_KEY = "ha_devices_mapping";
 
 const DEFAULT_ENTITY_MAPPING: EntityMapping = {
   deskLamp: "light.go",
@@ -16,15 +18,54 @@ const DEFAULT_ENTITY_MAPPING: EntityMapping = {
   mediaPlayer: "media_player.spotify",
 };
 
+// Migration function: convert old EntityMapping to new DevicesMapping
+const migrateToNewFormat = (oldMapping: EntityMapping): DevicesMapping => ({
+  rooms: [{
+    id: 'office',
+    name: 'Office',
+    lights: [
+      { id: 'desk_lamp', label: 'Desk Lamp', entity_id: oldMapping.deskLamp || 'light.go' },
+      { id: 'monitor_light', label: 'Monitor Light', entity_id: oldMapping.monitorLight || 'light.screen' },
+      { id: 'spotlight', label: 'Spotlight', entity_id: oldMapping.spotlight || 'light.door' },
+    ],
+    sensors: [
+      { id: 'temperature', label: 'Temperature', entity_id: oldMapping.temperatureSensor || 'sensor.dyson_pure_temperature', type: 'temperature' },
+      { id: 'humidity', label: 'Humidity', entity_id: oldMapping.humiditySensor || 'sensor.dyson_pure_humidity', type: 'humidity' },
+      { id: 'air_quality', label: 'Air Quality', entity_id: oldMapping.airQualitySensor || 'sensor.dyson_pure_pm_2_5', type: 'air_quality' },
+    ],
+    mediaPlayers: [
+      { id: 'spotify', label: 'Spotify', entity_id: oldMapping.mediaPlayer || 'media_player.spotify' },
+    ],
+  }]
+});
+
+// Convert DevicesMapping back to EntityMapping (for backward compatibility)
+const convertToLegacyFormat = (devicesMapping: DevicesMapping): EntityMapping => {
+  const office = devicesMapping.rooms[0];
+  return {
+    deskLamp: office.lights.find(l => l.id === 'desk_lamp')?.entity_id || 'light.go',
+    monitorLight: office.lights.find(l => l.id === 'monitor_light')?.entity_id || 'light.screen',
+    spotlight: office.lights.find(l => l.id === 'spotlight')?.entity_id || 'light.door',
+    temperatureSensor: office.sensors.find(s => s.type === 'temperature')?.entity_id || 'sensor.dyson_pure_temperature',
+    humiditySensor: office.sensors.find(s => s.type === 'humidity')?.entity_id || 'sensor.dyson_pure_humidity',
+    airQualitySensor: office.sensors.find(s => s.type === 'air_quality')?.entity_id || 'sensor.dyson_pure_pm_2_5',
+    iphoneBatteryLevel: DEFAULT_ENTITY_MAPPING.iphoneBatteryLevel,
+    iphoneBatteryState: DEFAULT_ENTITY_MAPPING.iphoneBatteryState,
+    mediaPlayer: office.mediaPlayers[0]?.entity_id || 'media_player.spotify',
+  };
+};
+
 export const useHomeAssistantConfig = () => {
   const [config, setConfig] = useState<HomeAssistantConfig | null>(null);
   const [entityMapping, setEntityMapping] = useState<EntityMapping>(DEFAULT_ENTITY_MAPPING);
+  const [devicesMapping, setDevicesMapping] = useState<DevicesMapping>(migrateToNewFormat(DEFAULT_ENTITY_MAPPING));
   const [isConnected, setIsConnected] = useState(false);
 
   useEffect(() => {
     // Load from localStorage
     const savedConfig = localStorage.getItem(CONFIG_KEY);
     const savedMapping = localStorage.getItem(ENTITY_MAPPING_KEY);
+    const savedDevicesMapping = localStorage.getItem(DEVICES_MAPPING_KEY);
 
     if (savedConfig) {
       try {
@@ -37,7 +78,18 @@ export const useHomeAssistantConfig = () => {
       }
     }
 
-    if (savedMapping) {
+    // Load DevicesMapping (prioritize new format)
+    if (savedDevicesMapping) {
+      try {
+        const parsedDevicesMapping = JSON.parse(savedDevicesMapping);
+        setDevicesMapping(parsedDevicesMapping);
+        // Also set legacy entityMapping for backward compatibility
+        setEntityMapping(convertToLegacyFormat(parsedDevicesMapping));
+      } catch (e) {
+        console.error("Failed to parse saved devices mapping:", e);
+      }
+    } else if (savedMapping) {
+      // Migrate from old format
       try {
         const parsedMapping = JSON.parse(savedMapping);
         
@@ -53,15 +105,23 @@ export const useHomeAssistantConfig = () => {
           ...parsedMapping,
         };
         setEntityMapping(mergedMapping);
-        // Save the merged mapping back to localStorage
+        
+        // Migrate to new format
+        const migratedDevicesMapping = migrateToNewFormat(mergedMapping);
+        setDevicesMapping(migratedDevicesMapping);
+        
+        // Save both formats
         localStorage.setItem(ENTITY_MAPPING_KEY, JSON.stringify(mergedMapping));
+        localStorage.setItem(DEVICES_MAPPING_KEY, JSON.stringify(migratedDevicesMapping));
       } catch (e) {
         console.error("Failed to parse saved mapping:", e);
         setEntityMapping(DEFAULT_ENTITY_MAPPING);
+        setDevicesMapping(migrateToNewFormat(DEFAULT_ENTITY_MAPPING));
       }
     } else {
       // Use default mapping if no saved mapping exists
       setEntityMapping(DEFAULT_ENTITY_MAPPING);
+      setDevicesMapping(migrateToNewFormat(DEFAULT_ENTITY_MAPPING));
     }
   }, []);
 
@@ -74,19 +134,82 @@ export const useHomeAssistantConfig = () => {
     setIsConnected(true);
   };
 
+  const saveDevicesMapping = (newDevicesMapping: DevicesMapping) => {
+    localStorage.setItem(DEVICES_MAPPING_KEY, JSON.stringify(newDevicesMapping));
+    setDevicesMapping(newDevicesMapping);
+    
+    // Also update legacy format
+    const legacyMapping = convertToLegacyFormat(newDevicesMapping);
+    localStorage.setItem(ENTITY_MAPPING_KEY, JSON.stringify(legacyMapping));
+    setEntityMapping(legacyMapping);
+  };
+
+  const addDevice = (roomId: string, category: 'lights' | 'sensors' | 'mediaPlayers', device: DeviceConfig) => {
+    setDevicesMapping(prev => ({
+      ...prev,
+      rooms: prev.rooms.map(room => 
+        room.id === roomId 
+          ? { ...room, [category]: [...room[category], device] }
+          : room
+      )
+    }));
+  };
+
+  const updateDevice = (
+    roomId: string, 
+    category: 'lights' | 'sensors' | 'mediaPlayers', 
+    deviceId: string, 
+    updates: Partial<DeviceConfig>
+  ) => {
+    setDevicesMapping(prev => ({
+      ...prev,
+      rooms: prev.rooms.map(room => 
+        room.id === roomId 
+          ? {
+              ...room,
+              [category]: room[category].map((device: DeviceConfig) =>
+                device.id === deviceId ? { ...device, ...updates } : device
+              )
+            }
+          : room
+      )
+    }));
+  };
+
+  const removeDevice = (roomId: string, category: 'lights' | 'sensors' | 'mediaPlayers', deviceId: string) => {
+    setDevicesMapping(prev => ({
+      ...prev,
+      rooms: prev.rooms.map(room => 
+        room.id === roomId 
+          ? {
+              ...room,
+              [category]: room[category].filter((device: DeviceConfig) => device.id !== deviceId)
+            }
+          : room
+      )
+    }));
+  };
+
   const clearConfig = () => {
     localStorage.removeItem(CONFIG_KEY);
     localStorage.removeItem(ENTITY_MAPPING_KEY);
+    localStorage.removeItem(DEVICES_MAPPING_KEY);
     setConfig(null);
     setEntityMapping({});
+    setDevicesMapping({ rooms: [] });
     setIsConnected(false);
   };
 
   return {
     config,
     entityMapping,
+    devicesMapping,
     isConnected,
     saveConfig,
+    saveDevicesMapping,
+    addDevice,
+    updateDevice,
+    removeDevice,
     clearConfig,
   };
 };
