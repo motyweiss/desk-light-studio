@@ -57,7 +57,7 @@ export const ProgressBar = ({ position, duration, isLoading, isTransitioning, on
   };
 
   return (
-    <div className="space-y-2 w-full relative">
+    <div className="space-y-3 w-full relative">
       {/* Loading/Transition Overlay */}
       <AnimatePresence>
         {(isLoading || isTransitioning) && (
