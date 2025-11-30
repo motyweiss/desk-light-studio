@@ -53,6 +53,8 @@ export const useHomeAssistantSync = (config: UseHomeAssistantSyncConfig) => {
   const reconnectAttemptRef = useRef(0);
   const [isReconnecting, setIsReconnecting] = useState(false);
   const pollIntervalRef = useRef<NodeJS.Timeout>();
+  const reconnectIntervalRef = useRef<NodeJS.Timeout>();
+  const hasShownDisconnectToast = useRef(false);
 
   // Update parent reconnecting state
   useEffect(() => {
@@ -274,10 +276,17 @@ export const useHomeAssistantSync = (config: UseHomeAssistantSyncConfig) => {
           syncLogger.printSummary();
           setIsReconnecting(false);
           reconnectAttemptRef.current = 0;
-          toast({
+          hasShownDisconnectToast.current = false;
+          
+          const toastId = toast({
             title: 'Reconnected',
             description: 'Successfully reconnected to Home Assistant',
           });
+          
+          // Auto-dismiss after 3 seconds
+          setTimeout(() => {
+            // Toast will auto-dismiss
+          }, 3000);
         }
 
         const lightUpdates: Partial<LightStates> = {};
@@ -378,18 +387,22 @@ export const useHomeAssistantSync = (config: UseHomeAssistantSyncConfig) => {
         // Mark as reconnecting if not already
         if (!isReconnecting) {
           setIsReconnecting(true);
-          toast({
-            title: 'Connection Lost',
-            description: 'Attempting to reconnect to Home Assistant...',
-            variant: 'destructive',
-          });
+          
+          // Only show toast once per disconnect event
+          if (!hasShownDisconnectToast.current) {
+            toast({
+              title: 'Connection Lost',
+              description: 'Attempting to reconnect...',
+              variant: 'destructive',
+            });
+            hasShownDisconnectToast.current = true;
+          }
         }
 
         reconnectAttemptRef.current += 1;
-        const retryCount = homeAssistant.getRetryCount();
 
         if (reconnectAttemptRef.current % 5 === 0) {
-          console.warn(`🔄 Reconnection attempt ${reconnectAttemptRef.current} (retry count: ${retryCount})`);
+          console.warn(`🔄 Reconnection attempt ${reconnectAttemptRef.current}`);
         }
       }
     };
@@ -407,6 +420,67 @@ export const useHomeAssistantSync = (config: UseHomeAssistantSyncConfig) => {
       }
     };
   }, [isConnected, entityMapping, isReconnecting, pendingLights, toast, onLightsUpdate, onSensorsUpdate, updateLight]);
+
+  // Dedicated background reconnection loop - runs independently of polling
+  useEffect(() => {
+    if (!isReconnecting || !entityMapping) return;
+
+    console.log('🔄 Starting automatic reconnection loop');
+    let attempt = 0;
+    const maxAttempts = 20; // More attempts with exponential backoff
+
+    const tryReconnect = async () => {
+      attempt++;
+      const delay = Math.min(1000 * Math.pow(2, Math.min(attempt - 1, 5)), 30000); // Max 30s
+      
+      console.log(`🔌 Reconnection attempt ${attempt}/${maxAttempts} (next retry in ${delay}ms)...`);
+      
+      try {
+        const result = await homeAssistant.testConnection();
+        if (result.success) {
+          console.log('✅ Reconnection successful!');
+          setIsReconnecting(false);
+          reconnectAttemptRef.current = 0;
+          hasShownDisconnectToast.current = false;
+          
+          // Force immediate sync after reconnection
+          await forceSyncStates();
+          
+          toast({ 
+            title: 'Reconnected', 
+            description: 'Connection restored successfully',
+          });
+          
+          return true;
+        }
+      } catch (e) {
+        console.warn(`⚠️  Reconnection attempt ${attempt} failed:`, e);
+      }
+      
+      if (attempt < maxAttempts) {
+        reconnectIntervalRef.current = setTimeout(tryReconnect, delay) as any;
+      } else {
+        console.error('❌ Max reconnection attempts reached');
+        setIsReconnecting(false);
+        toast({
+          title: 'Connection Failed',
+          description: 'Could not reconnect. Check settings and try again.',
+          variant: 'destructive',
+        });
+      }
+      
+      return false;
+    };
+    
+    // Start reconnection attempts
+    tryReconnect();
+    
+    return () => {
+      if (reconnectIntervalRef.current) {
+        clearTimeout(reconnectIntervalRef.current);
+      }
+    };
+  }, [isReconnecting, entityMapping, forceSyncStates, toast]);
 
   return {
     forceSyncStates,

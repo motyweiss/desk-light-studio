@@ -52,6 +52,7 @@ class HomeAssistantService {
   private retryCount = 0;
   private maxRetries = 5;
   private baseRetryDelay = 1000; // Start with 1 second
+  private _isConnected = false;
 
   setConfig(config: HomeAssistantConfig) {
     // Remove trailing slash from baseUrl to prevent double slashes
@@ -59,6 +60,14 @@ class HomeAssistantService {
       ...config,
       baseUrl: config.baseUrl.replace(/\/+$/, '')
     };
+  }
+
+  get isConnected(): boolean {
+    return this._isConnected;
+  }
+
+  setConnectionState(connected: boolean) {
+    this._isConnected = connected;
   }
 
   private getHeaders() {
@@ -121,14 +130,41 @@ class HomeAssistantService {
       });
 
       if (!response.ok) {
+        this._isConnected = false;
         return { success: false, error: `HTTP ${response.status}` };
       }
 
       const data = await response.json();
+      this._isConnected = true;
       return { success: true, version: data.version };
     } catch (error) {
+      this._isConnected = false;
       return { success: false, error: (error as Error).message };
     }
+  }
+
+  async connectWithRetry(maxAttempts: number = 5): Promise<boolean> {
+    for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+      const delay = Math.min(1000 * Math.pow(2, attempt - 1), 30000); // Max 30s
+      
+      try {
+        const result = await this.testConnection();
+        if (result.success) {
+          console.log(`✅ Connected to Home Assistant (attempt ${attempt})`);
+          return true;
+        }
+      } catch (error) {
+        console.warn(`⚠️  Connection attempt ${attempt}/${maxAttempts} failed:`, error);
+      }
+      
+      if (attempt < maxAttempts) {
+        console.log(`⏳ Retrying in ${delay}ms...`);
+        await new Promise(resolve => setTimeout(resolve, delay));
+      }
+    }
+    
+    console.error(`❌ Failed to connect after ${maxAttempts} attempts`);
+    return false;
   }
 
   async getLights(): Promise<HAEntity[]> {
@@ -204,11 +240,12 @@ class HomeAssistantService {
   }
 
   async getAllEntityStates(entityIds: string[]): Promise<Map<string, { state: string; brightness?: number }>> {
-    return this.retryWithBackoff(async () => {
-      const stateMap = new Map<string, { state: string; brightness?: number }>();
-      
-      await Promise.all(
-        entityIds.map(async (entityId) => {
+    // Fail fast - no retry logic, let reconnection loop handle failures
+    const stateMap = new Map<string, { state: string; brightness?: number }>();
+    
+    await Promise.all(
+      entityIds.map(async (entityId) => {
+        try {
           const entity = await this.getEntityState(entityId);
           if (entity) {
             stateMap.set(entityId, {
@@ -216,16 +253,21 @@ class HomeAssistantService {
               brightness: entity.attributes.brightness,
             });
           }
-        })
-      );
+        } catch (error) {
+          // Skip individual entity errors, continue with others
+          console.warn(`⚠️  Failed to fetch ${entityId}:`, error);
+        }
+      })
+    );
 
-      // If no states were returned, throw error to trigger retry
-      if (stateMap.size === 0) {
-        throw new Error("No entity states returned from Home Assistant");
-      }
+    // If no states were returned, throw error
+    if (stateMap.size === 0) {
+      this._isConnected = false;
+      throw new Error("No entity states returned from Home Assistant");
+    }
 
-      return stateMap;
-    }, "getAllEntityStates");
+    this._isConnected = true;
+    return stateMap;
   }
 
   // Media Player Functions
