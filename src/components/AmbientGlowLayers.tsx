@@ -1,6 +1,6 @@
 import { motion } from "framer-motion";
 import { useMemo, useCallback } from "react";
-import { EASING, DURATION } from "@/constants/animations";
+import { LIGHT_ANIMATION } from "@/constants/animations";
 
 interface AmbientGlowLayersProps {
   spotlightIntensity: number;
@@ -19,13 +19,13 @@ export const AmbientGlowLayers = ({
   const deskLampOpacity = useMemo(() => Math.pow(deskLampIntensity / 100, 2.2) * 0.5, [deskLampIntensity]);
   const monitorLightOpacity = useMemo(() => Math.pow(monitorLightIntensity / 100, 2.2) * 0.5, [monitorLightIntensity]);
 
-  // OPTIMIZED: Faster glow response for immediate feedback
+  // Unified animation timing with stagger delay
   const getDuration = useCallback((targetOpacity: number) => {
-    return targetOpacity > 0 ? DURATION.glowOn * 0.85 : DURATION.glowOff * 0.85; // 15% faster
+    return targetOpacity > 0 ? LIGHT_ANIMATION.turnOn.duration : LIGHT_ANIMATION.turnOff.duration;
   }, []);
 
   const getEasing = useCallback((targetOpacity: number) => {
-    return targetOpacity > 0 ? EASING.smooth : EASING.quickOut;
+    return targetOpacity > 0 ? LIGHT_ANIMATION.turnOn.ease : LIGHT_ANIMATION.turnOff.ease;
   }, []);
 
   return (
@@ -43,7 +43,7 @@ export const AmbientGlowLayers = ({
         }}
         transition={{
           duration: getDuration(spotlightOpacity),
-          delay: 0, // REMOVED DELAY for instant glow response
+          delay: LIGHT_ANIMATION.stagger.glow,
           ease: getEasing(spotlightOpacity)
         }}
       />
@@ -61,7 +61,7 @@ export const AmbientGlowLayers = ({
         }}
         transition={{
           duration: getDuration(deskLampOpacity),
-          delay: 0, // REMOVED DELAY for instant glow response
+          delay: LIGHT_ANIMATION.stagger.glow,
           ease: getEasing(deskLampOpacity)
         }}
       />
@@ -79,7 +79,7 @@ export const AmbientGlowLayers = ({
         }}
         transition={{
           duration: getDuration(monitorLightOpacity),
-          delay: 0, // REMOVED DELAY for instant glow response
+          delay: LIGHT_ANIMATION.stagger.glow,
           ease: getEasing(monitorLightOpacity)
         }}
       />

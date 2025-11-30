@@ -8,16 +8,36 @@ export const EASING = {
 } as const;
 
 export const DURATION = {
-  lightOn: 1.8,
-  lightOff: 0.8,
+  lightOn: 1.2,
+  lightOff: 0.6,
   glowOn: 1.2,
-  glowOff: 0.8,
+  glowOff: 0.6,
   glowDelay: 0.15,
   fast: 0.3,
   medium: 0.5,
   background: 0.8,
   mediaEntry: 1.0,
   pageTransition: 0.5,
+} as const;
+
+// Unified light animation system - all components use these exact timings
+export const LIGHT_ANIMATION = {
+  turnOn: {
+    duration: 1.2,
+    ease: [0.22, 0.03, 0.26, 1] as const,
+  },
+  turnOff: {
+    duration: 0.6,
+    ease: [0.33, 0.0, 0.2, 1] as const,
+  },
+  slider: {
+    duration: 0.2,
+    ease: [0.25, 0.1, 0.25, 1] as const,
+  },
+  stagger: {
+    glow: 0.05,
+    background: 0.1,
+  }
 } as const;
 
 export const POLL_INTERVAL = {

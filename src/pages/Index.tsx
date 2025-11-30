@@ -11,7 +11,7 @@ import { useHomeAssistantConfig } from "@/hooks/useHomeAssistantConfig";
 import { useClimate } from "@/contexts/ClimateContext";
 import { homeAssistant } from "@/services/homeAssistant";
 import { useHomeAssistantSync } from "@/hooks/useHomeAssistantSync";
-import { EASING, DURATION, BLOCKING_WINDOW } from "@/constants/animations";
+import { LIGHT_ANIMATION, BLOCKING_WINDOW } from "@/constants/animations";
 
 // Import all desk images for preloading
 import desk000 from "@/assets/desk-000.png";
@@ -460,8 +460,8 @@ const Index = () => {
               : "hsl(40 28% 26% / 0.35)" // All on - brightest overlay
           }}
           transition={{
-            duration: DURATION.lightOn,
-            ease: EASING.smooth
+            duration: LIGHT_ANIMATION.turnOn.duration,
+            ease: LIGHT_ANIMATION.turnOn.ease
           }}
         />
 
@@ -608,8 +608,9 @@ const Index = () => {
                 opacity: Math.pow(spotlightIntensity / 100, 2.0),
               }}
           transition={{
-            duration: DURATION.lightOn,
-            ease: EASING.smooth
+            duration: LIGHT_ANIMATION.turnOn.duration,
+            delay: LIGHT_ANIMATION.stagger.glow,
+            ease: LIGHT_ANIMATION.turnOn.ease
           }}
             />
 
@@ -624,8 +625,9 @@ const Index = () => {
                 opacity: Math.pow(deskLampIntensity / 100, 2.0),
               }}
           transition={{
-            duration: DURATION.lightOn,
-            ease: EASING.smooth
+            duration: LIGHT_ANIMATION.turnOn.duration,
+            delay: LIGHT_ANIMATION.stagger.glow,
+            ease: LIGHT_ANIMATION.turnOn.ease
           }}
             />
 
@@ -640,8 +642,9 @@ const Index = () => {
                 opacity: Math.pow(monitorLightIntensity / 100, 2.0),
               }}
           transition={{
-            duration: DURATION.lightOn,
-            ease: EASING.smooth
+            duration: LIGHT_ANIMATION.turnOn.duration,
+            delay: LIGHT_ANIMATION.stagger.glow,
+            ease: LIGHT_ANIMATION.turnOn.ease
           }}
             />
           </div>

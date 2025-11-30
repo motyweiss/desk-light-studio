@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from "react";
 import { motion } from "framer-motion";
 import { LightHotspot } from "./LightHotspot";
-import { EASING, DURATION } from "@/constants/animations";
+import { LIGHT_ANIMATION } from "@/constants/animations";
 
 // Import all 8 lighting state images
 // Naming: desk-XYZ where X=Spotlight, Y=DeskLamp, Z=MonitorLight (1=on, 0=off)
@@ -90,24 +90,24 @@ export const DeskDisplay = ({
       // Reset transition state after animation completes
       const lightsOnNew = countLightsOn(newState);
       const lightsOnCurrent = countLightsOn(currentState);
-      const duration = lightsOnNew > lightsOnCurrent ? DURATION.lightOn : DURATION.lightOff;
+      const animConfig = lightsOnNew > lightsOnCurrent ? LIGHT_ANIMATION.turnOn : LIGHT_ANIMATION.turnOff;
       
       const timer = setTimeout(() => {
         setIsTransitioning(false);
-      }, duration * 1000); // Convert to milliseconds
+      }, animConfig.duration * 1000); // Convert to milliseconds
       
       return () => clearTimeout(timer);
     }
   }, [getCurrentState, currentState]);
 
-  // OPTIMIZED: Faster transitions for instant feedback
-  const transitionDuration = useMemo(() => 
-    isTurningOn ? DURATION.lightOn * 0.8 : DURATION.lightOff * 0.8 // 20% faster
-  , [isTurningOn]);
-  
-  const transitionEasing = useMemo(() => 
-    isTurningOn ? EASING.smooth : EASING.quickOut
-  , [isTurningOn]);
+  // Unified transition timing - same as all other components
+  const transitionConfig = useMemo(() => {
+    const config = isTurningOn ? LIGHT_ANIMATION.turnOn : LIGHT_ANIMATION.turnOff;
+    return {
+      duration: config.duration,
+      ease: config.ease,
+    };
+  }, [isTurningOn]);
 
   return (
     <div
@@ -167,8 +167,8 @@ export const DeskDisplay = ({
                 }}
                 transition={{ 
                   opacity: {
-                    duration: transitionDuration,
-                    ease: transitionEasing,
+                    duration: transitionConfig.duration,
+                    ease: transitionConfig.ease,
                   },
                 }}
                 style={{

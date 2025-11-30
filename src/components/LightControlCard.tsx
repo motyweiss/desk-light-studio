@@ -3,7 +3,7 @@ import { Slider } from "@/components/ui/slider";
 import { useEffect, useState, useRef, useCallback } from "react";
 import { getIconForLight } from "@/components/icons/LightIcons";
 import { Loader2 } from "lucide-react";
-import { EASING, DURATION } from "@/constants/animations";
+import { LIGHT_ANIMATION } from "@/constants/animations";
 
 interface LightControlCardProps {
   id: string;
@@ -54,8 +54,8 @@ export const LightControlCard = ({
     } else {
       // Small change - smooth animation
       const controls = animate(displayValue, intensity, {
-        duration: 0.3,
-        ease: EASING.smooth
+        duration: LIGHT_ANIMATION.slider.duration,
+        ease: LIGHT_ANIMATION.slider.ease
       });
       return controls.stop;
     }
@@ -85,16 +85,16 @@ export const LightControlCard = ({
     triggerHaptic();
     
     const targetIntensity = isOn ? 0 : 100;
-    const isTurningOff = targetIntensity === 0;
+    const animConfig = targetIntensity === 0 ? LIGHT_ANIMATION.turnOff : LIGHT_ANIMATION.turnOn;
     
     // CRITICAL FIX: Update state IMMEDIATELY, not after animation
     isTogglingRef.current = true;
     onChange(targetIntensity);
     
-    // Animate the display smoothly
+    // Animate the display smoothly with unified timing
     animate(displayValue, targetIntensity, {
-      duration: isTurningOff ? DURATION.lightOff : DURATION.lightOn,
-      ease: EASING.smooth,
+      duration: animConfig.duration,
+      ease: animConfig.ease,
       onComplete: () => {
         isTogglingRef.current = false;
       }
@@ -116,7 +116,7 @@ export const LightControlCard = ({
       clearTimeout(debounceTimerRef.current);
     }
     
-    // REDUCED DEBOUNCE: Send to HA after 150ms instead of 300ms for faster response
+    // Debounce: Send to HA after 150ms
     debounceTimerRef.current = setTimeout(() => {
       onChange(newValue);
     }, 150);
@@ -218,15 +218,15 @@ export const LightControlCard = ({
         borderColor: isOn ? 'rgba(255, 255, 255, 0.25)' : 'rgba(255, 255, 255, 0.15)',
       }}
       transition={{
-        layout: { duration: 0.25, ease: EASING.smooth },
-        backgroundColor: { duration: DURATION.medium, ease: EASING.smooth },
-        borderColor: { duration: DURATION.medium, ease: EASING.smooth },
+        layout: { duration: 0.25, ease: LIGHT_ANIMATION.slider.ease },
+        backgroundColor: { duration: 0.5, ease: LIGHT_ANIMATION.turnOn.ease },
+        borderColor: { duration: 0.5, ease: LIGHT_ANIMATION.turnOn.ease },
       }}
         whileHover={{
         backgroundColor: isOn ? 'rgba(255, 255, 255, 0.22)' : 'rgba(255, 255, 255, 0.12)',
         borderColor: isOn ? 'rgba(255, 255, 255, 0.3)' : 'rgba(255, 255, 255, 0.2)',
         scale: 1.005,
-        transition: { duration: 0.4, ease: EASING.smooth }
+        transition: { duration: 0.4, ease: LIGHT_ANIMATION.turnOn.ease }
       }}
       whileTap={{ scale: 0.985 }}
     >
@@ -268,9 +268,9 @@ export const LightControlCard = ({
             color: isOn ? 'hsl(44 92% 62%)' : 'rgba(255, 255, 255, 0.3)'
           }}
           transition={{ 
-            scale: { duration: 0.4, ease: EASING.smooth },
-            opacity: { duration: 0.35, ease: EASING.smooth },
-            color: { duration: DURATION.medium, ease: EASING.smooth }
+            scale: { duration: 0.4, ease: LIGHT_ANIMATION.turnOn.ease },
+            opacity: { duration: 0.35, ease: LIGHT_ANIMATION.turnOn.ease },
+            color: { duration: 0.5, ease: LIGHT_ANIMATION.turnOn.ease }
           }}
         >
           <IconComponent className="w-7 h-7" />
@@ -284,7 +284,7 @@ export const LightControlCard = ({
             animate={{
               color: isOn ? 'rgba(255, 255, 255, 0.65)' : 'rgba(255, 255, 255, 0.5)'
             }}
-            transition={{ duration: DURATION.medium }}
+            transition={{ duration: 0.5 }}
           >
             {isOn ? `${displayNumber}%` : 'Off'}
           </motion.div>

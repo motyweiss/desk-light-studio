@@ -1,6 +1,7 @@
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, useMotionValue, animate } from "framer-motion";
 import { useState, useEffect } from "react";
 import { getIconForLight } from "@/components/icons/LightIcons";
+import { LIGHT_ANIMATION } from "@/constants/animations";
 
 interface LightHotspotProps {
   id: 'spotlight' | 'deskLamp' | 'monitorLight';
@@ -25,6 +26,23 @@ export const LightHotspot = ({
   const [isHovered, setIsHovered] = useState(false);
   const [isPressed, setIsPressed] = useState(false);
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
+  
+  // Animated intensity value for smooth percentage display
+  const displayIntensity = useMotionValue(intensity);
+  const [displayNumber, setDisplayNumber] = useState(intensity);
+
+  // Sync display intensity with actual intensity using unified animation timing
+  useEffect(() => {
+    const animConfig = intensity > 0 ? LIGHT_ANIMATION.turnOn : LIGHT_ANIMATION.turnOff;
+    const controls = animate(displayIntensity, intensity, {
+      duration: animConfig.duration,
+      ease: animConfig.ease,
+      onUpdate: (latest) => {
+        setDisplayNumber(Math.round(latest));
+      }
+    });
+    return () => controls.stop();
+  }, [intensity, displayIntensity]);
 
   // Reset mouse position when external hover changes
   useEffect(() => {
@@ -448,7 +466,7 @@ export const LightHotspot = ({
                         ease: [0.25, 0.46, 0.45, 0.94]
                       }}
                     >
-                      {intensity > 0 ? `${Math.round(intensity)}%` : 'Off'}
+                      {intensity > 0 ? `${displayNumber}%` : 'Off'}
                     </motion.span>
                   </div>
                 </div>
