@@ -1,25 +1,18 @@
-import { useState, useRef } from 'react';
-import { motion, useSpring, useMotionValue, useTransform, animate } from 'framer-motion';
-import { Thermometer, Droplets, Wind } from 'lucide-react';
-import { CircularProgress } from '@/components/CircularProgress';
-import { useClimate } from '@/contexts/ClimateContext';
 import { useEffect } from 'react';
+import { motion, useMotionValue, useTransform, animate } from 'framer-motion';
+import { Thermometer, Droplets, Wind } from 'lucide-react';
+import { useClimate } from '@/contexts/ClimateContext';
+import { ClimateIndicator } from './ClimateIndicator';
 
 export const ClimateIndicators = () => {
   const climate = useClimate();
-  const [isExpanded, setIsExpanded] = useState(false);
-  const containerRef = useRef<HTMLDivElement>(null);
-  
-  // Mouse tracking with spring physics
-  const mouseX = useSpring(0, { stiffness: 150, damping: 20 });
-  const mouseY = useSpring(0, { stiffness: 150, damping: 20 });
   
   // Animated counters
   const tempCount = useMotionValue(climate.temperature);
   const tempDisplay = useTransform(tempCount, (latest) => latest.toFixed(1));
   
   const humidityCount = useMotionValue(climate.humidity);
-  const humidityDisplay = useTransform(humidityCount, (latest) => Math.round(latest));
+  const humidityDisplay = useTransform(humidityCount, (latest) => Math.round(latest).toString());
   
   const airQualityCount = useMotionValue(climate.airQuality);
   
@@ -46,197 +39,50 @@ export const ClimateIndicators = () => {
     };
   }, [climate.temperature, climate.humidity, climate.airQuality, tempCount, humidityCount, airQualityCount]);
 
-  const getAirQualityStatus = (value: number): { label: string; color: string } => {
-    if (value <= 12) return { label: 'Good', color: 'hsl(142 70% 45%)' };
-    if (value <= 35) return { label: 'Moderate', color: 'hsl(45 90% 55%)' };
-    if (value <= 55) return { label: 'Sensitive', color: 'hsl(25 90% 55%)' };
-    return { label: 'Unhealthy', color: 'hsl(0 75% 55%)' };
-  };
-
-  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (!containerRef.current || !isExpanded) return;
-    
-    const rect = containerRef.current.getBoundingClientRect();
-    const centerX = rect.left + rect.width / 2;
-    const centerY = rect.top + rect.height / 2;
-    
-    const deltaX = (e.clientX - centerX) / 15;
-    const deltaY = (e.clientY - centerY) / 15;
-    
-    mouseX.set(deltaX);
-    mouseY.set(deltaY);
-  };
-
-  const handleMouseLeave = () => {
-    setIsExpanded(false);
-    mouseX.set(0);
-    mouseY.set(0);
+  const getAirQualityStatus = (value: number): string => {
+    if (value <= 12) return 'Good';
+    if (value <= 35) return 'Moderate';
+    if (value <= 55) return 'Sensitive';
+    return 'Unhealthy';
   };
 
   return (
-    <div 
-      ref={containerRef}
-      className="relative flex items-center cursor-pointer"
-      onMouseEnter={() => setIsExpanded(true)}
-      onMouseLeave={handleMouseLeave}
-      onMouseMove={handleMouseMove}
-    >
-      {/* Compact View (Default) */}
-      {!isExpanded && (
-        <motion.div
-          initial={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          className="flex items-center gap-5 px-3 py-1.5 rounded-lg hover:bg-white/5 transition-colors duration-300"
-        >
-          <div className="flex items-center gap-2">
-            <Thermometer className="w-4 h-4 text-white/60 transition-colors" strokeWidth={1.5} />
-            <span className="text-sm font-light text-white/70 tabular-nums transition-colors">
-              <motion.span>{tempDisplay}</motion.span>°
-            </span>
-          </div>
-          
-          <div className="flex items-center gap-2">
-            <Droplets className="w-4 h-4 text-white/60 transition-colors" strokeWidth={1.5} />
-            <span className="text-sm font-light text-white/70 tabular-nums transition-colors">
-              <motion.span>{humidityDisplay}</motion.span>%
-            </span>
-          </div>
-          
-          <div className="flex items-center gap-2">
-            <Wind className="w-4 h-4 text-white/60 transition-colors" strokeWidth={1.5} />
-            <span className="text-sm font-light text-white/70 transition-colors">
-              {getAirQualityStatus(climate.airQuality).label}
-            </span>
-          </div>
-        </motion.div>
-      )}
-
-      {/* Expanded View (Hover) */}
-      {isExpanded && (
-        <motion.div
-          initial={{ opacity: 0, scale: 0.95, y: 8 }}
-          animate={{ 
-            opacity: 1, 
-            scale: 1, 
-            y: 0,
-          }}
-          style={{
-            x: mouseX,
-            y: mouseY,
-          }}
-          exit={{ opacity: 0, scale: 0.92 }}
-          transition={{ 
-            duration: 0.35,
-            ease: [0.34, 1.56, 0.64, 1]
-          }}
-          className="absolute top-full left-1/2 -translate-x-1/2 mt-4"
-        >
-          <div className="bg-white/8 backdrop-blur-[24px] border border-white/15 rounded-2xl p-7 min-w-[480px]">
-            <motion.div 
-              className="flex gap-10 justify-center"
-              variants={{
-                show: {
-                  transition: {
-                    staggerChildren: 0.08,
-                  }
-                }
-              }}
-              initial="hidden"
-              animate="show"
-            >
-              {/* Temperature */}
-              <motion.div 
-                className="flex items-center gap-4"
-                variants={{
-                  hidden: { opacity: 0, scale: 0.9 },
-                  show: { opacity: 1, scale: 1 }
-                }}
-              >
-                <CircularProgress 
-                  value={climate.temperature} 
-                  min={15} 
-                  max={35} 
-                  size={56} 
-                  strokeWidth={3}
-                  isLoaded={climate.isLoaded}
-                  colorType="temperature"
-                  delay={0}
-                >
-                  <Thermometer className="w-6 h-6 text-white/50" strokeWidth={1.5} />
-                </CircularProgress>
-                <div className="flex flex-col">
-                  <span className="text-[10px] text-white/50 font-medium tracking-[0.15em] uppercase mb-0.5">
-                    Temperature
-                  </span>
-                  <div className="text-lg font-light text-white tabular-nums">
-                    <motion.span>{tempDisplay}</motion.span>°
-                  </div>
-                </div>
-              </motion.div>
-
-              {/* Humidity */}
-              <motion.div 
-                className="flex items-center gap-4"
-                variants={{
-                  hidden: { opacity: 0, scale: 0.9 },
-                  show: { opacity: 1, scale: 1 }
-                }}
-              >
-                <CircularProgress 
-                  value={climate.humidity} 
-                  min={0} 
-                  max={100} 
-                  size={56} 
-                  strokeWidth={3}
-                  isLoaded={climate.isLoaded}
-                  colorType="humidity"
-                  delay={0.08}
-                >
-                  <Droplets className="w-6 h-6 text-white/50" strokeWidth={1.5} />
-                </CircularProgress>
-                <div className="flex flex-col">
-                  <span className="text-[10px] text-white/50 font-medium tracking-[0.15em] uppercase mb-0.5">
-                    Humidity
-                  </span>
-                  <div className="text-lg font-light text-white tabular-nums">
-                    <motion.span>{humidityDisplay}</motion.span>%
-                  </div>
-                </div>
-              </motion.div>
-
-              {/* Air Quality */}
-              <motion.div 
-                className="flex items-center gap-4"
-                variants={{
-                  hidden: { opacity: 0, scale: 0.9 },
-                  show: { opacity: 1, scale: 1 }
-                }}
-              >
-                <CircularProgress 
-                  value={climate.airQuality} 
-                  min={0} 
-                  max={100} 
-                  size={56} 
-                  strokeWidth={3}
-                  isLoaded={climate.isLoaded}
-                  colorType="airQuality"
-                  delay={0.16}
-                >
-                  <Wind className="w-6 h-6 text-white/50" strokeWidth={1.5} />
-                </CircularProgress>
-                <div className="flex flex-col">
-                  <span className="text-[10px] text-white/50 font-medium tracking-[0.15em] uppercase mb-0.5">
-                    Air Quality
-                  </span>
-                  <div className="text-lg font-light text-white">
-                    {getAirQualityStatus(climate.airQuality).label}
-                  </div>
-                </div>
-              </motion.div>
-            </motion.div>
-          </div>
-        </motion.div>
-      )}
+    <div className="flex items-center gap-5">
+      <ClimateIndicator
+        icon={Thermometer}
+        label="Temperature"
+        value={climate.temperature}
+        unit="°"
+        min={15}
+        max={35}
+        colorType="temperature"
+        isLoaded={climate.isLoaded}
+        formatValue={(val) => tempDisplay.get()}
+      />
+      
+      <ClimateIndicator
+        icon={Droplets}
+        label="Humidity"
+        value={climate.humidity}
+        unit="%"
+        min={0}
+        max={100}
+        colorType="humidity"
+        isLoaded={climate.isLoaded}
+        formatValue={(val) => humidityDisplay.get()}
+      />
+      
+      <ClimateIndicator
+        icon={Wind}
+        label="Air Quality"
+        value={climate.airQuality}
+        unit=""
+        min={0}
+        max={100}
+        colorType="airQuality"
+        isLoaded={climate.isLoaded}
+        formatValue={(val) => getAirQualityStatus(val)}
+      />
     </div>
   );
 };
