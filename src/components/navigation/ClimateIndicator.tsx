@@ -62,9 +62,8 @@ export const ClimateIndicator = ({
       {/* Compact View - trigger area */}
       <div
         className="flex items-center gap-2 px-5 py-2.5 rounded-full 
-          bg-white/10 backdrop-blur-xl backdrop-saturate-150
           border border-white/20
-          hover:bg-white/15 hover:border-white/30
+          hover:border-white/30
           transition-all duration-300 cursor-pointer"
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={handleMouseLeave}
