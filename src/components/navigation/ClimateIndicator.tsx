@@ -60,7 +60,7 @@ export const ClimateIndicator = ({
       className="relative"
     >
       {/* Compact View - trigger area */}
-      <motion.div
+      <div
         className="flex items-center gap-2 px-4 py-2 rounded-full 
           border border-white/15
           hover:border-white/25
@@ -68,26 +68,12 @@ export const ClimateIndicator = ({
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={handleMouseLeave}
         onMouseMove={handleMouseMove}
-        whileHover={{
-          scale: 1.08,
-          backgroundColor: 'rgba(255, 255, 255, 0.08)',
-          borderColor: 'rgba(255, 255, 255, 0.35)',
-          boxShadow: '0 0 20px rgba(255, 255, 255, 0.15), 0 0 40px rgba(255, 255, 255, 0.08)',
-          transition: {
-            duration: 0.3,
-            ease: [0.25, 0.46, 0.45, 0.94]
-          }
-        }}
-        transition={{
-          duration: 0.25,
-          ease: [0.4, 0, 0.6, 1]
-        }}
       >
         <Icon className="w-4 h-4 text-white/70 transition-colors" strokeWidth={1.5} />
         <span className="text-sm font-light text-white/80 tabular-nums transition-colors">
           {displayValue}{unit}
         </span>
-      </motion.div>
+      </div>
 
       {/* Expanded Tooltip - appears directly below badge, centered */}
       <AnimatePresence>
