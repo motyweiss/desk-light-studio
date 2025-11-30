@@ -162,10 +162,10 @@ export const RoomInfoPanel = ({ roomName, masterSwitchOn, onMasterToggle, onLigh
           <motion.div
             key={light.id}
             variants={{
-              hidden: { opacity: 0, y: 35, scale: 0.92, filter: 'blur(8px)' },
-              show: { opacity: 1, y: 0, scale: 1, filter: 'blur(0px)' }
+              hidden: { opacity: 0, y: 20, scale: 0.95 },
+              show: { opacity: 1, y: 0, scale: 1 }
             }}
-            transition={{ duration: 0.8, ease: [0.22, 0.03, 0.26, 1] }}
+            transition={{ duration: 0.5, ease: [0.22, 0.03, 0.26, 1] }}
           >
             <LightControlCard
               id={light.id}
