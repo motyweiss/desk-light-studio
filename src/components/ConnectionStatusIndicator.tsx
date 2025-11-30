@@ -66,7 +66,7 @@ export const ConnectionStatusIndicator = ({
       ref={containerRef}
       onClick={handleClick}
       disabled={!isClickable}
-      className={`hidden md:flex ${inline ? 'relative' : 'fixed top-6 right-6 z-50'} w-9 h-9 items-center justify-center rounded-lg hover:bg-white/5 transition-all duration-300 ${getStatusColor()} ${isClickable ? 'cursor-pointer' : 'cursor-default'}`}
+      className={`hidden md:flex ${inline ? 'relative' : 'fixed top-6 right-6 z-50'} w-10 h-10 items-center justify-center rounded-lg hover:bg-white/5 transition-all duration-300 ${getStatusColor()} ${isClickable ? 'cursor-pointer' : 'cursor-default'}`}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={handleMouseLeave}
       onMouseMove={handleMouseMove}
@@ -77,7 +77,7 @@ export const ConnectionStatusIndicator = ({
       transition={inline ? undefined : { duration: 0.3, delay: 0.6 }}
       aria-label={getTooltipText()}
     >
-      <Zap className="w-4 h-4" strokeWidth={1.5} />
+      <Zap className="w-5 h-5" strokeWidth={1.5} />
 
       {/* Tooltip */}
       <AnimatePresence>
