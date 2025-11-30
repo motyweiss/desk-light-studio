@@ -72,8 +72,8 @@ export const RootLayout = ({ children }: RootLayoutProps) => {
           </AnimatePresence>
         </div>
 
-        {/* Global Media Player - Fixed at bottom */}
-        <MediaPlayer />
+        {/* Global Media Player - Fixed at bottom (hidden on settings page) */}
+        {!isSettingsPage && <MediaPlayer />}
       </div>
     </MediaPlayerProvider>
   );
