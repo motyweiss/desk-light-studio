@@ -47,7 +47,7 @@ export const ClimateIndicators = () => {
   };
 
   return (
-    <div className="flex items-center gap-5">
+    <div className="flex items-center gap-3">
       <ClimateIndicator
         icon={Thermometer}
         label="Temperature"
