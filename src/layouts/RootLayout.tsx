@@ -42,7 +42,7 @@ export const RootLayout = ({ children }: RootLayoutProps) => {
         />
 
         {/* Page Content with AnimatePresence for smooth transitions */}
-        <div className="flex-1 overflow-auto pt-0 md:pt-[68px] pb-[88px]">
+        <div className="flex-1 overflow-auto pt-0 md:pt-[68px] pb-[96px]">
           <AnimatePresence mode="wait">
             <motion.div
               key={location.pathname}

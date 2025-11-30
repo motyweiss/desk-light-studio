@@ -268,9 +268,25 @@ const Index = () => {
               ease: [0.22, 0.03, 0.26, 1]
             }}
           >
-            <RoomInfoPanel
-              roomName="Work Room"
-              lights={[
+          <RoomInfoPanel
+            roomName="Office Desk"
+            devices={[
+              {
+                id: 'iphone',
+                name: "iPhone",
+                batteryLevel: climate.iphoneBatteryLevel,
+                isCharging: climate.iphoneBatteryCharging,
+                icon: 'smartphone' as const
+              },
+              {
+                id: 'airpods',
+                name: "AirPods Max",
+                batteryLevel: climate.airpodsMaxBatteryLevel,
+                isCharging: climate.airpodsMaxBatteryCharging,
+                icon: 'headphones' as const
+              }
+            ]}
+            lights={[
                 {
                   id: "deskLamp",
                   label: "Desk Lamp",

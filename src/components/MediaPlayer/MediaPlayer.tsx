@@ -38,55 +38,9 @@ export const MediaPlayer = () => {
     handleSeek,
   } = useMediaPlayer();
 
-  // Show loading state - return null to hide loading message
-  if (isLoading) {
+  // Hide player during loading, not connected, or no entity configured
+  if (isLoading || !isConnected || !entityId || !playerState) {
     return null;
-  }
-
-  // Don't render if not connected
-  if (!isConnected) {
-    return null;
-  }
-
-  // Show message if no entity configured
-  if (!entityId) {
-    return (
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="fixed bottom-6 right-6 bg-amber-500/10 backdrop-blur-2xl border border-amber-500/30 rounded-2xl p-4 shadow-lg max-w-sm z-50"
-      >
-        <div className="flex items-center gap-3 text-amber-200/90">
-          <Music className="w-5 h-5" />
-          <div className="text-sm">
-            <p className="font-medium">No media player configured</p>
-            <p className="text-xs text-amber-200/60 mt-1">Open Settings (⚙️) to select your Spotify player</p>
-          </div>
-        </div>
-      </motion.div>
-    );
-  }
-
-  // Don't render if no player state after loading
-  if (!playerState) {
-    return (
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="fixed bottom-6 right-6 bg-red-500/10 backdrop-blur-2xl border border-red-500/30 rounded-2xl p-4 shadow-lg max-w-sm z-50"
-      >
-        <div className="flex items-center gap-3 text-red-200/90">
-          <Music className="w-5 h-5" />
-          <div className="text-sm">
-            <p className="font-medium">Media player not found</p>
-            <p className="text-xs text-red-200/60 mt-1">
-              Entity "{entityId}" not found in Home Assistant. 
-              Check console for available media players and update in Settings.
-            </p>
-          </div>
-        </div>
-      </motion.div>
-    );
   }
 
   // Hide player only if truly off/idle with no track
