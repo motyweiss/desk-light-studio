@@ -75,21 +75,27 @@ export const ClimateIndicator = ({
         </span>
       </div>
 
-      {/* Expanded Tooltip - pointer-events-none to prevent hover conflicts */}
+      {/* Expanded Tooltip - appears directly below badge, centered */}
       <AnimatePresence>
         {isHovered && (
           <motion.div
-            className="absolute top-full left-1/2 -translate-x-1/2 mt-3 z-50 pointer-events-none
+            className="absolute left-1/2 -translate-x-1/2 z-50 pointer-events-none
               bg-white/15 backdrop-blur-[40px] backdrop-saturate-150
-              pl-5 pr-8 py-3 rounded-full
+              px-6 py-3 rounded-full
               shadow-[0_12px_40px_rgba(0,0,0,0.15),inset_0_2px_4px_rgba(255,255,255,0.2)]
               border border-white/30
               overflow-hidden
               [background:linear-gradient(135deg,rgba(255,255,255,0.2),rgba(255,255,255,0.08))]"
+            style={{
+              top: 'calc(100% + 12px)',
+              x: mouseX,
+              y: mouseY,
+              transformOrigin: '50% 0%'
+            }}
             initial={{ 
               opacity: 0,
               scale: 0.3,
-              y: -16
+              y: -20
             }}
             animate={{ 
               opacity: 1,
@@ -110,15 +116,10 @@ export const ClimateIndicator = ({
                 }
               }
             }}
-            style={{
-              x: mouseX,
-              y: mouseY,
-              transformOrigin: '50% 0%'
-            }}
             exit={{ 
               opacity: 0,
               scale: 0.3,
-              y: -16,
+              y: -20,
               transition: {
                 duration: 0.25,
                 ease: [0.4, 0, 0.6, 1]
@@ -172,10 +173,10 @@ export const ClimateIndicator = ({
                 </CircularProgress>
               </motion.div>
               
-              {/* Text content */}
-              <div className="flex flex-col items-start gap-1.5">
+              {/* Text content - Value on top, Label below */}
+              <div className="flex flex-col items-start gap-0.5">
                 <motion.span 
-                  className="font-medium text-white text-sm leading-tight whitespace-nowrap"
+                  className="text-lg font-medium text-white leading-tight tabular-nums"
                   initial={{ opacity: 0, x: -8 }}
                   animate={{ 
                     opacity: 1, 
@@ -187,10 +188,10 @@ export const ClimateIndicator = ({
                     ease: [0.25, 0.46, 0.45, 0.94]
                   }}
                 >
-                  {label}
+                  {displayValue}{unit}
                 </motion.span>
                 <motion.span 
-                  className="text-xs leading-tight text-white/40"
+                  className="text-xs leading-tight text-white/40 whitespace-nowrap"
                   initial={{ opacity: 0, x: -8 }}
                   animate={{ 
                     opacity: 1, 
@@ -202,7 +203,7 @@ export const ClimateIndicator = ({
                     ease: [0.25, 0.46, 0.45, 0.94]
                   }}
                 >
-                  {displayValue}{unit}
+                  {label}
                 </motion.span>
               </div>
             </div>
