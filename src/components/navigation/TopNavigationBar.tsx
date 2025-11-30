@@ -1,7 +1,6 @@
 import { motion } from 'framer-motion';
 import { Home, Settings as SettingsIcon } from 'lucide-react';
 import { ClimateIndicators } from './ClimateIndicators';
-import { NavigationLinks } from './NavigationLinks';
 import { ConnectionStatusIndicator } from '@/components/ConnectionStatusIndicator';
 
 interface TopNavigationBarProps {
@@ -52,15 +51,13 @@ export const TopNavigationBar = ({
             <ClimateIndicators />
           </motion.div>
 
-          {/* Right: Navigation + Settings + Connection Status */}
+          {/* Right: Settings + Connection Status */}
           <motion.div 
             className="flex items-center gap-4"
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.5, delay: 0.2 }}
           >
-            <NavigationLinks currentPath={currentPath} />
-            
             <motion.button
               onClick={onSettingsClick}
               className="w-10 h-10 rounded-lg flex items-center justify-center text-white/60 hover:text-white/90 hover:bg-white/5 transition-colors"
