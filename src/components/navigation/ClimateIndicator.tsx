@@ -1,8 +1,7 @@
 import { useState, useRef } from 'react';
-import { motion, AnimatePresence, useSpring, useMotionValue, useTransform, animate } from 'framer-motion';
+import { motion, AnimatePresence, useSpring } from 'framer-motion';
 import { LucideIcon } from 'lucide-react';
 import { CircularProgress } from '@/components/CircularProgress';
-import { useEffect } from 'react';
 
 interface ClimateIndicatorProps {
   icon: LucideIcon;
@@ -34,43 +33,6 @@ export const ClimateIndicator = ({
   const mouseX = useSpring(0, { stiffness: 120, damping: 18 });
   const mouseY = useSpring(0, { stiffness: 120, damping: 18 });
 
-  // Animated color based on value
-  const animatedValue = useMotionValue(value);
-  
-  useEffect(() => {
-    const controls = animate(animatedValue, value, {
-      duration: 0.8,
-      ease: [0.22, 0.03, 0.26, 1]
-    });
-    return () => controls.stop();
-  }, [value, animatedValue]);
-
-  // Helper function to get color based on value and type
-  const getColor = (val: number, type: string): string => {
-    switch (type) {
-      case 'temperature':
-        if (val <= 17) return 'hsl(200 70% 55%)';      // Cold - blue
-        if (val <= 20) return 'hsl(180 60% 50%)';       // Cool - cyan
-        if (val <= 24) return 'hsl(142 70% 45%)';       // Comfortable - green
-        if (val <= 28) return 'hsl(35 90% 55%)';        // Warm - orange
-        return 'hsl(0 75% 55%)';                         // Hot - red
-      case 'humidity':
-        if (val >= 40 && val <= 60) return 'hsl(142 70% 45%)'; // Optimal - green
-        if ((val >= 30 && val < 40) || (val > 60 && val <= 70)) 
-          return 'hsl(45 90% 55%)';                      // Acceptable - yellow
-        return 'hsl(0 75% 55%)';                         // Poor - red
-      case 'airQuality':
-        if (val <= 12) return 'hsl(142 70% 45%)';       // Good - green
-        if (val <= 35) return 'hsl(45 90% 55%)';        // Moderate - yellow
-        if (val <= 55) return 'hsl(25 90% 55%)';        // Sensitive - orange
-        return 'hsl(0 75% 55%)';                         // Unhealthy - red
-      default:
-        return 'hsl(44 85% 58%)';                        // Default warm amber
-    }
-  };
-
-  const currentColor = getColor(value, colorType);
-
   const handleMouseMove = (e: React.MouseEvent) => {
     if (!containerRef.current || !isHovered) return;
     
@@ -98,40 +60,17 @@ export const ClimateIndicator = ({
       className="relative"
     >
       {/* Compact View - trigger area */}
-      <motion.div
-        className="flex items-center gap-2 px-3 py-1.5 rounded-lg hover:bg-white/5 transition-colors duration-300 cursor-pointer relative"
+      <div
+        className="flex items-center gap-2 px-3 py-1.5 rounded-lg hover:bg-white/5 transition-colors duration-300 cursor-pointer"
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={handleMouseLeave}
         onMouseMove={handleMouseMove}
       >
-        {/* Subtle colored glow behind icon */}
-        <motion.div
-          className="absolute left-3 w-4 h-4 rounded-full blur-md"
-          animate={{
-            backgroundColor: currentColor,
-            opacity: [0.15, 0.25, 0.15]
-          }}
-          transition={{
-            backgroundColor: { duration: 0.8, ease: [0.22, 0.03, 0.26, 1] },
-            opacity: { duration: 3, repeat: Infinity, ease: "easeInOut" }
-          }}
-        />
-        
-        <motion.div
-          animate={{ color: currentColor }}
-          transition={{ duration: 0.8, ease: [0.22, 0.03, 0.26, 1] }}
-        >
-          <Icon className="w-4 h-4 relative z-10" strokeWidth={1.5} />
-        </motion.div>
-        
-        <motion.span 
-          className="text-sm font-light tabular-nums relative z-10"
-          animate={{ color: currentColor }}
-          transition={{ duration: 0.8, ease: [0.22, 0.03, 0.26, 1] }}
-        >
+        <Icon className="w-4 h-4 text-white/60 transition-colors" strokeWidth={1.5} />
+        <span className="text-sm font-light text-white/70 tabular-nums transition-colors">
           {displayValue}{unit}
-        </motion.span>
-      </motion.div>
+        </span>
+      </div>
 
       {/* Expanded Tooltip - pointer-events-none to prevent hover conflicts */}
       <AnimatePresence>
@@ -219,12 +158,7 @@ export const ClimateIndicator = ({
                   colorType={colorType}
                   delay={0}
                 >
-                  <motion.div
-                    animate={{ color: currentColor }}
-                    transition={{ duration: 0.8, ease: [0.22, 0.03, 0.26, 1] }}
-                  >
-                    <Icon className="w-5 h-5" strokeWidth={1.5} style={{ color: 'currentColor' }} />
-                  </motion.div>
+                  <Icon className="w-5 h-5 text-white/50" strokeWidth={1.5} />
                 </CircularProgress>
               </motion.div>
               
@@ -246,18 +180,16 @@ export const ClimateIndicator = ({
                   {label}
                 </motion.span>
                 <motion.span 
-                  className="text-xs leading-tight"
+                  className="text-xs leading-tight text-white/40"
                   initial={{ opacity: 0, x: -8 }}
                   animate={{ 
                     opacity: 1, 
-                    x: 0,
-                    color: currentColor
+                    x: 0
                   }}
                   transition={{
                     delay: 0.24,
                     duration: 0.35,
-                    ease: [0.25, 0.46, 0.45, 0.94],
-                    color: { duration: 0.8, ease: [0.22, 0.03, 0.26, 1] }
+                    ease: [0.25, 0.46, 0.45, 0.94]
                   }}
                 >
                   {displayValue}{unit}
