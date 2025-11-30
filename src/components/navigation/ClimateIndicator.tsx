@@ -77,11 +77,12 @@ export const ClimateIndicator = ({
         {isHovered && (
           <motion.div
             className="absolute top-full left-1/2 -translate-x-1/2 mt-3 z-50 pointer-events-none
-              bg-white/8 backdrop-blur-[24px]
+              bg-white/12 backdrop-blur-[32px]
               pl-5 pr-8 py-3 rounded-full
-              shadow-[0_4px_24px_rgba(0,0,0,0.15),0_1px_4px_rgba(0,0,0,0.1),inset_0_1px_1px_rgba(255,255,255,0.1)]
-              border border-white/20
-              overflow-hidden"
+              shadow-[0_8px_32px_rgba(0,0,0,0.12),inset_0_1px_1px_rgba(255,255,255,0.15)]
+              border border-white/25
+              overflow-hidden
+              [background:linear-gradient(135deg,rgba(255,255,255,0.15),rgba(255,255,255,0.05))]"
             initial={{ 
               opacity: 0,
               scale: 0.92
