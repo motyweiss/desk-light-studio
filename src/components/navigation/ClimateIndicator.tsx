@@ -57,30 +57,26 @@ export const ClimateIndicator = ({
   return (
     <div 
       ref={containerRef}
-      className="relative flex items-center cursor-pointer"
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={handleMouseLeave}
-      onMouseMove={handleMouseMove}
+      className="relative"
     >
-      {/* Compact View */}
-      {!isHovered && (
-        <motion.div
-          initial={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          className="flex items-center gap-2 px-3 py-1.5 rounded-lg hover:bg-white/5 transition-colors duration-300"
-        >
-          <Icon className="w-4 h-4 text-white/60 transition-colors" strokeWidth={1.5} />
-          <span className="text-sm font-light text-white/70 tabular-nums transition-colors">
-            {displayValue}{unit}
-          </span>
-        </motion.div>
-      )}
+      {/* Compact View - trigger area */}
+      <div
+        className="flex items-center gap-2 px-3 py-1.5 rounded-lg hover:bg-white/5 transition-colors duration-300 cursor-pointer"
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={handleMouseLeave}
+        onMouseMove={handleMouseMove}
+      >
+        <Icon className="w-4 h-4 text-white/60 transition-colors" strokeWidth={1.5} />
+        <span className="text-sm font-light text-white/70 tabular-nums transition-colors">
+          {displayValue}{unit}
+        </span>
+      </div>
 
-      {/* Expanded Tooltip - matching LightHotspot style exactly */}
+      {/* Expanded Tooltip - pointer-events-none to prevent hover conflicts */}
       <AnimatePresence>
         {isHovered && (
           <motion.div
-            className="absolute top-full left-1/2 -translate-x-1/2 mt-3 z-50
+            className="absolute top-full left-1/2 -translate-x-1/2 mt-3 z-50 pointer-events-none
               bg-white/8 backdrop-blur-[24px]
               pl-5 pr-8 py-3 rounded-full
               shadow-[0_4px_24px_rgba(0,0,0,0.15),0_1px_4px_rgba(0,0,0,0.1),inset_0_1px_1px_rgba(255,255,255,0.1)]
@@ -88,9 +84,7 @@ export const ClimateIndicator = ({
               overflow-hidden"
             initial={{ 
               opacity: 0,
-              scale: 0.92,
-              originX: 0.5,
-              originY: 0
+              scale: 0.92
             }}
             animate={{ 
               opacity: 1,
