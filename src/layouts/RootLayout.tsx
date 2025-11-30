@@ -4,7 +4,6 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { MediaPlayerProvider } from '@/contexts/MediaPlayerContext';
 import { MediaPlayer } from '@/components/MediaPlayer/MediaPlayer';
 import { TopNavigationBar } from '@/components/navigation/TopNavigationBar';
-import { SettingsDialog } from '@/components/SettingsDialog';
 import { useHomeAssistantConfig } from '@/hooks/useHomeAssistantConfig';
 import { useHomeAssistantSync } from '@/hooks/useHomeAssistantSync';
 import { EASING } from '@/constants/animations';
@@ -15,8 +14,7 @@ interface RootLayoutProps {
 
 export const RootLayout = ({ children }: RootLayoutProps) => {
   const location = useLocation();
-  const { config, entityMapping, isConnected, saveConfig } = useHomeAssistantConfig();
-  const [settingsOpen, setSettingsOpen] = useState(false);
+  const { entityMapping, isConnected } = useHomeAssistantConfig();
   const [isReconnecting, setIsReconnecting] = useState(false);
   const [pendingLights] = useState<Set<string>>(new Set());
 
@@ -40,17 +38,7 @@ export const RootLayout = ({ children }: RootLayoutProps) => {
           currentPath={location.pathname}
           isConnected={isConnected}
           isReconnecting={isReconnecting}
-          onSettingsClick={() => setSettingsOpen(true)}
           onReconnectClick={attemptReconnect}
-        />
-
-        {/* Settings Dialog */}
-        <SettingsDialog
-          open={settingsOpen}
-          onOpenChange={setSettingsOpen}
-          currentConfig={config}
-          currentMapping={entityMapping}
-          onSave={saveConfig}
         />
 
         {/* Page Content with AnimatePresence for smooth transitions */}

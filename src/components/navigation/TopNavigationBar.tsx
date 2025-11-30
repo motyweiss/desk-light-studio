@@ -1,4 +1,5 @@
 import { motion } from 'framer-motion';
+import { useNavigate } from 'react-router-dom';
 import { Home, Settings as SettingsIcon } from 'lucide-react';
 import { ClimateIndicators } from './ClimateIndicators';
 import { ConnectionStatusIndicator } from '@/components/ConnectionStatusIndicator';
@@ -7,7 +8,6 @@ interface TopNavigationBarProps {
   currentPath: string;
   isConnected: boolean;
   isReconnecting: boolean;
-  onSettingsClick: () => void;
   onReconnectClick: () => void;
 }
 
@@ -15,9 +15,9 @@ export const TopNavigationBar = ({
   currentPath,
   isConnected,
   isReconnecting,
-  onSettingsClick,
   onReconnectClick,
 }: TopNavigationBarProps) => {
+  const navigate = useNavigate();
   return (
     <motion.header
       initial={{ y: -80, opacity: 0 }}
@@ -66,7 +66,7 @@ export const TopNavigationBar = ({
             />
             
             <motion.button
-              onClick={onSettingsClick}
+              onClick={() => navigate('/settings')}
               className="w-10 h-10 rounded-lg flex items-center justify-center text-white/60 hover:text-white/90 hover:bg-white/5 transition-colors"
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
