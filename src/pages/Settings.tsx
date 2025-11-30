@@ -1,15 +1,15 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { ArrowLeft, Link2, Lightbulb, Thermometer, Music, Loader2, CheckCircle2, AlertCircle } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { SettingsSection } from "@/components/settings/SettingsSection";
-import { SettingsField } from "@/components/settings/SettingsField";
-import { EntitySearchSelect } from "@/components/settings/EntitySearchSelect";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import ConnectionTab from "@/components/settings/ConnectionTab";
+import DevicesTab from "@/components/settings/DevicesTab";
 import { useHomeAssistantConfig } from "@/hooks/useHomeAssistantConfig";
 import { homeAssistant, type HAEntity } from "@/services/homeAssistant";
 import { useToast } from "@/hooks/use-toast";
+import { DeviceConfig } from "@/types/settings";
 
 const staggerContainer = {
   hidden: { opacity: 0 },
@@ -38,23 +38,13 @@ const sectionTransition = {
 const Settings = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { config, entityMapping, saveConfig } = useHomeAssistantConfig();
+  const { config, devicesMapping, saveConfig, saveDevicesMapping, addDevice, updateDevice, removeDevice } = useHomeAssistantConfig();
   
   const [baseUrl, setBaseUrl] = useState(config?.baseUrl || "");
   const [accessToken, setAccessToken] = useState(config?.accessToken || "");
-  const [deskLamp, setDeskLamp] = useState(entityMapping.deskLamp || "light.go");
-  const [monitorLight, setMonitorLight] = useState(entityMapping.monitorLight || "light.screen");
-  const [spotlight, setSpotlight] = useState(entityMapping.spotlight || "light.door");
-  const [temperatureSensor, setTemperatureSensor] = useState(entityMapping.temperatureSensor || "sensor.dyson_pure_temperature");
-  const [humiditySensor, setHumiditySensor] = useState(entityMapping.humiditySensor || "sensor.dyson_pure_humidity");
-  const [airQualitySensor, setAirQualitySensor] = useState(entityMapping.airQualitySensor || "sensor.dyson_pure_pm_2_5");
-  const [mediaPlayer, setMediaPlayer] = useState(entityMapping.mediaPlayer || "media_player.spotify");
+  const [localDevicesMapping, setLocalDevicesMapping] = useState(devicesMapping);
   
-  const [isTestingConnection, setIsTestingConnection] = useState(false);
-  const [connectionStatus, setConnectionStatus] = useState<{ success: boolean; version?: string; error?: string } | null>(null);
-  const [availableLights, setAvailableLights] = useState<HAEntity[]>([]);
-  const [availableSensors, setAvailableSensors] = useState<HAEntity[]>([]);
-  const [availableMediaPlayers, setAvailableMediaPlayers] = useState<HAEntity[]>([]);
+  const [allEntities, setAllEntities] = useState<HAEntity[]>([]);
   const [isLoadingEntities, setIsLoadingEntities] = useState(false);
   const [isDirty, setIsDirty] = useState(false);
 
@@ -65,6 +55,10 @@ const Settings = () => {
     }
   }, [config]);
 
+  useEffect(() => {
+    setLocalDevicesMapping(devicesMapping);
+  }, [devicesMapping]);
+
   // Auto-fetch entities when page loads if config exists
   useEffect(() => {
     const fetchEntitiesOnLoad = async () => {
@@ -74,14 +68,7 @@ const Settings = () => {
         
         try {
           const entities = await homeAssistant.getEntitiesWithContext();
-          const lights = entities.filter(e => e.entity_id.startsWith('light.'));
-          const sensors = entities.filter(e => e.entity_id.startsWith('sensor.'));
-          const mediaPlayers = entities.filter(e => e.entity_id.startsWith('media_player.'));
-          
-          setAvailableLights(lights);
-          setAvailableSensors(sensors);
-          setAvailableMediaPlayers(mediaPlayers);
-          setConnectionStatus({ success: true });
+          setAllEntities(entities);
         } catch (error) {
           console.log("Could not auto-fetch entities on load");
         }
@@ -96,61 +83,78 @@ const Settings = () => {
     const hasChanges = 
       baseUrl !== (config?.baseUrl || "") ||
       accessToken !== (config?.accessToken || "") ||
-      deskLamp !== entityMapping.deskLamp ||
-      monitorLight !== entityMapping.monitorLight ||
-      spotlight !== entityMapping.spotlight ||
-      temperatureSensor !== entityMapping.temperatureSensor ||
-      humiditySensor !== entityMapping.humiditySensor ||
-      airQualitySensor !== entityMapping.airQualitySensor ||
-      mediaPlayer !== entityMapping.mediaPlayer;
+      JSON.stringify(localDevicesMapping) !== JSON.stringify(devicesMapping);
     
     setIsDirty(hasChanges);
-  }, [baseUrl, accessToken, deskLamp, monitorLight, spotlight, temperatureSensor, humiditySensor, airQualitySensor, mediaPlayer, config, entityMapping]);
+  }, [baseUrl, accessToken, localDevicesMapping, config, devicesMapping]);
 
-  const handleTestConnection = async () => {
-    setIsTestingConnection(true);
-    setConnectionStatus(null);
+  const handleAddDevice = (roomId: string, category: 'lights' | 'sensors' | 'mediaPlayers') => {
+    const newDevice: DeviceConfig = {
+      id: `device_${Date.now()}`,
+      label: `New ${category === 'lights' ? 'Light' : category === 'sensors' ? 'Sensor' : 'Media Player'}`,
+      entity_id: '',
+      type: category === 'sensors' ? 'temperature' : undefined,
+    };
     
-    const normalizedUrl = baseUrl.replace(/\/+$/, '');
+    setLocalDevicesMapping(prev => ({
+      ...prev,
+      rooms: prev.rooms.map(room => 
+        room.id === roomId 
+          ? { ...room, [category]: [...room[category], newDevice] }
+          : room
+      )
+    }));
+  };
+
+  const handleUpdateDevice = (
+    roomId: string, 
+    category: 'lights' | 'sensors' | 'mediaPlayers', 
+    deviceId: string, 
+    updates: Partial<DeviceConfig>
+  ) => {
+    setLocalDevicesMapping(prev => ({
+      ...prev,
+      rooms: prev.rooms.map(room => 
+        room.id === roomId 
+          ? {
+              ...room,
+              [category]: room[category].map((device: DeviceConfig) =>
+                device.id === deviceId ? { ...device, ...updates } : device
+              )
+            }
+          : room
+      )
+    }));
+  };
+
+  const handleRemoveDevice = (roomId: string, category: 'lights' | 'sensors' | 'mediaPlayers', deviceId: string) => {
+    const confirmed = window.confirm('Are you sure you want to remove this device?');
+    if (!confirmed) return;
     
-    homeAssistant.setConfig({ baseUrl: normalizedUrl, accessToken });
-    const result = await homeAssistant.testConnection();
-    setConnectionStatus(result);
-    
-    if (result.success) {
-      setIsLoadingEntities(true);
-      const entities = await homeAssistant.getEntitiesWithContext();
-      const lights = entities.filter(e => e.entity_id.startsWith('light.'));
-      const sensors = entities.filter(e => e.entity_id.startsWith('sensor.'));
-      const mediaPlayers = entities.filter(e => e.entity_id.startsWith('media_player.'));
-      
-      setAvailableLights(lights);
-      setAvailableSensors(sensors);
-      setAvailableMediaPlayers(mediaPlayers);
-      setIsLoadingEntities(false);
-      
-      toast({
-        title: "Connected",
-        description: `Successfully connected to Home Assistant (${result.version})`,
-      });
-    } else {
-      toast({
-        title: "Connection Failed",
-        description: result.error,
-        variant: "destructive",
-      });
-    }
-    
-    setIsTestingConnection(false);
+    setLocalDevicesMapping(prev => ({
+      ...prev,
+      rooms: prev.rooms.map(room => 
+        room.id === roomId 
+          ? {
+              ...room,
+              [category]: room[category].filter((device: DeviceConfig) => device.id !== deviceId)
+            }
+          : room
+      )
+    }));
   };
 
   const handleSave = () => {
     const normalizedUrl = baseUrl.replace(/\/+$/, '');
     
+    // Save connection config
     saveConfig(
       { baseUrl: normalizedUrl, accessToken },
-      { deskLamp, monitorLight, spotlight, temperatureSensor, humiditySensor, airQualitySensor, mediaPlayer }
+      {} as any // Legacy format will be generated from devicesMapping
     );
+    
+    // Save devices mapping
+    saveDevicesMapping(localDevicesMapping);
     
     toast({
       title: "Settings Saved",
@@ -168,7 +172,7 @@ const Settings = () => {
     navigate("/");
   };
 
-  const isFormValid = baseUrl && accessToken && deskLamp && monitorLight && spotlight && temperatureSensor && humiditySensor && airQualitySensor && mediaPlayer;
+  const isFormValid = baseUrl && accessToken;
 
   return (
     <div className="h-full flex flex-col">
@@ -204,177 +208,34 @@ const Settings = () => {
         animate="show"
         className="flex-1 overflow-y-auto min-h-0"
       >
-        <div className="max-w-2xl mx-auto px-6 py-8 space-y-6 pb-24">
-          {/* Connection Section */}
-          <motion.div variants={sectionVariants} transition={sectionTransition}>
-            <SettingsSection icon={Link2} title="Connection">
-              {/* Connection Status Banner */}
-              {connectionStatus && (
-                <motion.div
-                  initial={{ opacity: 0, y: -10, scale: 0.95 }}
-                  animate={{ opacity: 1, y: 0, scale: 1 }}
-                  className={`p-4 rounded-xl backdrop-blur-xl border ${
-                    connectionStatus.success
-                      ? "bg-green-500/[0.08] border-green-400/30"
-                      : "bg-red-500/[0.08] border-red-400/30"
-                  }`}
-                >
-                  <div className="flex items-center gap-3">
-                    {connectionStatus.success ? (
-                      <CheckCircle2 className="w-5 h-5 text-green-400 flex-shrink-0" />
-                    ) : (
-                      <AlertCircle className="w-5 h-5 text-red-400 flex-shrink-0" />
-                    )}
-                    <span className={`text-sm font-light ${
-                      connectionStatus.success ? "text-green-200" : "text-red-200"
-                    }`}>
-                      {connectionStatus.success
-                        ? `Connected successfully! Version: ${connectionStatus.version}`
-                        : `Connection failed: ${connectionStatus.error}`}
-                    </span>
-                  </div>
-                </motion.div>
-              )}
-
-              <SettingsField
-                label="Base URL"
-                description="Your Home Assistant instance URL (with port if needed)"
-              >
-                <Input
-                  type="text"
-                  placeholder="https://your-home-assistant.duckdns.org:8123"
-                  value={baseUrl}
-                  onChange={(e) => setBaseUrl(e.target.value)}
-                />
-              </SettingsField>
-
-              <SettingsField
-                label="Long-Lived Access Token"
-                description="Token is stored securely in your browser"
-              >
-                <Input
-                  type="password"
-                  placeholder="Enter your Home Assistant token"
-                  value={accessToken}
-                  onChange={(e) => setAccessToken(e.target.value)}
-                  className="font-mono text-sm tracking-tight"
-                />
-              </SettingsField>
-
-              {(!connectionStatus?.success || isDirty) && (
-                <Button
-                  onClick={handleTestConnection}
-                  disabled={!baseUrl || !accessToken || isTestingConnection}
-                  variant="primary"
-                  className="w-full h-12 rounded-xl font-light tracking-wide"
-                >
-                  {isTestingConnection ? (
-                    <>
-                      <Loader2 className="w-4 h-4 animate-spin" />
-                      {connectionStatus?.success ? "Refreshing..." : "Testing Connection..."}
-                    </>
-                  ) : (
-                    connectionStatus?.success ? "Refresh Entities" : "Test Connection"
-                  )}
-                </Button>
-              )}
-            </SettingsSection>
-          </motion.div>
-
-          {/* Lights Section */}
-          <motion.div variants={sectionVariants} transition={sectionTransition}>
-              <SettingsSection icon={Lightbulb} title="Lights">
-                <SettingsField label="Desk Lamp">
-                  <EntitySearchSelect
-                    value={deskLamp}
-                    onValueChange={setDeskLamp}
-                    entities={availableLights}
-                    entityType="light"
-                    placeholder="Search lights..."
-                    isLoading={isLoadingEntities}
-                  />
-                </SettingsField>
-
-                <SettingsField label="Monitor Light">
-                  <EntitySearchSelect
-                    value={monitorLight}
-                    onValueChange={setMonitorLight}
-                    entities={availableLights}
-                    entityType="light"
-                    placeholder="Search lights..."
-                    isLoading={isLoadingEntities}
-                  />
-                </SettingsField>
-
-                <SettingsField label="Spotlight">
-                  <EntitySearchSelect
-                    value={spotlight}
-                    onValueChange={setSpotlight}
-                    entities={availableLights}
-                    entityType="light"
-                    placeholder="Search lights..."
-                    isLoading={isLoadingEntities}
-                  />
-                </SettingsField>
-              </SettingsSection>
-            </motion.div>
-
-          {/* Climate Sensors Section */}
-          <motion.div variants={sectionVariants} transition={sectionTransition}>
-              <SettingsSection icon={Thermometer} title="Climate Sensors">
-                <SettingsField label="Temperature Sensor">
-                  <EntitySearchSelect
-                    value={temperatureSensor}
-                    onValueChange={setTemperatureSensor}
-                    entities={availableSensors}
-                    entityType="sensor"
-                    sensorType="temperature"
-                    placeholder="Search temperature sensors..."
-                    isLoading={isLoadingEntities}
-                  />
-                </SettingsField>
-
-                <SettingsField label="Humidity Sensor">
-                  <EntitySearchSelect
-                    value={humiditySensor}
-                    onValueChange={setHumiditySensor}
-                    entities={availableSensors}
-                    entityType="sensor"
-                    sensorType="humidity"
-                    placeholder="Search humidity sensors..."
-                    isLoading={isLoadingEntities}
-                  />
-                </SettingsField>
-
-                <SettingsField label="Air Quality (PM 2.5)">
-                  <EntitySearchSelect
-                    value={airQualitySensor}
-                    onValueChange={setAirQualitySensor}
-                    entities={availableSensors}
-                    entityType="sensor"
-                    sensorType="air_quality"
-                    placeholder="Search air quality sensors..."
-                    isLoading={isLoadingEntities}
-                  />
-                </SettingsField>
-              </SettingsSection>
-            </motion.div>
-
-          {/* Media Player Section */}
-          <motion.div variants={sectionVariants} transition={sectionTransition}>
-              <SettingsSection icon={Music} title="Media Player">
-                <SettingsField label="Spotify/Sonos Device">
-                  <EntitySearchSelect
-                    value={mediaPlayer}
-                    onValueChange={setMediaPlayer}
-                    entities={availableMediaPlayers}
-                    entityType="media_player"
-                    placeholder="Search media players..."
-                    isLoading={isLoadingEntities}
-                  />
-                </SettingsField>
-              </SettingsSection>
-            </motion.div>
+        <div className="max-w-2xl mx-auto px-6 py-8 pb-24">
+          <Tabs defaultValue="connection" className="w-full">
+            <TabsList className="w-full mb-6">
+              <TabsTrigger value="connection" className="flex-1">Connection</TabsTrigger>
+              <TabsTrigger value="devices" className="flex-1">Devices</TabsTrigger>
+            </TabsList>
+            
+            <TabsContent value="connection">
+              <ConnectionTab
+                baseUrl={baseUrl}
+                accessToken={accessToken}
+                onBaseUrlChange={setBaseUrl}
+                onAccessTokenChange={setAccessToken}
+                onEntitiesFetched={setAllEntities}
+              />
+            </TabsContent>
+            
+            <TabsContent value="devices">
+              <DevicesTab
+                devicesMapping={localDevicesMapping}
+                entities={allEntities}
+                onAddDevice={handleAddDevice}
+                onUpdateDevice={handleUpdateDevice}
+                onRemoveDevice={handleRemoveDevice}
+                isLoading={isLoadingEntities}
+              />
+            </TabsContent>
+          </Tabs>
         </div>
       </motion.div>
 
