@@ -81,7 +81,7 @@ export const ClimateIndicator = ({
           <motion.div
             className="absolute left-1/2 -translate-x-1/2 z-50 pointer-events-none
               bg-white/15 backdrop-blur-[40px] backdrop-saturate-150
-              px-6 py-3 rounded-full
+              pl-4 pr-6 py-3 rounded-full
               shadow-[0_12px_40px_rgba(0,0,0,0.15),inset_0_2px_4px_rgba(255,255,255,0.2)]
               border border-white/30
               overflow-hidden
@@ -191,7 +191,7 @@ export const ClimateIndicator = ({
                   {displayValue}{unit}
                 </motion.span>
                 <motion.span 
-                  className="text-xs leading-tight text-white/40 whitespace-nowrap"
+                  className="text-xs leading-tight text-white/60 whitespace-nowrap"
                   initial={{ opacity: 0, x: -8 }}
                   animate={{ 
                     opacity: 1, 
