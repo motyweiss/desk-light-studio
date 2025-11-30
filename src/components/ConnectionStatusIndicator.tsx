@@ -84,10 +84,11 @@ export const ConnectionStatusIndicator = ({
         {isHovered && (
           <motion.div
             className="absolute pointer-events-none z-50
-              bg-white/8 backdrop-blur-[24px]
+              bg-white/12 backdrop-blur-[32px]
               pl-5 pr-8 py-2.5 rounded-full
-              shadow-[0_4px_24px_rgba(0,0,0,0.15),0_1px_4px_rgba(0,0,0,0.1),inset_0_1px_1px_rgba(255,255,255,0.1)]
-              border border-white/20"
+              shadow-[0_8px_32px_rgba(0,0,0,0.12),inset_0_1px_1px_rgba(255,255,255,0.15)]
+              border border-white/25
+              [background:linear-gradient(135deg,rgba(255,255,255,0.15),rgba(255,255,255,0.05))]"
             style={{
               right: '100%',
               top: '50%',
