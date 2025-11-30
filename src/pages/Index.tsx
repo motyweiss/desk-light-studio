@@ -47,11 +47,19 @@ const Index = () => {
     const startTime = Date.now();
     const minLoadTime = 500; // Minimum 500ms loading time
     
-    // Preload the desk image
+    // Preload BOTH background and desk image
+    const bgImage = new Image();
+    bgImage.src = '/bg.png';
+    
     const primaryImage = new Image();
     primaryImage.src = desk000;
     
+    let bgLoaded = false;
+    let deskLoaded = false;
+    
     const checkAllLoaded = () => {
+      if (!bgLoaded || !deskLoaded) return;
+      
       const elapsed = Date.now() - startTime;
       const remainingTime = Math.max(0, minLoadTime - elapsed);
       
@@ -74,12 +82,20 @@ const Index = () => {
       }, remainingTime);
     };
     
-    primaryImage.onload = () => {
-      checkAllLoaded();
+    bgImage.onload = () => { 
+      bgLoaded = true; 
+      checkAllLoaded(); 
+    };
+    
+    primaryImage.onload = () => { 
+      deskLoaded = true; 
+      checkAllLoaded(); 
     };
     
     // Fallback timeout in case images take too long (8 seconds max + min load time)
     const fallbackTimer = setTimeout(() => {
+      bgLoaded = true;
+      deskLoaded = true;
       checkAllLoaded();
     }, 8000 + minLoadTime);
     
