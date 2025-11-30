@@ -129,11 +129,11 @@ export const ClimateIndicators = () => {
             duration: 0.35,
             ease: [0.34, 1.56, 0.64, 1]
           }}
-          className="absolute top-full left-1/2 -translate-x-1/2 mt-3"
+          className="absolute top-full left-1/2 -translate-x-1/2 mt-4"
         >
-          <div className="bg-white/8 backdrop-blur-[24px] border border-white/15 rounded-2xl p-6 min-w-[420px]">
+          <div className="bg-white/8 backdrop-blur-[24px] border border-white/15 rounded-2xl p-7 min-w-[480px]">
             <motion.div 
-              className="flex gap-8"
+              className="flex gap-10 justify-center"
               variants={{
                 show: {
                   transition: {
@@ -146,7 +146,7 @@ export const ClimateIndicators = () => {
             >
               {/* Temperature */}
               <motion.div 
-                className="flex items-center gap-3"
+                className="flex items-center gap-4"
                 variants={{
                   hidden: { opacity: 0, scale: 0.9 },
                   show: { opacity: 1, scale: 1 }
@@ -156,19 +156,19 @@ export const ClimateIndicators = () => {
                   value={climate.temperature} 
                   min={15} 
                   max={35} 
-                  size={48} 
-                  strokeWidth={2.5}
+                  size={56} 
+                  strokeWidth={3}
                   isLoaded={climate.isLoaded}
                   colorType="temperature"
                   delay={0}
                 >
-                  <Thermometer className="w-5 h-5 text-white/60" strokeWidth={1.5} />
+                  <Thermometer className="w-6 h-6 text-white/50" strokeWidth={1.5} />
                 </CircularProgress>
                 <div className="flex flex-col">
-                  <span className="text-[9px] text-white/55 font-light tracking-[0.2em] uppercase mb-1">
+                  <span className="text-[10px] text-white/50 font-medium tracking-[0.15em] uppercase mb-0.5">
                     Temperature
                   </span>
-                  <div className="text-base font-light text-white tabular-nums">
+                  <div className="text-lg font-light text-white tabular-nums">
                     <motion.span>{tempDisplay}</motion.span>°
                   </div>
                 </div>
@@ -176,7 +176,7 @@ export const ClimateIndicators = () => {
 
               {/* Humidity */}
               <motion.div 
-                className="flex items-center gap-3"
+                className="flex items-center gap-4"
                 variants={{
                   hidden: { opacity: 0, scale: 0.9 },
                   show: { opacity: 1, scale: 1 }
@@ -186,19 +186,19 @@ export const ClimateIndicators = () => {
                   value={climate.humidity} 
                   min={0} 
                   max={100} 
-                  size={48} 
-                  strokeWidth={2.5}
+                  size={56} 
+                  strokeWidth={3}
                   isLoaded={climate.isLoaded}
                   colorType="humidity"
-                  delay={0}
+                  delay={0.08}
                 >
-                  <Droplets className="w-5 h-5 text-white/60" strokeWidth={1.5} />
+                  <Droplets className="w-6 h-6 text-white/50" strokeWidth={1.5} />
                 </CircularProgress>
                 <div className="flex flex-col">
-                  <span className="text-[9px] text-white/55 font-light tracking-[0.2em] uppercase mb-1">
+                  <span className="text-[10px] text-white/50 font-medium tracking-[0.15em] uppercase mb-0.5">
                     Humidity
                   </span>
-                  <div className="text-base font-light text-white tabular-nums">
+                  <div className="text-lg font-light text-white tabular-nums">
                     <motion.span>{humidityDisplay}</motion.span>%
                   </div>
                 </div>
@@ -206,7 +206,7 @@ export const ClimateIndicators = () => {
 
               {/* Air Quality */}
               <motion.div 
-                className="flex items-center gap-3"
+                className="flex items-center gap-4"
                 variants={{
                   hidden: { opacity: 0, scale: 0.9 },
                   show: { opacity: 1, scale: 1 }
@@ -216,20 +216,20 @@ export const ClimateIndicators = () => {
                   value={climate.airQuality} 
                   min={0} 
                   max={100} 
-                  size={48} 
-                  strokeWidth={2.5}
+                  size={56} 
+                  strokeWidth={3}
                   isLoaded={climate.isLoaded}
                   colorType="airQuality"
-                  delay={0}
+                  delay={0.16}
                 >
-                  <Wind className="w-5 h-5 text-white/60" strokeWidth={1.5} />
+                  <Wind className="w-6 h-6 text-white/50" strokeWidth={1.5} />
                 </CircularProgress>
                 <div className="flex flex-col">
-                  <span className="text-[9px] text-white/55 font-light tracking-[0.2em] uppercase mb-1">
+                  <span className="text-[10px] text-white/50 font-medium tracking-[0.15em] uppercase mb-0.5">
                     Air Quality
                   </span>
-                  <div className="text-base font-light text-white tabular-nums">
-                    <span>{getAirQualityStatus(climate.airQuality).label}</span>
+                  <div className="text-lg font-light text-white">
+                    {getAirQualityStatus(climate.airQuality).label}
                   </div>
                 </div>
               </motion.div>
