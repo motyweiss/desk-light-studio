@@ -1,6 +1,6 @@
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
-import { Monitor, Sofa, Bed, ChefHat } from 'lucide-react';
+import { Monitor } from 'lucide-react';
 
 interface NavigationLinksProps {
   currentPath: string;
@@ -9,9 +9,6 @@ interface NavigationLinksProps {
 export const NavigationLinks = ({ currentPath }: NavigationLinksProps) => {
   const links = [
     { path: '/', label: 'Office', icon: Monitor },
-    { path: '/living', label: 'Living Room', icon: Sofa },
-    { path: '/bedroom', label: 'Bedroom', icon: Bed },
-    { path: '/kitchen', label: 'Kitchen', icon: ChefHat },
   ];
 
   return (
