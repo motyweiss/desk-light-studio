@@ -253,8 +253,7 @@ const Settings = () => {
           </motion.div>
 
           {/* Lights Section */}
-          {!isLoadingEntities && availableLights.length > 0 && (
-            <motion.div variants={sectionVariants} transition={sectionTransition}>
+          <motion.div variants={sectionVariants} transition={sectionTransition}>
               <SettingsSection icon={Lightbulb} title="Lights">
                 <SettingsField label="Desk Lamp">
                   <Select value={deskLamp} onValueChange={setDeskLamp}>
@@ -302,11 +301,9 @@ const Settings = () => {
                 </SettingsField>
               </SettingsSection>
             </motion.div>
-          )}
 
           {/* Climate Sensors Section */}
-          {!isLoadingEntities && availableSensors.length > 0 && (
-            <motion.div variants={sectionVariants} transition={sectionTransition}>
+          <motion.div variants={sectionVariants} transition={sectionTransition}>
               <SettingsSection icon={Thermometer} title="Climate Sensors">
                 <SettingsField label="Temperature Sensor">
                   <Select value={temperatureSensor} onValueChange={setTemperatureSensor}>
@@ -354,11 +351,9 @@ const Settings = () => {
                 </SettingsField>
               </SettingsSection>
             </motion.div>
-          )}
 
           {/* Media Player Section */}
-          {!isLoadingEntities && availableMediaPlayers.length > 0 && (
-            <motion.div variants={sectionVariants} transition={sectionTransition}>
+          <motion.div variants={sectionVariants} transition={sectionTransition}>
               <SettingsSection icon={Music} title="Media Player">
                 <SettingsField label="Spotify/Sonos Device">
                   <Select value={mediaPlayer} onValueChange={setMediaPlayer}>
@@ -376,7 +371,6 @@ const Settings = () => {
                 </SettingsField>
               </SettingsSection>
             </motion.div>
-          )}
         </div>
       </motion.div>
 

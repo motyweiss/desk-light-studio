@@ -67,7 +67,7 @@ export const TopNavigationBar = ({
             
             <motion.button
               onClick={() => navigate('/settings')}
-              className="w-10 h-10 rounded-lg flex items-center justify-center text-white/60 hover:text-white/90 hover:bg-white/5 transition-colors"
+              className="w-10 h-10 rounded-lg flex items-center justify-center text-white hover:text-white transition-colors hover:bg-white/5"
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               aria-label="Settings"
