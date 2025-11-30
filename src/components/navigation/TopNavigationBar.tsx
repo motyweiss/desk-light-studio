@@ -54,7 +54,7 @@ export const TopNavigationBar = ({
 
           {/* Right: Navigation + Settings + Connection Status */}
           <motion.div 
-            className="flex items-center gap-3"
+            className="flex items-center gap-4"
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.5, delay: 0.2 }}
@@ -63,12 +63,12 @@ export const TopNavigationBar = ({
             
             <motion.button
               onClick={onSettingsClick}
-              className="w-9 h-9 rounded-lg flex items-center justify-center text-white/60 hover:text-white/90 hover:bg-white/5 transition-colors"
+              className="w-10 h-10 rounded-lg flex items-center justify-center text-white/60 hover:text-white/90 hover:bg-white/5 transition-colors"
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               aria-label="Settings"
             >
-              <SettingsIcon className="w-4 h-4" strokeWidth={1.5} />
+              <SettingsIcon className="w-5 h-5" strokeWidth={1.5} />
             </motion.button>
             
             <ConnectionStatusIndicator
