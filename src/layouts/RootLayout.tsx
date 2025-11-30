@@ -34,7 +34,7 @@ export const RootLayout = ({ children }: RootLayoutProps) => {
       entityId={entityMapping.mediaPlayer} 
       isConnected={isConnected}
     >
-      <div className="min-h-screen w-full relative">
+      <div className="h-screen w-full relative flex flex-col overflow-hidden">
         {/* Global Top Navigation Bar - Fixed at top (hidden on mobile) */}
         <TopNavigationBar
           currentPath={location.pathname}
@@ -54,7 +54,7 @@ export const RootLayout = ({ children }: RootLayoutProps) => {
         />
 
         {/* Page Content with AnimatePresence for smooth transitions */}
-        <div className="pt-0 md:pt-[68px]">
+        <div className="flex-1 overflow-auto pt-0 md:pt-[68px] pb-[88px]">
           <AnimatePresence mode="wait">
             <motion.div
               key={location.pathname}
@@ -65,7 +65,7 @@ export const RootLayout = ({ children }: RootLayoutProps) => {
                 duration: 0.5,
                 ease: EASING.smooth,
               }}
-              className="w-full"
+              className="w-full h-full"
             >
               {children}
             </motion.div>

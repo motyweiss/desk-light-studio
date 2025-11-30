@@ -430,7 +430,7 @@ const Index = () => {
       <Toaster />
 
       <div
-        className="min-h-[100dvh] flex items-center justify-center p-4 md:p-8 relative overflow-hidden"
+        className="h-full min-h-0 flex items-center justify-center p-4 md:p-8 relative overflow-hidden"
         style={{
           backgroundImage: backgroundLoaded ? "url('/bg.png')" : "none",
           backgroundSize: "cover",
