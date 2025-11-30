@@ -306,9 +306,9 @@ export const MediaPlayer = () => {
                     </div>
                   )}
 
-                  {/* Bottom Row: Playback Controls + Volume + Speaker Selector */}
-                  <div className="flex items-center justify-between">
-                    <div className="flex-1" onClick={(e) => e.stopPropagation()}>
+                   {/* Bottom Row: Playback Controls + Volume + Speaker Selector */}
+                  <div className="flex items-center justify-between gap-4">
+                    <div className="flex-1 flex justify-center" onClick={(e) => e.stopPropagation()}>
                       <PlaybackControls
                         isPlaying={playerState.isPlaying}
                         shuffle={playerState.shuffle}

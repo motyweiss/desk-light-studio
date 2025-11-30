@@ -59,12 +59,12 @@ export const PlaybackControls = ({
 
       {/* Play/Pause */}
       <motion.button
-        whileHover={{ scale: 1.05 }}
+        whileHover={{ scale: 1.02 }}
         whileTap={{ scale: 0.95 }}
         onClick={onPlayPause}
         className={`bg-white/10 hover:bg-white/15 rounded-full transition-colors backdrop-blur-xl ${
           compact ? 'w-9 h-9 sm:w-10 sm:h-10' : 'w-10 h-10 sm:w-12 sm:h-12'
-        } flex items-center justify-center`}
+        } flex items-center justify-center flex-shrink-0`}
       >
         {isPlaying ? (
           <Pause className={compact ? "w-4 h-4 text-white" : "w-4 h-4 sm:w-5 sm:h-5 text-white"} fill="currentColor" />
