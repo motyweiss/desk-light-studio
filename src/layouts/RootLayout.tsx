@@ -27,31 +27,43 @@ export const RootLayout = ({ children }: RootLayoutProps) => {
     onReconnectingChange: setIsReconnecting,
   });
 
+  const isSettingsPage = location.pathname === '/settings';
+
   return (
     <MediaPlayerProvider 
       entityId={entityMapping.mediaPlayer} 
       isConnected={isConnected}
     >
-      <div className="h-screen w-full relative flex flex-col overflow-hidden">
-        {/* Global Top Navigation Bar - Fixed at top (hidden on mobile) */}
-        <TopNavigationBar
-          currentPath={location.pathname}
-          isConnected={isConnected}
-          isReconnecting={isReconnecting}
-          onReconnectClick={attemptReconnect}
-        />
+      <div 
+        className="h-screen w-full relative flex flex-col overflow-hidden"
+        style={{
+          backgroundImage: "url('/bg.png')",
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+          backgroundColor: "hsl(0 0% 8%)",
+        }}
+      >
+        {/* Global Top Navigation Bar - Fixed at top (hidden on mobile and settings page) */}
+        {!isSettingsPage && (
+          <TopNavigationBar
+            currentPath={location.pathname}
+            isConnected={isConnected}
+            isReconnecting={isReconnecting}
+            onReconnectClick={attemptReconnect}
+          />
+        )}
 
         {/* Page Content with AnimatePresence for smooth transitions */}
-        <div className="flex-1 overflow-auto pt-0 md:pt-[68px] pb-[96px]">
+        <div className={`flex-1 overflow-auto pt-0 ${!isSettingsPage ? 'md:pt-[68px]' : ''} ${isSettingsPage ? 'pb-0' : 'pb-[96px]'}`}>
           <AnimatePresence mode="wait">
             <motion.div
               key={location.pathname}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
+              initial={{ opacity: 0, scale: 0.98 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.98 }}
               transition={{
-                duration: 0.5,
-                ease: EASING.smooth,
+                duration: 0.35,
+                ease: [0.32, 0.72, 0, 1],
               }}
               className="w-full h-full"
             >
