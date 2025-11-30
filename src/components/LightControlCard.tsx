@@ -210,8 +210,8 @@ export const LightControlCard = ({
       onMouseLeave={() => onHover(null)}
       className="w-full rounded-3xl px-8 py-4 cursor-pointer text-left border transition-all duration-500 backdrop-blur-xl relative overflow-hidden"
       animate={{
-        backgroundColor: isOn ? 'rgba(255, 255, 255, 0.12)' : 'rgba(255, 255, 255, 0.03)',
-        borderColor: isOn ? 'rgba(255, 255, 255, 0.2)' : 'rgba(255, 255, 255, 0.1)',
+        backgroundColor: isOn ? 'rgba(255, 255, 255, 0.18)' : 'rgba(255, 255, 255, 0.08)',
+        borderColor: isOn ? 'rgba(255, 255, 255, 0.25)' : 'rgba(255, 255, 255, 0.15)',
       }}
       transition={{
         layout: { duration: 0.25, ease: EASING.smooth },
@@ -219,8 +219,8 @@ export const LightControlCard = ({
         borderColor: { duration: DURATION.medium, ease: EASING.smooth },
       }}
         whileHover={{
-        backgroundColor: isOn ? 'rgba(255, 255, 255, 0.15)' : 'rgba(255, 255, 255, 0.06)',
-        borderColor: isOn ? 'rgba(255, 255, 255, 0.25)' : 'rgba(255, 255, 255, 0.15)',
+        backgroundColor: isOn ? 'rgba(255, 255, 255, 0.22)' : 'rgba(255, 255, 255, 0.12)',
+        borderColor: isOn ? 'rgba(255, 255, 255, 0.3)' : 'rgba(255, 255, 255, 0.2)',
         scale: 1.005,
         transition: { duration: 0.4, ease: EASING.smooth }
       }}
