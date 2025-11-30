@@ -1,9 +1,10 @@
-import { motion, useMotionValue, animate, useMotionValueEvent, AnimatePresence } from "framer-motion";
+import { useMotionValueEvent, AnimatePresence, motion } from "framer-motion";
 import { Slider } from "@/components/ui/slider";
-import { useEffect, useState, useRef, useCallback } from "react";
+import { useState, useRef, useCallback, useEffect } from "react";
 import { getIconForLight } from "@/components/icons/LightIcons";
 import { Loader2 } from "lucide-react";
 import { LIGHT_ANIMATION } from "@/constants/animations";
+import { useLightAnimation } from "@/hooks/useLightAnimation";
 
 interface LightControlCardProps {
   id: string;
@@ -30,36 +31,26 @@ export const LightControlCard = ({
 }: LightControlCardProps) => {
   const IconComponent = getIconForLight(id);
   const isOn = intensity > 0;
-  const displayValue = useMotionValue(intensity);
+  
+  // Use unified animation hook
+  const { displayValue, isAnimating, animateTo } = useLightAnimation(id, { 
+    initialValue: intensity 
+  });
+  
   const [displayNumber, setDisplayNumber] = useState(intensity);
   const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
-  const isTogglingRef = useRef(false);
+  const userInteractingRef = useRef(false);
   
   useMotionValueEvent(displayValue, "change", (latest) => {
     setDisplayNumber(Math.round(latest));
   });
   
-  // CRITICAL: Always sync display with intensity state immediately
+  // Sync with external intensity changes
   useEffect(() => {
-    // If we're toggling, don't interrupt the animation
-    if (isTogglingRef.current) return;
-    
-    // Snap immediately to new value if it's very different (external change)
-    const currentDisplay = displayValue.get();
-    const diff = Math.abs(currentDisplay - intensity);
-    
-    if (diff > 5) {
-      // External change detected - snap immediately
-      displayValue.set(intensity);
-    } else {
-      // Small change - smooth animation
-      const controls = animate(displayValue, intensity, {
-        duration: LIGHT_ANIMATION.slider.duration,
-        ease: LIGHT_ANIMATION.slider.ease
-      });
-      return controls.stop;
+    if (!userInteractingRef.current && Math.abs(displayValue.get() - intensity) > 0.5) {
+      animateTo(intensity, 'external');
     }
-  }, [intensity, displayValue]);
+  }, [intensity, displayValue, animateTo]);
   
   // Cleanup debounce timer on unmount
   useEffect(() => {
@@ -85,23 +76,18 @@ export const LightControlCard = ({
     triggerHaptic();
     
     const targetIntensity = isOn ? 0 : 100;
-    const animConfig = targetIntensity === 0 ? LIGHT_ANIMATION.turnOff : LIGHT_ANIMATION.turnOn;
     
-    // CRITICAL FIX: Update state IMMEDIATELY, not after animation
-    isTogglingRef.current = true;
+    // Animate and notify immediately
+    userInteractingRef.current = true;
+    animateTo(targetIntensity, 'user');
     onChange(targetIntensity);
     
-    // Animate the display smoothly with unified timing
-    animate(displayValue, targetIntensity, {
-      duration: animConfig.duration,
-      ease: animConfig.ease,
-      onComplete: () => {
-        isTogglingRef.current = false;
-      }
-    });
+    // Reset user interaction flag after animation
+    setTimeout(() => {
+      userInteractingRef.current = false;
+    }, LIGHT_ANIMATION.turnOn.duration * 1000);
   };
 
-  // Define slider change handler before any conditional returns
   const handleSliderChange = useCallback((values: number[]) => {
     const newValue = values[0];
     if (Math.abs(newValue - displayNumber) >= 10) {
@@ -109,20 +95,22 @@ export const LightControlCard = ({
     }
     
     // Update display immediately
-    displayValue.set(newValue);
+    userInteractingRef.current = true;
+    animateTo(newValue, 'user', { immediate: true });
     
     // Clear existing debounce timer
     if (debounceTimerRef.current) {
       clearTimeout(debounceTimerRef.current);
     }
     
-    // Debounce: Send to HA after 150ms
+    // Debounce: Send to onChange after 300ms
     debounceTimerRef.current = setTimeout(() => {
       onChange(newValue);
-    }, 150);
-  }, [displayNumber, onChange, displayValue]);
+      userInteractingRef.current = false;
+    }, 300);
+  }, [displayNumber, onChange, animateTo]);
 
-  // Skeleton loading state - render different UI but all hooks must be called first
+  // Skeleton loading state
   if (isLoading) {
     return (
       <motion.div
@@ -136,7 +124,6 @@ export const LightControlCard = ({
           borderColor: 'transparent',
         }}
       >
-        {/* Pulsing overlay animation */}
         <motion.div
           className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent"
           animate={{ x: ['-100%', '100%'] }}
@@ -148,7 +135,6 @@ export const LightControlCard = ({
         />
 
         <div className="flex items-center gap-6 relative z-10">
-          {/* Icon skeleton */}
           <motion.div
             className="flex-shrink-0 w-7 h-7 rounded-full bg-white/5"
             animate={{ opacity: [0.3, 0.5, 0.3] }}
@@ -159,7 +145,6 @@ export const LightControlCard = ({
             }}
           />
 
-          {/* Text skeleton */}
           <div className="flex-1 space-y-2">
             <motion.div 
               className="h-4 w-24 bg-white/5 rounded"
@@ -183,7 +168,6 @@ export const LightControlCard = ({
             />
           </div>
 
-          {/* Slider skeleton */}
           <div className="flex-shrink-0 flex items-center gap-3">
             <div className="w-4 h-4" />
             <motion.div 
@@ -222,7 +206,7 @@ export const LightControlCard = ({
         backgroundColor: { duration: 0.5, ease: LIGHT_ANIMATION.turnOn.ease },
         borderColor: { duration: 0.5, ease: LIGHT_ANIMATION.turnOn.ease },
       }}
-        whileHover={{
+      whileHover={{
         backgroundColor: isOn ? 'rgba(255, 255, 255, 0.22)' : 'rgba(255, 255, 255, 0.12)',
         borderColor: isOn ? 'rgba(255, 255, 255, 0.3)' : 'rgba(255, 255, 255, 0.2)',
         scale: 1.005,
@@ -258,7 +242,7 @@ export const LightControlCard = ({
       )}
 
       <div className="flex items-center gap-6 relative z-10">
-        {/* Icon - Original size */}
+        {/* Icon */}
         <motion.div
           className="flex-shrink-0"
           initial={{ scale: 0.5, opacity: 0 }}
@@ -297,7 +281,7 @@ export const LightControlCard = ({
           onClick={(e) => e.stopPropagation()}
           onPointerDown={(e) => e.stopPropagation()}
         >
-          {/* Subtle Spinner - Left of Slider with fixed width */}
+          {/* Spinner - Left of Slider with fixed width */}
           <div className="w-4 h-4 flex items-center justify-center flex-shrink-0">
             <AnimatePresence>
               {isPending && (
