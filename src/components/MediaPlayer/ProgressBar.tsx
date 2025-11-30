@@ -86,7 +86,7 @@ export const ProgressBar = ({ position, duration, isLoading, isTransitioning, on
           className="w-full"
           disabled={isLoading || isTransitioning}
         />
-        <div className="flex justify-between text-xs text-white/40 font-light">
+        <div className="flex justify-between text-xs text-white/60 font-light tabular-nums tracking-wide">
           <span>{formatTime(displayPosition)}</span>
           <span>{formatTime(duration)}</span>
         </div>
