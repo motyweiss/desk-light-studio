@@ -4,9 +4,9 @@ import { motion } from "framer-motion";
 import { ArrowLeft, Link2, Lightbulb, Thermometer, Music, Loader2, CheckCircle2, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { SettingsSection } from "@/components/settings/SettingsSection";
 import { SettingsField } from "@/components/settings/SettingsField";
+import { EntitySearchSelect } from "@/components/settings/EntitySearchSelect";
 import { useHomeAssistantConfig } from "@/hooks/useHomeAssistantConfig";
 import { homeAssistant, type HAEntity } from "@/services/homeAssistant";
 import { useToast } from "@/hooks/use-toast";
@@ -73,11 +73,11 @@ const Settings = () => {
         homeAssistant.setConfig({ baseUrl: config.baseUrl, accessToken: config.accessToken });
         
         try {
-          const [lights, sensors, mediaPlayers] = await Promise.all([
-            homeAssistant.getLights(),
-            homeAssistant.getSensors(),
-            homeAssistant.getMediaPlayers()
-          ]);
+          const entities = await homeAssistant.getEntitiesWithContext();
+          const lights = entities.filter(e => e.entity_id.startsWith('light.'));
+          const sensors = entities.filter(e => e.entity_id.startsWith('sensor.'));
+          const mediaPlayers = entities.filter(e => e.entity_id.startsWith('media_player.'));
+          
           setAvailableLights(lights);
           setAvailableSensors(sensors);
           setAvailableMediaPlayers(mediaPlayers);
@@ -119,11 +119,11 @@ const Settings = () => {
     
     if (result.success) {
       setIsLoadingEntities(true);
-      const [lights, sensors, mediaPlayers] = await Promise.all([
-        homeAssistant.getLights(),
-        homeAssistant.getSensors(),
-        homeAssistant.getMediaPlayers()
-      ]);
+      const entities = await homeAssistant.getEntitiesWithContext();
+      const lights = entities.filter(e => e.entity_id.startsWith('light.'));
+      const sensors = entities.filter(e => e.entity_id.startsWith('sensor.'));
+      const mediaPlayers = entities.filter(e => e.entity_id.startsWith('media_player.'));
+      
       setAvailableLights(lights);
       setAvailableSensors(sensors);
       setAvailableMediaPlayers(mediaPlayers);
@@ -285,63 +285,36 @@ const Settings = () => {
           <motion.div variants={sectionVariants} transition={sectionTransition}>
               <SettingsSection icon={Lightbulb} title="Lights">
                 <SettingsField label="Desk Lamp">
-                  <Select value={deskLamp} onValueChange={setDeskLamp}>
-                    <SelectTrigger>
-                      <SelectValue placeholder={isLoadingEntities ? "Loading..." : "Select entity..."} />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {deskLamp && !availableLights.find(l => l.entity_id === deskLamp) && (
-                        <SelectItem value={deskLamp}>
-                          {deskLamp} (current)
-                        </SelectItem>
-                      )}
-                      {availableLights.map((light) => (
-                        <SelectItem key={light.entity_id} value={light.entity_id}>
-                          {light.attributes.friendly_name || light.entity_id}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  <EntitySearchSelect
+                    value={deskLamp}
+                    onValueChange={setDeskLamp}
+                    entities={availableLights}
+                    entityType="light"
+                    placeholder="Search lights..."
+                    isLoading={isLoadingEntities}
+                  />
                 </SettingsField>
 
                 <SettingsField label="Monitor Light">
-                  <Select value={monitorLight} onValueChange={setMonitorLight}>
-                    <SelectTrigger>
-                      <SelectValue placeholder={isLoadingEntities ? "Loading..." : "Select entity..."} />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {monitorLight && !availableLights.find(l => l.entity_id === monitorLight) && (
-                        <SelectItem value={monitorLight}>
-                          {monitorLight} (current)
-                        </SelectItem>
-                      )}
-                      {availableLights.map((light) => (
-                        <SelectItem key={light.entity_id} value={light.entity_id}>
-                          {light.attributes.friendly_name || light.entity_id}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  <EntitySearchSelect
+                    value={monitorLight}
+                    onValueChange={setMonitorLight}
+                    entities={availableLights}
+                    entityType="light"
+                    placeholder="Search lights..."
+                    isLoading={isLoadingEntities}
+                  />
                 </SettingsField>
 
                 <SettingsField label="Spotlight">
-                  <Select value={spotlight} onValueChange={setSpotlight}>
-                    <SelectTrigger>
-                      <SelectValue placeholder={isLoadingEntities ? "Loading..." : "Select entity..."} />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {spotlight && !availableLights.find(l => l.entity_id === spotlight) && (
-                        <SelectItem value={spotlight}>
-                          {spotlight} (current)
-                        </SelectItem>
-                      )}
-                      {availableLights.map((light) => (
-                        <SelectItem key={light.entity_id} value={light.entity_id}>
-                          {light.attributes.friendly_name || light.entity_id}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  <EntitySearchSelect
+                    value={spotlight}
+                    onValueChange={setSpotlight}
+                    entities={availableLights}
+                    entityType="light"
+                    placeholder="Search lights..."
+                    isLoading={isLoadingEntities}
+                  />
                 </SettingsField>
               </SettingsSection>
             </motion.div>
@@ -350,63 +323,39 @@ const Settings = () => {
           <motion.div variants={sectionVariants} transition={sectionTransition}>
               <SettingsSection icon={Thermometer} title="Climate Sensors">
                 <SettingsField label="Temperature Sensor">
-                  <Select value={temperatureSensor} onValueChange={setTemperatureSensor}>
-                    <SelectTrigger>
-                      <SelectValue placeholder={isLoadingEntities ? "Loading..." : "Select sensor..."} />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {temperatureSensor && !availableSensors.find(s => s.entity_id === temperatureSensor) && (
-                        <SelectItem value={temperatureSensor}>
-                          {temperatureSensor} (current)
-                        </SelectItem>
-                      )}
-                      {availableSensors.map((sensor) => (
-                        <SelectItem key={sensor.entity_id} value={sensor.entity_id}>
-                          {sensor.attributes.friendly_name || sensor.entity_id}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  <EntitySearchSelect
+                    value={temperatureSensor}
+                    onValueChange={setTemperatureSensor}
+                    entities={availableSensors}
+                    entityType="sensor"
+                    sensorType="temperature"
+                    placeholder="Search temperature sensors..."
+                    isLoading={isLoadingEntities}
+                  />
                 </SettingsField>
 
                 <SettingsField label="Humidity Sensor">
-                  <Select value={humiditySensor} onValueChange={setHumiditySensor}>
-                    <SelectTrigger>
-                      <SelectValue placeholder={isLoadingEntities ? "Loading..." : "Select sensor..."} />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {humiditySensor && !availableSensors.find(s => s.entity_id === humiditySensor) && (
-                        <SelectItem value={humiditySensor}>
-                          {humiditySensor} (current)
-                        </SelectItem>
-                      )}
-                      {availableSensors.map((sensor) => (
-                        <SelectItem key={sensor.entity_id} value={sensor.entity_id}>
-                          {sensor.attributes.friendly_name || sensor.entity_id}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  <EntitySearchSelect
+                    value={humiditySensor}
+                    onValueChange={setHumiditySensor}
+                    entities={availableSensors}
+                    entityType="sensor"
+                    sensorType="humidity"
+                    placeholder="Search humidity sensors..."
+                    isLoading={isLoadingEntities}
+                  />
                 </SettingsField>
 
                 <SettingsField label="Air Quality (PM 2.5)">
-                  <Select value={airQualitySensor} onValueChange={setAirQualitySensor}>
-                    <SelectTrigger>
-                      <SelectValue placeholder={isLoadingEntities ? "Loading..." : "Select sensor..."} />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {airQualitySensor && !availableSensors.find(s => s.entity_id === airQualitySensor) && (
-                        <SelectItem value={airQualitySensor}>
-                          {airQualitySensor} (current)
-                        </SelectItem>
-                      )}
-                      {availableSensors.map((sensor) => (
-                        <SelectItem key={sensor.entity_id} value={sensor.entity_id}>
-                          {sensor.attributes.friendly_name || sensor.entity_id}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  <EntitySearchSelect
+                    value={airQualitySensor}
+                    onValueChange={setAirQualitySensor}
+                    entities={availableSensors}
+                    entityType="sensor"
+                    sensorType="air_quality"
+                    placeholder="Search air quality sensors..."
+                    isLoading={isLoadingEntities}
+                  />
                 </SettingsField>
               </SettingsSection>
             </motion.div>
@@ -415,23 +364,14 @@ const Settings = () => {
           <motion.div variants={sectionVariants} transition={sectionTransition}>
               <SettingsSection icon={Music} title="Media Player">
                 <SettingsField label="Spotify/Sonos Device">
-                  <Select value={mediaPlayer} onValueChange={setMediaPlayer}>
-                    <SelectTrigger>
-                      <SelectValue placeholder={isLoadingEntities ? "Loading..." : "Select media player..."} />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {mediaPlayer && !availableMediaPlayers.find(p => p.entity_id === mediaPlayer) && (
-                        <SelectItem value={mediaPlayer}>
-                          {mediaPlayer} (current)
-                        </SelectItem>
-                      )}
-                      {availableMediaPlayers.map((player) => (
-                        <SelectItem key={player.entity_id} value={player.entity_id}>
-                          {player.attributes.friendly_name || player.entity_id}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  <EntitySearchSelect
+                    value={mediaPlayer}
+                    onValueChange={setMediaPlayer}
+                    entities={availableMediaPlayers}
+                    entityType="media_player"
+                    placeholder="Search media players..."
+                    isLoading={isLoadingEntities}
+                  />
                 </SettingsField>
               </SettingsSection>
             </motion.div>
