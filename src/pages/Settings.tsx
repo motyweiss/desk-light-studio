@@ -144,13 +144,13 @@ const Settings = () => {
   const isFormValid = baseUrl && accessToken && deskLamp && monitorLight && spotlight && temperatureSensor && humiditySensor && airQualitySensor && mediaPlayer;
 
   return (
-    <div className="min-h-screen w-full flex flex-col">
+    <div className="h-full flex flex-col">
       {/* Fixed Header */}
       <motion.div 
         initial={{ y: -80, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ duration: 0.5, ease: [0.22, 0.03, 0.26, 1] }}
-        className="sticky top-0 z-10 bg-background/80 backdrop-blur-xl border-b border-white/10"
+        className="flex-shrink-0 bg-background/80 backdrop-blur-xl border-b border-white/10"
       >
         <div className="max-w-2xl mx-auto px-6 py-4 flex items-center justify-between">
           <button
@@ -175,9 +175,9 @@ const Settings = () => {
         variants={staggerContainer}
         initial="hidden"
         animate="show"
-        className="flex-1 overflow-y-auto"
+        className="flex-1 overflow-y-auto min-h-0"
       >
-        <div className="max-w-2xl mx-auto px-6 py-8 space-y-6">
+        <div className="max-w-2xl mx-auto px-6 py-8 space-y-6 pb-24">
           {/* Connection Section */}
           <motion.div variants={sectionVariants} transition={sectionTransition}>
             <SettingsSection icon={Link2} title="Connection">
@@ -379,7 +379,7 @@ const Settings = () => {
         initial={{ y: 80, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ duration: 0.5, delay: 0.2, ease: [0.22, 0.03, 0.26, 1] }}
-        className="sticky bottom-0 z-10 bg-background/80 backdrop-blur-xl border-t border-white/10"
+        className="flex-shrink-0 bg-background/80 backdrop-blur-xl border-t border-white/10"
       >
         <div className="max-w-2xl mx-auto px-6 py-4 flex justify-between gap-4">
           <Button

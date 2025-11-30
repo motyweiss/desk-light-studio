@@ -7,6 +7,7 @@ import { LoadingOverlay } from "@/components/LoadingOverlay";
 import { Toaster } from "@/components/ui/toaster";
 import { useClimate } from "@/contexts/ClimateContext";
 import { useLighting } from "@/contexts/LightingContext";
+import { useAppLoad } from "@/contexts/AppLoadContext";
 import { LIGHT_ANIMATION } from "@/constants/animations";
 
 // Import all desk images for preloading
@@ -20,9 +21,9 @@ import desk110 from "@/assets/desk-110.png";
 import desk111 from "@/assets/desk-111.png";
 
 const Index = () => {
-  const [isLoading, setIsLoading] = useState(true);
-  const [isLoaded, setIsLoaded] = useState(false);
-  const [backgroundLoaded, setBackgroundLoaded] = useState(false);
+  const { hasInitiallyLoaded, setInitiallyLoaded } = useAppLoad();
+  const [isLoading, setIsLoading] = useState(!hasInitiallyLoaded);
+  const [isLoaded, setIsLoaded] = useState(hasInitiallyLoaded);
   const [isTransitioning, setIsTransitioning] = useState(false);
   
   // Get climate data from global context
@@ -34,23 +35,23 @@ const Index = () => {
   // Hover states for coordinated UI
   const [hoveredLight, setHoveredLight] = useState<string | null>(null);
 
-  // Optimized image loading - preload primary "all lights off" image first
+  // Optimized image loading - only on initial load
   useEffect(() => {
+    // If already loaded once, skip loading entirely
+    if (hasInitiallyLoaded) {
+      setIsLoading(false);
+      setIsLoaded(true);
+      return;
+    }
+
     const startTime = Date.now();
     const minLoadTime = 500; // Minimum 500ms loading time
     
-    // Preload both the desk image and background
+    // Preload the desk image
     const primaryImage = new Image();
-    const backgroundImage = new Image();
     primaryImage.src = desk000;
-    backgroundImage.src = '/bg.png';
-    
-    let primaryLoaded = false;
-    let bgLoaded = false;
     
     const checkAllLoaded = () => {
-      if (!primaryLoaded || !bgLoaded) return;
-      
       const elapsed = Date.now() - startTime;
       const remainingTime = Math.max(0, minLoadTime - elapsed);
       
@@ -60,8 +61,8 @@ const Index = () => {
         
         // Coordinate state updates in single frame to prevent flashing
         requestAnimationFrame(() => {
-          setBackgroundLoaded(true);
           setIsLoaded(true);
+          setInitiallyLoaded(); // Mark as initially loaded
         });
         
         // Preload remaining images in background after primary loads
@@ -74,24 +75,16 @@ const Index = () => {
     };
     
     primaryImage.onload = () => {
-      primaryLoaded = true;
-      checkAllLoaded();
-    };
-    
-    backgroundImage.onload = () => {
-      bgLoaded = true;
       checkAllLoaded();
     };
     
     // Fallback timeout in case images take too long (8 seconds max + min load time)
     const fallbackTimer = setTimeout(() => {
-      primaryLoaded = true;
-      bgLoaded = true;
       checkAllLoaded();
     }, 8000 + minLoadTime);
     
     return () => clearTimeout(fallbackTimer);
-  }, []);
+  }, [hasInitiallyLoaded, setInitiallyLoaded]);
 
   // Master switch logic - bidirectional synchronization
   const allLightsOn = lights.spotlight.targetValue > 0 || lights.deskLamp.targetValue > 0 || lights.monitorLight.targetValue > 0;
@@ -188,16 +181,7 @@ const Index = () => {
       <LoadingOverlay isLoading={isLoading} />
       <Toaster />
 
-      <div
-        className="h-full min-h-0 flex items-center justify-center p-4 md:p-8 relative overflow-hidden"
-        style={{
-          backgroundImage: backgroundLoaded ? "url('/bg.png')" : "none",
-          backgroundSize: "cover",
-          backgroundPosition: "center",
-          backgroundRepeat: "no-repeat",
-          backgroundColor: "hsl(0 0% 8%)",
-        }}
-      >
+      <div className="h-full min-h-0 flex items-center justify-center p-4 md:p-8 relative overflow-hidden">
         {/* Dynamic color overlay that responds to lighting */}
         <motion.div
           className="fixed inset-0 pointer-events-none z-0"
