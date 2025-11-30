@@ -88,11 +88,13 @@ export const ClimateIndicator = ({
               [background:linear-gradient(135deg,rgba(255,255,255,0.2),rgba(255,255,255,0.08))]"
             initial={{ 
               opacity: 0,
-              scale: 0.92
+              scale: 0.3,
+              y: -16
             }}
             animate={{ 
               opacity: 1,
               scale: 1,
+              y: 0,
               transition: {
                 opacity: {
                   duration: 0.35,
@@ -101,19 +103,24 @@ export const ClimateIndicator = ({
                 scale: {
                   duration: 0.4,
                   ease: [0.34, 1.56, 0.64, 1]
+                },
+                y: {
+                  duration: 0.4,
+                  ease: [0.34, 1.56, 0.64, 1]
                 }
               }
             }}
             style={{
               x: mouseX,
               y: mouseY,
-              transformOrigin: 'center top'
+              transformOrigin: '50% 0%'
             }}
             exit={{ 
               opacity: 0,
-              scale: 0.92,
+              scale: 0.3,
+              y: -16,
               transition: {
-                duration: 0.3,
+                duration: 0.25,
                 ease: [0.4, 0, 0.6, 1]
               }
             }}
