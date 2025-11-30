@@ -44,7 +44,19 @@ export interface HAEntity {
   attributes: {
     friendly_name?: string;
     brightness?: number;
+    device_class?: string;
+    unit_of_measurement?: string;
   };
+  area_id?: string;
+  area_name?: string;
+  device_id?: string;
+  device_name?: string;
+}
+
+export interface HAArea {
+  area_id: string;
+  name: string;
+  icon?: string;
 }
 
 class HomeAssistantService {
@@ -159,6 +171,60 @@ class HomeAssistantService {
       return entities.filter(e => e.entity_id.startsWith("sensor."));
     } catch (error) {
       console.error("Failed to get sensors:", error);
+      return [];
+    }
+  }
+
+  async getAreas(): Promise<HAArea[]> {
+    try {
+      const response = await fetch(`${this.config?.baseUrl}/api/config/area_registry/list`, {
+        headers: this.getHeaders(),
+      });
+
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+
+      const areas: HAArea[] = await response.json();
+      return areas;
+    } catch (error) {
+      console.error("Failed to get areas:", error);
+      return [];
+    }
+  }
+
+  async getEntitiesWithContext(): Promise<HAEntity[]> {
+    try {
+      const [states, areas, devices, entityRegistry] = await Promise.all([
+        fetch(`${this.config?.baseUrl}/api/states`, { headers: this.getHeaders() }).then(r => r.json()),
+        fetch(`${this.config?.baseUrl}/api/config/area_registry/list`, { headers: this.getHeaders() }).then(r => r.json()).catch(() => []),
+        fetch(`${this.config?.baseUrl}/api/config/device_registry/list`, { headers: this.getHeaders() }).then(r => r.json()).catch(() => []),
+        fetch(`${this.config?.baseUrl}/api/config/entity_registry/list`, { headers: this.getHeaders() }).then(r => r.json()).catch(() => [])
+      ]);
+
+      // Create lookup maps with proper typing
+      const areaMap = new Map<string, string>(areas.map((a: any) => [a.area_id, a.name]));
+      const deviceMap = new Map<string, { name: string; area_id?: string }>(
+        devices.map((d: any) => [d.id, { name: d.name_by_user || d.name, area_id: d.area_id }])
+      );
+      const entityMap = new Map<string, { device_id?: string; area_id?: string }>(
+        entityRegistry.map((e: any) => [e.entity_id, { device_id: e.device_id, area_id: e.area_id }])
+      );
+
+      // Enrich states with context
+      return states.map((entity: HAEntity) => {
+        const entityInfo = entityMap.get(entity.entity_id);
+        const deviceInfo = entityInfo?.device_id ? deviceMap.get(entityInfo.device_id) : null;
+        const areaId = entityInfo?.area_id || deviceInfo?.area_id;
+        
+        return {
+          ...entity,
+          area_id: areaId,
+          area_name: areaId ? areaMap.get(areaId) : undefined,
+          device_id: entityInfo?.device_id,
+          device_name: deviceInfo?.name
+        };
+      });
+    } catch (error) {
+      console.error("Failed to get entities with context:", error);
       return [];
     }
   }
