@@ -38,8 +38,8 @@ export const MediaPlayer = () => {
     handleSeek,
   } = useMediaPlayer();
 
-  // Hide player during loading, not connected, or no entity configured
-  if (isLoading || !isConnected || !entityId || !playerState) {
+  // Hide player only during loading or if no player state
+  if (isLoading || !playerState) {
     return null;
   }
 

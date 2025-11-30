@@ -6,6 +6,38 @@ import type { MediaPlayerEntity } from '@/services/homeAssistant';
 import { PREDEFINED_GROUPS, SPEAKER_ENTITY_MAP, type SpeakerGroup } from '@/config/speakerGroups';
 import { POLL_INTERVAL } from '@/constants/animations';
 
+// Demo state to show when not connected to Home Assistant
+const DEMO_PLAYER_STATE: MediaPlayerState = {
+  isPlaying: false,
+  isPaused: true,
+  isIdle: false,
+  isOff: false,
+  volume: 65,
+  isMuted: false,
+  currentTrack: {
+    title: "Bohemian Rhapsody",
+    artist: "Queen",
+    album: "A Night at the Opera",
+    albumArt: null,
+    duration: 354,
+    position: 0,
+  },
+  shuffle: false,
+  repeat: 'off',
+  source: "Spotify",
+  availableSources: [],
+  groupedSpeakers: [],
+  appName: "Spotify",
+  isPending: false,
+  isLoading: false,
+  entityId: 'demo',
+  isTrackLoading: false,
+  isTrackTransitioning: false,
+  wasExternallyPaused: false,
+  queueEnded: false,
+  errorState: null,
+};
+
 interface MediaPlayerContextType {
   playerState: MediaPlayerState | null;
   isLoading: boolean;
@@ -51,9 +83,15 @@ export const MediaPlayerProvider = ({ children, entityId, isConnected }: MediaPl
     pollInterval: POLL_INTERVAL.mediaPlayer, // Fast polling for immediate music detection
   });
 
+  // Demo mode check
+  const isDemoMode = !isConnected || !entityId;
+
+  // Return demo state when not connected
+  const effectivePlayerState = isDemoMode ? DEMO_PLAYER_STATE : playerState;
+
   // Optimistic handlers with immediate UI update
   const handlePlayPause = useCallback(async () => {
-    if (!entityId || !playerState) return;
+    if (isDemoMode || !entityId || !playerState) return;
     
     setPlayerState(prev => prev ? { ...prev, isPlaying: !prev.isPlaying, isPaused: prev.isPlaying } : null);
     await homeAssistant.mediaPlayPause(entityId);
@@ -61,26 +99,26 @@ export const MediaPlayerProvider = ({ children, entityId, isConnected }: MediaPl
   }, [entityId, playerState, setPlayerState, syncFromRemote]);
 
   const handleNext = useCallback(async () => {
-    if (!entityId) return;
+    if (isDemoMode || !entityId) return;
     await homeAssistant.mediaNextTrack(entityId);
     setTimeout(syncFromRemote, 300);
   }, [entityId, syncFromRemote]);
 
   const handlePrevious = useCallback(async () => {
-    if (!entityId) return;
+    if (isDemoMode || !entityId) return;
     await homeAssistant.mediaPreviousTrack(entityId);
     setTimeout(syncFromRemote, 300);
   }, [entityId, syncFromRemote]);
 
   const handleVolumeChange = useCallback(async (volume: number) => {
-    if (!entityId || !playerState) return;
+    if (isDemoMode || !entityId || !playerState) return;
     
     setPlayerState(prev => prev ? { ...prev, volume } : null);
     await homeAssistant.setMediaVolume(entityId, volume);
   }, [entityId, playerState, setPlayerState]);
 
   const handleMuteToggle = useCallback(async () => {
-    if (!entityId || !playerState) return;
+    if (isDemoMode || !entityId || !playerState) return;
     
     setPlayerState(prev => prev ? { ...prev, isMuted: !prev.isMuted } : null);
     await homeAssistant.toggleMediaMute(entityId, playerState.isMuted);
@@ -88,7 +126,7 @@ export const MediaPlayerProvider = ({ children, entityId, isConnected }: MediaPl
   }, [entityId, playerState, setPlayerState, syncFromRemote]);
 
   const handleShuffleToggle = useCallback(async () => {
-    if (!entityId || !playerState) return;
+    if (isDemoMode || !entityId || !playerState) return;
     
     setPlayerState(prev => prev ? { ...prev, shuffle: !prev.shuffle } : null);
     await homeAssistant.setMediaShuffle(entityId, !playerState.shuffle);
@@ -96,7 +134,7 @@ export const MediaPlayerProvider = ({ children, entityId, isConnected }: MediaPl
   }, [entityId, playerState, setPlayerState, syncFromRemote]);
 
   const handleRepeatToggle = useCallback(async () => {
-    if (!entityId || !playerState) return;
+    if (isDemoMode || !entityId || !playerState) return;
     
     const nextRepeat = playerState.repeat === 'off' ? 'all' : playerState.repeat === 'all' ? 'one' : 'off';
     setPlayerState(prev => prev ? { ...prev, repeat: nextRepeat } : null);
@@ -106,7 +144,7 @@ export const MediaPlayerProvider = ({ children, entityId, isConnected }: MediaPl
 
   // Handler for Spotify Connect source selection
   const handleSpotifySourceChange = useCallback(async (source: string) => {
-    if (!entityId) return;
+    if (isDemoMode || !entityId) return;
     
     console.log('🎵 Selecting Spotify Connect source:', source);
     
@@ -122,7 +160,7 @@ export const MediaPlayerProvider = ({ children, entityId, isConnected }: MediaPl
 
   // Handler for individual Sonos speaker selection
   const handleSpeakerSelect = useCallback(async (speakerEntityId: string, friendlyName: string) => {
-    if (!entityId) return;
+    if (isDemoMode || !entityId) return;
     
     console.log('🔊 Selecting speaker:', friendlyName, speakerEntityId);
     
@@ -139,7 +177,7 @@ export const MediaPlayerProvider = ({ children, entityId, isConnected }: MediaPl
 
   // Handler for speaker group selection
   const handleGroupSelect = useCallback(async (group: SpeakerGroup) => {
-    if (!entityId) return;
+    if (isDemoMode || !entityId) return;
     
     console.log('👥 Selecting speaker group:', group.name, group.entityIds);
     
@@ -160,7 +198,7 @@ export const MediaPlayerProvider = ({ children, entityId, isConnected }: MediaPl
   }, [entityId, syncFromRemote]);
 
   const handleSeek = useCallback(async (position: number) => {
-    if (!entityId || !playerState?.currentTrack) return;
+    if (isDemoMode || !entityId || !playerState?.currentTrack) return;
     
     // Update local state immediately for responsive UI
     setPlayerState(prev => prev?.currentTrack ? {
@@ -198,8 +236,8 @@ export const MediaPlayerProvider = ({ children, entityId, isConnected }: MediaPl
   }, [playerState, detectActiveTarget, currentPlaybackTarget]);
 
   const value: MediaPlayerContextType = {
-    playerState,
-    isLoading,
+    playerState: effectivePlayerState,
+    isLoading: isDemoMode ? false : isLoading,
     availableSpeakers,
     predefinedGroups: PREDEFINED_GROUPS,
     currentPlaybackTarget,
