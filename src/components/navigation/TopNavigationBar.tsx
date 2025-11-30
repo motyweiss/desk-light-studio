@@ -51,13 +51,20 @@ export const TopNavigationBar = ({
             <ClimateIndicators />
           </motion.div>
 
-          {/* Right: Settings + Connection Status */}
+          {/* Right: Connection Status + Settings */}
           <motion.div 
             className="flex items-center gap-4"
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.5, delay: 0.2 }}
           >
+            <ConnectionStatusIndicator
+              isConnected={isConnected}
+              isReconnecting={isReconnecting}
+              onReconnectClick={onReconnectClick}
+              inline={true}
+            />
+            
             <motion.button
               onClick={onSettingsClick}
               className="w-10 h-10 rounded-lg flex items-center justify-center text-white/60 hover:text-white/90 hover:bg-white/5 transition-colors"
@@ -67,13 +74,6 @@ export const TopNavigationBar = ({
             >
               <SettingsIcon className="w-5 h-5" strokeWidth={1.5} />
             </motion.button>
-            
-            <ConnectionStatusIndicator
-              isConnected={isConnected}
-              isReconnecting={isReconnecting}
-              onReconnectClick={onReconnectClick}
-              inline={true}
-            />
           </motion.div>
         </div>
       </div>
