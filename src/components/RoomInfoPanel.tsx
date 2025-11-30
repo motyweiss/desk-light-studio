@@ -150,7 +150,7 @@ export const RoomInfoPanel = ({ roomName, masterSwitchOn, onMasterToggle, onLigh
           show: {
             opacity: 1,
             transition: {
-              delayChildren: 0.6,
+              delayChildren: 0.3,
               staggerChildren: 0.25
             }
           }
