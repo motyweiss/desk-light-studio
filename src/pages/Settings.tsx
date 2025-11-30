@@ -394,10 +394,9 @@ const Settings = () => {
             Cancel
           </Button>
           <Button
-            variant="primary"
             onClick={handleSave}
             disabled={!isFormValid}
-            className="flex-1"
+            className="flex-1 bg-[hsl(28_18%_12%)] hover:bg-[hsl(28_18%_16%)] text-white border-white/10 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
           >
             Save & Apply
           </Button>
