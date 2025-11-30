@@ -99,13 +99,11 @@ export const useClimateSync = (config: UseClimateSyncConfig) => {
         setAirpodsMaxBatteryCharging(isCharging);
       }
 
-      if (!isLoaded) {
-        setIsLoaded(true);
-      }
+      setIsLoaded(true);
     } catch (error) {
       console.error('❌ Failed to sync climate data:', error);
     }
-  }, [isConnected, entityMapping, isLoaded]);
+  }, [isConnected, entityMapping]);
 
   // Initial sync
   useEffect(() => {
