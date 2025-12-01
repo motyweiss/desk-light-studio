@@ -1,11 +1,12 @@
 import { motion, AnimatePresence } from 'framer-motion';
 import { useState, useEffect, useMemo } from 'react';
-import { X, MapPin, Zap, Info, Clock, Activity, Code } from 'lucide-react';
+import { X, MapPin, Zap, Info, Clock, Activity, Code, Settings } from 'lucide-react';
 import { DiscoveredDevice, DiscoveredEntity } from '@/types/discovery';
 import DeviceTypeIcon from './DeviceTypeIcon';
 import ManufacturerLogo from './ManufacturerLogo';
 import DeviceWidget from './DeviceWidget';
 import AreaAssignmentDropdown from './AreaAssignmentDropdown';
+import { EntityControl, isControllable } from './EntityControl';
 import { useHomeAssistantConfig } from '@/hooks/useHomeAssistantConfig';
 import { homeAssistant } from '@/services/homeAssistant';
 import {
@@ -122,6 +123,16 @@ const DeviceDetailModal = ({ device, isOpen, onClose }: DeviceDetailModalProps) 
     );
   }
 
+  const controllableEntities = liveEntities.filter(e => isControllable(e.domain));
+
+  const handleEntityStateChange = (entityId: string, newState: any) => {
+    setLiveEntities(prev => prev.map(e => 
+      e.entity_id === entityId 
+        ? { ...e, state: newState.state || e.state, attributes: { ...e.attributes, ...newState.attributes } }
+        : e
+    ));
+  };
+
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-3xl max-h-[85vh] overflow-y-auto bg-[hsl(28,20%,18%)]/95 backdrop-blur-xl border-white/10 text-white">
@@ -175,6 +186,31 @@ const DeviceDetailModal = ({ device, isOpen, onClose }: DeviceDetailModalProps) 
         </DialogHeader>
 
         <div className="space-y-6 mt-4">
+          {/* Quick Controls Section */}
+          {controllableEntities.length > 0 && (
+            <motion.div
+              className="p-4 rounded-xl bg-white/[0.02] border border-white/5"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.15, duration: 0.3 }}
+            >
+              <h3 className="text-sm font-light text-white/70 mb-3 flex items-center gap-2">
+                <Settings className="w-4 h-4" strokeWidth={1.5} />
+                Quick Controls
+              </h3>
+              <div className="space-y-2">
+                {controllableEntities.map((entity) => (
+                  <EntityControl 
+                    key={entity.entity_id}
+                    entity={entity}
+                    onStateChange={handleEntityStateChange}
+                    isConnected={!!config}
+                  />
+                ))}
+              </div>
+            </motion.div>
+          )}
+
           {/* Area Assignment */}
           <div className="p-4 rounded-xl bg-white/[0.02] border border-white/5">
             <div className="flex items-center justify-between">
