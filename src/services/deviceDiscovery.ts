@@ -6,6 +6,7 @@ import {
   DeviceType, 
   HomeDiscoveryResult 
 } from '@/types/discovery';
+import { getDeviceTemplate } from '@/config/deviceDisplayTemplates';
 
 const DOMAIN_PRIORITY = [
   'light',
@@ -103,6 +104,8 @@ export class DeviceDiscoveryService {
       // Determine device name and manufacturer
       const { name, manufacturer } = this.extractDeviceInfo(deviceKey, entities);
       
+      const deviceType = this.detectDeviceType(entities);
+      
       const device: DiscoveredDevice = {
         id: entities.length === 1 ? primaryEntity.entity_id : `device_${deviceKey.toLowerCase().replace(/\s+/g, '_').replace(/'/g, '')}`,
         name,
@@ -116,9 +119,10 @@ export class DeviceDiscoveryService {
           return (aPriority === -1 ? 999 : aPriority) - (bPriority === -1 ? 999 : bPriority);
         }),
         primaryEntity: this.selectPrimaryEntity(entities),
-        deviceType: this.detectDeviceType(entities),
+        deviceType,
         isGroup: false,
-        groupMembers: []
+        groupMembers: [],
+        displayableValues: this.extractDisplayableValues(deviceType, manufacturer, entities)
       };
 
       discoveredDevices.push(device);
@@ -353,5 +357,24 @@ export class DeviceDiscoveryService {
       isGroup: true,
       groupMembers: members
     };
+  }
+
+  private extractDisplayableValues(
+    deviceType: DeviceType, 
+    manufacturer: string | undefined,
+    entities: DiscoveredEntity[]
+  ) {
+    const template = getDeviceTemplate(deviceType, manufacturer);
+    
+    if (!template) {
+      return [];
+    }
+    
+    try {
+      return template.extractDisplayableValues(entities);
+    } catch (error) {
+      console.error('Error extracting displayable values:', error);
+      return [];
+    }
   }
 }

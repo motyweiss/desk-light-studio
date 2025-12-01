@@ -2,55 +2,14 @@ import { motion } from 'framer-motion';
 import { DiscoveredDevice } from '@/types/discovery';
 import DeviceTypeIcon from './DeviceTypeIcon';
 import ManufacturerLogo from './ManufacturerLogo';
-import { ChevronRight, Zap, Thermometer, Droplets, Wind, Battery, Signal, Activity } from 'lucide-react';
+import DeviceWidget from './DeviceWidget';
+import { ChevronRight } from 'lucide-react';
 
 interface DeviceCardProps {
   device: DiscoveredDevice;
   index: number;
   onClick?: () => void;
 }
-
-const getEntityIcon = (entity: any) => {
-  const domain = entity.domain;
-  const deviceClass = entity.device_class;
-  
-  if (domain === 'sensor') {
-    if (deviceClass === 'temperature') return Thermometer;
-    if (deviceClass === 'humidity') return Droplets;
-    if (deviceClass === 'battery') return Battery;
-    if (deviceClass === 'pm25' || deviceClass === 'pm10') return Wind;
-    return Activity;
-  }
-  
-  if (domain === 'light') return Zap;
-  if (domain === 'binary_sensor') return Signal;
-  
-  return Activity;
-};
-
-const formatEntityValue = (entity: any): string => {
-  const { state, attributes } = entity;
-  
-  if (entity.domain === 'light') {
-    return state === 'on' ? 'On' : 'Off';
-  }
-  
-  if (entity.domain === 'sensor') {
-    const unit = attributes.unit_of_measurement || '';
-    return `${state}${unit}`;
-  }
-  
-  if (entity.domain === 'binary_sensor') {
-    return state === 'on' ? 'Active' : 'Inactive';
-  }
-  
-  return state.charAt(0).toUpperCase() + state.slice(1);
-};
-
-const getManufacturerLogo = (manufacturer?: string) => {
-  // Returning null - will use ManufacturerLogo component instead
-  return null;
-};
 
 const DeviceCard = ({ device, index, onClick }: DeviceCardProps) => {
   const primaryEntity = device.entities.find(e => e.entity_id === device.primaryEntity) || device.entities[0];
@@ -103,68 +62,19 @@ const DeviceCard = ({ device, index, onClick }: DeviceCardProps) => {
               </p>
             )}
 
-            {/* Entity Hierarchy - All capabilities */}
-            {device.entities.length > 1 && (
+            {/* Display Widgets - Only relevant displayable values */}
+            {device.displayableValues && device.displayableValues.length > 0 && (
               <div className="space-y-1.5 mt-2.5">
-                {device.entities.slice(0, 4).map((entity) => {
-                  const Icon = getEntityIcon(entity);
-                  const value = formatEntityValue(entity);
-                  const isEntityActive = entity.state === 'on' || entity.state === 'playing';
-                  
-                  // Extract entity label (remove device name prefix)
-                  let entityLabel = entity.friendly_name;
-                  if (entityLabel.startsWith(device.name)) {
-                    entityLabel = entityLabel.substring(device.name.length).trim();
-                  }
-                  if (!entityLabel) {
-                    entityLabel = entity.domain.charAt(0).toUpperCase() + entity.domain.slice(1);
-                  }
-                  
-                  return (
-                    <div 
-                      key={entity.entity_id}
-                      className="flex items-center gap-2 text-xs"
-                    >
-                      <Icon className={`w-3 h-3 flex-shrink-0 transition-colors ${
-                        isEntityActive ? 'text-[hsl(43_88%_60%)]' : 'text-white/40'
-                      }`} />
-                      <span className="text-white/50 truncate flex-1 min-w-0 font-light">
-                        {entityLabel}
-                      </span>
-                      <span className={`font-light flex-shrink-0 transition-colors ${
-                        isEntityActive ? 'text-[hsl(43_88%_60%)]' : 'text-white/70'
-                      }`}>
-                        {value}
-                      </span>
-                    </div>
-                  );
-                })}
-                {device.entities.length > 4 && (
-                  <div className="text-[11px] text-white/30 font-light">
-                    +{device.entities.length - 4} more
-                  </div>
-                )}
-              </div>
-            )}
-
-            {/* Single entity display */}
-            {device.entities.length === 1 && (
-              <div className="text-xs font-light text-white/50 mt-1">
-                {formatEntityValue(primaryEntity)}
-              </div>
-            )}
-
-            {/* Capabilities Pills */}
-            {device.entities.some(e => e.capabilities.length > 0) && (
-              <div className="flex flex-wrap gap-1.5 mt-3">
-                {Array.from(new Set(device.entities.flatMap(e => e.capabilities))).slice(0, 3).map(cap => (
-                  <span 
-                    key={cap}
-                    className="px-2 py-0.5 rounded text-[10px] font-light bg-white/5 text-white/40 border border-white/5"
-                  >
-                    {cap}
-                  </span>
+                {device.displayableValues.map((widget) => (
+                  <DeviceWidget key={widget.id} widget={widget} />
                 ))}
+              </div>
+            )}
+
+            {/* Fallback: Show entity count if no displayable values */}
+            {(!device.displayableValues || device.displayableValues.length === 0) && (
+              <div className="text-xs font-light text-white/50 mt-1">
+                {device.entities.length} {device.entities.length === 1 ? 'entity' : 'entities'}
               </div>
             )}
           </div>

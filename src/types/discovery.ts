@@ -35,6 +35,15 @@ export interface DiscoveredDevice {
   deviceType: DeviceType;
   isGroup: boolean;
   groupMembers?: string[];
+  displayableValues?: Array<{
+    id: string;
+    label: string;
+    icon: string;
+    value: string | number;
+    unit?: string;
+    widgetType: 'value' | 'status';
+    isActive?: boolean;
+  }>;
 }
 
 export interface DiscoveredArea {
