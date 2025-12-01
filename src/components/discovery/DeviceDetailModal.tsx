@@ -34,14 +34,15 @@ const DeviceDetailModal = ({ device, isOpen, onClose }: DeviceDetailModalProps) 
 
   // Real-time updates from Home Assistant
   useEffect(() => {
-    if (!isOpen) return;
+    if (!isOpen || !device) return;
 
     // Initialize with device entities
     setLiveEntities(device.entities);
+    setLastUpdated(new Date());
 
     // If no HA config, stop here (demo mode)
     if (!config) {
-      console.log('Running in demo mode - no real-time updates');
+      console.log('💡 Running in demo mode - no real-time updates');
       return;
     }
 
@@ -61,28 +62,33 @@ const DeviceDetailModal = ({ device, isOpen, onClose }: DeviceDetailModalProps) 
               }
               return entity;
             } catch (error) {
-              console.error(`Error fetching state for ${entity.entity_id}:`, error);
+              console.error(`❌ Error fetching state for ${entity.entity_id}:`, error);
               return entity;
             }
           })
         );
         setLiveEntities(updatedEntities);
         setLastUpdated(new Date());
+        console.log(`✅ Updated ${updatedEntities.length} entities for ${device.name}`);
       } catch (error) {
-        console.error('Error updating device states:', error);
+        console.error('❌ Error updating device states:', error);
       } finally {
         setIsUpdating(false);
       }
     };
 
     // Initial fetch
+    console.log(`🔄 Starting real-time updates for ${device.name}`);
     updateEntityStates();
 
     // Poll every 2 seconds for real-time updates
     const interval = setInterval(updateEntityStates, 2000);
 
-    return () => clearInterval(interval);
-  }, [isOpen, config, device.entities]);
+    return () => {
+      console.log(`⏹️ Stopping real-time updates for ${device.name}`);
+      clearInterval(interval);
+    };
+  }, [isOpen, config, device]);
 
   // Format attributes for display
   const formatAttributeValue = (value: any): string => {
