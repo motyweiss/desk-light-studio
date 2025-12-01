@@ -27,11 +27,6 @@ const DeviceDetailModal = ({ device, isOpen, onClose }: DeviceDetailModalProps) 
   const [lastUpdated, setLastUpdated] = useState<Date>(new Date());
   const [isUpdating, setIsUpdating] = useState(false);
 
-  if (!device) return null;
-
-  const primaryEntity = liveEntities.find(e => e.entity_id === device.primaryEntity) || liveEntities[0];
-  const isActive = liveEntities.some(e => e.state === 'on' || e.state === 'playing' || e.state === 'home');
-
   // Real-time updates from Home Assistant
   useEffect(() => {
     if (!isOpen || !device) return;
@@ -106,6 +101,12 @@ const DeviceDetailModal = ({ device, isOpen, onClose }: DeviceDetailModalProps) 
     }
     return String(value);
   };
+
+  // Early return after all hooks
+  if (!device) return null;
+
+  const primaryEntity = liveEntities.find(e => e.entity_id === device.primaryEntity) || liveEntities[0];
+  const isActive = liveEntities.some(e => e.state === 'on' || e.state === 'playing' || e.state === 'home');
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
