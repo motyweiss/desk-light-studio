@@ -4,7 +4,7 @@ import DeviceTypeIcon from './DeviceTypeIcon';
 import ManufacturerLogo from './ManufacturerLogo';
 import DeviceWidget from './DeviceWidget';
 import AreaAssignmentDropdown from './AreaAssignmentDropdown';
-import { ChevronRight } from 'lucide-react';
+import { ChevronRight, Users } from 'lucide-react';
 
 interface DeviceCardProps {
   device: DiscoveredDevice;
@@ -33,17 +33,24 @@ const DeviceCard = ({ device, index, onClick, showAreaAssignment = false }: Devi
             onClick={onClick}
           >
             {/* Device Icon */}
-            <div className={`flex-shrink-0 p-2.5 rounded-lg transition-colors ${
-              isActive 
-                ? 'bg-[hsl(43_88%_60%)]/10' 
-                : 'bg-white/5'
-            }`}>
-              <DeviceTypeIcon 
-                type={device.deviceType}
-                deviceClass={primaryEntity.device_class}
-                state={primaryEntity.state}
-                className="w-5 h-5" 
-              />
+            <div className="relative flex-shrink-0">
+              <div className={`p-2.5 rounded-lg transition-colors ${
+                isActive 
+                  ? 'bg-[hsl(43_88%_60%)]/10' 
+                  : 'bg-white/5'
+              }`}>
+                <DeviceTypeIcon 
+                  type={device.deviceType}
+                  deviceClass={primaryEntity.device_class}
+                  state={primaryEntity.state}
+                  className="w-5 h-5" 
+                />
+              </div>
+              {device.isGroup && device.groupMembers && (
+                <div className="absolute -top-1 -right-1 w-4 h-4 bg-[hsl(43_88%_60%)] rounded-full flex items-center justify-center shadow-lg">
+                  <Users className="w-2.5 h-2.5 text-black" strokeWidth={2.5} />
+                </div>
+              )}
             </div>
             
             {/* Device Info */}
@@ -104,12 +111,14 @@ const DeviceCard = ({ device, index, onClick, showAreaAssignment = false }: Devi
         )}
       </div>
 
-      {/* Group Badge */}
-      {device.isGroup && (
+      {/* Group Badge with Members List */}
+      {device.isGroup && device.groupMembers && device.groupMembers.length > 0 && (
         <div className="mt-3 pt-3 border-t border-white/5">
-          <span className="text-[10px] font-light text-white/30 px-2 py-1 bg-white/5 rounded">
-            Group • {device.groupMembers?.length || 0} members
-          </span>
+          <div className="flex items-center justify-between">
+            <span className="text-[11px] font-light text-[hsl(43_88%_60%)] bg-[hsl(43_88%_60%)]/10 px-2.5 py-1 rounded-full">
+              Group • {device.groupMembers.length} {device.groupMembers.length === 1 ? 'member' : 'members'}
+            </span>
+          </div>
         </div>
       )}
     </motion.div>
