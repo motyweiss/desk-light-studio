@@ -1,4 +1,4 @@
-import { HAEntity, HomeAssistantConfig } from './homeAssistant';
+import { HomeAssistantConfig } from './homeAssistant';
 import { 
   DiscoveredDevice, 
   DiscoveredArea, 
@@ -35,37 +35,35 @@ export class DeviceDiscoveryService {
       'Content-Type': 'application/json',
     };
 
-    // Fetch all data in parallel
-    const [statesRes, areasRes, devicesRes, entitiesRes] = await Promise.all([
-      fetch(`${baseUrl}/api/states`, { headers }),
-      fetch(`${baseUrl}/api/config/area_registry/list`, { headers, method: 'POST' }),
-      fetch(`${baseUrl}/api/config/device_registry/list`, { headers, method: 'POST' }),
-      fetch(`${baseUrl}/api/config/entity_registry/list`, { headers, method: 'POST' })
-    ]);
-
+    // Fetch only states - this is the only endpoint we know works
+    const statesRes = await fetch(`${baseUrl}/api/states`, { headers });
+    
+    if (!statesRes.ok) {
+      throw new Error(`Failed to fetch states: ${statesRes.statusText}`);
+    }
+    
     const states: any[] = await statesRes.json();
-    const areas: any[] = await areasRes.json();
-    const devices: any[] = await devicesRes.json();
-    const entityRegistry: any[] = await entitiesRes.json();
 
-    // Build maps for quick lookup
-    const areaMap = new Map<string, any>(areas.map((a: any) => [a.area_id, a]));
-    const deviceMap = new Map<string, any>(devices.map((d: any) => [d.id, d]));
-    const entityToDeviceMap = new Map<string, any>(
-      entityRegistry.map((e: any) => [e.entity_id, { device_id: e.device_id, area_id: e.area_id }])
-    );
-
+    // Extract area information from entity attributes
+    const areaMap = new Map<string, { id: string; name: string; entities: DiscoveredEntity[] }>();
+    
     // Identify groups
     const groups = this.identifyGroups(states);
     const groupMemberIds = this.collectGroupMemberIds(groups);
 
-    // Group entities by device (excluding group members)
-    const deviceEntitiesMap = new Map<string, DiscoveredEntity[]>();
-    const entitiesWithoutDevice: DiscoveredEntity[] = [];
+    // Process all entities
+    const devicesByName = new Map<string, DiscoveredEntity[]>();
+    const unassignedEntities: DiscoveredEntity[] = [];
 
     states.forEach(state => {
+      // Skip group members to avoid duplication
       if (groupMemberIds.has(state.entity_id)) return;
+      // Skip groups themselves
       if (this.isGroupEntity(state)) return;
+      // Skip internal/hidden entities
+      if (state.entity_id.startsWith('sun.') || 
+          state.entity_id.startsWith('zone.') ||
+          state.attributes.hidden) return;
 
       const entity: DiscoveredEntity = {
         entity_id: state.entity_id,
@@ -77,35 +75,42 @@ export class DeviceDiscoveryService {
         capabilities: this.extractCapabilities(state)
       };
 
-      const registryInfo = entityToDeviceMap.get(state.entity_id);
-      const deviceId = registryInfo?.device_id || 'no-device';
-
-      if (deviceId === 'no-device') {
-        entitiesWithoutDevice.push(entity);
-      } else {
-        if (!deviceEntitiesMap.has(deviceId)) {
-          deviceEntitiesMap.set(deviceId, []);
+      // Extract area from friendly_name (e.g., "Office Light" -> area: "Office")
+      const areaName = this.extractAreaFromName(entity.friendly_name, entity.domain);
+      
+      if (areaName) {
+        if (!areaMap.has(areaName)) {
+          areaMap.set(areaName, {
+            id: areaName.toLowerCase().replace(/\s+/g, '_'),
+            name: areaName,
+            entities: []
+          });
         }
-        deviceEntitiesMap.get(deviceId)!.push(entity);
+        areaMap.get(areaName)!.entities.push(entity);
+      } else {
+        unassignedEntities.push(entity);
       }
+
+      // Group by device name (friendly name without domain-specific suffix)
+      const deviceName = this.extractDeviceName(entity.friendly_name, entity.domain);
+      if (!devicesByName.has(deviceName)) {
+        devicesByName.set(deviceName, []);
+      }
+      devicesByName.get(deviceName)!.push(entity);
     });
 
-    // Create discovered devices
+    // Create discovered devices from grouped entities
     const discoveredDevices: DiscoveredDevice[] = [];
 
-    deviceEntitiesMap.forEach((entities, deviceId) => {
-      const deviceInfo = deviceMap.get(deviceId);
-      const registryInfo = entityToDeviceMap.get(entities[0].entity_id);
-      const areaId = deviceInfo?.area_id || registryInfo?.area_id;
-      const area = areaId ? areaMap.get(areaId) : null;
-
+    devicesByName.forEach((entities, deviceName) => {
+      const primaryEntity = entities[0];
+      const areaName = this.extractAreaFromName(primaryEntity.friendly_name, primaryEntity.domain);
+      
       const device: DiscoveredDevice = {
-        id: deviceId,
-        name: deviceInfo?.name_by_user || deviceInfo?.name || entities[0].friendly_name,
-        manufacturer: deviceInfo?.manufacturer,
-        model: deviceInfo?.model,
-        area_id: areaId,
-        area_name: area?.name,
+        id: entities.length === 1 ? primaryEntity.entity_id : `device_${deviceName.toLowerCase().replace(/\s+/g, '_')}`,
+        name: deviceName,
+        area_id: areaName?.toLowerCase().replace(/\s+/g, '_'),
+        area_name: areaName,
         entities,
         primaryEntity: this.selectPrimaryEntity(entities),
         deviceType: this.detectDeviceType(entities),
@@ -116,53 +121,27 @@ export class DeviceDiscoveryService {
       discoveredDevices.push(device);
     });
 
-    // Handle entities without device
-    entitiesWithoutDevice.forEach(entity => {
-      const registryInfo = entityToDeviceMap.get(entity.entity_id);
-      const areaId = registryInfo?.area_id;
-      const area = areaId ? areaMap.get(areaId) : null;
-
-      discoveredDevices.push({
-        id: entity.entity_id,
-        name: entity.friendly_name,
-        area_id: areaId,
-        area_name: area?.name,
-        entities: [entity],
-        primaryEntity: entity.entity_id,
-        deviceType: this.detectDeviceType([entity]),
-        isGroup: false,
-        groupMembers: []
-      });
-    });
-
     // Convert groups to devices
-    const groupDevices = groups.map(g => this.groupToDevice(g, areaMap, deviceMap, entityToDeviceMap));
-
-    // Group devices by area
-    const areaDevicesMap = new Map<string, DiscoveredDevice[]>();
-    const unassignedDevices: DiscoveredDevice[] = [];
-
-    [...discoveredDevices, ...groupDevices].forEach(device => {
-      if (device.area_id) {
-        if (!areaDevicesMap.has(device.area_id)) {
-          areaDevicesMap.set(device.area_id, []);
-        }
-        areaDevicesMap.get(device.area_id)!.push(device);
-      } else {
-        unassignedDevices.push(device);
+    const groupDevices = groups.map(g => this.groupToDevice(g));
+    
+    // Build area structures
+    const discoveredAreas: DiscoveredArea[] = [];
+    areaMap.forEach((areaInfo) => {
+      // Get devices for this area
+      const areaDevices = discoveredDevices.filter(d => d.area_id === areaInfo.id);
+      
+      if (areaDevices.length > 0) {
+        discoveredAreas.push({
+          id: areaInfo.id,
+          name: areaInfo.name,
+          devices: areaDevices,
+          entityCount: areaDevices.reduce((sum, d) => sum + d.entities.length, 0)
+        });
       }
     });
 
-    const discoveredAreas: DiscoveredArea[] = Array.from(areaDevicesMap.entries()).map(([areaId, devices]) => {
-      const area = areaMap.get(areaId);
-      return {
-        id: areaId,
-        name: area?.name || 'Unknown Area',
-        icon: area?.icon,
-        devices,
-        entityCount: devices.reduce((sum, d) => sum + d.entities.length, 0)
-      };
-    });
+    // Unassigned devices
+    const unassignedDevices = discoveredDevices.filter(d => !d.area_id);
 
     // Calculate stats
     const allDevices = [...discoveredDevices, ...groupDevices];
@@ -182,6 +161,30 @@ export class DeviceDiscoveryService {
         devicesByType
       }
     };
+  }
+
+  private extractAreaFromName(friendlyName: string, domain: string): string | null {
+    // Common patterns: "Office Light", "Kitchen Temperature", "Bedroom Door"
+    // Try to extract the area (first word/words before the device type)
+    const parts = friendlyName.split(' ');
+    if (parts.length >= 2) {
+      // Take everything except the last word as potential area
+      const potentialArea = parts.slice(0, -1).join(' ');
+      // Common device type words to identify
+      const deviceWords = ['light', 'lamp', 'temperature', 'humidity', 'sensor', 'switch', 
+                          'battery', 'door', 'window', 'motion', 'camera', 'lock', 'player'];
+      const lastWord = parts[parts.length - 1].toLowerCase();
+      
+      if (deviceWords.some(w => lastWord.includes(w)) || domain === 'sensor' || domain === 'binary_sensor') {
+        return potentialArea;
+      }
+    }
+    return null;
+  }
+
+  private extractDeviceName(friendlyName: string, domain: string): string {
+    // Return the full friendly name as device name
+    return friendlyName;
   }
 
   private isGroupEntity(state: any): boolean {
@@ -250,23 +253,15 @@ export class DeviceDiscoveryService {
     return 'unknown';
   }
 
-  private groupToDevice(
-    group: any, 
-    areaMap: Map<string, any>,
-    deviceMap: Map<string, any>,
-    entityToDeviceMap: Map<string, any>
-  ): DiscoveredDevice {
+  private groupToDevice(group: any): DiscoveredDevice {
     const attrs = group.attributes as any;
     const members = attrs?.entity_id || attrs?.group_members || [];
-    const registryInfo = entityToDeviceMap.get(group.entity_id);
-    const areaId = registryInfo?.area_id;
-    const area = areaId ? areaMap.get(areaId) : null;
 
     return {
       id: group.entity_id,
       name: group.attributes.friendly_name || group.entity_id,
-      area_id: areaId,
-      area_name: area?.name,
+      area_id: undefined,
+      area_name: undefined,
       entities: [{
         entity_id: group.entity_id,
         domain: group.entity_id.split('.')[0],
