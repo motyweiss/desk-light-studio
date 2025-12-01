@@ -51,9 +51,8 @@ export class DeviceDiscoveryService {
     const groups = this.identifyGroups(states);
     const groupMemberIds = this.collectGroupMemberIds(groups);
 
-    // Process all entities
-    const devicesByName = new Map<string, DiscoveredEntity[]>();
-    const unassignedEntities: DiscoveredEntity[] = [];
+    // Process all entities and group intelligently
+    const allEntities: DiscoveredEntity[] = [];
 
     states.forEach(state => {
       // Skip group members to avoid duplication
@@ -75,43 +74,47 @@ export class DeviceDiscoveryService {
         capabilities: this.extractCapabilities(state)
       };
 
-      // Extract area from friendly_name (e.g., "Office Light" -> area: "Office")
-      const areaName = this.extractAreaFromName(entity.friendly_name, entity.domain);
-      
-      if (areaName) {
-        if (!areaMap.has(areaName)) {
-          areaMap.set(areaName, {
-            id: areaName.toLowerCase().replace(/\s+/g, '_'),
-            name: areaName,
-            entities: []
-          });
-        }
-        areaMap.get(areaName)!.entities.push(entity);
-      } else {
-        unassignedEntities.push(entity);
-      }
+      allEntities.push(entity);
+    });
 
-      // Group by device name (friendly name without domain-specific suffix)
-      const deviceName = this.extractDeviceName(entity.friendly_name, entity.domain);
-      if (!devicesByName.has(deviceName)) {
-        devicesByName.set(deviceName, []);
+    // Smart device grouping - group entities by common device name
+    const devicesByName = this.smartDeviceGrouping(allEntities);
+    
+    // Extract area information for each device
+    devicesByName.forEach((entities, deviceName) => {
+      const areaName = this.extractAreaFromName(entities[0].friendly_name, entities[0].domain);
+      
+      if (areaName && !areaMap.has(areaName)) {
+        areaMap.set(areaName, {
+          id: areaName.toLowerCase().replace(/\s+/g, '_'),
+          name: areaName,
+          entities: []
+        });
       }
-      devicesByName.get(deviceName)!.push(entity);
     });
 
     // Create discovered devices from grouped entities
     const discoveredDevices: DiscoveredDevice[] = [];
 
-    devicesByName.forEach((entities, deviceName) => {
+    devicesByName.forEach((entities, deviceKey) => {
       const primaryEntity = entities[0];
       const areaName = this.extractAreaFromName(primaryEntity.friendly_name, primaryEntity.domain);
       
+      // Determine device name and manufacturer
+      const { name, manufacturer } = this.extractDeviceInfo(deviceKey, entities);
+      
       const device: DiscoveredDevice = {
-        id: entities.length === 1 ? primaryEntity.entity_id : `device_${deviceName.toLowerCase().replace(/\s+/g, '_')}`,
-        name: deviceName,
+        id: entities.length === 1 ? primaryEntity.entity_id : `device_${deviceKey.toLowerCase().replace(/\s+/g, '_').replace(/'/g, '')}`,
+        name,
+        manufacturer,
         area_id: areaName?.toLowerCase().replace(/\s+/g, '_'),
         area_name: areaName,
-        entities,
+        entities: entities.sort((a, b) => {
+          // Sort entities by importance: primary domain first, then sensors
+          const aPriority = DOMAIN_PRIORITY.indexOf(a.domain);
+          const bPriority = DOMAIN_PRIORITY.indexOf(b.domain);
+          return (aPriority === -1 ? 999 : aPriority) - (bPriority === -1 ? 999 : bPriority);
+        }),
         primaryEntity: this.selectPrimaryEntity(entities),
         deviceType: this.detectDeviceType(entities),
         isGroup: false,
@@ -163,28 +166,103 @@ export class DeviceDiscoveryService {
     };
   }
 
-  private extractAreaFromName(friendlyName: string, domain: string): string | null {
-    // Common patterns: "Office Light", "Kitchen Temperature", "Bedroom Door"
-    // Try to extract the area (first word/words before the device type)
-    const parts = friendlyName.split(' ');
-    if (parts.length >= 2) {
-      // Take everything except the last word as potential area
-      const potentialArea = parts.slice(0, -1).join(' ');
-      // Common device type words to identify
-      const deviceWords = ['light', 'lamp', 'temperature', 'humidity', 'sensor', 'switch', 
-                          'battery', 'door', 'window', 'motion', 'camera', 'lock', 'player'];
-      const lastWord = parts[parts.length - 1].toLowerCase();
+  private smartDeviceGrouping(entities: DiscoveredEntity[]): Map<string, DiscoveredEntity[]> {
+    const deviceGroups = new Map<string, DiscoveredEntity[]>();
+    
+    entities.forEach(entity => {
+      const deviceKey = this.extractDeviceKey(entity);
       
-      if (deviceWords.some(w => lastWord.includes(w)) || domain === 'sensor' || domain === 'binary_sensor') {
-        return potentialArea;
+      if (!deviceGroups.has(deviceKey)) {
+        deviceGroups.set(deviceKey, []);
+      }
+      deviceGroups.get(deviceKey)!.push(entity);
+    });
+    
+    return deviceGroups;
+  }
+
+  private extractDeviceKey(entity: DiscoveredEntity): string {
+    const name = entity.friendly_name;
+    
+    // Pattern 1: "Device Name Property" (e.g., "Dyson Pure Temperature", "Dyson Pure Humidity")
+    // Extract common prefix before the last 1-2 words
+    const words = name.split(' ');
+    
+    if (words.length >= 3) {
+      // Check if last word is a property (Temperature, Humidity, Battery, etc.)
+      const lastWord = words[words.length - 1].toLowerCase();
+      const propertyWords = ['temperature', 'humidity', 'battery', 'level', 'state', 
+                            'motion', 'contact', 'status', 'pm'];
+      
+      if (propertyWords.includes(lastWord) || lastWord.includes('pm')) {
+        // Return everything except the last word as device key
+        return words.slice(0, -1).join(' ');
+      }
+      
+      // Check for two-word properties (e.g., "Battery Level", "Battery State")
+      if (words.length >= 4) {
+        const lastTwoWords = words.slice(-2).join(' ').toLowerCase();
+        const twoWordProperties = ['battery level', 'battery state', 'pm 2', 'pm 10'];
+        
+        if (twoWordProperties.some(prop => lastTwoWords.includes(prop))) {
+          return words.slice(0, -2).join(' ');
+        }
       }
     }
+    
+    // Pattern 2: "Owner's Device" (e.g., "Moty's iPhone")
+    // Keep as-is - this is already a device name
+    if (name.includes("'s ") || name.includes("'s")) {
+      return name.split(' Battery')[0].split(' Level')[0].split(' State')[0];
+    }
+    
+    // Default: return the full name
+    return name;
+  }
+
+  private extractAreaFromName(friendlyName: string, domain: string): string | null {
+    // Try to detect area from name patterns
+    const words = friendlyName.split(' ');
+    
+    // Skip device names that include ownership (e.g., "Moty's iPhone")
+    if (friendlyName.includes("'s ")) return null;
+    
+    // Common room names
+    const commonRooms = ['office', 'bedroom', 'kitchen', 'living', 'bathroom', 
+                        'dining', 'garage', 'hall', 'entrance', 'outdoor'];
+    
+    // Check if any word matches a room name
+    for (const word of words) {
+      if (commonRooms.includes(word.toLowerCase())) {
+        return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
+      }
+    }
+    
     return null;
   }
 
-  private extractDeviceName(friendlyName: string, domain: string): string {
-    // Return the full friendly name as device name
-    return friendlyName;
+  private extractDeviceInfo(deviceKey: string, entities: DiscoveredEntity[]): { name: string; manufacturer?: string } {
+    // Detect manufacturer from device key
+    const lowerKey = deviceKey.toLowerCase();
+    
+    const manufacturers = [
+      { name: 'Dyson', keywords: ['dyson'] },
+      { name: 'Philips Hue', keywords: ['hue'] },
+      { name: 'Apple', keywords: ['iphone', 'ipad', 'airpods', 'macbook'] },
+      { name: 'Sonos', keywords: ['sonos'] },
+      { name: 'Spotify', keywords: ['spotify'] }
+    ];
+    
+    for (const mfr of manufacturers) {
+      if (mfr.keywords.some(kw => lowerKey.includes(kw))) {
+        return {
+          name: deviceKey,
+          manufacturer: mfr.name
+        };
+      }
+    }
+    
+    return { name: deviceKey };
   }
 
   private isGroupEntity(state: any): boolean {
