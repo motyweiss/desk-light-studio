@@ -39,7 +39,8 @@ const DeviceCard = ({ device, index, onClick, showAreaAssignment = false }: Devi
                 : 'bg-white/5'
             }`}>
               <DeviceTypeIcon 
-                type={device.deviceType} 
+                type={device.deviceType}
+                deviceClass={primaryEntity.device_class}
                 state={primaryEntity.state}
                 className="w-5 h-5" 
               />
