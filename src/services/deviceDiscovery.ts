@@ -7,6 +7,7 @@ import {
   HomeDiscoveryResult 
 } from '@/types/discovery';
 import { getDeviceTemplate } from '@/config/deviceDisplayTemplates';
+import { shouldIncludeEntity, detectManufacturer } from '@/config/entityFilters';
 
 const DOMAIN_PRIORITY = [
   'light',
@@ -60,14 +61,22 @@ export class DeviceDiscoveryService {
       if (groupMemberIds.has(state.entity_id)) return;
       // Skip groups themselves
       if (this.isGroupEntity(state)) return;
-      // Skip internal/hidden entities
-      if (state.entity_id.startsWith('sun.') || 
-          state.entity_id.startsWith('zone.') ||
-          state.attributes.hidden) return;
+      
+      const domain = state.entity_id.split('.')[0];
+      
+      // Apply smart filtering
+      if (!shouldIncludeEntity(
+        state.entity_id,
+        domain,
+        state.state,
+        state.attributes.device_class
+      )) {
+        return;
+      }
 
       const entity: DiscoveredEntity = {
         entity_id: state.entity_id,
-        domain: state.entity_id.split('.')[0],
+        domain,
         state: state.state,
         friendly_name: state.attributes.friendly_name || state.entity_id,
         device_class: state.attributes.device_class,
@@ -246,27 +255,11 @@ export class DeviceDiscoveryService {
   }
 
   private extractDeviceInfo(deviceKey: string, entities: DiscoveredEntity[]): { name: string; manufacturer?: string } {
-    // Detect manufacturer from device key
-    const lowerKey = deviceKey.toLowerCase();
-    
-    const manufacturers = [
-      { name: 'Dyson', keywords: ['dyson'] },
-      { name: 'Philips Hue', keywords: ['hue'] },
-      { name: 'Apple', keywords: ['iphone', 'ipad', 'airpods', 'macbook'] },
-      { name: 'Sonos', keywords: ['sonos'] },
-      { name: 'Spotify', keywords: ['spotify'] }
-    ];
-    
-    for (const mfr of manufacturers) {
-      if (mfr.keywords.some(kw => lowerKey.includes(kw))) {
-        return {
-          name: deviceKey,
-          manufacturer: mfr.name
-        };
-      }
-    }
-    
-    return { name: deviceKey };
+    const manufacturer = detectManufacturer(deviceKey);
+    return {
+      name: deviceKey,
+      manufacturer
+    };
   }
 
   private isGroupEntity(state: any): boolean {

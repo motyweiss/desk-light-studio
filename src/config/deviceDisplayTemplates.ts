@@ -262,6 +262,203 @@ export const displayTemplates: Record<string, DeviceDisplayTemplate> = {
       
       return values;
     }
+  },
+
+  // Climate (AC/Thermostat)
+  'climate': {
+    deviceType: 'climate',
+    displayName: 'Climate Control',
+    icon: 'Thermometer',
+    extractDisplayableValues: (entities) => {
+      const values: DisplayableValue[] = [];
+      const climateEntity = entities.find(e => e.domain === 'climate');
+      
+      if (climateEntity) {
+        const isOn = climateEntity.state !== 'off';
+        const currentTemp = climateEntity.attributes.current_temperature;
+        const targetTemp = climateEntity.attributes.temperature;
+        const mode = climateEntity.attributes.hvac_mode;
+        
+        if (currentTemp !== undefined) {
+          values.push({
+            id: 'current_temp',
+            label: 'Current',
+            icon: 'Thermometer',
+            value: formatValue(currentTemp),
+            unit: '°C',
+            widgetType: 'value',
+            isActive: isOn
+          });
+        }
+        
+        if (targetTemp !== undefined) {
+          values.push({
+            id: 'target_temp',
+            label: 'Target',
+            icon: 'Target',
+            value: formatValue(targetTemp),
+            unit: '°C',
+            widgetType: 'value',
+            isActive: isOn
+          });
+        }
+        
+        if (mode) {
+          values.push({
+            id: 'mode',
+            label: 'Mode',
+            icon: 'Wind',
+            value: mode,
+            widgetType: 'status',
+            isActive: isOn
+          });
+        }
+      }
+      
+      return values;
+    }
+  },
+
+  // Cover (Blinds/Curtains)
+  'cover': {
+    deviceType: 'cover',
+    displayName: 'Cover',
+    icon: 'Blinds',
+    extractDisplayableValues: (entities) => {
+      const values: DisplayableValue[] = [];
+      const coverEntity = entities.find(e => e.domain === 'cover');
+      
+      if (coverEntity) {
+        const position = coverEntity.attributes.current_position;
+        const isOpen = coverEntity.state === 'open';
+        
+        if (position !== undefined) {
+          values.push({
+            id: 'position',
+            label: 'Position',
+            icon: 'Percent',
+            value: Math.round(position),
+            unit: '%',
+            widgetType: 'value',
+            isActive: position > 0
+          });
+        }
+        
+        values.push({
+          id: 'state',
+          label: 'Status',
+          icon: 'Blinds',
+          value: isOpen ? 'Open' : 'Closed',
+          widgetType: 'status',
+          isActive: isOpen
+        });
+      }
+      
+      return values;
+    }
+  },
+
+  // Vacuum
+  'vacuum': {
+    deviceType: 'vacuum',
+    displayName: 'Vacuum',
+    icon: 'Circle',
+    extractDisplayableValues: (entities) => {
+      const values: DisplayableValue[] = [];
+      const vacuumEntity = entities.find(e => e.domain === 'vacuum');
+      
+      if (vacuumEntity) {
+        const batteryEntity = entities.find(e => e.device_class === 'battery');
+        const isActive = vacuumEntity.state === 'cleaning' || vacuumEntity.state === 'returning';
+        
+        values.push({
+          id: 'state',
+          label: 'Status',
+          icon: 'Circle',
+          value: vacuumEntity.state,
+          widgetType: 'status',
+          isActive
+        });
+        
+        if (batteryEntity) {
+          values.push({
+            id: 'battery',
+            label: 'Battery',
+            icon: 'Battery',
+            value: parseInt(batteryEntity.state),
+            unit: '%',
+            widgetType: 'value',
+            isActive: parseInt(batteryEntity.state) > 20
+          });
+        }
+      }
+      
+      return values;
+    }
+  },
+
+  // Lock
+  'lock': {
+    deviceType: 'lock',
+    displayName: 'Lock',
+    icon: 'Lock',
+    extractDisplayableValues: (entities) => {
+      const values: DisplayableValue[] = [];
+      const lockEntity = entities.find(e => e.domain === 'lock');
+      
+      if (lockEntity) {
+        const isLocked = lockEntity.state === 'locked';
+        values.push({
+          id: 'state',
+          label: 'Status',
+          icon: isLocked ? 'Lock' : 'LockOpen',
+          value: isLocked ? 'Locked' : 'Unlocked',
+          widgetType: 'status',
+          isActive: isLocked
+        });
+      }
+      
+      return values;
+    }
+  },
+
+  // Fan
+  'fan': {
+    deviceType: 'fan',
+    displayName: 'Fan',
+    icon: 'Fan',
+    extractDisplayableValues: (entities) => {
+      const values: DisplayableValue[] = [];
+      const fanEntity = entities.find(e => e.domain === 'fan');
+      
+      if (fanEntity) {
+        const isOn = fanEntity.state === 'on';
+        const speed = fanEntity.attributes.percentage;
+        
+        values.push({
+          id: 'state',
+          label: 'Status',
+          icon: 'Fan',
+          value: isOn ? 'On' : 'Off',
+          widgetType: 'status',
+          isActive: isOn
+        });
+        
+        if (speed !== undefined && isOn) {
+          values.push({
+            id: 'speed',
+            label: 'Speed',
+            icon: 'Gauge',
+            value: Math.round(speed),
+            unit: '%',
+            widgetType: 'value',
+            isActive: true
+          });
+        }
+      }
+      
+      return values;
+    }
   }
 };
 

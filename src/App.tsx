@@ -5,6 +5,7 @@ import { ClimateProvider } from "./contexts/ClimateContext";
 import { LightingProvider } from "./contexts/LightingContext";
 import { AppLoadProvider } from "./contexts/AppLoadContext";
 import { DeviceDiscoveryProvider } from "./contexts/DeviceDiscoveryContext";
+import { AreaManagementProvider } from "./contexts/AreaManagementContext";
 import { RootLayout } from "./layouts/RootLayout";
 import Index from "./pages/Index";
 import Settings from "./pages/Settings";
@@ -19,19 +20,21 @@ const App = () => (
       <AppLoadProvider>
         <ClimateProvider>
           <LightingProvider>
-            <DeviceDiscoveryProvider>
-              <BrowserRouter>
-                <RootLayout>
-                  <Routes>
-                    <Route path="/" element={<Index />} />
-                    <Route path="/side-page" element={<SidePage />} />
-                    <Route path="/settings" element={<Settings />} />
-                    {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-                    <Route path="*" element={<NotFound />} />
-                  </Routes>
-                </RootLayout>
-              </BrowserRouter>
-            </DeviceDiscoveryProvider>
+            <AreaManagementProvider>
+              <DeviceDiscoveryProvider>
+                <BrowserRouter>
+                  <RootLayout>
+                    <Routes>
+                      <Route path="/" element={<Index />} />
+                      <Route path="/side-page" element={<SidePage />} />
+                      <Route path="/settings" element={<Settings />} />
+                      {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+                      <Route path="*" element={<NotFound />} />
+                    </Routes>
+                  </RootLayout>
+                </BrowserRouter>
+              </DeviceDiscoveryProvider>
+            </AreaManagementProvider>
           </LightingProvider>
         </ClimateProvider>
       </AppLoadProvider>

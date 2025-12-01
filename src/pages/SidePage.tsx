@@ -1,18 +1,66 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { RefreshCw, Home } from 'lucide-react';
+import { RefreshCw, Home, Settings } from 'lucide-react';
 import { useDeviceDiscovery } from '@/contexts/DeviceDiscoveryContext';
+import { useAreaManagement } from '@/contexts/AreaManagementContext';
 import StatsBar from '@/components/discovery/StatsBar';
 import AreaCard from '@/components/discovery/AreaCard';
 import UnassignedSection from '@/components/discovery/UnassignedSection';
 import AreaDetailSheet from '@/components/discovery/AreaDetailSheet';
-import { DiscoveredArea } from '@/types/discovery';
+import AreaManagementPanel from '@/components/discovery/AreaManagementPanel';
+import { DiscoveredArea, DiscoveredDevice } from '@/types/discovery';
 import { Link } from 'react-router-dom';
 
 const SidePage = () => {
   const { discoveryResult, isDiscovering, runDiscovery, error } = useDeviceDiscovery();
+  const { areas, assignments, mergeAutoDetectedAreas, getDeviceArea } = useAreaManagement();
   const [selectedArea, setSelectedArea] = useState<DiscoveredArea | null>(null);
   const [isSheetOpen, setIsSheetOpen] = useState(false);
+  const [isManagementOpen, setIsManagementOpen] = useState(false);
+
+  // Merge auto-detected areas with managed areas
+  useEffect(() => {
+    if (discoveryResult) {
+      mergeAutoDetectedAreas(
+        discoveryResult.areas.map(area => ({ id: area.id, name: area.name }))
+      );
+    }
+  }, [discoveryResult, mergeAutoDetectedAreas]);
+
+  // Create organized areas with assignments
+  const organizedAreas = areas.map(area => {
+    const assignedDevices: DiscoveredDevice[] = [];
+    
+    if (discoveryResult) {
+      const allDevices = [
+        ...discoveryResult.areas.flatMap(a => a.devices),
+        ...discoveryResult.unassignedDevices
+      ];
+      
+      allDevices.forEach(device => {
+        const deviceAreaId = getDeviceArea(device.id);
+        if (deviceAreaId === area.id) {
+          assignedDevices.push(device);
+        }
+      });
+    }
+    
+    return {
+      id: area.id,
+      name: area.name,
+      icon: area.icon,
+      devices: assignedDevices,
+      entityCount: assignedDevices.reduce((sum, d) => sum + d.entities.length, 0)
+    };
+  }).filter(area => area.devices.length > 0);
+
+  // Get truly unassigned devices
+  const unassignedDevices = discoveryResult 
+    ? [
+        ...discoveryResult.areas.flatMap(a => a.devices),
+        ...discoveryResult.unassignedDevices
+      ].filter(device => !getDeviceArea(device.id))
+    : [];
 
   const handleAreaClick = (area: DiscoveredArea) => {
     setSelectedArea(area);
@@ -88,23 +136,32 @@ const SidePage = () => {
               Smart Home Overview
             </h1>
           </div>
-          <button
-            onClick={handleRefresh}
-            disabled={isDiscovering}
-            className="flex items-center gap-2 px-4 py-2 bg-white/[0.04] backdrop-blur-xl border border-white/10 rounded-xl hover:bg-white/[0.06] hover:border-white/20 transition-all duration-300 disabled:opacity-50"
-          >
-            <RefreshCw 
-              className={`w-4 h-4 text-white/60 ${isDiscovering ? 'animate-spin' : ''}`} 
-              strokeWidth={1.5} 
-            />
-            <span className="text-sm font-light text-white/90">Refresh</span>
-          </button>
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => setIsManagementOpen(true)}
+              className="flex items-center gap-2 px-4 py-2 bg-white/[0.04] backdrop-blur-xl border border-white/10 rounded-xl hover:bg-white/[0.06] hover:border-white/20 transition-all duration-300"
+            >
+              <Settings className="w-4 h-4 text-white/60" strokeWidth={1.5} />
+              <span className="text-sm font-light text-white/90">Manage Areas</span>
+            </button>
+            <button
+              onClick={handleRefresh}
+              disabled={isDiscovering}
+              className="flex items-center gap-2 px-4 py-2 bg-white/[0.04] backdrop-blur-xl border border-white/10 rounded-xl hover:bg-white/[0.06] hover:border-white/20 transition-all duration-300 disabled:opacity-50"
+            >
+              <RefreshCw 
+                className={`w-4 h-4 text-white/60 ${isDiscovering ? 'animate-spin' : ''}`} 
+                strokeWidth={1.5} 
+              />
+              <span className="text-sm font-light text-white/90">Refresh</span>
+            </button>
+          </div>
         </motion.div>
 
         {/* Stats Bar */}
         <div className="mb-8">
           <StatsBar
-            totalAreas={discoveryResult.stats.totalAreas}
+            totalAreas={organizedAreas.length}
             totalDevices={discoveryResult.stats.totalDevices}
             totalEntities={discoveryResult.stats.totalEntities}
             isConnected={true}
@@ -113,7 +170,7 @@ const SidePage = () => {
 
         {/* Areas Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
-          {discoveryResult.areas.map((area, index) => (
+          {organizedAreas.map((area, index) => (
             <AreaCard
               key={area.id}
               area={area}
@@ -124,7 +181,7 @@ const SidePage = () => {
         </div>
 
         {/* Unassigned Devices */}
-        <UnassignedSection devices={discoveryResult.unassignedDevices} />
+        <UnassignedSection devices={unassignedDevices} />
       </div>
 
       {/* Area Detail Sheet */}
@@ -132,6 +189,12 @@ const SidePage = () => {
         area={selectedArea}
         isOpen={isSheetOpen}
         onClose={() => setIsSheetOpen(false)}
+      />
+
+      {/* Area Management Panel */}
+      <AreaManagementPanel
+        isOpen={isManagementOpen}
+        onClose={() => setIsManagementOpen(false)}
       />
     </div>
   );

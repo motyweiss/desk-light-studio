@@ -29,7 +29,12 @@ const UnassignedSection = ({ devices }: UnassignedSectionProps) => {
 
       <div className="space-y-2">
         {devices.map((device, index) => (
-          <DeviceCard key={device.id} device={device} index={index} />
+          <DeviceCard 
+            key={device.id} 
+            device={device} 
+            index={index}
+            showAreaAssignment={true}
+          />
         ))}
       </div>
     </motion.div>
