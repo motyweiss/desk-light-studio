@@ -108,6 +108,20 @@ const DeviceDetailModal = ({ device, isOpen, onClose }: DeviceDetailModalProps) 
   const primaryEntity = liveEntities.find(e => e.entity_id === device.primaryEntity) || liveEntities[0];
   const isActive = liveEntities.some(e => e.state === 'on' || e.state === 'playing' || e.state === 'home');
 
+  // If no entities available, show message
+  if (!primaryEntity || liveEntities.length === 0) {
+    return (
+      <Dialog open={isOpen} onOpenChange={onClose}>
+        <DialogContent className="max-w-3xl bg-[hsl(28,20%,18%)]/95 backdrop-blur-xl border-white/10 text-white">
+          <DialogHeader>
+            <DialogTitle>No Entities Found</DialogTitle>
+          </DialogHeader>
+          <p className="text-white/60">This device has no available entities to display.</p>
+        </DialogContent>
+      </Dialog>
+    );
+  }
+
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-3xl max-h-[85vh] overflow-y-auto bg-[hsl(28,20%,18%)]/95 backdrop-blur-xl border-white/10 text-white">
