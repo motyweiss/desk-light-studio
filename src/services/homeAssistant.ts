@@ -650,6 +650,77 @@ class HomeAssistantService {
       return [];
     }
   }
+
+  // Generic Entity Controls
+  async callService(domain: string, service: string, entityId: string, data?: any): Promise<boolean> {
+    return this.retryWithBackoff(async () => {
+      const response = await fetch(`${this.config?.baseUrl}/api/services/${domain}/${service}`, {
+        method: "POST",
+        headers: this.getHeaders(),
+        body: JSON.stringify({ entity_id: entityId, ...data }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to call ${domain}.${service}: ${response.statusText}`);
+      }
+      
+      return true;
+    }, `callService(${domain}.${service}, ${entityId})`).catch(error => {
+      console.error(`Failed to call ${domain}.${service}:`, error);
+      return false;
+    });
+  }
+
+  // Switch Controls
+  async toggleSwitch(entityId: string, turnOn: boolean): Promise<boolean> {
+    const service = turnOn ? "turn_on" : "turn_off";
+    return this.callService("switch", service, entityId);
+  }
+
+  // Fan Controls
+  async toggleFan(entityId: string, turnOn: boolean): Promise<boolean> {
+    const service = turnOn ? "turn_on" : "turn_off";
+    return this.callService("fan", service, entityId);
+  }
+
+  async setFanSpeed(entityId: string, percentage: number): Promise<boolean> {
+    return this.callService("fan", "set_percentage", entityId, { percentage });
+  }
+
+  // Cover Controls
+  async setCoverPosition(entityId: string, position: number): Promise<boolean> {
+    return this.callService("cover", "set_cover_position", entityId, { position });
+  }
+
+  async openCover(entityId: string): Promise<boolean> {
+    return this.callService("cover", "open_cover", entityId);
+  }
+
+  async closeCover(entityId: string): Promise<boolean> {
+    return this.callService("cover", "close_cover", entityId);
+  }
+
+  async stopCover(entityId: string): Promise<boolean> {
+    return this.callService("cover", "stop_cover", entityId);
+  }
+
+  // Lock Controls
+  async lockDoor(entityId: string): Promise<boolean> {
+    return this.callService("lock", "lock", entityId);
+  }
+
+  async unlockDoor(entityId: string): Promise<boolean> {
+    return this.callService("lock", "unlock", entityId);
+  }
+
+  // Climate Controls
+  async setClimateTemperature(entityId: string, temperature: number): Promise<boolean> {
+    return this.callService("climate", "set_temperature", entityId, { temperature });
+  }
+
+  async setClimateMode(entityId: string, hvac_mode: string): Promise<boolean> {
+    return this.callService("climate", "set_hvac_mode", entityId, { hvac_mode });
+  }
 }
 
 export const homeAssistant = new HomeAssistantService();
