@@ -24,7 +24,7 @@ export const DeviceDiscoveryProvider = ({ children }: { children: ReactNode }) =
   const { toast } = useToast();
 
   const runDiscovery = async () => {
-    const haConfig = localStorage.getItem('homeassistant_config');
+    const haConfig = localStorage.getItem('ha_config');
     if (!haConfig) {
       setError('No Home Assistant configuration found');
       return;
@@ -76,7 +76,7 @@ export const DeviceDiscoveryProvider = ({ children }: { children: ReactNode }) =
   };
 
   useEffect(() => {
-    const haConfig = localStorage.getItem('homeassistant_config');
+    const haConfig = localStorage.getItem('ha_config');
     if (haConfig) {
       runDiscovery();
     }
