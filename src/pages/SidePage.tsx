@@ -1,8 +1,9 @@
 import { useState, useEffect, useMemo } from 'react';
 import { motion } from 'framer-motion';
-import { RefreshCw, Home, Settings, CheckSquare, Square } from 'lucide-react';
+import { RefreshCw, Home, Settings, CheckSquare, Square, Sparkles, Info } from 'lucide-react';
 import { useDeviceDiscovery } from '@/contexts/DeviceDiscoveryContext';
 import { useAreaManagement } from '@/contexts/AreaManagementContext';
+import { AutoAssignmentService } from '@/services/autoAssignment';
 import StatsBar from '@/components/discovery/StatsBar';
 import AreaCard from '@/components/discovery/AreaCard';
 import UnassignedSection from '@/components/discovery/UnassignedSection';
@@ -15,10 +16,12 @@ import DeviceCard from '@/components/discovery/DeviceCard';
 import { DiscoveredArea, DiscoveredDevice, DeviceType } from '@/types/discovery';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
+import { useToast } from '@/hooks/use-toast';
 
 const SidePage = () => {
   const { discoveryResult, isDiscovering, runDiscovery, error } = useDeviceDiscovery();
-  const { areas, assignments, mergeAutoDetectedAreas, getDeviceArea, bulkAssignDevices } = useAreaManagement();
+  const { areas, assignments, mergeAutoDetectedAreas, getDeviceArea, bulkAssignDevices, assignDevice, getLearnedPatterns } = useAreaManagement();
+  const { toast } = useToast();
   const [selectedArea, setSelectedArea] = useState<DiscoveredArea | null>(null);
   const [isSheetOpen, setIsSheetOpen] = useState(false);
   const [isManagementOpen, setIsManagementOpen] = useState(false);
@@ -33,6 +36,7 @@ const SidePage = () => {
   // Bulk Selection State
   const [isBulkMode, setIsBulkMode] = useState(false);
   const [selectedDeviceIds, setSelectedDeviceIds] = useState<Set<string>>(new Set());
+  const [isAutoAssigning, setIsAutoAssigning] = useState(false);
 
   // Merge auto-detected areas with managed areas
   useEffect(() => {
@@ -161,6 +165,82 @@ const SidePage = () => {
     bulkAssignDevices(Array.from(selectedDeviceIds), areaId || '');
     setSelectedDeviceIds(new Set());
     setIsBulkMode(false);
+  };
+
+  const handleAutoAssign = async () => {
+    if (!discoveryResult) {
+      toast({
+        title: "No devices found",
+        description: "Please run discovery first",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsAutoAssigning(true);
+    try {
+      const autoAssignService = new AutoAssignmentService(getLearnedPatterns());
+      const allDevices = [
+        ...discoveryResult.areas.flatMap(area => area.devices),
+        ...discoveryResult.unassignedDevices,
+      ];
+
+      const results = autoAssignService.autoAssignAll(allDevices, discoveryResult.areas);
+      
+      let assignedCount = 0;
+      let highConfidenceCount = 0;
+
+      results.forEach(result => {
+        if (result.areaId && result.confidence >= 50) {
+          assignDevice(
+            result.deviceId, 
+            result.areaId, 
+            false,
+            result.confidence, 
+            result.source,
+            result.reasoning
+          );
+          assignedCount++;
+          
+          if (result.confidence >= 80) {
+            highConfidenceCount++;
+          }
+        }
+      });
+
+      toast({
+        title: "Auto-assignment complete",
+        description: `${assignedCount} devices assigned (${highConfidenceCount} high confidence)`,
+      });
+    } catch (err) {
+      console.error('Auto-assignment error:', err);
+      toast({
+        title: "Auto-assignment failed",
+        description: err instanceof Error ? err.message : "Unknown error",
+        variant: "destructive",
+      });
+    } finally {
+      setIsAutoAssigning(false);
+    }
+  };
+
+  const getAssignmentBadge = (deviceId: string) => {
+    const assignment = assignments.find(a => a.deviceId === deviceId);
+    if (!assignment) return null;
+
+    if (assignment.isManualOverride) {
+      return { icon: '✏️', label: 'Manual', color: 'text-blue-400' };
+    }
+
+    if (assignment.confidence && assignment.confidence >= 90) {
+      return { icon: '🤖', label: 'Auto (100%)', color: 'text-green-400' };
+    }
+
+    if (assignment.confidence && assignment.confidence >= 70) {
+      return { icon: '🎯', label: `Auto (${assignment.confidence}%)`, color: 'text-yellow-400' };
+    }
+
+    return { icon: '🤖', label: 'Auto', color: 'text-gray-400' };
   };
 
   const selectedDevice = allDevices.find(d => d.id === selectedDeviceId) || null;
@@ -293,6 +373,33 @@ const SidePage = () => {
             hasActiveFilters={hasActiveFilters}
           />
         </div>
+
+        {/* Auto-Assignment Banner */}
+        <motion.div
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4 }}
+          className="mb-6 flex items-center justify-between gap-4 p-4 bg-white/5 backdrop-blur-sm rounded-lg border border-white/10"
+        >
+          <div className="flex items-center gap-3">
+            <Info className="w-5 h-5 text-white/50" />
+            <div>
+              <h3 className="text-sm font-medium text-white/90">Smart Auto-Assignment</h3>
+              <p className="text-xs text-white/50">
+                Automatically assign devices to rooms using AI pattern matching
+              </p>
+            </div>
+          </div>
+          <Button
+            onClick={handleAutoAssign}
+            disabled={isAutoAssigning || !discoveryResult}
+            className="gap-2"
+            variant="default"
+          >
+            <Sparkles className="w-4 h-4" />
+            {isAutoAssigning ? 'Assigning...' : 'Auto-Assign All'}
+          </Button>
+        </motion.div>
 
         {/* Stats Bar */}
         <div className="mb-8">

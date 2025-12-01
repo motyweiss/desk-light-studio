@@ -1,6 +1,7 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { DeviceDiscoveryService } from '@/services/deviceDiscovery';
 import { HomeDiscoveryResult, DiscoveredDevice, DeviceType } from '@/types/discovery';
+import { AutoAssignmentService } from '@/services/autoAssignment';
 import { useToast } from '@/hooks/use-toast';
 
 const getDemoData = (): HomeDiscoveryResult => {
@@ -244,6 +245,7 @@ interface DeviceDiscoveryContextType {
   refreshArea: (areaId: string) => Promise<void>;
   getDevicesByArea: (areaId: string) => DiscoveredDevice[];
   getDevicesByType: (type: DeviceType) => DiscoveredDevice[];
+  runAutoAssignment: () => Promise<void>;
 }
 
 const DeviceDiscoveryContext = createContext<DeviceDiscoveryContextType | undefined>(undefined);
@@ -254,6 +256,15 @@ export const DeviceDiscoveryProvider = ({ children }: { children: ReactNode }) =
   const [lastDiscoveryTime, setLastDiscoveryTime] = useState<Date | null>(null);
   const [error, setError] = useState<string | null>(null);
   const { toast } = useToast();
+  
+  // Import area management dynamically to avoid circular dependency
+  const [areaManagement, setAreaManagement] = useState<any>(null);
+  
+  useEffect(() => {
+    import('@/contexts/AreaManagementContext').then(module => {
+      setAreaManagement({ useAreaManagement: module.useAreaManagement });
+    });
+  }, []);
 
   const runDiscovery = async () => {
     const haConfig = localStorage.getItem('ha_config');
@@ -307,6 +318,23 @@ export const DeviceDiscoveryProvider = ({ children }: { children: ReactNode }) =
     return allDevices.filter(d => d.deviceType === type);
   };
 
+  const runAutoAssignment = async () => {
+    if (!discoveryResult) {
+      toast({
+        title: "No devices found",
+        description: "Please run discovery first",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // This will be called from components that have access to area management
+    toast({
+      title: "Auto-assignment initiated",
+      description: "Processing device assignments...",
+    });
+  };
+
   useEffect(() => {
     const haConfig = localStorage.getItem('ha_config');
     if (haConfig) {
@@ -327,7 +355,8 @@ export const DeviceDiscoveryProvider = ({ children }: { children: ReactNode }) =
         runDiscovery,
         refreshArea,
         getDevicesByArea,
-        getDevicesByType
+        getDevicesByType,
+        runAutoAssignment
       }}
     >
       {children}

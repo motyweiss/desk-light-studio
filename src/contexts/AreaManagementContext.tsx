@@ -1,5 +1,7 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { ManagedArea, DeviceAssignment, AreaManagementState } from '@/types/areaManagement';
+import { DiscoveredDevice } from '@/types/discovery';
+import { AutoAssignmentService, LearnedPattern } from '@/services/autoAssignment';
 import { useToast } from '@/hooks/use-toast';
 
 interface AreaManagementContextType {
@@ -9,11 +11,13 @@ interface AreaManagementContextType {
   createArea: (name: string, icon?: string) => ManagedArea;
   renameArea: (areaId: string, newName: string) => void;
   deleteArea: (areaId: string) => void;
-  assignDevice: (deviceId: string, areaId: string | null, isManual?: boolean) => void;
+  assignDevice: (deviceId: string, areaId: string | null, isManual?: boolean, confidence?: number, source?: DeviceAssignment['source'], reasoning?: string) => void;
   bulkAssignDevices: (deviceIds: string[], areaId: string) => void;
   getDeviceArea: (deviceId: string) => string | null;
   setCustomDeviceName: (deviceId: string, name: string) => void;
   mergeAutoDetectedAreas: (autoAreas: Array<{ id: string; name: string }>) => void;
+  learnFromAssignment: (device: DiscoveredDevice, areaId: string, areaName: string) => void;
+  getLearnedPatterns: () => LearnedPattern[];
 }
 
 const AreaManagementContext = createContext<AreaManagementContextType | undefined>(undefined);
@@ -24,7 +28,8 @@ export const AreaManagementProvider = ({ children }: { children: ReactNode }) =>
   const [state, setState] = useState<AreaManagementState>({
     areas: [],
     assignments: [],
-    customDeviceNames: {}
+    customDeviceNames: {},
+    learnedPatterns: []
   });
   const { toast } = useToast();
 
@@ -119,13 +124,16 @@ export const AreaManagementProvider = ({ children }: { children: ReactNode }) =>
     });
   };
 
-  const assignDevice = (deviceId: string, areaId: string | null, isManual: boolean = true) => {
+  const assignDevice = (deviceId: string, areaId: string | null, isManual: boolean = true, confidence?: number, source?: DeviceAssignment['source'], reasoning?: string) => {
     setState(prev => {
       const existingIndex = prev.assignments.findIndex(a => a.deviceId === deviceId);
       const newAssignment: DeviceAssignment = {
         deviceId,
         areaId,
-        isManualOverride: isManual
+        isManualOverride: isManual,
+        confidence,
+        source,
+        reasoning
       };
 
       let newAssignments;
@@ -198,6 +206,20 @@ export const AreaManagementProvider = ({ children }: { children: ReactNode }) =>
     });
   };
 
+  const learnFromAssignment = (device: DiscoveredDevice, areaId: string, areaName: string) => {
+    const autoAssignService = new AutoAssignmentService(state.learnedPatterns);
+    autoAssignService.learnFromAssignment(device, areaId, areaName);
+    
+    setState(prev => ({
+      ...prev,
+      learnedPatterns: autoAssignService.getLearnedPatterns(),
+    }));
+  };
+
+  const getLearnedPatterns = (): LearnedPattern[] => {
+    return state.learnedPatterns;
+  };
+
   return (
     <AreaManagementContext.Provider
       value={{
@@ -211,7 +233,9 @@ export const AreaManagementProvider = ({ children }: { children: ReactNode }) =>
         bulkAssignDevices,
         getDeviceArea,
         setCustomDeviceName,
-        mergeAutoDetectedAreas
+        mergeAutoDetectedAreas,
+        learnFromAssignment,
+        getLearnedPatterns
       }}
     >
       {children}
