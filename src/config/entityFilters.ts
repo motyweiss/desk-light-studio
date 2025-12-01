@@ -35,6 +35,12 @@ export const EXCLUDED_PATTERNS = [
   '*.rssi',
   '*.linkquality',
   '*.last_seen',
+  '*battery_type*',
+  '*_firmware*',
+  '*_hardware*',
+  '*_serial*',
+  '*_model*',
+  'sensor.sun_*',
 ];
 
 export const RELEVANT_SENSOR_CLASSES = [

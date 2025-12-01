@@ -308,6 +308,7 @@ export class DeviceDiscoveryService {
     const domains = entities.map(e => e.domain);
     const deviceClasses = entities.map(e => e.device_class).filter(Boolean);
 
+    // Priority 1: Control domains (lights, media players, etc.)
     if (domains.includes('light')) return 'light';
     if (domains.includes('climate')) return 'climate';
     if (domains.includes('media_player')) return 'media_player';
@@ -316,14 +317,18 @@ export class DeviceDiscoveryService {
     if (domains.includes('vacuum')) return 'vacuum';
     if (domains.includes('lock')) return 'lock';
     if (domains.includes('fan')) return 'fan';
+    if (domains.includes('switch')) return 'switch';
     
-    if (domains.includes('sensor')) {
+    // Priority 2: Sensor domains with device_class
+    if (domains.includes('sensor') || domains.includes('binary_sensor')) {
+      // Check for battery sensors
       if (deviceClasses.includes('battery')) return 'battery';
+      // All other sensors
       return 'sensor';
     }
     
+    // Priority 3: Tracker
     if (domains.includes('device_tracker')) return 'tracker';
-    if (domains.includes('switch')) return 'switch';
     
     return 'unknown';
   }
@@ -357,7 +362,12 @@ export class DeviceDiscoveryService {
     manufacturer: string | undefined,
     entities: DiscoveredEntity[]
   ) {
-    const template = getDeviceTemplate(deviceType, manufacturer);
+    // Get the primary entity's device_class for template matching
+    const primaryEntity = entities.find(e => e.entity_id === this.selectPrimaryEntity(entities)) || entities[0];
+    const deviceClass = primaryEntity?.device_class;
+    
+    // Try to get template with device_class for better matching
+    const template = getDeviceTemplate(deviceType, manufacturer, deviceClass);
     
     if (!template) {
       return [];

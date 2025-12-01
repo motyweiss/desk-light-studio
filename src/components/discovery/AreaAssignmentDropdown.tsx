@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Check, MapPin, Plus, Search } from 'lucide-react';
 import { useAreaManagement } from '@/contexts/AreaManagementContext';
+import { useToast } from '@/hooks/use-toast';
 import {
   Command,
   CommandEmpty,
@@ -26,19 +27,45 @@ const AreaAssignmentDropdown = ({ deviceId, deviceName }: AreaAssignmentDropdown
   const [open, setOpen] = useState(false);
   const [searchValue, setSearchValue] = useState('');
   const { areas, getDeviceArea, assignDevice, createArea } = useAreaManagement();
+  const { toast } = useToast();
   const currentAreaId = getDeviceArea(deviceId);
 
   const handleSelect = (areaId: string | null) => {
-    assignDevice(deviceId, areaId);
-    setOpen(false);
+    try {
+      assignDevice(deviceId, areaId, true);
+      const areaName = areaId ? areas.find(a => a.id === areaId)?.name : 'Unassigned';
+      toast({
+        title: "Device assigned",
+        description: `${deviceName} assigned to ${areaName}`
+      });
+      setOpen(false);
+    } catch (error) {
+      toast({
+        title: "Assignment failed",
+        description: "Could not assign device to area",
+        variant: "destructive"
+      });
+    }
   };
 
   const handleCreateNew = () => {
     if (searchValue.trim()) {
-      const newArea = createArea(searchValue.trim());
-      assignDevice(deviceId, newArea.id);
-      setSearchValue('');
-      setOpen(false);
+      try {
+        const newArea = createArea(searchValue.trim());
+        assignDevice(deviceId, newArea.id, true);
+        toast({
+          title: "Area created",
+          description: `${deviceName} assigned to ${newArea.name}`
+        });
+        setSearchValue('');
+        setOpen(false);
+      } catch (error) {
+        toast({
+          title: "Creation failed",
+          description: "Could not create new area",
+          variant: "destructive"
+        });
+      }
     }
   };
 

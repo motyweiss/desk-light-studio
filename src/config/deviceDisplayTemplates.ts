@@ -459,15 +459,401 @@ export const displayTemplates: Record<string, DeviceDisplayTemplate> = {
       
       return values;
     }
+  },
+
+  // Binary Sensor - Motion
+  'binary_sensor_motion': {
+    deviceType: 'sensor',
+    displayName: 'Motion Sensor',
+    icon: 'Activity',
+    extractDisplayableValues: (entities) => {
+      const values: DisplayableValue[] = [];
+      const motion = entities.find(e => e.device_class === 'motion');
+      if (motion) {
+        const hasMotion = motion.state === 'on';
+        values.push({
+          id: 'motion',
+          label: 'Motion',
+          icon: 'Activity',
+          value: hasMotion ? 'Detected' : 'Clear',
+          widgetType: 'status',
+          isActive: hasMotion
+        });
+      }
+      return values;
+    }
+  },
+
+  // Binary Sensor - Occupancy
+  'binary_sensor_occupancy': {
+    deviceType: 'sensor',
+    displayName: 'Occupancy Sensor',
+    icon: 'UserCheck',
+    extractDisplayableValues: (entities) => {
+      const values: DisplayableValue[] = [];
+      const occupancy = entities.find(e => e.device_class === 'occupancy');
+      if (occupancy) {
+        const isOccupied = occupancy.state === 'on';
+        values.push({
+          id: 'occupancy',
+          label: 'Status',
+          icon: isOccupied ? 'UserCheck' : 'UserX',
+          value: isOccupied ? 'Occupied' : 'Clear',
+          widgetType: 'status',
+          isActive: isOccupied
+        });
+      }
+      return values;
+    }
+  },
+
+  // Binary Sensor - Door
+  'binary_sensor_door': {
+    deviceType: 'sensor',
+    displayName: 'Door Sensor',
+    icon: 'DoorOpen',
+    extractDisplayableValues: (entities) => {
+      const values: DisplayableValue[] = [];
+      const door = entities.find(e => e.device_class === 'door');
+      if (door) {
+        const isOpen = door.state === 'on';
+        values.push({
+          id: 'door',
+          label: 'Status',
+          icon: isOpen ? 'DoorOpen' : 'DoorClosed',
+          value: isOpen ? 'Open' : 'Closed',
+          widgetType: 'status',
+          isActive: isOpen
+        });
+      }
+      return values;
+    }
+  },
+
+  // Binary Sensor - Window
+  'binary_sensor_window': {
+    deviceType: 'sensor',
+    displayName: 'Window Sensor',
+    icon: 'SquareStack',
+    extractDisplayableValues: (entities) => {
+      const values: DisplayableValue[] = [];
+      const window = entities.find(e => e.device_class === 'window');
+      if (window) {
+        const isOpen = window.state === 'on';
+        values.push({
+          id: 'window',
+          label: 'Status',
+          icon: 'SquareStack',
+          value: isOpen ? 'Open' : 'Closed',
+          widgetType: 'status',
+          isActive: isOpen
+        });
+      }
+      return values;
+    }
+  },
+
+  // Binary Sensor - Smoke
+  'binary_sensor_smoke': {
+    deviceType: 'sensor',
+    displayName: 'Smoke Detector',
+    icon: 'Flame',
+    extractDisplayableValues: (entities) => {
+      const values: DisplayableValue[] = [];
+      const smoke = entities.find(e => e.device_class === 'smoke');
+      if (smoke) {
+        const detected = smoke.state === 'on';
+        values.push({
+          id: 'smoke',
+          label: 'Status',
+          icon: 'Flame',
+          value: detected ? 'Detected!' : 'Clear',
+          widgetType: 'status',
+          isActive: detected
+        });
+      }
+      return values;
+    }
+  },
+
+  // Binary Sensor - Moisture
+  'binary_sensor_moisture': {
+    deviceType: 'sensor',
+    displayName: 'Moisture Sensor',
+    icon: 'Droplet',
+    extractDisplayableValues: (entities) => {
+      const values: DisplayableValue[] = [];
+      const moisture = entities.find(e => e.device_class === 'moisture');
+      if (moisture) {
+        const isWet = moisture.state === 'on';
+        values.push({
+          id: 'moisture',
+          label: 'Status',
+          icon: 'Droplet',
+          value: isWet ? 'Wet' : 'Dry',
+          widgetType: 'status',
+          isActive: isWet
+        });
+      }
+      return values;
+    }
+  },
+
+  // Sensor - Temperature
+  'sensor_temperature': {
+    deviceType: 'sensor',
+    displayName: 'Temperature Sensor',
+    icon: 'Thermometer',
+    extractDisplayableValues: (entities) => {
+      const values: DisplayableValue[] = [];
+      const temp = entities.find(e => e.device_class === 'temperature');
+      if (temp) {
+        const tempValue = parseFloat(temp.state);
+        values.push({
+          id: 'temperature',
+          label: 'Temperature',
+          icon: 'Thermometer',
+          value: formatValue(temp.state),
+          unit: '°C',
+          widgetType: 'value',
+          isActive: !isNaN(tempValue)
+        });
+      }
+      return values;
+    }
+  },
+
+  // Sensor - Humidity
+  'sensor_humidity': {
+    deviceType: 'sensor',
+    displayName: 'Humidity Sensor',
+    icon: 'Droplets',
+    extractDisplayableValues: (entities) => {
+      const values: DisplayableValue[] = [];
+      const humidity = entities.find(e => e.device_class === 'humidity');
+      if (humidity) {
+        values.push({
+          id: 'humidity',
+          label: 'Humidity',
+          icon: 'Droplets',
+          value: Math.round(parseFloat(humidity.state)),
+          unit: '%',
+          widgetType: 'value',
+          isActive: true
+        });
+      }
+      return values;
+    }
+  },
+
+  // Sensor - Illuminance
+  'sensor_illuminance': {
+    deviceType: 'sensor',
+    displayName: 'Light Sensor',
+    icon: 'Sun',
+    extractDisplayableValues: (entities) => {
+      const values: DisplayableValue[] = [];
+      const illuminance = entities.find(e => e.device_class === 'illuminance');
+      if (illuminance) {
+        const lux = parseFloat(illuminance.state);
+        values.push({
+          id: 'illuminance',
+          label: 'Light Level',
+          icon: 'Sun',
+          value: Math.round(lux),
+          unit: ' lx',
+          widgetType: 'value',
+          isActive: lux > 0
+        });
+      }
+      return values;
+    }
+  },
+
+  // Sensor - Battery
+  'sensor_battery': {
+    deviceType: 'sensor',
+    displayName: 'Battery',
+    icon: 'Battery',
+    extractDisplayableValues: (entities) => {
+      const values: DisplayableValue[] = [];
+      const battery = entities.find(e => e.device_class === 'battery');
+      if (battery) {
+        const level = parseInt(battery.state);
+        const icon = level < 20 ? 'BatteryLow' : level < 50 ? 'BatteryMedium' : 'BatteryFull';
+        values.push({
+          id: 'battery',
+          label: 'Battery',
+          icon,
+          value: level,
+          unit: '%',
+          widgetType: 'value',
+          isActive: level > 20
+        });
+      }
+      return values;
+    }
+  },
+
+  // Sensor - Power
+  'sensor_power': {
+    deviceType: 'sensor',
+    displayName: 'Power Meter',
+    icon: 'Zap',
+    extractDisplayableValues: (entities) => {
+      const values: DisplayableValue[] = [];
+      const power = entities.find(e => e.device_class === 'power');
+      if (power) {
+        const watts = parseFloat(power.state);
+        values.push({
+          id: 'power',
+          label: 'Power',
+          icon: 'Zap',
+          value: formatValue(power.state, 1),
+          unit: ' W',
+          widgetType: 'value',
+          isActive: watts > 0
+        });
+      }
+      return values;
+    }
+  },
+
+  // Sensor - Energy
+  'sensor_energy': {
+    deviceType: 'sensor',
+    displayName: 'Energy Meter',
+    icon: 'Gauge',
+    extractDisplayableValues: (entities) => {
+      const values: DisplayableValue[] = [];
+      const energy = entities.find(e => e.device_class === 'energy');
+      if (energy) {
+        values.push({
+          id: 'energy',
+          label: 'Energy',
+          icon: 'Gauge',
+          value: formatValue(energy.state, 2),
+          unit: ' kWh',
+          widgetType: 'value',
+          isActive: true
+        });
+      }
+      return values;
+    }
+  },
+
+  // Sensor - PM2.5
+  'sensor_pm25': {
+    deviceType: 'sensor',
+    displayName: 'Air Quality (PM2.5)',
+    icon: 'Wind',
+    extractDisplayableValues: (entities) => {
+      const values: DisplayableValue[] = [];
+      const pm25 = entities.find(e => e.device_class === 'pm25');
+      if (pm25) {
+        const value = parseInt(pm25.state);
+        values.push({
+          id: 'pm25',
+          label: 'PM 2.5',
+          icon: 'Wind',
+          value,
+          unit: ' µg/m³',
+          widgetType: 'value',
+          isActive: value < 35
+        });
+      }
+      return values;
+    }
+  },
+
+  // Sensor - PM10
+  'sensor_pm10': {
+    deviceType: 'sensor',
+    displayName: 'Air Quality (PM10)',
+    icon: 'Wind',
+    extractDisplayableValues: (entities) => {
+      const values: DisplayableValue[] = [];
+      const pm10 = entities.find(e => e.device_class === 'pm10');
+      if (pm10) {
+        const value = parseInt(pm10.state);
+        values.push({
+          id: 'pm10',
+          label: 'PM 10',
+          icon: 'Wind',
+          value,
+          unit: ' µg/m³',
+          widgetType: 'value',
+          isActive: value < 50
+        });
+      }
+      return values;
+    }
+  },
+
+  // Sensor - CO2
+  'sensor_carbon_dioxide': {
+    deviceType: 'sensor',
+    displayName: 'CO2 Sensor',
+    icon: 'CloudOff',
+    extractDisplayableValues: (entities) => {
+      const values: DisplayableValue[] = [];
+      const co2 = entities.find(e => e.device_class === 'carbon_dioxide');
+      if (co2) {
+        const ppm = parseInt(co2.state);
+        values.push({
+          id: 'co2',
+          label: 'CO₂',
+          icon: 'CloudOff',
+          value: ppm,
+          unit: ' ppm',
+          widgetType: 'value',
+          isActive: ppm < 1000
+        });
+      }
+      return values;
+    }
+  },
+
+  // Sensor - Pressure
+  'sensor_pressure': {
+    deviceType: 'sensor',
+    displayName: 'Pressure Sensor',
+    icon: 'Gauge',
+    extractDisplayableValues: (entities) => {
+      const values: DisplayableValue[] = [];
+      const pressure = entities.find(e => e.device_class === 'pressure');
+      if (pressure) {
+        values.push({
+          id: 'pressure',
+          label: 'Pressure',
+          icon: 'Gauge',
+          value: formatValue(pressure.state, 1),
+          unit: ' hPa',
+          widgetType: 'value',
+          isActive: true
+        });
+      }
+      return values;
+    }
   }
 };
 
 // Function to get template for a device
 export const getDeviceTemplate = (
   deviceType: DeviceType, 
-  manufacturer?: string
+  manufacturer?: string,
+  deviceClass?: string
 ): DeviceDisplayTemplate | null => {
-  // Try manufacturer-specific template first
+  // Priority 1: Try device_class specific template (most specific)
+  if (deviceClass) {
+    const primaryDomain = deviceType === 'sensor' ? 'sensor' : 'binary_sensor';
+    const classKey = `${primaryDomain}_${deviceClass}`;
+    if (displayTemplates[classKey]) {
+      return displayTemplates[classKey];
+    }
+  }
+
+  // Priority 2: Try manufacturer-specific template
   if (manufacturer) {
     const key = `${deviceType}_${manufacturer.toLowerCase().replace(/\s+/g, '_')}`;
     if (displayTemplates[key]) {
@@ -475,7 +861,7 @@ export const getDeviceTemplate = (
     }
   }
   
-  // Fall back to generic template
+  // Priority 3: Fall back to generic device type template
   if (displayTemplates[deviceType]) {
     return displayTemplates[deviceType];
   }
