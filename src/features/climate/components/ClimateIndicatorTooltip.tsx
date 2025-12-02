@@ -66,15 +66,15 @@ export const ClimateIndicatorTooltip = ({
             value={progressValue}
             min={progressMin}
             max={progressMax}
-            size={44}
-            strokeWidth={2.5}
+            size={36}
+            strokeWidth={2}
             isLoaded={true}
             colorType={colorType}
             delay={0}
           >
-            <Icon className="w-5 h-5 text-white/60" strokeWidth={1.5} />
+            <Icon className="w-4 h-4 text-white/60" strokeWidth={1.5} />
           </CircularProgress>
-          <div className="text-base font-light text-white tabular-nums">
+          <div className="text-sm font-light text-white tabular-nums">
             {value}
             <span className="text-xs text-white/40 ml-0.5">{unit}</span>
           </div>

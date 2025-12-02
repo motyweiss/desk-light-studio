@@ -70,7 +70,7 @@ export const ClimateIndicators = () => {
 
   return (
     <motion.div 
-      className="flex items-center gap-10"
+      className="flex items-center gap-4"
       initial={{ opacity: 0, y: 10 }}
       animate={{ 
         opacity: climate.isLoaded ? 1 : 0,
