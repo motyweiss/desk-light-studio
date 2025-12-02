@@ -51,4 +51,10 @@ export const logger = {
       console.info(`ℹ️ ${message}`, data !== undefined ? data : '');
     }
   },
+
+  performance: (message: string, data?: any) => {
+    if (isDev) {
+      console.log(`⏱️ ${message}`, data !== undefined ? data : '');
+    }
+  },
 };

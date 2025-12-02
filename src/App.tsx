@@ -1,6 +1,7 @@
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { ClimateProvider } from "@/features/climate";
 import { LightingProvider } from "@/features/lighting";
 import { AppLoadProvider } from "./contexts/AppLoadContext";
@@ -12,26 +13,28 @@ import NotFound from "./pages/NotFound";
 const queryClient = new QueryClient();
 
 const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <AppLoadProvider>
-        <ClimateProvider>
-          <LightingProvider>
-            <BrowserRouter>
-              <RootLayout>
-                <Routes>
-                  <Route path="/" element={<Index />} />
-                  <Route path="/settings" element={<Settings />} />
-                  {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-                  <Route path="*" element={<NotFound />} />
-                </Routes>
-              </RootLayout>
-            </BrowserRouter>
-          </LightingProvider>
-        </ClimateProvider>
-      </AppLoadProvider>
-    </TooltipProvider>
-  </QueryClientProvider>
+  <ErrorBoundary>
+    <QueryClientProvider client={queryClient}>
+      <TooltipProvider>
+        <AppLoadProvider>
+          <ClimateProvider>
+            <LightingProvider>
+              <BrowserRouter>
+                <RootLayout>
+                  <Routes>
+                    <Route path="/" element={<Index />} />
+                    <Route path="/settings" element={<Settings />} />
+                    {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+                    <Route path="*" element={<NotFound />} />
+                  </Routes>
+                </RootLayout>
+              </BrowserRouter>
+            </LightingProvider>
+          </ClimateProvider>
+        </AppLoadProvider>
+      </TooltipProvider>
+    </QueryClientProvider>
+  </ErrorBoundary>
 );
 
 export default App;
