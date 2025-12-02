@@ -1,8 +1,8 @@
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import { ClimateProvider } from "./contexts/ClimateContext";
-import { LightingProvider } from "./contexts/LightingContext";
+import { ClimateProvider } from "@/features/climate";
+import { LightingProvider } from "@/features/lighting";
 import { AppLoadProvider } from "./contexts/AppLoadContext";
 import { RootLayout } from "./layouts/RootLayout";
 import Index from "./pages/Index";

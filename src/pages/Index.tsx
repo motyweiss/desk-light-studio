@@ -1,14 +1,14 @@
 import { useState, useEffect, useMemo, useCallback, useRef } from "react";
 import { motion } from "framer-motion";
-import { DeskDisplay } from "@/components/DeskDisplay";
+import { DeskDisplay } from "@/features/lighting/components/DeskDisplay";
 import { RoomInfoPanel } from "@/components/RoomInfoPanel";
-import { AmbientGlowLayers } from "@/components/AmbientGlowLayers";
+import { AmbientGlowLayers } from "@/features/lighting/components/AmbientGlowLayers";
 import { LoadingOverlay } from "@/components/LoadingOverlay";
 import { Toaster } from "@/components/ui/toaster";
-import { useClimate } from "@/contexts/ClimateContext";
-import { useLighting } from "@/contexts/LightingContext";
+import { useClimate } from "@/features/climate";
+import { useLighting } from "@/features/lighting";
 import { useAppLoad } from "@/contexts/AppLoadContext";
-import { LIGHT_ANIMATION } from "@/constants/animations";
+import { LIGHT_ANIMATION, type AnimationSource } from "@/constants/animations";
 
 // Import all desk images for preloading
 import desk000 from "@/assets/desk-000.png";
