@@ -31,31 +31,31 @@ export const CircularProgress = ({
   const getProgressColor = (val: number, type: string): string => {
     switch (type) {
       case 'temperature':
-        if (val <= 17) return 'hsl(200 70% 55%)';               // Light blue - cold
-        if (val > 17 && val <= 20) return 'hsl(180 60% 50%)';  // Cyan - cool
-        if (val > 20 && val <= 24) return 'hsl(142 70% 45%)';  // Green - comfortable
-        if (val > 24 && val <= 28) return 'hsl(35 90% 55%)';   // Orange - warm
-        return 'hsl(0 75% 55%)';                                // Red - hot
+        if (val <= 17) return 'hsl(var(--status-cold))';
+        if (val > 17 && val <= 20) return 'hsl(var(--status-cool))';
+        if (val > 20 && val <= 24) return 'hsl(var(--status-comfortable))';
+        if (val > 24 && val <= 28) return 'hsl(var(--status-warm))';
+        return 'hsl(var(--status-hot))';
         
       case 'humidity':
-        if (val >= 40 && val <= 60) return 'hsl(142 70% 45%)'; // Green - optimal
+        if (val >= 40 && val <= 60) return 'hsl(var(--status-optimal))';
         if ((val >= 30 && val < 40) || (val > 60 && val <= 70)) 
-          return 'hsl(45 90% 55%)';                             // Yellow - acceptable
-        return 'hsl(0 75% 55%)';                                // Red - poor
+          return 'hsl(var(--status-caution))';
+        return 'hsl(var(--status-danger))';
         
       case 'airQuality':
-        if (val <= 12) return 'hsl(142 70% 45%)';              // Green - good
-        if (val <= 35) return 'hsl(45 90% 55%)';               // Yellow - moderate
-        if (val <= 55) return 'hsl(25 90% 55%)';               // Orange - unhealthy sensitive
-        return 'hsl(0 75% 55%)';                                // Red - unhealthy
+        if (val <= 12) return 'hsl(var(--status-comfortable))';
+        if (val <= 35) return 'hsl(var(--status-caution))';
+        if (val <= 55) return 'hsl(var(--status-warning))';
+        return 'hsl(var(--status-danger))';
         
       case 'battery':
-        if (val >= 50) return 'hsl(142 70% 45%)';              // Green - good
-        if (val >= 20) return 'hsl(45 90% 55%)';               // Yellow - medium
-        return 'hsl(0 75% 55%)';                                // Red - low
+        if (val >= 50) return 'hsl(var(--status-comfortable))';
+        if (val >= 20) return 'hsl(var(--status-caution))';
+        return 'hsl(var(--status-danger))';
         
       default:
-        return 'hsl(44 85% 58%)';                               // Default warm amber
+        return 'hsl(var(--warm-glow))';
     }
   };
   

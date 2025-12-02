@@ -44,6 +44,27 @@ export const colors = {
   // Lighting glow colors
   spotlightGlow: 'hsl(42 85% 58%)',
   lampGlow: 'hsl(44 80% 60%)',
+  
+  // Ambient glow colors for lighting effects
+  glowWarmOrange: 'hsl(40 45% 50%)',
+  glowWarmGold: 'hsl(42 50% 52%)',
+  glowWarmCream: 'hsl(41 48% 52%)',
+  glowBase: 'hsl(41 40% 48%)',
+  
+  // Status colors for sensors
+  statusCold: 'hsl(200 70% 55%)',
+  statusCool: 'hsl(180 60% 50%)',
+  statusComfortable: 'hsl(142 70% 45%)',
+  statusWarm: 'hsl(35 90% 55%)',
+  statusHot: 'hsl(0 75% 55%)',
+  statusOptimal: 'hsl(142 70% 45%)',
+  statusCaution: 'hsl(45 90% 55%)',
+  statusWarning: 'hsl(25 90% 55%)',
+  statusDanger: 'hsl(0 75% 55%)',
+  
+  // Interactive element colors
+  interactiveDot: 'hsl(38 70% 58%)',
+  interactiveGlow: 'rgb(200 160 80)',
 } as const;
 
 export const typography = {
