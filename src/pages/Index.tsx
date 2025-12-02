@@ -233,10 +233,10 @@ const Index = () => {
         />
 
         {/* Main content area */}
-        <div className="w-full h-full max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-8 md:gap-12 lg:gap-16 relative z-10">
+        <div className="w-full h-full max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-8 md:gap-8 lg:gap-10 relative z-10">
           {/* Desk Display */}
           <motion.div
-            className="w-full md:w-[42%] lg:w-[40%] flex-shrink-0 md:order-1 order-2"
+            className="w-full md:w-[45%] lg:w-[43%] flex-shrink-0 md:order-1 order-2"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: isLoaded ? 1 : 0, y: isLoaded ? 0 : 20 }}
             transition={{ 
