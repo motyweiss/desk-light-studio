@@ -4,7 +4,7 @@ import { useState, useRef, useCallback, useEffect } from "react";
 import { getIconForLight } from "@/components/icons/LightIcons";
 import { Loader2 } from "lucide-react";
 import { LIGHT_ANIMATION } from "@/constants/animations";
-import { useLightAnimation } from "@/hooks/useLightAnimation";
+import { useLightAnimation } from "../hooks/useLightAnimation";
 
 interface LightControlCardProps {
   id: string;

@@ -2,7 +2,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useState, useRef } from 'react';
 import { Music, AlertCircle } from 'lucide-react';
 import { homeAssistant } from '@/services/homeAssistant';
-import { useMediaPlayer } from '@/contexts/MediaPlayerContext';
+import { useMediaPlayer } from '@/features/mediaPlayer';
 import { ProgressBar } from './ProgressBar';
 import { PlaybackControls } from './PlaybackControls';
 import { VolumeControl } from './VolumeControl';
@@ -352,7 +352,7 @@ export const MediaPlayer = () => {
         onClose={() => setSpeakerPopoverOpen(false)}
         currentPlaybackTarget={currentPlaybackTarget}
         spotifySources={playerState.availableSources}
-        availableSpeakers={availableSpeakers}
+        availableSpeakers={availableSpeakers as any}
         predefinedGroups={predefinedGroups}
         onSpotifySourceSelect={handleSpotifySourceChange}
         onSpeakerSelect={handleSpeakerSelect}

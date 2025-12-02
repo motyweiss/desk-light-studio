@@ -1,6 +1,6 @@
 import { useEffect, useCallback, useRef, useState } from 'react';
 import { homeAssistant } from '@/services/homeAssistant';
-import { syncLogger } from '@/utils/syncLogger';
+import { logger } from '@/shared/utils/logger';
 import { POLL_INTERVAL, BLOCKING_WINDOW } from '@/constants/animations';
 import { useToast } from '@/hooks/use-toast';
 
@@ -76,8 +76,7 @@ export const useHomeAssistantSync = (config: UseHomeAssistantSyncConfig) => {
     // Only skip update if manual change happened recently
     const timeSinceManualChange = Date.now() - lastManualChangeRef.current;
     if (timeSinceManualChange < BLOCKING_WINDOW.manualChange) {
-      syncLogger.logBlockedUpdate();
-      console.log(`🚫 BLOCKED: ${lightId} update blocked (manual change ${timeSinceManualChange}ms ago)`);
+      logger.sync(`Update blocked: ${lightId} (manual change ${timeSinceManualChange}ms ago)`);
       return null;
     }
 
@@ -262,16 +261,13 @@ export const useHomeAssistantSync = (config: UseHomeAssistantSyncConfig) => {
         const states = await homeAssistant.getAllEntityStates(allEntityIds);
         const fetchDuration = Date.now() - syncStartTime;
 
-        syncLogger.logSync(fetchDuration, true);
-
         if (fetchDuration > 1000) {
-          console.warn(`⚠️  Slow sync: ${fetchDuration}ms (threshold: 1000ms)`);
+          logger.warn(`Slow sync: ${fetchDuration}ms (threshold: 1000ms)`);
         }
 
         // Connection successful - reset reconnection state
         if (isReconnecting) {
-          console.log('✅ Connection restored!');
-          syncLogger.printSummary();
+          logger.connection('Connection restored!');
           setIsReconnecting(false);
           reconnectAttemptRef.current = 0;
           toast({

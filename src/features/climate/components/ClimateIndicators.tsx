@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 import { motion, useMotionValue, useTransform, animate } from 'framer-motion';
 import { Thermometer, Droplets, Wind } from 'lucide-react';
-import { useClimate } from '@/contexts/ClimateContext';
+import { useClimate } from '../context/ClimateContext';
 import { ClimateIndicator } from './ClimateIndicator';
 
 export const ClimateIndicators = () => {

@@ -3,7 +3,17 @@ import type { HAConfig, HAEntity, ConnectionResult } from './types';
 
 /**
  * HTTP Client for Home Assistant API
- * Handles all REST API calls with retry logic and error handling
+ * 
+ * Handles all REST API calls with:
+ * - Automatic retry with exponential backoff
+ * - Error handling and logging
+ * - Type-safe requests and responses
+ * 
+ * @example
+ * ```typescript
+ * haClient.setConfig({ baseUrl: '...', accessToken: '...' });
+ * const entity = await haClient.getEntityState('light.desk_lamp');
+ * ```
  */
 class HomeAssistantClient {
   private config: HAConfig | null = null;

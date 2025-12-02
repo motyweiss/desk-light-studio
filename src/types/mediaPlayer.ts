@@ -39,7 +39,7 @@ export interface MediaPlayerState {
 
 export interface MediaPlayerEntity {
   entity_id: string;
-  state: 'playing' | 'paused' | 'idle' | 'off' | 'standby';
+  state: string; // Allow any string, not just specific enum values
   attributes: {
     friendly_name?: string;
     volume_level?: number;
