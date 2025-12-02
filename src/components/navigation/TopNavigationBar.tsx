@@ -27,13 +27,13 @@ export const TopNavigationBar = ({
         delay: 0.1,
         ease: [0.16, 1, 0.3, 1],
       }}
-      className="fixed top-0 inset-x-0 z-40 h-[68px] hidden md:block"
+      className="fixed top-0 inset-x-0 z-40 h-[68px]"
     >
       <div className="bg-white/8 backdrop-blur-[24px] border-b border-white/15 h-full">
         <div className="max-w-7xl mx-auto px-4 md:px-6 h-full flex items-center justify-between">
-          {/* Left: Home Branding */}
+          {/* Left: Home Branding - hidden on mobile */}
           <motion.div 
-            className="flex items-center gap-3"
+            className="hidden md:flex items-center gap-3"
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.5, delay: 0.2 }}
@@ -51,9 +51,9 @@ export const TopNavigationBar = ({
             <ClimateIndicators />
           </motion.div>
 
-          {/* Right: Connection Status + Settings */}
+          {/* Right: Connection Status + Settings - hidden on mobile */}
           <motion.div 
-            className="flex items-center gap-4 overflow-visible"
+            className="hidden md:flex items-center gap-4 overflow-visible"
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.5, delay: 0.2 }}
