@@ -70,7 +70,7 @@ export const ClimateIndicatorTooltip = ({
 
       {/* Tooltip */}
       <AnimatePresence>
-        {isOpen && (
+        {isOpen && trendData.length > 0 && (
           <motion.div
             initial={{ 
               opacity: 0,
@@ -91,9 +91,10 @@ export const ClimateIndicatorTooltip = ({
               duration: 0.35,
               ease: [0.25, 0.46, 0.45, 0.94]
             }}
-            className={`absolute left-1/2 -translate-x-1/2 z-50 ${
-              position === "bottom" ? "top-full mt-3" : "bottom-full mb-3"
+            className={`fixed left-1/2 -translate-x-1/2 ${
+              position === "bottom" ? "top-[120px]" : "bottom-[120px]"
             }`}
+            style={{ zIndex: 100 }}
           >
             <div className="bg-white/8 backdrop-blur-[24px] rounded-2xl px-5 py-4 shadow-[0_4px_24px_rgba(0,0,0,0.15)] border border-white/20 min-w-[280px]">
               {/* Header with icon and value */}
