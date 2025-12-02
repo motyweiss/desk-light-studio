@@ -13,3 +13,5 @@ export { AnimationPreview } from "./components/AnimationPreview";
 export { ComponentCard } from "./components/ComponentCard";
 export { ComponentShowcase } from "./components/ComponentShowcase";
 export { IconGallery } from "./components/IconGallery";
+export { BlocksShowcase } from "./components/BlocksShowcase";
+export { UsageMap } from "./components/UsageMap";

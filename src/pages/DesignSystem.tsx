@@ -9,6 +9,8 @@ import {
   AnimationPreview,
   ComponentShowcase,
   IconGallery,
+  BlocksShowcase,
+  UsageMap,
   searchComponents,
 } from "@/design-system";
 
@@ -74,6 +76,20 @@ export default function DesignSystem() {
         return <ComponentShowcase category="layout" />;
       case "icons":
         return <IconGallery />;
+      case "blocks":
+        return <BlocksShowcase />;
+      case "navigation-blocks":
+        return <BlocksShowcase category="navigation" />;
+      case "media-blocks":
+        return <BlocksShowcase category="media" />;
+      case "display-blocks":
+        return <BlocksShowcase category="display" />;
+      case "input-blocks":
+        return <BlocksShowcase category="input" />;
+      case "feedback-blocks":
+        return <BlocksShowcase category="feedback" />;
+      case "usage-map":
+        return <UsageMap />;
       default:
         return <ColorPalette />;
     }
