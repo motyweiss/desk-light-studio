@@ -1,5 +1,5 @@
 import { motion, AnimatePresence } from "framer-motion";
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Zap } from "lucide-react";
 
 interface ConnectionStatusIndicatorProps {
@@ -16,7 +16,18 @@ export const ConnectionStatusIndicator = ({
   inline = false
 }: ConnectionStatusIndicatorProps) => {
   const [isHovered, setIsHovered] = useState(false);
+  const [tooltipPosition, setTooltipPosition] = useState({ top: 0, left: 0 });
   const containerRef = useRef<HTMLButtonElement>(null);
+
+  useEffect(() => {
+    if (isHovered && containerRef.current) {
+      const rect = containerRef.current.getBoundingClientRect();
+      setTooltipPosition({
+        top: rect.bottom + 12,
+        left: rect.left + rect.width / 2,
+      });
+    }
+  }, [isHovered]);
 
   const handleMouseLeave = () => {
     setIsHovered(false);
@@ -63,14 +74,14 @@ export const ConnectionStatusIndicator = ({
       <AnimatePresence>
         {isHovered && (
           <motion.div
-            className="absolute pointer-events-none z-[100]
+            className="fixed pointer-events-none z-[100]
               bg-white/12 backdrop-blur-[32px]
               px-5 py-2.5 rounded-full
               border border-white/25
               [background:linear-gradient(135deg,rgba(255,255,255,0.15),rgba(255,255,255,0.05))]"
             style={{
-              top: 'calc(100% + 12px)',
-              left: '50%',
+              top: tooltipPosition.top,
+              left: tooltipPosition.left,
               transform: 'translateX(-50%)',
               transformOrigin: '50% 0%'
             }}
