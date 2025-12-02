@@ -6,6 +6,8 @@ import { ClimateProvider } from "@/features/climate";
 import { LightingProvider } from "@/features/lighting";
 import { AppLoadProvider } from "./contexts/AppLoadContext";
 import { RootLayout } from "./layouts/RootLayout";
+import { UpdatePrompt } from "./components/UpdatePrompt";
+import { OfflineIndicator } from "./components/OfflineIndicator";
 import Index from "./pages/Index";
 import Settings from "./pages/Settings";
 import DesignSystem from "./pages/DesignSystem";
@@ -31,6 +33,8 @@ const App = () => (
                   </Routes>
                 </RootLayout>
               </BrowserRouter>
+              <UpdatePrompt />
+              <OfflineIndicator />
             </LightingProvider>
           </ClimateProvider>
         </AppLoadProvider>
