@@ -3,10 +3,12 @@ import { motion, useMotionValue, useTransform, animate } from 'framer-motion';
 import { Thermometer, Droplets, Wind } from 'lucide-react';
 import { useClimate } from '../context/ClimateContext';
 import { ClimateIndicatorTooltip } from './ClimateIndicatorTooltip';
-import { useTrendData } from '../hooks/useTrendData';
+import { useHistoryData } from '../hooks/useHistoryData';
+import { useHomeAssistantConfig } from '@/hooks/useHomeAssistantConfig';
 
 export const ClimateIndicators = () => {
   const climate = useClimate();
+  const { isConnected, entityMapping } = useHomeAssistantConfig();
   const [hoveredIndicator, setHoveredIndicator] = useState<string | null>(null);
   
   // Animated counters
@@ -18,10 +20,27 @@ export const ClimateIndicators = () => {
   
   const airQualityCount = useMotionValue(climate.airQuality);
   
-  // Generate trend data for each sensor
-  const temperatureTrend = useTrendData(climate.temperature, 'temperature');
-  const humidityTrend = useTrendData(climate.humidity, 'humidity');
-  const airQualityTrend = useTrendData(climate.airQuality, 'airQuality');
+  // Fetch historical data for each sensor
+  const temperatureTrend = useHistoryData(
+    entityMapping?.temperatureSensor,
+    isConnected,
+    climate.temperature,
+    'temperature'
+  );
+  
+  const humidityTrend = useHistoryData(
+    entityMapping?.humiditySensor,
+    isConnected,
+    climate.humidity,
+    'humidity'
+  );
+  
+  const airQualityTrend = useHistoryData(
+    entityMapping?.airQualitySensor,
+    isConnected,
+    climate.airQuality,
+    'airQuality'
+  );
   
   useEffect(() => {
     const tempControls = animate(tempCount, climate.temperature, {

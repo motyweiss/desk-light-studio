@@ -146,6 +146,33 @@ class HomeAssistantClient {
   }
 
   /**
+   * Get historical data for an entity
+   */
+  async getHistory(
+    entityId: string,
+    hoursBack: number = 24
+  ): Promise<Array<{ state: string; last_changed: string }>> {
+    if (!this.config) {
+      throw new Error('Client not configured');
+    }
+
+    try {
+      const endTime = new Date();
+      const startTime = new Date(endTime.getTime() - hoursBack * 60 * 60 * 1000);
+      
+      const response = await this.request<Array<Array<{ state: string; last_changed: string }>>>(
+        `/api/history/period/${startTime.toISOString()}?filter_entity_id=${entityId}&minimal_response&significant_changes_only`,
+        { method: 'GET' }
+      );
+
+      return response[0] || [];
+    } catch (error) {
+      logger.error(`Failed to get history for ${entityId}`, error);
+      return [];
+    }
+  }
+
+  /**
    * Generic HTTP request with retry logic
    */
   private async request<T>(

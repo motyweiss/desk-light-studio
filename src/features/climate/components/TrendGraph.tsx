@@ -76,32 +76,11 @@ export const TrendGraph = ({
       className="overflow-visible"
       style={{ minWidth: width, minHeight: height }}
     >
-      {/* Gradient for fill */}
-      <defs>
-        <linearGradient id="trendGradient" x1="0%" y1="0%" x2="0%" y2="100%">
-          <stop offset="0%" stopColor={color} stopOpacity={0.2} />
-          <stop offset="100%" stopColor={color} stopOpacity={0.02} />
-        </linearGradient>
-      </defs>
-
-      {/* Fill area under the curve */}
-      <motion.path
-        d={`${pathData} L ${width} ${height} L 0 ${height} Z`}
-        fill="url(#trendGradient)"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: animate ? 1 : 0 }}
-        transition={{
-          duration: 0.6,
-          delay: 0.2,
-          ease: [0.25, 0.46, 0.45, 0.94]
-        }}
-      />
-
       {/* Main trend line */}
       <motion.path
         d={pathData}
         stroke={color}
-        strokeWidth={2}
+        strokeWidth={1.5}
         fill="none"
         strokeLinecap="round"
         strokeLinejoin="round"
@@ -115,15 +94,13 @@ export const TrendGraph = ({
         }}
         transition={{
           pathLength: {
-            duration: 1.2,
-            ease: [0.22, 0.03, 0.26, 1]
+            duration: 1.5,
+            ease: [0.25, 0.1, 0.25, 1]
           },
           opacity: {
-            duration: 0.3
+            duration: 0.5,
+            ease: "easeOut"
           }
-        }}
-        style={{
-          filter: 'drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1))'
         }}
       />
 
