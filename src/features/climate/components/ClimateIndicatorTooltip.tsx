@@ -35,13 +35,15 @@ export const ClimateIndicatorTooltip = ({
   colorType
 }: ClimateIndicatorTooltipProps) => {
   return (
-    <div className="relative">
-      {/* Clickable indicator */}
-      <motion.button
-        onClick={onToggle}
-        className="cursor-pointer"
-        whileHover={{ scale: 1.05 }}
-        whileTap={{ scale: 0.95 }}
+    <div 
+      className="relative"
+      onMouseEnter={onToggle}
+      onMouseLeave={onToggle}
+    >
+      {/* Compact indicator with hover trigger */}
+      <motion.div
+        className="cursor-default"
+        whileHover={{ scale: 1.02 }}
       >
         <div className="flex items-center gap-3">
           <CircularProgress 
@@ -66,7 +68,7 @@ export const ClimateIndicatorTooltip = ({
             </div>
           </div>
         </div>
-      </motion.button>
+      </motion.div>
 
       {/* Tooltip */}
       <AnimatePresence>

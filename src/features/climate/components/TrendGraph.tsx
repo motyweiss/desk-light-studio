@@ -127,37 +127,6 @@ export const TrendGraph = ({
         }}
       />
 
-      {/* Data points */}
-      {data.map((value, index) => {
-        const min = Math.min(...data);
-        const max = Math.max(...data);
-        const range = max - min || 1;
-        const x = (index / (data.length - 1)) * width;
-        const y = height - ((value - min) / range) * height;
-        
-        return (
-          <motion.circle
-            key={index}
-            cx={x}
-            cy={y}
-            r={2}
-            fill={color}
-            initial={{ 
-              scale: 0,
-              opacity: 0
-            }}
-            animate={{ 
-              scale: animate ? 1 : 0,
-              opacity: animate ? 0.8 : 0
-            }}
-            transition={{
-              duration: 0.4,
-              delay: 0.6 + (index * 0.05),
-              ease: [0.34, 1.56, 0.64, 1]
-            }}
-          />
-        );
-      })}
     </svg>
   );
 };
