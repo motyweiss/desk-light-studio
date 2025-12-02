@@ -79,10 +79,10 @@ export const LightHotspot = ({
   const intensityCurve = Math.pow(intensityRatio, 0.7); // Non-linear for stronger high-intensity glow
   const dotOpacity = 0.35 + intensityCurve * 0.65;
   const dotColor = isOn 
-    ? `hsla(38, 70%, 58%, ${dotOpacity})` 
+    ? `hsl(var(--interactive-dot) / ${dotOpacity})` 
     : "hsl(var(--foreground) / 0.5)";
   const glowColor = isOn 
-    ? `rgba(200, 160, 80, ${0.25 + intensityCurve * 0.5})` 
+    ? `rgba(var(--interactive-glow) / ${0.25 + intensityCurve * 0.5})` 
     : "rgba(255, 255, 255, 0.25)";
   
   // Breathing animation adapts to intensity
@@ -143,7 +143,7 @@ export const LightHotspot = ({
               cx="30"
               cy="30"
               r="22"
-              fill={isOn ? `rgba(200, 160, 80, ${0.12 + intensityCurve * 0.15})` : "rgba(255, 255, 255, 0.06)"}
+              fill={isOn ? `rgba(var(--interactive-glow) / ${0.12 + intensityCurve * 0.15})` : "rgba(255, 255, 255, 0.06)"}
               initial={{ opacity: 0.25, scale: 1 }}
               animate={{
                 opacity: isOn ? [0.4 + intensityRatio * 0.2, 0.7 + intensityRatio * 0.2, 0.4 + intensityRatio * 0.2] : [0.25, 0.4, 0.25],
@@ -206,7 +206,7 @@ export const LightHotspot = ({
                 cx="30"
                 cy="30"
                 r="11"
-                fill={isOn ? `rgba(200, 160, 80, ${0.2 + intensityCurve * 0.25})` : "rgba(255, 255, 255, 0.07)"}
+                fill={isOn ? `rgba(var(--interactive-glow) / ${0.2 + intensityCurve * 0.25})` : "rgba(255, 255, 255, 0.07)"}
                 initial={{ opacity: 0.28, scale: 1 }}
                 animate={{
                   opacity: isOn ? (0.6 + intensityCurve * 0.35) : 0.28,
@@ -235,11 +235,11 @@ export const LightHotspot = ({
                   stiffness: 400,
                   damping: 25,
                 }}
-                style={{
-                  filter: isOn 
-                    ? `drop-shadow(0 0 ${6 + intensityCurve * 8}px rgba(200, 160, 80, ${0.4 + intensityCurve * 0.5})) drop-shadow(0 2px 6px rgba(0, 0, 0, 0.25))`
-                    : 'drop-shadow(0 2px 4px rgba(0, 0, 0, 0.15))'
-                }}
+                  style={{
+                    filter: isOn 
+                      ? `drop-shadow(0 0 ${6 + intensityCurve * 8}px rgba(var(--interactive-glow) / ${0.4 + intensityCurve * 0.5})) drop-shadow(0 2px 6px rgba(0, 0, 0, 0.25))`
+                      : 'drop-shadow(0 2px 4px rgba(0, 0, 0, 0.15))'
+                  }}
               />
 
               {/* Enhanced inner warm core - intensity-scaled */}
@@ -248,7 +248,7 @@ export const LightHotspot = ({
                   cx="30"
                   cy="30"
                   r="7"
-                  fill={`rgba(200, 160, 80, ${0.25 + intensityCurve * 0.3})`}
+                  fill={`rgba(var(--interactive-glow) / ${0.25 + intensityCurve * 0.3})`}
                   initial={{ opacity: 0, scale: 0.4 }}
                   animate={{ 
                     opacity: [0.65 + intensityRatio * 0.15, 0.95 + intensityRatio * 0.05, 0.65 + intensityRatio * 0.15],
@@ -405,7 +405,7 @@ export const LightHotspot = ({
                   style={{
                     background: intensity > 0
                       ? `radial-gradient(circle at 50% 50%, 
-                          rgba(200, 160, 80, ${0.08 * (intensity / 100)}) 0%, 
+                          rgba(var(--interactive-glow) / ${0.08 * (intensity / 100)}) 0%, 
                           transparent 70%)`
                       : 'none',
                   }}
@@ -429,8 +429,8 @@ export const LightHotspot = ({
                     <IconComponent 
                       className={`w-7 h-7 transition-colors duration-300 ${
                         intensity > 0 
-                          ? 'text-[hsl(43_90%_60%)]' 
-                          : 'text-[rgb(180,180,180)]'
+                          ? 'text-warm-glow' 
+                          : 'text-muted-foreground'
                       }`}
                     />
                   </motion.div>

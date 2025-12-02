@@ -131,7 +131,7 @@ export const RoomInfoPanel = ({ roomName, masterSwitchOn, onMasterToggle, onLigh
                     <div className="text-base font-light text-white tabular-nums flex items-center gap-1.5">
                       <span>{device.batteryLevel}%</span>
                       {device.isCharging && (
-                        <Zap className="w-3.5 h-3.5 text-[hsl(45_90%_55%)]" fill="currentColor" />
+                        <Zap className="w-3.5 h-3.5 text-status-caution" fill="currentColor" />
                       )}
                     </div>
                   </div>
