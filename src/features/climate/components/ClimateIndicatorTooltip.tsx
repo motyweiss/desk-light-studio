@@ -2,6 +2,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import { CircularProgress } from "./CircularProgress";
 import { TrendGraph } from "./TrendGraph";
 import { LucideIcon } from "lucide-react";
+import { useRef, useState, useEffect } from "react";
+import { createPortal } from "react-dom";
 
 interface ClimateIndicatorTooltipProps {
   isOpen: boolean;
@@ -34,8 +36,22 @@ export const ClimateIndicatorTooltip = ({
   progressMin = 0,
   colorType
 }: ClimateIndicatorTooltipProps) => {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [tooltipPosition, setTooltipPosition] = useState({ top: 0, left: 0 });
+
+  useEffect(() => {
+    if (isOpen && containerRef.current) {
+      const rect = containerRef.current.getBoundingClientRect();
+      setTooltipPosition({
+        top: rect.bottom + 12, // 12px offset below the trigger
+        left: rect.left + rect.width / 2, // Center horizontally
+      });
+    }
+  }, [isOpen]);
+
   return (
     <div 
+      ref={containerRef}
       className="relative"
       onMouseEnter={onToggle}
       onMouseLeave={onToggle}
@@ -65,14 +81,14 @@ export const ClimateIndicatorTooltip = ({
         </div>
       </motion.div>
 
-      {/* Tooltip */}
-      <AnimatePresence>
-        {isOpen && trendData.length > 0 && (
+      {/* Tooltip - rendered via Portal */}
+      {isOpen && trendData.length > 0 && createPortal(
+        <AnimatePresence>
           <motion.div
             initial={{ 
               opacity: 0,
               scale: 0.92,
-              y: position === "bottom" ? -10 : 10
+              y: -10
             }}
             animate={{ 
               opacity: 1,
@@ -82,16 +98,19 @@ export const ClimateIndicatorTooltip = ({
             exit={{ 
               opacity: 0,
               scale: 0.92,
-              y: position === "bottom" ? -10 : 10
+              y: -10
             }}
             transition={{
               duration: 0.35,
               ease: [0.25, 0.46, 0.45, 0.94]
             }}
-            className={`fixed left-1/2 -translate-x-1/2 ${
-              position === "bottom" ? "top-[120px]" : "bottom-[120px]"
-            }`}
-            style={{ zIndex: 9999 }}
+            className="fixed"
+            style={{ 
+              top: `${tooltipPosition.top}px`,
+              left: `${tooltipPosition.left}px`,
+              transform: 'translateX(-50%)',
+              zIndex: 9999
+            }}
           >
             <div className="bg-white/8 backdrop-blur-[24px] rounded-2xl px-5 py-4 shadow-[0_4px_24px_rgba(0,0,0,0.15)] border border-white/20 min-w-[280px]">
               {/* Header with icon and value */}
@@ -167,8 +186,9 @@ export const ClimateIndicatorTooltip = ({
               </motion.div>
             </div>
           </motion.div>
-        )}
-      </AnimatePresence>
+        </AnimatePresence>,
+        document.body
+      )}
     </div>
   );
 };
