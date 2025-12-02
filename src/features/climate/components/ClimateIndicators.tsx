@@ -1,11 +1,13 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { motion, useMotionValue, useTransform, animate } from 'framer-motion';
 import { Thermometer, Droplets, Wind } from 'lucide-react';
 import { useClimate } from '../context/ClimateContext';
-import { ClimateIndicator } from './ClimateIndicator';
+import { ClimateIndicatorTooltip } from './ClimateIndicatorTooltip';
+import { useTrendData } from '../hooks/useTrendData';
 
 export const ClimateIndicators = () => {
   const climate = useClimate();
+  const [openTooltip, setOpenTooltip] = useState<string | null>(null);
   
   // Animated counters
   const tempCount = useMotionValue(climate.temperature);
@@ -15,6 +17,11 @@ export const ClimateIndicators = () => {
   const humidityDisplay = useTransform(humidityCount, (latest) => Math.round(latest).toString());
   
   const airQualityCount = useMotionValue(climate.airQuality);
+  
+  // Generate trend data for each sensor
+  const temperatureTrend = useTrendData(climate.temperature, 'temperature');
+  const humidityTrend = useTrendData(climate.humidity, 'humidity');
+  const airQualityTrend = useTrendData(climate.airQuality, 'airQuality');
   
   useEffect(() => {
     const tempControls = animate(tempCount, climate.temperature, {
@@ -46,43 +53,85 @@ export const ClimateIndicators = () => {
     return 'Unhealthy';
   };
 
+  const getAirQualityColor = (value: number): string => {
+    if (value <= 12) return "hsl(var(--status-comfortable))";
+    if (value <= 35) return "hsl(var(--status-caution))";
+    if (value <= 55) return "hsl(var(--status-warning))";
+    return "hsl(var(--status-danger))";
+  };
+
+  const handleTooltipToggle = (sensorId: string) => {
+    setOpenTooltip(prev => prev === sensorId ? null : sensorId);
+  };
+
   return (
-    <div className="flex items-center gap-3">
-      <ClimateIndicator
+    <motion.div 
+      className="flex items-center gap-10"
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ 
+        opacity: climate.isLoaded ? 1 : 0,
+        y: climate.isLoaded ? 0 : 10
+      }}
+      transition={{ 
+        duration: 0.6,
+        delay: 0.4,
+        ease: [0.22, 0.03, 0.26, 1]
+      }}
+    >
+      <ClimateIndicatorTooltip
+        isOpen={openTooltip === 'temperature'}
         icon={Thermometer}
         label="Temperature"
-        value={climate.temperature}
-        unit="°"
-        min={15}
-        max={35}
+        value={tempDisplay.get()}
+        unit="°C"
+        trendData={temperatureTrend}
+        color={
+          climate.temperature <= 17 ? "hsl(var(--status-cold))" :
+          climate.temperature <= 20 ? "hsl(var(--status-cool))" :
+          climate.temperature <= 24 ? "hsl(var(--status-comfortable))" :
+          climate.temperature <= 28 ? "hsl(var(--status-warm))" :
+          "hsl(var(--status-hot))"
+        }
+        onToggle={() => handleTooltipToggle('temperature')}
+        progressValue={climate.temperature}
+        progressMax={35}
+        progressMin={15}
         colorType="temperature"
-        isLoaded={climate.isLoaded}
-        formatValue={(val) => tempDisplay.get()}
       />
       
-      <ClimateIndicator
+      <ClimateIndicatorTooltip
+        isOpen={openTooltip === 'humidity'}
         icon={Droplets}
         label="Humidity"
-        value={climate.humidity}
+        value={humidityDisplay.get()}
         unit="%"
-        min={0}
-        max={100}
+        trendData={humidityTrend}
+        color={
+          (climate.humidity >= 40 && climate.humidity <= 60) ? "hsl(var(--status-optimal))" :
+          ((climate.humidity >= 30 && climate.humidity < 40) || (climate.humidity > 60 && climate.humidity <= 70)) ? "hsl(var(--status-caution))" :
+          "hsl(var(--status-danger))"
+        }
+        onToggle={() => handleTooltipToggle('humidity')}
+        progressValue={climate.humidity}
+        progressMax={100}
+        progressMin={0}
         colorType="humidity"
-        isLoaded={climate.isLoaded}
-        formatValue={(val) => humidityDisplay.get()}
       />
       
-      <ClimateIndicator
+      <ClimateIndicatorTooltip
+        isOpen={openTooltip === 'airQuality'}
         icon={Wind}
         label="Air Quality"
-        value={climate.airQuality}
+        value={getAirQualityStatus(climate.airQuality)}
         unit=""
-        min={0}
-        max={100}
+        trendData={airQualityTrend}
+        color={getAirQualityColor(climate.airQuality)}
+        onToggle={() => handleTooltipToggle('airQuality')}
+        progressValue={climate.airQuality}
+        progressMax={100}
+        progressMin={0}
         colorType="airQuality"
-        isLoaded={climate.isLoaded}
-        formatValue={(val) => getAirQualityStatus(val)}
       />
-    </div>
+    </motion.div>
   );
 };

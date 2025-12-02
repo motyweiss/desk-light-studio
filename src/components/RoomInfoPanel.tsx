@@ -2,9 +2,11 @@ import { motion, useMotionValue, useTransform, animate } from "framer-motion";
 import { Thermometer, Droplets, Power, Wind, Zap } from "lucide-react";
 import { LightControlCard } from "@/features/lighting/components/LightControlCard";
 import { CircularProgress } from "@/features/climate/components/CircularProgress";
+import { ClimateIndicatorTooltip } from "@/features/climate/components/ClimateIndicatorTooltip";
+import { useTrendData } from "@/features/climate/hooks/useTrendData";
 import { AirPodsMaxIcon } from "./icons/AirPodsMaxIcon";
 import { IPhoneIcon } from "./icons/IPhoneIcon";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 
 interface Light {
   id: string;
