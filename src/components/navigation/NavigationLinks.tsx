@@ -1,6 +1,6 @@
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
-import { Monitor } from 'lucide-react';
+import { Monitor, Palette } from 'lucide-react';
 
 interface NavigationLinksProps {
   currentPath: string;
@@ -9,6 +9,7 @@ interface NavigationLinksProps {
 export const NavigationLinks = ({ currentPath }: NavigationLinksProps) => {
   const links = [
     { path: '/', label: 'Office', icon: Monitor },
+    { path: '/design-system', label: 'Design System', icon: Palette },
   ];
 
   return (
