@@ -1,5 +1,6 @@
 import { motion, AnimatePresence } from 'framer-motion';
 import { Check, Speaker, Smartphone, Monitor, Volume2, Users, Star } from 'lucide-react';
+import { useState, useLayoutEffect } from 'react';
 import type { MediaPlayerEntity } from '@/services/homeAssistant';
 import type { SpeakerGroup } from '@/config/speakerGroups';
 import type { PlaybackTarget } from '@/types/mediaPlayer';
@@ -41,6 +42,23 @@ export const SpeakerPopover = ({
   const hasSpeakers = availableSpeakers.length > 0;
   const hasGroups = predefinedGroups.length > 0;
 
+  // State for popover position
+  const [popoverPosition, setPopoverPosition] = useState<{ bottom: string; right: string }>({
+    bottom: '100px',
+    right: '24px',
+  });
+
+  // Calculate position when popover opens
+  useLayoutEffect(() => {
+    if (isOpen && anchorRef.current) {
+      const rect = anchorRef.current.getBoundingClientRect();
+      setPopoverPosition({
+        bottom: `${window.innerHeight - rect.top + 8}px`,
+        right: `${window.innerWidth - rect.right}px`,
+      });
+    }
+  }, [isOpen, anchorRef]);
+
   const handleSpotifySelect = (source: string) => {
     onSpotifySourceSelect(source);
     onClose();
@@ -54,18 +72,6 @@ export const SpeakerPopover = ({
   const handleGroupClick = (group: SpeakerGroup) => {
     onGroupSelect(group);
     onClose();
-  };
-
-  // Calculate position relative to anchor
-  const getPopoverStyle = (): React.CSSProperties => {
-    if (!anchorRef.current) return {};
-    
-    const rect = anchorRef.current.getBoundingClientRect();
-    return {
-      position: 'fixed',
-      bottom: `${window.innerHeight - rect.top + 8}px`,
-      right: `${window.innerWidth - rect.right}px`,
-    };
   };
 
   return (
@@ -91,7 +97,11 @@ export const SpeakerPopover = ({
               duration: 0.2, 
               ease: [0.25, 0.1, 0.25, 1]
             }}
-            style={getPopoverStyle()}
+            style={{
+              position: 'fixed',
+              bottom: popoverPosition.bottom,
+              right: popoverPosition.right,
+            }}
             className="z-[101] w-[280px] max-h-[320px] bg-[#2a2520]/95 backdrop-blur-[40px] border border-white/20 rounded-xl overflow-hidden shadow-xl"
             onClick={(e) => e.stopPropagation()}
           >
