@@ -1,7 +1,7 @@
 import { motion, AnimatePresence } from 'framer-motion';
 import { Check, Speaker, Smartphone, Monitor, Volume2, Users, Star } from 'lucide-react';
 import { useState, useLayoutEffect } from 'react';
-import type { MediaPlayerEntity } from '@/services/homeAssistant';
+import type { HAMediaPlayerEntity } from '@/api/homeAssistant/types';
 import type { SpeakerGroup } from '@/config/speakerGroups';
 import type { PlaybackTarget } from '@/types/mediaPlayer';
 
@@ -10,7 +10,7 @@ interface SpeakerPopoverProps {
   onClose: () => void;
   currentPlaybackTarget: PlaybackTarget | null;
   spotifySources: string[];
-  availableSpeakers: MediaPlayerEntity[];
+  availableSpeakers: HAMediaPlayerEntity[];
   predefinedGroups: SpeakerGroup[];
   onSpotifySourceSelect: (source: string) => void;
   onSpeakerSelect: (entityId: string, friendlyName: string) => void;

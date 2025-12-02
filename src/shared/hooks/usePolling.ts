@@ -11,7 +11,14 @@ interface UsePollingOptions<T> {
 
 /**
  * Generic polling hook with window focus detection
- * Automatically syncs when window regains focus
+ * 
+ * @example
+ * ```typescript
+ * usePolling(
+ *   async () => await fetchData(),
+ *   { interval: 1500, enabled: true, runOnFocus: true }
+ * );
+ * ```
  */
 export const usePolling = <T>(
   fetcher: () => Promise<T>,

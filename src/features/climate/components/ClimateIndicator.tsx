@@ -1,7 +1,7 @@
 import { useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { LucideIcon } from 'lucide-react';
-import { CircularProgress } from '@/components/CircularProgress';
+import { CircularProgress } from './CircularProgress';
 
 interface ClimateIndicatorProps {
   icon: LucideIcon;
