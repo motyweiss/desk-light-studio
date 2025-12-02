@@ -51,6 +51,8 @@ export interface HAMediaPlayerEntity extends HAEntity {
     source_list?: string[];
     supported_features?: number;
     friendly_name?: string;
+    group_members?: string[];
+    app_name?: string;
   };
 }
 

@@ -4,6 +4,7 @@
  */
 
 export { haClient } from './client';
+export { websocketService } from './websocket';
 export { lights } from './entities/lights';
 export { sensors } from './entities/sensors';
 export { mediaPlayer } from './entities/mediaPlayer';
