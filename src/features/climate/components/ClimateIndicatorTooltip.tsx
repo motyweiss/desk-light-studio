@@ -74,7 +74,11 @@ export const ClimateIndicatorTooltip = ({
             colorType={colorType}
             delay={0.1}
           >
-            <Icon className="w-4 h-4 text-white/60" strokeWidth={1.5} />
+            <Icon 
+              className="w-4 h-4 transition-colors duration-300" 
+              strokeWidth={1.5}
+              style={{ color: isLoading ? 'rgba(255,255,255,0.3)' : color }}
+            />
           </CircularProgress>
           <motion.div 
             className="text-sm font-light text-white tabular-nums"
@@ -180,6 +184,7 @@ export const ClimateIndicatorTooltip = ({
                   height={50}
                   color={color}
                   animate={isOpen}
+                  colorType={colorType}
                 />
               </motion.div>
             </div>
