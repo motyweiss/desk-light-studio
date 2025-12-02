@@ -17,7 +17,10 @@ export const TrendGraph = ({
   animate = true 
 }: TrendGraphProps) => {
   const pathData = useMemo(() => {
-    if (data.length < 2) return "";
+    if (data.length < 2) {
+      // Not enough data points, return empty path
+      return "";
+    }
     
     const min = Math.min(...data);
     const max = Math.max(...data);
@@ -46,6 +49,18 @@ export const TrendGraph = ({
     
     return path;
   }, [data, width, height]);
+
+  // Guard: don't render if not enough data
+  if (data.length < 2) {
+    return (
+      <div 
+        className="flex items-center justify-center text-white/30 text-xs"
+        style={{ width, height }}
+      >
+        Loading data...
+      </div>
+    );
+  }
 
   const totalLength = useMemo(() => {
     if (!pathData) return 0;
