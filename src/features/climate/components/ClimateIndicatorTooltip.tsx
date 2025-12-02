@@ -1,10 +1,10 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { CircularProgress } from "./CircularProgress";
 import { TrendGraph } from "./TrendGraph";
+import { ColorLegend } from "./ColorLegend";
 import { LucideIcon } from "lucide-react";
 import { useRef, useState, useEffect } from "react";
 import { createPortal } from "react-dom";
-
 interface ClimateIndicatorTooltipProps {
   isOpen: boolean;
   icon: LucideIcon;
@@ -75,7 +75,7 @@ export const ClimateIndicatorTooltip = ({
             delay={0.1}
           >
             <Icon 
-              className="w-4 h-4 transition-colors duration-300" 
+              className="w-4 h-4 transition-colors duration-700" 
               strokeWidth={1.5}
               style={{ color: isLoading ? 'rgba(255,255,255,0.3)' : color }}
             />
@@ -187,6 +187,9 @@ export const ClimateIndicatorTooltip = ({
                   colorType={colorType}
                 />
               </motion.div>
+
+              {/* Color Legend */}
+              <ColorLegend colorType={colorType} />
             </div>
           </motion.div>
         </AnimatePresence>,

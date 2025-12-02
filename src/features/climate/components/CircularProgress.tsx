@@ -1,4 +1,5 @@
-import { motion } from "framer-motion";
+import { motion, useMotionValue, useSpring, useTransform } from "framer-motion";
+import { useEffect, useMemo } from "react";
 
 interface CircularProgressProps {
   value: number;
@@ -81,17 +82,21 @@ export const CircularProgress = ({
           strokeLinecap="round"
           initial={{ 
             strokeDashoffset: circumference,
-            stroke: getProgressColor(value, colorType)
           }}
           animate={{ 
             strokeDashoffset: isLoaded ? offset : circumference,
-            stroke: getProgressColor(value, colorType)
           }}
-          style={{ strokeDasharray: circumference }}
+          style={{ 
+            strokeDasharray: circumference,
+            stroke: getProgressColor(value, colorType),
+            transition: 'stroke 0.7s ease-in-out'
+          }}
           transition={{ 
-            duration: isLoaded ? 1.5 : 0,
-            delay: isLoaded ? delay : 0,
-            ease: [0.22, 0.03, 0.26, 1] 
+            strokeDashoffset: {
+              duration: isLoaded ? 1.5 : 0,
+              delay: isLoaded ? delay : 0,
+              ease: [0.22, 0.03, 0.26, 1]
+            }
           }}
         />
       </svg>
