@@ -114,7 +114,7 @@ export const ClimateIndicatorTooltip = ({
           >
             <div className="bg-white/8 backdrop-blur-[24px] rounded-2xl px-5 py-4 shadow-[0_4px_24px_rgba(0,0,0,0.15)] border border-white/20 min-w-[280px]">
               {/* Header with icon and value */}
-              <div className="flex items-center gap-4 mb-4">
+              <div className="flex items-center gap-4 mb-3">
                 <motion.div
                   className="w-12 h-12 rounded-full flex items-center justify-center backdrop-blur-xl"
                   style={{ backgroundColor: `${color}15` }}
@@ -166,23 +166,13 @@ export const ClimateIndicatorTooltip = ({
                   ease: [0.25, 0.46, 0.45, 0.94]
                 }}
               >
-                <div className="mb-2 flex items-center justify-between">
-                  <span className="text-[10px] text-white/40 font-light tracking-wider uppercase">
-                    Last 24h Trend
-                  </span>
-                  <span className="text-[10px] text-white/30 font-light tabular-nums">
-                    {trendData.length} readings
-                  </span>
-                </div>
-                <div className="bg-white/5 rounded-lg p-3 border border-white/10">
-                  <TrendGraph 
-                    data={trendData}
-                    width={240}
-                    height={50}
-                    color={color}
-                    animate={isOpen}
-                  />
-                </div>
+                <TrendGraph 
+                  data={trendData}
+                  width={240}
+                  height={50}
+                  color={color}
+                  animate={isOpen}
+                />
               </motion.div>
             </div>
           </motion.div>
