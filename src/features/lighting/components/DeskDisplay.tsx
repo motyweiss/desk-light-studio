@@ -1,5 +1,5 @@
-import { useState, useEffect, useMemo } from "react";
-import { motion } from "framer-motion";
+import { useState, useEffect, useMemo, useCallback } from "react";
+import { motion, useSpring, useTransform } from "framer-motion";
 import { LightHotspot } from "./LightHotspot";
 import { LIGHT_ANIMATION } from "@/constants/animations";
 
@@ -51,12 +51,37 @@ export const DeskDisplay = ({
   const [isHovered, setIsHovered] = useState(false);
   const [isTransitioning, setIsTransitioning] = useState(false);
 
+  // Spring animations for smooth 3D parallax effect
+  const springConfig = { stiffness: 150, damping: 20 };
+  const x = useSpring(0, springConfig);
+  const y = useSpring(0, springConfig);
+
+  // Transform to rotation values (subtle ±3 degrees max)
+  const rotateX = useTransform(y, [-1, 1], [3, -3]);
+  const rotateY = useTransform(x, [-1, 1], [-3, 3]);
+
+  // Mouse move handler for parallax effect
+  const handleMouseMove = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    const centerX = rect.left + rect.width / 2;
+    const centerY = rect.top + rect.height / 2;
+    
+    // Normalize to -1 to 1 range
+    const normalizedX = (e.clientX - centerX) / (rect.width / 2);
+    const normalizedY = (e.clientY - centerY) / (rect.height / 2);
+    
+    x.set(normalizedX);
+    y.set(normalizedY);
+  }, [x, y]);
+
   const handleMouseEnter = () => {
     setIsHovered(true);
   };
 
   const handleMouseLeave = () => {
     setIsHovered(false);
+    x.set(0);
+    y.set(0);
   };
 
   // Count how many lights are on in a state
@@ -114,8 +139,17 @@ export const DeskDisplay = ({
       className="relative w-full aspect-square"
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
+      onMouseMove={handleMouseMove}
     >
-      <div className="relative w-full h-full overflow-hidden rounded-[2rem]">
+      <motion.div 
+        className="relative w-full h-full overflow-hidden rounded-[2rem]"
+        style={{
+          perspective: 1000,
+          rotateX,
+          rotateY,
+          transformStyle: 'preserve-3d',
+        }}
+      >
         {/* Gradient mask overlay for smooth fade out to background */}
         <div 
           className="absolute inset-0 z-20 pointer-events-none"
@@ -179,7 +213,7 @@ export const DeskDisplay = ({
           })}
         </div>
         
-      </div>
+      </motion.div>
 
       {/* Interactive Light Hotspots Layer - Desktop Only */}
       <div className="hidden md:block absolute inset-0 z-30 pointer-events-none">
