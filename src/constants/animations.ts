@@ -43,9 +43,9 @@ export const LIGHT_ANIMATION = {
 } as const;
 
 export const POLL_INTERVAL = {
-  lights: 1000,        // 1 second for light states
-  sensors: 1500,       // 1.5 seconds for sensors
-  mediaPlayer: 600,    // 600ms for immediate music detection
+  lights: 1500,        // 1.5 seconds for light states (reduced load)
+  sensors: 5000,       // 5 seconds for sensors (less frequent)
+  mediaPlayer: 2000,   // 2 seconds for media player
 } as const;
 
 export const BLOCKING_WINDOW = {

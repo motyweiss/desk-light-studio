@@ -69,21 +69,18 @@ export const useHomeAssistantSync = (config: UseHomeAssistantSyncConfig) => {
   ): number | null => {
     // Skip if light is pending HA confirmation
     if (pendingLights.has(lightId)) {
-      console.log(`🚫 ${lightId}: skipped (pending HA confirmation)`);
       return null;
     }
 
     // Only skip update if manual change happened recently
     const timeSinceManualChange = Date.now() - lastManualChangeRef.current;
     if (timeSinceManualChange < BLOCKING_WINDOW.manualChange) {
-      logger.sync(`Update blocked: ${lightId} (manual change ${timeSinceManualChange}ms ago)`);
       return null;
     }
 
     const newIntensity = state === 'on' ? Math.round((brightness || 255) / 255 * 100) : 0;
 
     if (currentIntensity !== newIntensity) {
-      console.log(`💡 ${lightId} synced: ${currentIntensity}% → ${newIntensity}% (remote state: ${state})`);
       return newIntensity;
     }
 
@@ -111,8 +108,6 @@ export const useHomeAssistantSync = (config: UseHomeAssistantSyncConfig) => {
     const allEntityIds = [...lightEntityIds, ...sensorEntityIds];
     if (allEntityIds.length === 0) return;
 
-    console.log('⚡ Force sync triggered');
-
     try {
       const states = await homeAssistant.getAllEntityStates(allEntityIds);
 
@@ -126,7 +121,6 @@ export const useHomeAssistantSync = (config: UseHomeAssistantSyncConfig) => {
           ? Math.round((state.brightness || 255) / 255 * 100)
           : 0;
         lightUpdates.spotlight = newIntensity;
-        console.log(`💡 Spotlight force synced: ${newIntensity}%`);
       }
 
       if (entityMapping.deskLamp && states.has(entityMapping.deskLamp)) {
@@ -135,7 +129,6 @@ export const useHomeAssistantSync = (config: UseHomeAssistantSyncConfig) => {
           ? Math.round((state.brightness || 255) / 255 * 100)
           : 0;
         lightUpdates.deskLamp = newIntensity;
-        console.log(`💡 Desk Lamp force synced: ${newIntensity}%`);
       }
 
       if (entityMapping.monitorLight && states.has(entityMapping.monitorLight)) {
@@ -144,7 +137,6 @@ export const useHomeAssistantSync = (config: UseHomeAssistantSyncConfig) => {
           ? Math.round((state.brightness || 255) / 255 * 100)
           : 0;
         lightUpdates.monitorLight = newIntensity;
-        console.log(`💡 Monitor Light force synced: ${newIntensity}%`);
       }
 
       // Update sensors
@@ -251,18 +243,15 @@ export const useHomeAssistantSync = (config: UseHomeAssistantSyncConfig) => {
     const allEntityIds = [...lightEntityIds, ...sensorEntityIds];
     if (allEntityIds.length === 0) return;
 
-    console.log('🔄 Starting Home Assistant sync polling');
-    console.log('📡 Light entities:', lightEntityIds);
-    console.log('🌡️ Sensor entities:', sensorEntityIds);
-
     const syncStates = async () => {
       const syncStartTime = Date.now();
       try {
         const states = await homeAssistant.getAllEntityStates(allEntityIds);
         const fetchDuration = Date.now() - syncStartTime;
 
-        if (fetchDuration > 1000) {
-          logger.warn(`Slow sync: ${fetchDuration}ms (threshold: 1000ms)`);
+        // Only log if sync is very slow (>2000ms)
+        if (fetchDuration > 2000) {
+          logger.warn(`Slow sync: ${fetchDuration}ms`);
         }
 
         // Connection successful - reset reconnection state
@@ -390,14 +379,12 @@ export const useHomeAssistantSync = (config: UseHomeAssistantSyncConfig) => {
       }
     };
 
-    console.log('🚀 Starting initial sync...');
     syncStates();
 
-    // Poll every 1000ms (reduced from 500ms)
+    // Poll every 1000ms
     pollIntervalRef.current = setInterval(syncStates, POLL_INTERVAL.lights);
 
     return () => {
-      console.log('🛑 Stopping Home Assistant sync polling');
       if (pollIntervalRef.current) {
         clearInterval(pollIntervalRef.current);
       }
