@@ -1,4 +1,4 @@
-import { motion, AnimatePresence, useSpring } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { useState, useRef } from "react";
 import { Zap } from "lucide-react";
 
@@ -17,28 +17,9 @@ export const ConnectionStatusIndicator = ({
 }: ConnectionStatusIndicatorProps) => {
   const [isHovered, setIsHovered] = useState(false);
   const containerRef = useRef<HTMLButtonElement>(null);
-  
-  // Mouse tracking with spring physics
-  const mouseX = useSpring(0, { stiffness: 120, damping: 18 });
-  const mouseY = useSpring(0, { stiffness: 120, damping: 18 });
-
-  const handleMouseMove = (e: React.MouseEvent) => {
-    if (!containerRef.current || !isHovered) return;
-    
-    const rect = e.currentTarget.getBoundingClientRect();
-    const centerX = rect.left + rect.width / 2;
-    const centerY = rect.top + rect.height / 2;
-    const deltaX = (e.clientX - centerX) / 30;
-    const deltaY = (e.clientY - centerY) / 30;
-    
-    mouseX.set(deltaX);
-    mouseY.set(deltaY);
-  };
 
   const handleMouseLeave = () => {
     setIsHovered(false);
-    mouseX.set(0);
-    mouseY.set(0);
   };
 
   const getStatusColor = () => {
@@ -48,9 +29,9 @@ export const ConnectionStatusIndicator = ({
   };
 
   const getTooltipText = () => {
-    if (isReconnecting) return "Reconnecting...";
-    if (!isConnected) return "Disconnected";
-    return "Connected";
+    if (isReconnecting) return "Reconnecting to Home Assistant...";
+    if (!isConnected) return "Disconnected - Click to reconnect";
+    return "Connected to Home Assistant";
   };
 
   const handleClick = () => {
@@ -69,7 +50,6 @@ export const ConnectionStatusIndicator = ({
       className={`hidden md:flex ${inline ? 'relative' : 'fixed top-6 right-6 z-50'} w-10 h-10 items-center justify-center rounded-lg hover:bg-white/5 transition-all duration-300 ${getStatusColor()} ${isClickable ? 'cursor-pointer' : 'cursor-default'}`}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={handleMouseLeave}
-      onMouseMove={handleMouseMove}
       initial={inline ? false : { opacity: 0, scale: 0.8 }}
       animate={inline ? false : { opacity: 1, scale: 1 }}
       whileHover={{ scale: 1.05 }}
@@ -89,13 +69,10 @@ export const ConnectionStatusIndicator = ({
               border border-white/25
               [background:linear-gradient(135deg,rgba(255,255,255,0.15),rgba(255,255,255,0.05))]"
             style={{
-              top: '100%',
+              top: 'calc(100% + 12px)',
               left: '50%',
-              marginTop: '12px',
-              x: mouseX,
-              y: mouseY,
-              translateX: '-50%',
-              transformOrigin: 'top center'
+              transform: 'translateX(-50%)',
+              transformOrigin: '50% 0%'
             }}
             initial={{ scale: 0.92, opacity: 0 }}
             animate={{ 
