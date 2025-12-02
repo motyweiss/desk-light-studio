@@ -8,6 +8,7 @@ import { AppLoadProvider } from "./contexts/AppLoadContext";
 import { RootLayout } from "./layouts/RootLayout";
 import Index from "./pages/Index";
 import Settings from "./pages/Settings";
+import DesignSystem from "./pages/DesignSystem";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -24,6 +25,7 @@ const App = () => (
                   <Routes>
                     <Route path="/" element={<Index />} />
                     <Route path="/settings" element={<Settings />} />
+                    <Route path="/design-system" element={<DesignSystem />} />
                     {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                     <Route path="*" element={<NotFound />} />
                   </Routes>
