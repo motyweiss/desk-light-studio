@@ -1,0 +1,109 @@
+import { Meta } from '@storybook/blocks';
+
+<Meta title="Introduction" />
+
+# Smart Home Dashboard - Component Library
+
+Welcome to the Smart Home Dashboard Storybook documentation. This interactive component library showcases all UI components, features, and patterns used in the application.
+
+## 🏠 What is This Project?
+
+A sophisticated smart home dashboard that integrates with Home Assistant to control:
+- **Lighting**: Real-time control of multiple light sources with intensity adjustment
+- **Climate**: Monitor temperature, humidity, and air quality sensors
+- **Media Player**: Control Sonos speakers and Spotify playback
+- **Device Monitoring**: Track battery levels and charging status
+
+## 📚 Component Categories
+
+### UI Components
+Basic, reusable UI building blocks:
+- **Button**: Various button styles and states
+- **Slider**: Interactive range inputs
+- **Input**: Form input fields
+- **Select**: Dropdown selection components
+- **Dialog**: Modal dialogs and overlays
+
+### Feature Components
+Domain-specific components:
+- **LightControlCard**: Individual light control with intensity slider
+- **ClimateIndicator**: Real-time climate data display with circular progress
+- **MediaPlayer**: Full-featured music player interface
+- **ConnectionStatusIndicator**: Home Assistant connection status
+
+### Layout Components
+Page structure and organization:
+- **RoomInfoPanel**: Main control panel with climate and lighting
+- **ErrorBoundary**: Error handling and recovery UI
+
+## 🎨 Design System
+
+The project uses a sophisticated design system featuring:
+- **Glassmorphism**: Frosted glass effects with backdrop blur
+- **Warm Color Palette**: Browns, tans, and warm ambers
+- **Dynamic Theming**: CSS variables for consistent styling
+- **Responsive Design**: Mobile-first approach
+- **Smooth Animations**: Framer Motion for fluid transitions
+
+## 🏗️ Architecture
+
+Built with modern technologies:
+- **React 18** + **TypeScript**
+- **Vite** for blazing fast builds
+- **Tailwind CSS** for utility-first styling
+- **Framer Motion** for animations
+- **Vitest** + **React Testing Library** for testing
+- **Home Assistant** integration for smart home control
+
+## 🧪 Testing
+
+Comprehensive test coverage:
+- **91 total tests** (88%+ coverage)
+- **41 unit tests** for hooks and utilities
+- **22 component tests** for UI reliability
+- **28 integration tests** for feature flows
+
+## 🚀 Getting Started
+
+### View Components
+Browse the sidebar to explore individual components with live, interactive examples.
+
+### Customize Props
+Use the Controls panel at the bottom to modify component properties in real-time.
+
+### Check Documentation
+Each component includes detailed documentation, usage examples, and code snippets.
+
+### Explore Stories
+Multiple stories per component demonstrate different states and use cases.
+
+## 📖 Usage Example
+
+```tsx
+import { LightControlCard } from '@/features/lighting/components/LightControlCard';
+
+function MyComponent() {
+  const [intensity, setIntensity] = useState(50);
+
+  return (
+    <LightControlCard
+      id="desk-lamp"
+      label="Desk Lamp"
+      intensity={intensity}
+      onChange={setIntensity}
+      isPending={false}
+    />
+  );
+}
+```
+
+## 🔗 Useful Links
+
+- [Project Documentation](../README.md)
+- [Testing Guide](../src/test/README.md)
+- [Refactoring History](../REFACTORING.md)
+- [GitHub Repository](#)
+
+---
+
+**Built with ❤️ using Lovable**
