@@ -1,7 +1,7 @@
 import { ReactNode, useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
-import { MediaPlayerProvider } from '@/contexts/MediaPlayerContext';
+import { MediaPlayerProvider } from '@/features/mediaPlayer';
 import { MediaPlayer } from '@/components/MediaPlayer/MediaPlayer';
 import { TopNavigationBar } from '@/components/navigation/TopNavigationBar';
 import { useHomeAssistantConfig } from '@/hooks/useHomeAssistantConfig';

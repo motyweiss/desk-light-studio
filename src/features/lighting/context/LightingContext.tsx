@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useCallback, useEffect, useRef } from 'react';
-import { websocketService } from '@/services/homeAssistantWebSocket';
+import { websocketService } from '@/api/homeAssistant';
 import { haClient, lights as lightsAPI } from '@/api/homeAssistant';
 import { useHomeAssistantConfig } from '@/hooks/useHomeAssistantConfig';
 import { useToast } from '@/hooks/use-toast';
@@ -171,7 +171,7 @@ export const LightingProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     const connectWebSocket = async () => {
       try {
         logger.connection('Attempting WebSocket connection...');
-        await websocketService.connect(config.baseUrl, config.accessToken);
+        await websocketService.connect(config);
         
         setConnectionType('websocket');
         pollingEnabledRef.current = false;
@@ -315,7 +315,7 @@ export const LightingProvider: React.FC<{ children: React.ReactNode }> = ({ chil
 
     try {
       logger.connection('Manual reconnection attempt...');
-      await websocketService.connect(config.baseUrl, config.accessToken);
+      await websocketService.connect(config);
       setConnectionType('websocket');
       pollingEnabledRef.current = false;
       await fetchInitialStates();
