@@ -22,10 +22,13 @@ export const ConnectionStatusIndicator = ({
   useLayoutEffect(() => {
     if (isHovered && containerRef.current) {
       const rect = containerRef.current.getBoundingClientRect();
-      setTooltipPosition({
+      console.log('🎯 Tooltip position calculation:', { rect, isHovered });
+      const newPosition = {
         top: rect.bottom + 12,
         left: rect.left + rect.width / 2,
-      });
+      };
+      console.log('📍 Setting tooltip position:', newPosition);
+      setTooltipPosition(newPosition);
     }
   }, [isHovered]);
 
@@ -59,7 +62,10 @@ export const ConnectionStatusIndicator = ({
       onClick={handleClick}
       disabled={!isClickable}
       className={`hidden md:flex ${inline ? 'relative' : 'fixed top-6 right-6 z-50'} w-10 h-10 items-center justify-center rounded-lg hover:bg-white/5 transition-all duration-300 overflow-visible ${getStatusColor()} ${isClickable ? 'cursor-pointer' : 'cursor-default'}`}
-      onMouseEnter={() => setIsHovered(true)}
+      onMouseEnter={() => {
+        console.log('🖱️ Mouse entered connection indicator');
+        setIsHovered(true);
+      }}
       onMouseLeave={handleMouseLeave}
       initial={inline ? false : { opacity: 0, scale: 0.8 }}
       animate={inline ? false : { opacity: 1, scale: 1 }}
@@ -73,7 +79,9 @@ export const ConnectionStatusIndicator = ({
       {/* Tooltip */}
       <AnimatePresence>
         {isHovered && tooltipPosition.top > 0 && (
-          <motion.div
+          <>
+            {console.log('✅ Rendering tooltip at:', tooltipPosition)}
+            <motion.div
             className="fixed pointer-events-none z-[200]
               bg-white/12 backdrop-blur-[32px]
               px-5 py-2.5 rounded-full
@@ -107,6 +115,7 @@ export const ConnectionStatusIndicator = ({
               {getTooltipText()}
             </div>
           </motion.div>
+          </>
         )}
       </AnimatePresence>
     </motion.button>
