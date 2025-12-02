@@ -34,7 +34,7 @@ interface UseClimateSyncConfig {
  * Unified climate and device battery synchronization
  */
 export const useClimateSync = (config: UseClimateSyncConfig): ClimateData => {
-  const { isConnected, entityMapping, pollingInterval = 3000 } = config;
+  const { isConnected, entityMapping, pollingInterval = 5000 } = config;
 
   const [climateData, setClimateData] = useState<ClimateData>({
     temperature: 22,
@@ -112,8 +112,6 @@ export const useClimateSync = (config: UseClimateSyncConfig): ClimateData => {
         newData.isLoaded = true;
         return newData;
       });
-
-      logger.climate('Synced climate data');
     } catch (error) {
       logger.error('Failed to sync climate data', error);
     }

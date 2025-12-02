@@ -26,7 +26,7 @@ interface UseMediaPlayerSyncReturn {
  * Handles polling, state management, and playback target detection
  */
 export const useMediaPlayerSync = (config: UseMediaPlayerSyncConfig): UseMediaPlayerSyncReturn => {
-  const { entityId, enabled, pollInterval = 600 } = config;
+  const { entityId, enabled, pollInterval = 2000 } = config;
 
   const [playerState, setPlayerState] = useState<MediaPlayerState | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -117,8 +117,6 @@ export const useMediaPlayerSync = (config: UseMediaPlayerSyncConfig): UseMediaPl
         const newState = entityToState(entity, trackChanged);
         setPlayerState(newState);
         isPlayingRef.current = newState.isPlaying;
-
-        logger.media(`Synced: ${newState.isPlaying ? 'Playing' : newState.isPaused ? 'Paused' : 'Stopped'} - ${newState.currentTrack.title}`);
       }
 
       setIsLoading(false);
@@ -173,9 +171,12 @@ export const useMediaPlayerSync = (config: UseMediaPlayerSyncConfig): UseMediaPl
   }, []);
 
   /**
-   * Load available speakers
+   * Load available speakers (cached)
    */
   const loadAvailableSpeakers = useCallback(async () => {
+    // Only load if not already loaded
+    if (availableSpeakers.length > 0) return;
+    
     try {
       const speakers = await mediaPlayer.getAvailablePlayers();
       const sonosSpeakers = speakers.filter(speaker => 
@@ -188,7 +189,7 @@ export const useMediaPlayerSync = (config: UseMediaPlayerSyncConfig): UseMediaPl
     } catch (error) {
       logger.error('Failed to load available speakers', error);
     }
-  }, []);
+  }, [availableSpeakers.length]);
 
   // Real-time position tracking
   useEffect(() => {

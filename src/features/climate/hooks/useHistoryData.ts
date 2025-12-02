@@ -1,10 +1,11 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { haClient } from '@/api/homeAssistant/client';
 import { logger } from '@/shared/utils/logger';
 
 /**
  * Hook to fetch and process historical sensor data from Home Assistant
  * Falls back to mock data when not connected
+ * Uses caching to prevent excessive API calls
  */
 export const useHistoryData = (
   entityId: string | undefined,
@@ -13,6 +14,8 @@ export const useHistoryData = (
   sensorType: 'temperature' | 'humidity' | 'airQuality'
 ): number[] => {
   const [historyData, setHistoryData] = useState<number[]>([]);
+  const lastFetchRef = useRef<number>(0);
+  const cacheRef = useRef<Map<string, { data: number[]; timestamp: number }>>(new Map());
 
   useEffect(() => {
     const fetchHistory = async () => {
@@ -22,11 +25,29 @@ export const useHistoryData = (
         return;
       }
 
+      // Cache for 5 minutes
+      const cacheKey = `${entityId}_${sensorType}`;
+      const cached = cacheRef.current.get(cacheKey);
+      const now = Date.now();
+      
+      if (cached && (now - cached.timestamp) < 300000) {
+        setHistoryData(cached.data);
+        return;
+      }
+
+      // Throttle API calls - max once per 10 seconds
+      if (now - lastFetchRef.current < 10000) {
+        return;
+      }
+
+      lastFetchRef.current = now;
+
       try {
         const history = await haClient.getHistory(entityId, 24);
         
         if (!history || history.length === 0) {
-          setHistoryData(generateMockData(currentValue, sensorType));
+          const mockData = generateMockData(currentValue, sensorType);
+          setHistoryData(mockData);
           return;
         }
 
@@ -36,15 +57,17 @@ export const useHistoryData = (
           .filter(val => !isNaN(val) && val !== null);
 
         if (values.length < 2) {
-          setHistoryData(generateMockData(currentValue, sensorType));
+          const mockData = generateMockData(currentValue, sensorType);
+          setHistoryData(mockData);
           return;
         }
 
         // Sample data to ~24 points for smooth graph
         const sampledData = sampleData(values, 24);
-        setHistoryData(sampledData);
         
-        logger.sync(`History loaded for ${entityId}`, { points: sampledData.length });
+        // Cache the result
+        cacheRef.current.set(cacheKey, { data: sampledData, timestamp: now });
+        setHistoryData(sampledData);
       } catch (error) {
         logger.error(`Failed to load history for ${entityId}`, error);
         setHistoryData(generateMockData(currentValue, sensorType));
@@ -52,7 +75,7 @@ export const useHistoryData = (
     };
 
     fetchHistory();
-  }, [entityId, isConnected, currentValue, sensorType]);
+  }, [entityId, isConnected, sensorType]);
 
   return historyData;
 };
