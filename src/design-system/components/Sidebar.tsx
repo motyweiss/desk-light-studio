@@ -1,4 +1,4 @@
-import { Palette, Type, Ruler, Zap, Box, Layout, Image } from "lucide-react";
+import { Palette, Type, Ruler, Zap, Box, Layout, Image, Wrench } from "lucide-react";
 
 interface SidebarProps {
   activeSection: string;
@@ -26,10 +26,29 @@ const sections = [
     ],
   },
   {
+    title: "Patterns",
+    icon: Layout,
+    items: [
+      { id: "blocks", label: "All Blocks" },
+      { id: "navigation-blocks", label: "Navigation" },
+      { id: "media-blocks", label: "Media" },
+      { id: "display-blocks", label: "Display" },
+      { id: "input-blocks", label: "Input" },
+      { id: "feedback-blocks", label: "Feedback" },
+    ],
+  },
+  {
     title: "Assets",
     icon: Image,
     items: [
       { id: "icons", label: "Icons" },
+    ],
+  },
+  {
+    title: "Tools",
+    icon: Wrench,
+    items: [
+      { id: "usage-map", label: "Usage Map" },
     ],
   },
 ];
