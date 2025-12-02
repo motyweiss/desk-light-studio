@@ -1,4 +1,4 @@
-import { useState, useCallback, useMemo } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { usePolling } from '@/shared/hooks';
 import { sensors } from '@/api/homeAssistant';
 import { logger } from '@/shared/utils/logger';
@@ -116,6 +116,13 @@ export const useClimateSync = (config: UseClimateSyncConfig): ClimateData => {
       logger.error('Failed to sync climate data', error);
     }
   }, [isConnected, entityMapping]);
+
+  // Immediate first sync on mount
+  useEffect(() => {
+    if (isConnected) {
+      syncClimateData();
+    }
+  }, [isConnected, syncClimateData]);
 
   // Setup polling
   usePolling(syncClimateData, {

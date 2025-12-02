@@ -19,6 +19,7 @@ interface ClimateIndicatorTooltipProps {
   progressMax: number;
   progressMin?: number;
   colorType: 'temperature' | 'humidity' | 'airQuality';
+  isLoading?: boolean;
 }
 
 export const ClimateIndicatorTooltip = ({
@@ -34,7 +35,8 @@ export const ClimateIndicatorTooltip = ({
   progressValue,
   progressMax,
   progressMin = 0,
-  colorType
+  colorType,
+  isLoading = false
 }: ClimateIndicatorTooltipProps) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const [tooltipPosition, setTooltipPosition] = useState({ top: 0, left: 0 });
@@ -68,16 +70,22 @@ export const ClimateIndicatorTooltip = ({
             max={progressMax}
             size={36}
             strokeWidth={2}
-            isLoaded={true}
+            isLoaded={!isLoading}
             colorType={colorType}
-            delay={0}
+            delay={0.1}
           >
             <Icon className="w-4 h-4 text-white/60" strokeWidth={1.5} />
           </CircularProgress>
-          <div className="text-sm font-light text-white tabular-nums">
-            {value}
-            <span className="text-xs text-white/40 ml-0.5">{unit}</span>
-          </div>
+          <motion.div 
+            className="text-sm font-light text-white tabular-nums"
+            animate={{
+              opacity: isLoading ? 0.4 : 1
+            }}
+            transition={{ duration: 0.3 }}
+          >
+            {isLoading && value === '0' ? '--' : value}
+            {!isLoading && <span className="text-xs text-white/40 ml-0.5">{unit}</span>}
+          </motion.div>
         </div>
       </motion.div>
 
