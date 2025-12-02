@@ -1,5 +1,5 @@
 import { createContext, useContext, ReactNode } from 'react';
-import { useClimateSync } from '@/hooks/useClimateSync';
+import { useClimateSync } from '@/features/climate/hooks/useClimateSync';
 import { useHomeAssistantConfig } from '@/hooks/useHomeAssistantConfig';
 
 interface ClimateState {
@@ -24,7 +24,15 @@ export const ClimateProvider = ({ children }: { children: ReactNode }) => {
   
   const climateState = useClimateSync({
     isConnected,
-    entityMapping,
+    entityMapping: {
+      temperatureSensor: entityMapping?.temperatureSensor,
+      humiditySensor: entityMapping?.humiditySensor,
+      airQualitySensor: entityMapping?.airQualitySensor,
+      iphoneBattery: (entityMapping as any)?.iphoneBatteryLevel,
+      iphoneBatteryState: (entityMapping as any)?.iphoneBatteryState,
+      airpodsMaxBattery: (entityMapping as any)?.airpodsMaxBatteryLevel,
+      airpodsMaxBatteryState: (entityMapping as any)?.airpodsMaxBatteryState,
+    },
   });
 
   return (

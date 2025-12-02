@@ -1,3 +1,5 @@
+export type AnimationSource = 'user' | 'external' | 'initial';
+
 export const EASING = {
   smooth: [0.22, 0.03, 0.26, 1] as const,
   quickOut: [0.33, 0.0, 0.2, 1] as const,
