@@ -1,7 +1,7 @@
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { Home, Settings as SettingsIcon } from 'lucide-react';
-import { ClimateIndicators } from './ClimateIndicators';
+import { ClimateIndicators } from '@/features/climate/components/ClimateIndicators';
 import { ConnectionStatusIndicator } from '@/components/ConnectionStatusIndicator';
 
 interface TopNavigationBarProps {

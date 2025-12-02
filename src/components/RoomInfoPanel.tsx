@@ -1,7 +1,7 @@
 import { motion, useMotionValue, useTransform, animate } from "framer-motion";
 import { Thermometer, Droplets, Power, Wind, Zap } from "lucide-react";
-import { LightControlCard } from "./LightControlCard";
-import { CircularProgress } from "./CircularProgress";
+import { LightControlCard } from "@/features/lighting/components/LightControlCard";
+import { CircularProgress } from "@/features/climate/components/CircularProgress";
 import { AirPodsMaxIcon } from "./icons/AirPodsMaxIcon";
 import { IPhoneIcon } from "./icons/IPhoneIcon";
 import { useEffect } from "react";
