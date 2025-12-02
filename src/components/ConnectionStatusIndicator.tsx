@@ -1,5 +1,5 @@
 import { motion, AnimatePresence } from "framer-motion";
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useLayoutEffect } from "react";
 import { Zap } from "lucide-react";
 
 interface ConnectionStatusIndicatorProps {
@@ -19,7 +19,7 @@ export const ConnectionStatusIndicator = ({
   const [tooltipPosition, setTooltipPosition] = useState({ top: 0, left: 0 });
   const containerRef = useRef<HTMLButtonElement>(null);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (isHovered && containerRef.current) {
       const rect = containerRef.current.getBoundingClientRect();
       setTooltipPosition({
@@ -72,16 +72,16 @@ export const ConnectionStatusIndicator = ({
 
       {/* Tooltip */}
       <AnimatePresence>
-        {isHovered && (
+        {isHovered && tooltipPosition.top > 0 && (
           <motion.div
-            className="fixed pointer-events-none z-[100]
+            className="fixed pointer-events-none z-[200]
               bg-white/12 backdrop-blur-[32px]
               px-5 py-2.5 rounded-full
               border border-white/25
               [background:linear-gradient(135deg,rgba(255,255,255,0.15),rgba(255,255,255,0.05))]"
             style={{
-              top: tooltipPosition.top,
-              left: tooltipPosition.left,
+              top: `${tooltipPosition.top}px`,
+              left: `${tooltipPosition.left}px`,
               transform: 'translateX(-50%)',
               transformOrigin: '50% 0%'
             }}
@@ -103,7 +103,7 @@ export const ConnectionStatusIndicator = ({
               }
             }}
           >
-            <div className="text-xs font-light text-foreground whitespace-nowrap">
+            <div className="text-xs font-light text-white whitespace-nowrap">
               {getTooltipText()}
             </div>
           </motion.div>
