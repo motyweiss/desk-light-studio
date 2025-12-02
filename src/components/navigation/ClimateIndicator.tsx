@@ -59,7 +59,7 @@ export const ClimateIndicator = ({
       <AnimatePresence>
         {isHovered && (
           <motion.div
-            className="absolute left-1/2 -translate-x-1/2 z-[100] pointer-events-none
+            className="absolute z-[100] pointer-events-none
               bg-white/15 backdrop-blur-[40px] backdrop-saturate-150
               pl-4 pr-6 py-3 rounded-full
               shadow-[0_12px_40px_rgba(0,0,0,0.15),inset_0_2px_4px_rgba(255,255,255,0.2)]
@@ -68,6 +68,8 @@ export const ClimateIndicator = ({
               [background:linear-gradient(135deg,rgba(255,255,255,0.2),rgba(255,255,255,0.08))]"
             style={{
               top: 'calc(100% + 12px)',
+              left: 'calc(50% - 20px)',
+              transform: 'translateX(-50%)',
               transformOrigin: '50% 0%'
             }}
             initial={{ 
