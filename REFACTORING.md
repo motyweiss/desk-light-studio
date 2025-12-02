@@ -1,5 +1,127 @@
 # Smart Home Dashboard Refactoring
 
+## Phase 9: Infrastructure Enhancements (COMPLETED) ✅
+
+**Status**: ✅ 100% Complete
+
+### 9.1 Git Hooks (Husky + Prettier) ✅
+**Goal**: Automated code quality and formatting on git operations
+
+**Implemented**:
+- Prettier configuration (`.prettierrc.json`)
+- Pre-commit hooks via Husky
+  - Auto-format with Prettier
+  - ESLint with auto-fix
+  - Run related tests
+- Pre-push hooks
+  - TypeScript type checking
+  - Full test suite
+- Commit message linting (commitlint)
+  - Conventional commits enforcement
+  - Type validation
+- Lint-staged configuration for performance
+
+**Files Created**:
+- `.prettierrc.json` - Formatting rules
+- `.prettierignore` - Excluded files
+- `.lintstagedrc.json` - Staged files processing
+- `commitlint.config.js` - Commit message rules
+- `.husky/pre-commit` - Pre-commit hook
+- `.husky/pre-push` - Pre-push hook
+- `.husky/commit-msg` - Commit message validation
+- `.husky/README.md` - Hook documentation
+- `scripts/setup-husky.sh` - Husky initialization script
+
+### 9.2 API Mocking (MSW) ✅
+**Goal**: Reliable testing without real Home Assistant connection
+
+**Implemented**:
+- Mock Service Worker setup
+- Complete Home Assistant API handlers
+  - Lights (get state, turn on/off, set brightness)
+  - Sensors (temperature, humidity, air quality, battery)
+  - Media player (Spotify state, controls)
+- Node.js server for tests
+- Browser worker for Storybook
+- Automatic integration in test setup
+
+**Files Created**:
+- `src/test/mocks/handlers.ts` - API response handlers (12+ endpoints)
+- `src/test/mocks/server.ts` - Node.js MSW server
+- `src/test/mocks/browser.ts` - Browser MSW worker
+- `src/test/mocks/README.md` - MSW documentation
+- Updated `src/test/setup.ts` - MSW server lifecycle
+
+**Mocked Endpoints**:
+- 12+ Home Assistant API endpoints
+- Complete light control operations (3 entities)
+- All sensor readings (temperature, humidity, PM2.5, battery)
+- Media player state and controls (Spotify)
+
+### 9.3 E2E Testing (Playwright) ✅
+**Goal**: End-to-end testing of critical user journeys
+
+**Implemented**:
+- Playwright configuration
+  - 5 browser targets (Chrome, Firefox, Safari, Mobile Chrome, Mobile Safari)
+  - Automatic dev server startup
+  - Artifacts on failure (screenshots, videos, traces)
+- Comprehensive test suites:
+  - **Light Control** (13 tests)
+    - Room info display
+    - Light card interactions
+    - Slider adjustments
+    - Master switch
+    - Keyboard shortcuts (1-3, spacebar)
+    - Mobile layout verification
+  - **Media Player** (8 tests)
+    - Player visibility
+    - Playback controls
+    - Volume adjustment
+    - Mini/full mode toggle
+    - Mobile responsiveness
+  - **Settings** (7 tests)
+    - Connection status
+    - Settings dialog
+    - Home Assistant configuration
+    - Entity mapping
+    - Desktop/mobile visibility
+
+**Files Created**:
+- `playwright.config.ts` - Playwright configuration
+- `e2e/light-control.spec.ts` - Light control tests (13 tests)
+- `e2e/media-player.spec.ts` - Media player tests (8 tests)
+- `e2e/settings.spec.ts` - Settings tests (7 tests)
+- `e2e/README.md` - E2E testing documentation
+
+**Test Coverage**:
+- 28 E2E tests across 3 critical flows
+- Cross-browser validation (5 browsers)
+- Mobile and desktop responsive testing
+- Keyboard interaction testing
+- Graceful handling of optional UI elements
+
+**Impact**:
+- ✅ 28 E2E tests covering critical user journeys
+- ✅ Cross-browser compatibility verification
+- ✅ Mobile/desktop responsive validation
+- ✅ Automated quality gates prevent broken commits/pushes
+- ✅ Consistent code formatting across team
+- ✅ Fast, reliable tests without HA dependency
+- ✅ Storybook components work without backend
+- ✅ Zero breaking changes to existing code
+- ✅ Production-ready infrastructure
+
+**Dependencies Added**:
+- `prettier` - Code formatting
+- `husky` - Git hooks
+- `lint-staged` - Staged files processing
+- `@commitlint/cli` + `@commitlint/config-conventional` - Commit linting
+- `msw` - API mocking
+- `@playwright/test` - E2E testing
+
+---
+
 ## Phase 8: Storybook Component Documentation (COMPLETED) ✅
 
 ### Storybook Setup
@@ -369,10 +491,12 @@ src/
 | **Phase 6** | Component & Integration Tests | ✅ Complete | **50 tests** |
 | **Phase 7** | CI/CD Pipeline & Automation | ✅ Complete | **5 workflows** |
 | **Phase 8** | Storybook Documentation | ✅ Complete | **8 story files, 37+ variants** |
+| **Phase 9** | Infrastructure Enhancements | ✅ Complete | **28 E2E tests** |
 
-**Total Tests**: 91 comprehensive tests across all layers  
+**Total Tests**: 119 comprehensive tests (91 unit/component/integration + 28 E2E)  
 **CI/CD**: 5 automated workflows (CI, Deploy, PR Checks, Dependabot)  
-**Documentation**: Interactive Storybook with 37+ component variants
+**Documentation**: Interactive Storybook with 37+ component variants  
+**Infrastructure**: Git hooks (Husky), API mocking (MSW), E2E testing (Playwright)
 
 ---
 
@@ -423,27 +547,31 @@ it('should complete full user flow', async () => {
 ## Next Steps (Optional)
 
 ### Future Enhancements
-1. **E2E Tests**: Add Playwright for full user journey testing
-2. **Visual Regression**: Add Chromatic for automated visual testing
-3. **Mutation Testing**: Add Stryker for test quality validation
-4. **Production Monitoring**: Add Sentry for error tracking and performance monitoring
+1. **Visual Regression**: Add Chromatic for automated visual testing of Storybook stories
+2. **Mutation Testing**: Add Stryker for test quality validation
+3. **Production Monitoring**: Add Sentry for error tracking and performance monitoring
+4. **Bundle Analysis**: Add webpack-bundle-analyzer or Vite Bundle Visualizer
+5. **Environment Validation**: Add Zod for runtime config validation
 
 ---
 
-**Refactoring Status**: ✅ **PHASE 8 COMPLETE**  
-**Total Duration**: 8 phases  
-**Test Coverage**: 91 comprehensive tests (88%+ coverage)  
+**Refactoring Status**: ✅ **PHASE 9 COMPLETE**  
+**Total Duration**: 9 phases  
+**Test Coverage**: 119 comprehensive tests (91 unit/component/integration + 28 E2E, 88%+ coverage)  
 **CI/CD**: 5 automated GitHub Actions workflows  
 **Documentation**: Interactive Storybook with 37+ component variants  
+**Infrastructure**: Git hooks (Husky + Prettier), API mocking (MSW), E2E testing (Playwright)  
 **Zero Breaking Changes**: All functionality preserved  
-**Production Ready**: Error boundaries, performance monitoring, comprehensive testing, automated deployment, interactive documentation
+**Production Ready**: Error boundaries, performance monitoring, comprehensive testing, automated deployment, interactive documentation, automated code quality checks
 
 **Project is now:**
-- ✅ Fully tested with 91 comprehensive tests (41 unit + 22 component + 28 integration)
+- ✅ Fully tested with 119 comprehensive tests (41 unit + 22 component + 28 integration + 28 E2E)
 - ✅ 88%+ code coverage on all critical paths
 - ✅ Component-level testing for UI reliability
 - ✅ Integration tests validating complete user flows
-- ✅ Modern test infrastructure (Vitest + RTL)
+- ✅ **E2E tests covering critical user journeys across 5 browsers**
+- ✅ Modern test infrastructure (Vitest + RTL + Playwright)
+- ✅ **API mocking with MSW for reliable, fast tests**
 - ✅ Test utilities and mocks ready for extension
 - ✅ **Automated CI/CD pipeline with GitHub Actions**
 - ✅ **Automated deployment to GitHub Pages**
@@ -454,4 +582,7 @@ it('should complete full user flow', async () => {
 - ✅ **37+ component variants documented and explorable**
 - ✅ **Visual playground for component development**
 - ✅ **Living design system documentation**
+- ✅ **Git hooks (Husky) preventing broken commits/pushes**
+- ✅ **Automatic code formatting (Prettier) on commit**
+- ✅ **Conventional commit enforcement (commitlint)**
 - ✅ Developer-friendly testing guide and patterns
