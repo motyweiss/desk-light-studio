@@ -40,12 +40,12 @@ export const ClimateIndicatorTooltip = ({
       onMouseEnter={onToggle}
       onMouseLeave={onToggle}
     >
-      {/* Compact indicator with hover trigger */}
+      {/* Compact indicator with hover trigger - minimalist display */}
       <motion.div
         className="cursor-default"
         whileHover={{ scale: 1.02 }}
       >
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2">
           <CircularProgress 
             value={progressValue}
             min={progressMin}
@@ -58,14 +58,9 @@ export const ClimateIndicatorTooltip = ({
           >
             <Icon className="w-5 h-5 text-white/60" strokeWidth={1.5} />
           </CircularProgress>
-          <div className="flex flex-col">
-            <span className="text-[9px] text-white/55 font-light tracking-[0.2em] uppercase mb-1">
-              {label}
-            </span>
-            <div className="text-base font-light text-white tabular-nums">
-              {value}
-              <span className="text-xs text-white/40 ml-0.5">{unit}</span>
-            </div>
+          <div className="text-base font-light text-white tabular-nums">
+            {value}
+            <span className="text-xs text-white/40 ml-0.5">{unit}</span>
           </div>
         </div>
       </motion.div>
@@ -96,7 +91,7 @@ export const ClimateIndicatorTooltip = ({
             className={`fixed left-1/2 -translate-x-1/2 ${
               position === "bottom" ? "top-[120px]" : "bottom-[120px]"
             }`}
-            style={{ zIndex: 100 }}
+            style={{ zIndex: 9999 }}
           >
             <div className="bg-white/8 backdrop-blur-[24px] rounded-2xl px-5 py-4 shadow-[0_4px_24px_rgba(0,0,0,0.15)] border border-white/20 min-w-[280px]">
               {/* Header with icon and value */}
