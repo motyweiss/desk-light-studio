@@ -47,7 +47,7 @@ export const ConnectionStatusIndicator = ({
       ref={containerRef}
       onClick={handleClick}
       disabled={!isClickable}
-      className={`hidden md:flex ${inline ? 'relative' : 'fixed top-6 right-6 z-50'} w-10 h-10 items-center justify-center rounded-lg hover:bg-white/5 transition-all duration-300 ${getStatusColor()} ${isClickable ? 'cursor-pointer' : 'cursor-default'}`}
+      className={`hidden md:flex ${inline ? 'relative' : 'fixed top-6 right-6 z-50'} w-10 h-10 items-center justify-center rounded-lg hover:bg-white/5 transition-all duration-300 overflow-visible ${getStatusColor()} ${isClickable ? 'cursor-pointer' : 'cursor-default'}`}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={handleMouseLeave}
       initial={inline ? false : { opacity: 0, scale: 0.8 }}
@@ -63,7 +63,7 @@ export const ConnectionStatusIndicator = ({
       <AnimatePresence>
         {isHovered && (
           <motion.div
-            className="absolute pointer-events-none z-50
+            className="absolute pointer-events-none z-[100]
               bg-white/12 backdrop-blur-[32px]
               px-5 py-2.5 rounded-full
               border border-white/25

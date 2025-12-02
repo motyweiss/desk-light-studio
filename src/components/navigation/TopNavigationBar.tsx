@@ -53,7 +53,7 @@ export const TopNavigationBar = ({
 
           {/* Right: Connection Status + Settings */}
           <motion.div 
-            className="flex items-center gap-4"
+            className="flex items-center gap-4 overflow-visible"
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.5, delay: 0.2 }}
