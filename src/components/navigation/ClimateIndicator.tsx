@@ -1,5 +1,5 @@
 import { useState, useRef } from 'react';
-import { motion, AnimatePresence, useSpring } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { LucideIcon } from 'lucide-react';
 import { CircularProgress } from '@/components/CircularProgress';
 
@@ -28,28 +28,9 @@ export const ClimateIndicator = ({
 }: ClimateIndicatorProps) => {
   const [isHovered, setIsHovered] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
-  
-  // Mouse tracking with spring physics - matching LightHotspot
-  const mouseX = useSpring(0, { stiffness: 120, damping: 18 });
-  const mouseY = useSpring(0, { stiffness: 120, damping: 18 });
-
-  const handleMouseMove = (e: React.MouseEvent) => {
-    if (!containerRef.current || !isHovered) return;
-    
-    const rect = containerRef.current.getBoundingClientRect();
-    const centerX = rect.left + rect.width / 2;
-    const centerY = rect.top + rect.height / 2;
-    const deltaX = (e.clientX - centerX) / 30;
-    const deltaY = (e.clientY - centerY) / 30;
-    
-    mouseX.set(deltaX);
-    mouseY.set(deltaY);
-  };
 
   const handleMouseLeave = () => {
     setIsHovered(false);
-    mouseX.set(0);
-    mouseY.set(0);
   };
 
   const displayValue = formatValue ? formatValue(value) : value.toFixed(1);
@@ -67,7 +48,6 @@ export const ClimateIndicator = ({
           transition-all duration-300 cursor-pointer"
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={handleMouseLeave}
-        onMouseMove={handleMouseMove}
       >
         <Icon className="w-4 h-4 text-white/70 transition-colors" strokeWidth={1.5} />
         <span className="text-sm font-light text-white/80 tabular-nums transition-colors">
