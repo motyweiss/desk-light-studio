@@ -11,14 +11,14 @@ export const ClimateIndicators = () => {
   const { isConnected, entityMapping } = useHomeAssistantConfig();
   const [hoveredIndicator, setHoveredIndicator] = useState<string | null>(null);
   
-  // Animated counters
-  const tempCount = useMotionValue(climate.temperature);
+  // Animated counters - start from 0 for smooth initial animation
+  const tempCount = useMotionValue(0);
   const tempDisplay = useTransform(tempCount, (latest) => latest.toFixed(1));
   
-  const humidityCount = useMotionValue(climate.humidity);
+  const humidityCount = useMotionValue(0);
   const humidityDisplay = useTransform(humidityCount, (latest) => Math.round(latest).toString());
   
-  const airQualityCount = useMotionValue(climate.airQuality);
+  const airQualityCount = useMotionValue(0);
   
   // Fetch historical data for each sensor
   const temperatureTrend = useHistoryData(
@@ -43,18 +43,21 @@ export const ClimateIndicators = () => {
   );
   
   useEffect(() => {
+    // Faster animation for initial defaults, slower for real data
+    const duration = climate.isLoaded ? 1.5 : 0.8;
+    
     const tempControls = animate(tempCount, climate.temperature, {
-      duration: 2,
+      duration,
       ease: [0.22, 0.03, 0.26, 1]
     });
     
     const humidityControls = animate(humidityCount, climate.humidity, {
-      duration: 2,
+      duration,
       ease: [0.22, 0.03, 0.26, 1]
     });
     
     const airQualityControls = animate(airQualityCount, climate.airQuality, {
-      duration: 2,
+      duration,
       ease: [0.22, 0.03, 0.26, 1]
     });
     
@@ -63,7 +66,7 @@ export const ClimateIndicators = () => {
       humidityControls.stop();
       airQualityControls.stop();
     };
-  }, [climate.temperature, climate.humidity, climate.airQuality, tempCount, humidityCount, airQualityCount]);
+  }, [climate.temperature, climate.humidity, climate.airQuality, climate.isLoaded, tempCount, humidityCount, airQualityCount]);
 
   const getAirQualityStatus = (value: number): string => {
     if (value <= 12) return 'Good';
@@ -92,12 +95,12 @@ export const ClimateIndicators = () => {
       className="flex items-center gap-4"
       initial={{ opacity: 0, y: 10 }}
       animate={{ 
-        opacity: climate.isLoaded ? 1 : 0,
-        y: climate.isLoaded ? 0 : 10
+        opacity: 1,
+        y: 0
       }}
       transition={{ 
         duration: 0.6,
-        delay: 0.4,
+        delay: 0.2,
         ease: [0.22, 0.03, 0.26, 1]
       }}
     >
@@ -124,6 +127,7 @@ export const ClimateIndicators = () => {
           progressMax={35}
           progressMin={15}
           colorType="temperature"
+          isLoading={!climate.isLoaded}
         />
       </div>
       
@@ -148,6 +152,7 @@ export const ClimateIndicators = () => {
           progressMax={100}
           progressMin={0}
           colorType="humidity"
+          isLoading={!climate.isLoaded}
         />
       </div>
       
@@ -168,6 +173,7 @@ export const ClimateIndicators = () => {
           progressMax={100}
           progressMin={0}
           colorType="airQuality"
+          isLoading={!climate.isLoaded}
         />
       </div>
     </motion.div>
