@@ -25,7 +25,7 @@ const Index = () => {
   const [isLoading, setIsLoading] = useState(!hasInitiallyLoaded);
   const [isLoaded, setIsLoaded] = useState(hasInitiallyLoaded);
   const [isTransitioning, setIsTransitioning] = useState(false);
-  const [overlayExited, setOverlayExited] = useState(hasInitiallyLoaded);
+  const [contentReady, setContentReady] = useState(hasInitiallyLoaded);
   
   // Get climate data from global context
   const climate = useClimate();
@@ -36,11 +36,11 @@ const Index = () => {
   // Hover states for coordinated UI
   const [hoveredLight, setHoveredLight] = useState<string | null>(null);
 
-  // Handle overlay exit complete - trigger content animations
+  // Handle overlay exit - use onExitComplete for perfect timing
   const handleOverlayExitComplete = useCallback(() => {
-    setOverlayExited(true);
-    // Small delay before triggering content animations
+    // Wait one frame to ensure overlay is fully gone
     requestAnimationFrame(() => {
+      setContentReady(true);
       setIsLoaded(true);
     });
   }, []);
@@ -51,7 +51,7 @@ const Index = () => {
     if (hasInitiallyLoaded) {
       setIsLoading(false);
       setIsLoaded(true);
-      setOverlayExited(true);
+      setContentReady(true);
       return;
     }
 
@@ -209,9 +209,9 @@ const Index = () => {
       <motion.div 
         className="h-full min-h-0 flex items-center justify-center p-3 md:p-8 relative overflow-hidden"
         initial={{ opacity: 0 }}
-        animate={{ opacity: overlayExited ? 1 : 0 }}
+        animate={{ opacity: contentReady ? 1 : 0 }}
         transition={{ 
-          duration: 0.3,
+          duration: 0.4,
           ease: [0.22, 0.03, 0.26, 1]
         }}
         style={{ willChange: 'opacity' }}
