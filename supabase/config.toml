@@ -1,1 +1,4 @@
 project_id = "qsuxnfvtbnlgbbionzss"
+
+[functions.ha-proxy]
+verify_jwt = true

@@ -1,12 +1,13 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import ConnectionTab from "@/components/settings/ConnectionTab";
 import DevicesTab from "@/components/settings/DevicesTab";
 import SettingsConnectionBadge from "@/components/settings/SettingsConnectionBadge";
+import { useHAConfig } from "@/hooks/useHAConfig";
 import { useHomeAssistantConfig } from "@/hooks/useHomeAssistantConfig";
 import { homeAssistant, type HAEntity } from "@/services/homeAssistant";
 import { useToast } from "@/hooks/use-toast";
@@ -23,38 +24,38 @@ const staggerContainer = {
   }
 };
 
-const sectionVariants = {
-  hidden: { opacity: 0, y: 20 },
-  show: { 
-    opacity: 1, 
-    y: 0
-  }
-};
-
-const sectionTransition = {
-  duration: 0.4,
-  ease: [0.22, 0.03, 0.26, 1] as const
-};
-
 const Settings = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { config, devicesMapping, saveConfig, saveDevicesMapping, addDevice, updateDevice, removeDevice } = useHomeAssistantConfig();
   
-  const [baseUrl, setBaseUrl] = useState(config?.baseUrl || "");
-  const [accessToken, setAccessToken] = useState(config?.accessToken || "");
+  // Use the new secure hook for connection config
+  const { 
+    config: haConfig, 
+    isLoading: isLoadingHAConfig,
+    isConnected,
+    saveConfig: saveHAConfig,
+    testConnection 
+  } = useHAConfig();
+  
+  // Use legacy hook for devices mapping (will be migrated separately)
+  const { devicesMapping, saveDevicesMapping } = useHomeAssistantConfig();
+  
+  const [baseUrl, setBaseUrl] = useState("");
+  const [accessToken, setAccessToken] = useState("");
   const [localDevicesMapping, setLocalDevicesMapping] = useState(devicesMapping);
   
   const [allEntities, setAllEntities] = useState<HAEntity[]>([]);
   const [isLoadingEntities, setIsLoadingEntities] = useState(false);
   const [isDirty, setIsDirty] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
 
+  // Initialize form with secure config
   useEffect(() => {
-    if (config) {
-      setBaseUrl(config.baseUrl);
-      setAccessToken(config.accessToken);
+    if (haConfig) {
+      setBaseUrl(haConfig.baseUrl);
+      setAccessToken(haConfig.accessToken);
     }
-  }, [config]);
+  }, [haConfig]);
 
   useEffect(() => {
     setLocalDevicesMapping(devicesMapping);
@@ -63,9 +64,9 @@ const Settings = () => {
   // Auto-fetch entities when page loads if config exists
   useEffect(() => {
     const fetchEntitiesOnLoad = async () => {
-      if (config?.baseUrl && config?.accessToken) {
+      if (haConfig?.baseUrl && haConfig?.accessToken) {
         setIsLoadingEntities(true);
-        homeAssistant.setConfig({ baseUrl: config.baseUrl, accessToken: config.accessToken });
+        homeAssistant.setConfig({ baseUrl: haConfig.baseUrl, accessToken: haConfig.accessToken });
         
         try {
           const entities = await homeAssistant.getEntitiesWithContext();
@@ -78,16 +79,16 @@ const Settings = () => {
     };
     
     fetchEntitiesOnLoad();
-  }, [config]);
+  }, [haConfig]);
 
   useEffect(() => {
     const hasChanges = 
-      baseUrl !== (config?.baseUrl || "") ||
-      accessToken !== (config?.accessToken || "") ||
+      baseUrl !== (haConfig?.baseUrl || "") ||
+      accessToken !== (haConfig?.accessToken || "") ||
       JSON.stringify(localDevicesMapping) !== JSON.stringify(devicesMapping);
     
     setIsDirty(hasChanges);
-  }, [baseUrl, accessToken, localDevicesMapping, config, devicesMapping]);
+  }, [baseUrl, accessToken, localDevicesMapping, haConfig, devicesMapping]);
 
   const handleAddDevice = (roomId: string, category: 'lights' | 'sensors' | 'mediaPlayers') => {
     const newDevice: DeviceConfig = {
@@ -145,24 +146,41 @@ const Settings = () => {
     }));
   };
 
-  const handleSave = () => {
-    const normalizedUrl = baseUrl.replace(/\/+$/, '');
+  const handleSave = async () => {
+    setIsSaving(true);
     
-    // Save connection config
-    saveConfig(
-      { baseUrl: normalizedUrl, accessToken },
-      {} as any // Legacy format will be generated from devicesMapping
-    );
-    
-    // Save devices mapping
-    saveDevicesMapping(localDevicesMapping);
-    
-    toast({
-      title: "Settings Saved",
-      description: "Your configuration has been saved successfully",
-    });
-    
-    navigate("/");
+    try {
+      // Save connection config securely to database
+      const result = await saveHAConfig(baseUrl, accessToken);
+      
+      if (!result.success) {
+        toast({
+          title: "Error Saving",
+          description: result.error || "Failed to save connection settings",
+          variant: "destructive",
+        });
+        setIsSaving(false);
+        return;
+      }
+      
+      // Save devices mapping (still uses localStorage for now)
+      saveDevicesMapping(localDevicesMapping);
+      
+      toast({
+        title: "Settings Saved",
+        description: "Your configuration has been saved securely",
+      });
+      
+      navigate("/");
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: error instanceof Error ? error.message : "Failed to save settings",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   const handleCancel = () => {
@@ -174,6 +192,14 @@ const Settings = () => {
   };
 
   const isFormValid = baseUrl && accessToken;
+
+  if (isLoadingHAConfig) {
+    return (
+      <div className="h-full flex items-center justify-center">
+        <Loader2 className="w-8 h-8 animate-spin text-white/60" />
+      </div>
+    );
+  }
 
   return (
     <div className="h-full flex flex-col">
@@ -198,7 +224,7 @@ const Settings = () => {
           >
             Settings
           </h1>
-          <SettingsConnectionBadge baseUrl={config?.baseUrl || ""} accessToken={config?.accessToken || ""} />
+          <SettingsConnectionBadge baseUrl={haConfig?.baseUrl || ""} accessToken={haConfig?.accessToken || ""} />
         </div>
       </motion.div>
 
@@ -257,10 +283,17 @@ const Settings = () => {
           </Button>
           <Button
             onClick={handleSave}
-            disabled={!isFormValid}
+            disabled={!isFormValid || isSaving}
             className="flex-1 bg-[hsl(28_18%_12%)] hover:bg-[hsl(28_18%_16%)] text-white border-white/10 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
           >
-            Save & Apply
+            {isSaving ? (
+              <>
+                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                Saving...
+              </>
+            ) : (
+              "Save & Apply"
+            )}
           </Button>
         </div>
       </motion.div>
