@@ -193,12 +193,17 @@ class HomeAssistantService {
 
   async getEntitiesWithContext(): Promise<HAEntity[]> {
     try {
-      const [states, areas, devices, entityRegistry] = await Promise.all([
+      const [states, areasResponse, devicesResponse, entityRegistryResponse] = await Promise.all([
         fetch(`${this.config?.baseUrl}/api/states`, { headers: this.getHeaders() }).then(r => r.json()),
         fetch(`${this.config?.baseUrl}/api/config/area_registry/list`, { headers: this.getHeaders() }).then(r => r.json()).catch(() => []),
         fetch(`${this.config?.baseUrl}/api/config/device_registry/list`, { headers: this.getHeaders() }).then(r => r.json()).catch(() => []),
         fetch(`${this.config?.baseUrl}/api/config/entity_registry/list`, { headers: this.getHeaders() }).then(r => r.json()).catch(() => [])
       ]);
+
+      // Ensure arrays - handle both array and object responses
+      const areas = Array.isArray(areasResponse) ? areasResponse : [];
+      const devices = Array.isArray(devicesResponse) ? devicesResponse : [];
+      const entityRegistry = Array.isArray(entityRegistryResponse) ? entityRegistryResponse : [];
 
       // Create lookup maps with proper typing
       const areaMap = new Map<string, string>(areas.map((a: any) => [a.area_id, a.name]));
@@ -209,8 +214,11 @@ class HomeAssistantService {
         entityRegistry.map((e: any) => [e.entity_id, { device_id: e.device_id, area_id: e.area_id }])
       );
 
+      // Ensure states is an array
+      const statesArray = Array.isArray(states) ? states : [];
+
       // Enrich states with context
-      return states.map((entity: HAEntity) => {
+      return statesArray.map((entity: HAEntity) => {
         const entityInfo = entityMap.get(entity.entity_id);
         const deviceInfo = entityInfo?.device_id ? deviceMap.get(entityInfo.device_id) : null;
         const areaId = entityInfo?.area_id || deviceInfo?.area_id;
