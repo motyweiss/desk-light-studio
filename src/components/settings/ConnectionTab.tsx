@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Loader2, CheckCircle2, XCircle, Link2 } from "lucide-react";
 import { SettingsSection } from "./SettingsSection";
 import { SettingsField } from "./SettingsField";
+import { QuickConnectSuggestions } from "./QuickConnectSuggestions";
 import { homeAssistant, type HAEntity } from "@/services/homeAssistant";
 import { useToast } from "@/hooks/use-toast";
 
@@ -101,6 +102,23 @@ const ConnectionTab = ({
       className="space-y-8"
     >
       <SettingsSection icon={Link2} title="Home Assistant Connection">
+        {/* Quick Connect Suggestions */}
+        <QuickConnectSuggestions
+          currentUrl={baseUrl}
+          accessToken={accessToken}
+          onUrlSelect={(url) => {
+            onBaseUrlChange(url);
+            // Auto-trigger test after URL selection
+            setTimeout(() => {
+              if (accessToken) {
+                handleTestConnection();
+              }
+            }, 100);
+          }}
+        />
+
+        <div className="h-px bg-white/10 my-4" />
+
         <SettingsField 
           label="Base URL"
           description="Your Home Assistant instance URL (e.g., http://homeassistant.local:8123)"
