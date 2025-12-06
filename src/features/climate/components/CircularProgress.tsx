@@ -32,11 +32,14 @@ export const CircularProgress = ({
   const getProgressColor = (val: number, type: string): string => {
     switch (type) {
       case 'temperature':
-        if (val <= 17) return 'hsl(var(--status-cold))';
-        if (val > 17 && val <= 20) return 'hsl(var(--status-cool))';
-        if (val > 20 && val <= 24) return 'hsl(var(--status-comfortable))';
-        if (val > 24 && val <= 28) return 'hsl(var(--status-warm))';
-        return 'hsl(var(--status-hot))';
+        // Blue to red gradient for temperature only
+        if (val <= 18) return 'hsl(210 80% 55%)'; // cold - blue
+        if (val <= 20) return 'hsl(190 70% 50%)'; // cool - cyan-blue
+        if (val <= 22) return 'hsl(160 60% 48%)'; // mild - teal
+        if (val <= 24) return 'hsl(45 80% 55%)';  // comfortable - yellow
+        if (val <= 26) return 'hsl(30 85% 55%)';  // warm - orange
+        if (val <= 28) return 'hsl(15 85% 55%)';  // warmer - red-orange
+        return 'hsl(0 80% 55%)'; // hot - red
         
       case 'humidity':
         if (val >= 40 && val <= 60) return 'hsl(var(--status-optimal))';

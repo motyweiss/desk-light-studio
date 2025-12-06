@@ -24,11 +24,14 @@ export const TrendGraph = ({
     
     switch (type) {
       case 'temperature':
-        if (value <= 17) return 'hsl(200 70% 55%)';
-        if (value <= 20) return 'hsl(180 60% 50%)';
-        if (value <= 24) return 'hsl(142 70% 45%)';
-        if (value <= 28) return 'hsl(35 90% 55%)';
-        return 'hsl(0 75% 55%)';
+        // Blue to red gradient for temperature only
+        if (value <= 18) return 'hsl(210 80% 55%)'; // cold - blue
+        if (value <= 20) return 'hsl(190 70% 50%)'; // cool - cyan-blue
+        if (value <= 22) return 'hsl(160 60% 48%)'; // mild - teal
+        if (value <= 24) return 'hsl(45 80% 55%)';  // comfortable - yellow
+        if (value <= 26) return 'hsl(30 85% 55%)';  // warm - orange
+        if (value <= 28) return 'hsl(15 85% 55%)';  // warmer - red-orange
+        return 'hsl(0 80% 55%)'; // hot - red
         
       case 'humidity':
         if (value >= 40 && value <= 60) return 'hsl(142 70% 45%)';
