@@ -2,7 +2,7 @@ import React, { createContext, useContext, useEffect, useState } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 
-type OAuthProvider = 'google' | 'github';
+type OAuthProvider = 'google' | 'github' | 'apple';
 
 interface AuthContextType {
   user: User | null;
