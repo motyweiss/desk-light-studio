@@ -75,13 +75,28 @@ export const DeskDisplay = ({
   }, []);
 
   // Spring animations for smooth 3D parallax effect
-  const springConfig = { stiffness: 150, damping: 20 };
+  const springConfig = { stiffness: 120, damping: 18, mass: 0.8 };
   const x = useSpring(0, springConfig);
   const y = useSpring(0, springConfig);
 
-  // Transform to rotation values (subtle ±3 degrees max)
-  const rotateX = useTransform(y, [-1, 1], [3, -3]);
-  const rotateY = useTransform(x, [-1, 1], [-3, 3]);
+  // Transform to rotation values (enhanced ±5 degrees for more depth)
+  const rotateX = useTransform(y, [-1, 1], [5, -5]);
+  const rotateY = useTransform(x, [-1, 1], [-5, 5]);
+  
+  // Additional transforms for enhanced depth perception
+  const translateX = useTransform(x, [-1, 1], [-8, 8]);
+  const translateY = useTransform(y, [-1, 1], [-8, 8]);
+  const scale = useTransform(
+    [x, y], 
+    ([latestX, latestY]) => {
+      const distance = Math.sqrt((latestX as number) ** 2 + (latestY as number) ** 2);
+      return 1 + distance * 0.02; // Subtle scale increase towards edges
+    }
+  );
+  
+  // Shadow offset based on mouse position (simulates light source)
+  const shadowX = useTransform(x, [-1, 1], [15, -15]);
+  const shadowY = useTransform(y, [-1, 1], [15, -15]);
 
   // Mouse move handler for parallax effect
   const handleMouseMove = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
@@ -168,16 +183,39 @@ export const DeskDisplay = ({
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
       onMouseMove={handleMouseMove}
+      style={{ perspective: 1200 }}
     >
-      <motion.div 
-        className="relative w-full h-full overflow-hidden rounded-[2rem]"
+      {/* Outer container for shadow effect */}
+      <motion.div
+        className="relative w-full h-full"
         style={{
-          perspective: 1000,
-          rotateX,
-          rotateY,
-          transformStyle: 'preserve-3d',
+          x: translateX,
+          y: translateY,
+          scale,
         }}
       >
+        {/* Dynamic shadow layer */}
+        <motion.div
+          className="absolute inset-0 rounded-[2rem] pointer-events-none"
+          style={{
+            x: shadowX,
+            y: shadowY,
+            background: 'radial-gradient(ellipse at center, rgba(0,0,0,0.3) 0%, transparent 70%)',
+            filter: 'blur(30px)',
+            transform: 'translateZ(-50px)',
+            opacity: isHovered ? 0.6 : 0.3,
+            transition: 'opacity 0.4s ease',
+          }}
+        />
+        
+        <motion.div 
+          className="relative w-full h-full overflow-hidden rounded-[2rem]"
+          style={{
+            rotateX,
+            rotateY,
+            transformStyle: 'preserve-3d',
+          }}
+        >
         {/* Gradient mask overlay for smooth fade out to background */}
         <div 
           className="absolute inset-0 z-20 pointer-events-none"
@@ -275,6 +313,7 @@ export const DeskDisplay = ({
           })}
         </div>
         
+        </motion.div>
       </motion.div>
 
       {/* Interactive Light Hotspots Layer - Desktop Only */}
