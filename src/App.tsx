@@ -10,7 +10,6 @@ import { AppLoadProvider } from "./contexts/AppLoadContext";
 import { AuthProvider } from "./contexts/AuthContext";
 import { RootLayout } from "./layouts/RootLayout";
 import { ProtectedRoute } from "./components/ProtectedRoute";
-import { UpdatePrompt } from "./components/UpdatePrompt";
 import { OfflineIndicator } from "./components/OfflineIndicator";
 
 import Index from "./pages/Index";
@@ -41,7 +40,6 @@ const App = () => (
                         <Route path="*" element={<NotFound />} />
                       </Routes>
                     </RootLayout>
-                    <UpdatePrompt />
                     <OfflineIndicator />
                   </ClimateProvider>
                 </LightingProvider>
