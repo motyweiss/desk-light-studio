@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, useCallback } from "react";
+import { useState, useEffect, useMemo, useCallback, useRef } from "react";
 import { motion, useSpring, useTransform } from "framer-motion";
 import { LightHotspot } from "./LightHotspot";
 import { LIGHT_ANIMATION } from "@/constants/animations";
@@ -36,6 +36,20 @@ const lightingStates: Record<string, string> = {
   "111": desk111,
 };
 
+// Preload all images and track loading state
+const preloadImages = (images: Record<string, string>): Promise<void[]> => {
+  return Promise.all(
+    Object.values(images).map(src => {
+      return new Promise<void>((resolve) => {
+        const img = new Image();
+        img.onload = () => resolve();
+        img.onerror = () => resolve(); // Resolve even on error to not block
+        img.src = src;
+      });
+    })
+  );
+};
+
 export const DeskDisplay = ({ 
   spotlightIntensity, 
   deskLampIntensity, 
@@ -50,6 +64,15 @@ export const DeskDisplay = ({
   const [previousState, setPreviousState] = useState("000");
   const [isHovered, setIsHovered] = useState(false);
   const [isTransitioning, setIsTransitioning] = useState(false);
+  const [allImagesLoaded, setAllImagesLoaded] = useState(false);
+  const loadedImagesRef = useRef<Set<string>>(new Set());
+
+  // Preload all images on mount
+  useEffect(() => {
+    preloadImages(lightingStates).then(() => {
+      setAllImagesLoaded(true);
+    });
+  }, []);
 
   // Spring animations for smooth 3D parallax effect
   const springConfig = { stiffness: 150, damping: 20 };
@@ -99,6 +122,11 @@ export const DeskDisplay = ({
 
   // Determine if we're turning on or off
   const isTurningOn = countLightsOn(currentState) > countLightsOn(previousState);
+
+  // Track individual image load state
+  const handleImageLoad = useCallback((state: string) => {
+    loadedImagesRef.current.add(state);
+  }, []);
 
   // CRITICAL: Update state immediately when intensity changes (no delay)
   useEffect(() => {
@@ -170,7 +198,7 @@ export const DeskDisplay = ({
             `,
           }}
         />
-        {/* Stack all 8 images with smooth crossfade transitions */}
+        {/* Stack all 8 images - all rendered and loaded, only opacity changes */}
         <div 
           className="absolute inset-0"
           style={{
@@ -186,8 +214,15 @@ export const DeskDisplay = ({
             WebkitMaskComposite: 'source-in',
           }}
         >
-        {Object.entries(lightingStates).map(([state, image]) => {
+          {/* Base layer - always show current state image at opacity 1 underneath */}
+          {Object.entries(lightingStates).map(([state, image]) => {
             const isActive = state === currentState;
+            const wasPrevious = state === previousState;
+            
+            // During transition: show previous at full opacity, animate current on top
+            // After transition: show current at full opacity
+            const shouldShowAsPrevious = isTransitioning && wasPrevious && !isActive;
+            const shouldAnimate = isActive;
             
             return (
               <motion.img
@@ -195,19 +230,29 @@ export const DeskDisplay = ({
                 src={image}
                 alt={`Desk lighting state ${state}`}
                 className="absolute inset-0 w-full h-full object-cover"
-                initial={{ opacity: 0 }}
+                onLoad={() => handleImageLoad(state)}
+                initial={false}
                 animate={{ 
-                  opacity: isActive && isLoaded ? 1 : 0,
+                  opacity: shouldShowAsPrevious 
+                    ? 1 
+                    : shouldAnimate && isLoaded && allImagesLoaded 
+                      ? 1 
+                      : 0,
+                  zIndex: shouldAnimate ? 10 : shouldShowAsPrevious ? 5 : 1,
                 }}
                 transition={{ 
                   opacity: {
-                    duration: transitionConfig.duration,
+                    duration: shouldAnimate ? transitionConfig.duration : 0,
                     ease: transitionConfig.ease,
                   },
+                  zIndex: { duration: 0 }
                 }}
                 style={{
                   pointerEvents: isActive ? 'auto' : 'none',
+                  willChange: 'opacity',
                 }}
+                loading="eager"
+                decoding="async"
               />
             );
           })}
