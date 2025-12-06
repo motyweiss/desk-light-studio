@@ -213,11 +213,13 @@ export const DeskDisplay = ({
             if (isActive && isLoaded && allImagesLoaded) {
               targetOpacity = 1;
             } else if (showAsPrevious) {
-              targetOpacity = 1;
+              // Previous state fades out smoothly
+              targetOpacity = 0;
             }
             
-            // Instant for initial render, animated for subsequent changes
-            const animDuration = hasInitialRender && dataReady && isActive ? transitionConfig.duration : 0;
+            // Both active and previous states should animate
+            const shouldAnimate = hasInitialRender && dataReady && (isActive || showAsPrevious);
+            const animDuration = shouldAnimate ? transitionConfig.duration : 0;
             
             return (
               <motion.img
