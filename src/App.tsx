@@ -4,6 +4,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 
 import { LightingProvider } from "@/features/lighting";
+import { ClimateProvider } from "@/features/climate";
 import { AppLoadProvider } from "./contexts/AppLoadContext";
 import { AuthProvider } from "./contexts/AuthContext";
 import { RootLayout } from "./layouts/RootLayout";
@@ -25,20 +26,22 @@ const App = () => (
         <BrowserRouter>
           <AuthProvider>
             <AppLoadProvider>
-              <LightingProvider>
-                <RootLayout>
-                  <Routes>
-                    <Route path="/auth" element={<Auth />} />
-                    <Route path="/" element={<ProtectedRoute><Index /></ProtectedRoute>} />
-                    <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
-                    <Route path="/design-system" element={<ProtectedRoute><DesignSystem /></ProtectedRoute>} />
-                    {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-                    <Route path="*" element={<NotFound />} />
-                  </Routes>
-                </RootLayout>
-                <UpdatePrompt />
-                <OfflineIndicator />
-              </LightingProvider>
+                <LightingProvider>
+                  <ClimateProvider>
+                    <RootLayout>
+                      <Routes>
+                        <Route path="/auth" element={<Auth />} />
+                        <Route path="/" element={<ProtectedRoute><Index /></ProtectedRoute>} />
+                        <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
+                        <Route path="/design-system" element={<ProtectedRoute><DesignSystem /></ProtectedRoute>} />
+                        {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+                        <Route path="*" element={<NotFound />} />
+                      </Routes>
+                    </RootLayout>
+                    <UpdatePrompt />
+                    <OfflineIndicator />
+                  </ClimateProvider>
+                </LightingProvider>
             </AppLoadProvider>
           </AuthProvider>
         </BrowserRouter>
