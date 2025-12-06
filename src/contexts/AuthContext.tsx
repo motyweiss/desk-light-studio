@@ -2,12 +2,15 @@ import React, { createContext, useContext, useEffect, useState } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 
+type OAuthProvider = 'google' | 'github';
+
 interface AuthContextType {
   user: User | null;
   session: Session | null;
   loading: boolean;
   signIn: (email: string, password: string) => Promise<{ error: Error | null }>;
   signUp: (email: string, password: string) => Promise<{ error: Error | null }>;
+  signInWithOAuth: (provider: OAuthProvider) => Promise<{ error: Error | null }>;
   signOut: () => Promise<void>;
 }
 
@@ -67,12 +70,22 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return { error: error as Error | null };
   };
 
+  const signInWithOAuth = async (provider: OAuthProvider) => {
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider,
+      options: {
+        redirectTo: `${window.location.origin}/`,
+      },
+    });
+    return { error: error as Error | null };
+  };
+
   const signOut = async () => {
     await supabase.auth.signOut();
   };
 
   return (
-    <AuthContext.Provider value={{ user, session, loading, signIn, signUp, signOut }}>
+    <AuthContext.Provider value={{ user, session, loading, signIn, signUp, signInWithOAuth, signOut }}>
       {children}
     </AuthContext.Provider>
   );
