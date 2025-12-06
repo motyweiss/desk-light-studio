@@ -75,30 +75,28 @@ export const PAGE_LOAD = {
   },
   
   // Individual element timing (relative to container start)
+  // ORDER: header → devices → lightCards → deskImage (left to right visual flow)
   elements: {
     header: {
       delay: 0,
       duration: 0.5,
-      y: 8,
     },
     masterSwitch: {
-      delay: 0.04,
+      delay: 0.05,
       duration: 0.45,
     },
     devices: {
-      delay: 0.1,
-      stagger: 0.06,
+      delay: 0.12,
+      stagger: 0.05,
       duration: 0.45,
-      y: 6,
     },
     lightCards: {
-      delay: 0.16,
-      stagger: 0.06,
+      delay: 0.2,
+      stagger: 0.05,
       duration: 0.45,
-      y: 8,
     },
     deskImage: {
-      delay: 0.08,
+      delay: 0.25,
       duration: 0.55,
     },
   },

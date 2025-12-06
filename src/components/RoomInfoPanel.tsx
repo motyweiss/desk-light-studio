@@ -59,29 +59,18 @@ export const RoomInfoPanel = ({
 }: RoomInfoPanelProps) => {
 
   return (
-    <motion.div 
-      className="space-y-4 md:space-y-8"
-      initial={{ opacity: 0 }}
-      animate={{ opacity: isLoaded ? 1 : 0 }}
-      transition={{
-        ...entryTransition,
-        delay: PAGE_LOAD.container.delay,
-      }}
-      style={{ willChange: 'opacity' }}
-    >
+    <div className="space-y-4 md:space-y-8">
       {/* Room Title with Master Switch */}
       <motion.div 
         className="flex items-center justify-between gap-4 md:gap-6"
-        initial={{ opacity: 0, y: PAGE_LOAD.elements.header.y }}
-        animate={{ 
-          opacity: isLoaded ? 1 : 0,
-          y: isLoaded ? 0 : PAGE_LOAD.elements.header.y
-        }}
+        initial={{ opacity: 0 }}
+        animate={{ opacity: isLoaded ? 1 : 0 }}
         transition={{
-          ...entryTransition,
+          duration: PAGE_LOAD.elements.header.duration,
+          ease: EASING.entrance,
           delay: PAGE_LOAD.elements.header.delay,
         }}
-        style={{ willChange: 'opacity, transform' }}
+        style={{ willChange: 'opacity' }}
       >
         <h1 className="text-2xl md:text-4xl font-display font-light tracking-tight text-foreground leading-tight">
           {roomName}
@@ -117,19 +106,7 @@ export const RoomInfoPanel = ({
 
       {/* Devices Battery Section - Desktop only */}
       {devices && devices.length > 0 && (
-        <motion.div 
-          className="hidden md:block rounded-2xl py-6 px-6"
-          initial={{ opacity: 0, y: PAGE_LOAD.elements.devices.y }}
-          animate={{ 
-            opacity: isLoaded ? 1 : 0,
-            y: isLoaded ? 0 : PAGE_LOAD.elements.devices.y
-          }}
-          transition={{
-            ...entryTransition,
-            delay: PAGE_LOAD.elements.devices.delay,
-          }}
-          style={{ willChange: 'opacity, transform' }}
-        >
+        <div className="hidden md:block rounded-2xl py-6 px-6">
           <div className="flex flex-row gap-10">
             {devices.map((device, index) => {
               const DeviceIcon = device.icon === 'headphones' ? AirPodsMaxIcon : IPhoneIcon;
@@ -141,9 +118,11 @@ export const RoomInfoPanel = ({
                   initial={{ opacity: 0 }}
                   animate={{ opacity: isLoaded ? 1 : 0 }}
                   transition={{
-                    ...entryTransition,
+                    duration: PAGE_LOAD.elements.devices.duration,
+                    ease: EASING.entrance,
                     delay: PAGE_LOAD.elements.devices.delay + (index * PAGE_LOAD.elements.devices.stagger),
                   }}
+                  style={{ willChange: 'opacity' }}
                 >
                   <CircularProgress 
                     value={device.batteryLevel} 
@@ -202,33 +181,22 @@ export const RoomInfoPanel = ({
               );
             })}
           </div>
-        </motion.div>
+        </div>
       )}
 
       {/* Light Controls Section */}
-      <motion.div 
-        className="space-y-2 md:mt-6"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: isLoaded ? 1 : 0 }}
-        transition={{ 
-          ...entryTransition, 
-          delay: PAGE_LOAD.elements.lightCards.delay 
-        }}
-        style={{ willChange: 'opacity' }}
-      >
+      <div className="space-y-2 md:mt-6">
         {lights.map((light, index) => (
           <motion.div 
             key={light.id}
-            initial={{ opacity: 0, y: PAGE_LOAD.elements.lightCards.y }}
-            animate={{ 
-              opacity: isLoaded ? 1 : 0,
-              y: isLoaded ? 0 : PAGE_LOAD.elements.lightCards.y
-            }}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: isLoaded ? 1 : 0 }}
             transition={{
-              ...entryTransition,
+              duration: PAGE_LOAD.elements.lightCards.duration,
+              ease: EASING.entrance,
               delay: PAGE_LOAD.elements.lightCards.delay + (index * PAGE_LOAD.elements.lightCards.stagger),
             }}
-            style={{ willChange: 'opacity, transform' }}
+            style={{ willChange: 'opacity' }}
           >
             <LightControlCard
               id={light.id}
@@ -241,7 +209,7 @@ export const RoomInfoPanel = ({
             />
           </motion.div>
         ))}
-      </motion.div>
-    </motion.div>
+      </div>
+    </div>
   );
 };

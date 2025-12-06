@@ -62,14 +62,10 @@ export const DeskDisplay = ({
   const [isReady, setIsReady] = useState(false);
   const transitionTimeoutRef = useRef<number | null>(null);
 
-  // Mark ready after initial load and data is available
+  // Mark ready immediately when loaded and data is available
   useEffect(() => {
     if (isLoaded && dataReady && !isReady) {
-      // Small delay to let other animations settle
-      const timer = setTimeout(() => {
-        setIsReady(true);
-      }, 100);
-      return () => clearTimeout(timer);
+      setIsReady(true);
     }
   }, [isLoaded, dataReady, isReady]);
 
