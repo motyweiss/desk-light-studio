@@ -460,6 +460,50 @@ class HomeAssistantService {
     return `${this.config.baseUrl}${relativePath}`;
   }
 
+  private imageCache = new Map<string, string>();
+
+  async fetchImageAsDataUrl(relativePath: string | null): Promise<string | null> {
+    if (!relativePath || !this.config) return null;
+
+    // Check cache first
+    if (this.imageCache.has(relativePath)) {
+      return this.imageCache.get(relativePath)!;
+    }
+
+    try {
+      const fullUrl = relativePath.startsWith('http') 
+        ? relativePath 
+        : `${this.config.baseUrl}${relativePath}`;
+
+      const response = await fetch(fullUrl, {
+        headers: {
+          'Authorization': `Bearer ${this.config.accessToken}`,
+        },
+      });
+
+      if (!response.ok) return null;
+
+      const blob = await response.blob();
+      return new Promise((resolve) => {
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          const dataUrl = reader.result as string;
+          this.imageCache.set(relativePath, dataUrl);
+          resolve(dataUrl);
+        };
+        reader.onerror = () => resolve(null);
+        reader.readAsDataURL(blob);
+      });
+    } catch (error) {
+      console.error('Failed to fetch image:', error);
+      return null;
+    }
+  }
+
+  clearImageCache() {
+    this.imageCache.clear();
+  }
+
   async setMediaShuffle(entityId: string, shuffle: boolean): Promise<boolean> {
     return this.retryWithBackoff(async () => {
       const response = await fetch(`${this.config?.baseUrl}/api/services/media_player/shuffle_set`, {
