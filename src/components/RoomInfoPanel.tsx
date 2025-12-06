@@ -178,16 +178,22 @@ export const RoomInfoPanel = ({
                             : { ...dataTransition }
                         }}
                       />
-                      {/* Value layer */}
+                      {/* Value layer - blur-to-sharp reveal */}
                       <motion.div 
                         className="text-base font-light text-white tabular-nums flex items-center gap-1.5"
                         initial={false}
                         animate={{ 
                           opacity: dataReady && !showSkeleton ? 1 : 0,
+                          filter: dataReady && !showSkeleton ? 'blur(0px)' : 'blur(4px)',
                         }}
                         transition={{ 
                           ...dataTransition,
                           delay: showSkeleton ? 0 : DATA_TRANSITION.dataEnter.delay,
+                          filter: { 
+                            duration: 0.4, 
+                            delay: showSkeleton ? 0 : DATA_TRANSITION.dataEnter.delay,
+                            ease: dataTransition.ease 
+                          }
                         }}
                       >
                         <span>{device.batteryLevel}%</span>

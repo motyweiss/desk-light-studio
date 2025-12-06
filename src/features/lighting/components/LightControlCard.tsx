@@ -194,15 +194,19 @@ export const LightControlCard = ({
               ease: "easeInOut"
             } : smoothTransition}
           />
-          {/* Real icon */}
+          {/* Real icon - blur-to-sharp reveal */}
           <motion.div
             className="absolute inset-0 flex items-center justify-center"
             initial={false}
             animate={{
               opacity: isLoading ? 0 : 1,
+              filter: isLoading ? 'blur(4px)' : 'blur(0px)',
               color: isOn ? 'hsl(44 92% 62%)' : 'rgba(255, 255, 255, 0.3)'
             }}
-            transition={smoothTransition}
+            transition={{
+              ...smoothTransition,
+              filter: { duration: 0.35, ease: smoothTransition.ease }
+            }}
           >
             <IconComponent className="w-5 h-5 md:w-7 md:h-7" />
           </motion.div>
@@ -227,8 +231,14 @@ export const LightControlCard = ({
             <motion.div 
               className="font-light text-sm md:text-base text-white tracking-wide leading-tight"
               initial={false}
-              animate={{ opacity: isLoading ? 0 : 1 }}
-              transition={smoothTransition}
+              animate={{ 
+                opacity: isLoading ? 0 : 1,
+                filter: isLoading ? 'blur(3px)' : 'blur(0px)',
+              }}
+              transition={{
+                ...smoothTransition,
+                filter: { duration: 0.35, ease: smoothTransition.ease }
+              }}
             >
               {label}
             </motion.div>
@@ -254,9 +264,13 @@ export const LightControlCard = ({
               initial={false}
               animate={{
                 opacity: isLoading ? 0 : 1,
+                filter: isLoading ? 'blur(3px)' : 'blur(0px)',
                 color: isOn ? 'rgba(255, 255, 255, 0.65)' : 'rgba(255, 255, 255, 0.5)'
               }}
-              transition={smoothTransition}
+              transition={{
+                ...smoothTransition,
+                filter: { duration: 0.35, ease: smoothTransition.ease }
+              }}
             >
               {isOn ? `${displayNumber}%` : 'Off'}
             </motion.div>
@@ -310,12 +324,18 @@ export const LightControlCard = ({
               />
             </motion.div>
             
-            {/* Real slider */}
+            {/* Real slider - blur-to-sharp reveal */}
             <motion.div 
               className="w-full"
               initial={false}
-              animate={{ opacity: isLoading ? 0 : 1 }}
-              transition={smoothTransition}
+              animate={{ 
+                opacity: isLoading ? 0 : 1,
+                filter: isLoading ? 'blur(4px)' : 'blur(0px)',
+              }}
+              transition={{
+                ...smoothTransition,
+                filter: { duration: 0.4, ease: smoothTransition.ease }
+              }}
             >
               <Slider
                 value={[displayNumber]}

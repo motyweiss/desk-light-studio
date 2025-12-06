@@ -149,18 +149,25 @@ export const CircularProgress = ({
         />
       </svg>
       
-      {/* Icon container - smooth opacity */}
+      {/* Icon container - blur-to-sharp reveal */}
       <motion.div 
         className="absolute inset-0 flex items-center justify-center"
         initial={false}
         animate={{ 
-          opacity: isShowingSkeleton ? [0.4, 0.7, 0.4] : 1 
+          opacity: isShowingSkeleton ? [0.4, 0.7, 0.4] : 1,
+          filter: isShowingSkeleton ? 'blur(2px)' : 'blur(0px)',
         }}
         transition={isShowingSkeleton ? {
-          duration: 1.5,
-          repeat: Infinity,
-          ease: "easeInOut",
-        } : smoothTransition}
+          opacity: {
+            duration: 1.5,
+            repeat: Infinity,
+            ease: "easeInOut",
+          },
+          filter: { duration: 0.1 }
+        } : {
+          ...smoothTransition,
+          filter: { duration: 0.4, ease: smoothTransition.ease }
+        }}
       >
         {children}
       </motion.div>
