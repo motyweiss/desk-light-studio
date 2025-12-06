@@ -1,6 +1,6 @@
 import { useState, useCallback, useEffect } from 'react';
 import { usePolling } from '@/shared/hooks';
-import { sensors } from '@/api/homeAssistant';
+import { sensors, haClient } from '@/api/homeAssistant';
 import { logger } from '@/shared/utils/logger';
 
 interface ClimateData {
@@ -51,7 +51,16 @@ export const useClimateSync = (config: UseClimateSyncConfig): ClimateData => {
    * Sync all climate sensors
    */
   const syncClimateData = useCallback(async () => {
-    if (!isConnected) return;
+    // Check if haClient is configured
+    if (!haClient.getConfig()) {
+      logger.warn('HA client not configured, skipping climate sync');
+      return;
+    }
+    
+    if (!isConnected) {
+      logger.warn('Not connected to HA, skipping climate sync');
+      return;
+    }
 
     const entityIds = [
       entityMapping.temperatureSensor,
@@ -63,9 +72,15 @@ export const useClimateSync = (config: UseClimateSyncConfig): ClimateData => {
       entityMapping.airpodsMaxBatteryState,
     ].filter(Boolean) as string[];
 
-    if (entityIds.length === 0) return;
+    // If no entities configured, mark as loaded with defaults
+    if (entityIds.length === 0) {
+      logger.warn('No climate entities configured');
+      setClimateData(prev => ({ ...prev, isLoaded: true }));
+      return;
+    }
 
     try {
+      logger.info('Syncing climate data...');
       const states = await sensors.getMultipleStates(entityIds);
 
       setClimateData(prev => {
@@ -110,24 +125,30 @@ export const useClimateSync = (config: UseClimateSyncConfig): ClimateData => {
         }
 
         newData.isLoaded = true;
+        logger.info('Climate data synced successfully');
         return newData;
       });
     } catch (error) {
       logger.error('Failed to sync climate data', error);
+      // Still mark as loaded on error to prevent infinite loading
+      setClimateData(prev => ({ ...prev, isLoaded: true }));
     }
   }, [isConnected, entityMapping]);
 
-  // Immediate first sync on mount
+  // Immediate first sync on mount when connected
   useEffect(() => {
-    if (isConnected) {
+    if (isConnected && haClient.getConfig()) {
+      logger.info('Initial climate sync triggered');
       syncClimateData();
     }
   }, [isConnected, syncClimateData]);
 
-  // Setup polling
+  // Setup polling - only when connected AND haClient is configured
+  const shouldPoll = isConnected && !!haClient.getConfig();
+  
   usePolling(syncClimateData, {
     interval: pollingInterval,
-    enabled: isConnected,
+    enabled: shouldPoll,
     runOnFocus: true,
   });
 

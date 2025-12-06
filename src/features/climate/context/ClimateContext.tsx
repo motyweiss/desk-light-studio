@@ -1,6 +1,7 @@
-import { createContext, useContext, ReactNode } from 'react';
+import { createContext, useContext, ReactNode, useEffect } from 'react';
 import { useClimateSync } from '@/features/climate/hooks/useClimateSync';
 import { useHomeAssistantConfig } from '@/hooks/useHomeAssistantConfig';
+import { haClient } from '@/api/homeAssistant';
 
 interface ClimateState {
   temperature: number;
@@ -20,7 +21,14 @@ interface ClimateContextValue extends ClimateState {
 const ClimateContext = createContext<ClimateContextValue | undefined>(undefined);
 
 export const ClimateProvider = ({ children }: { children: ReactNode }) => {
-  const { isConnected, entityMapping } = useHomeAssistantConfig();
+  const { isConnected, config, entityMapping } = useHomeAssistantConfig();
+  
+  // Ensure haClient is configured when config is available
+  useEffect(() => {
+    if (config) {
+      haClient.setConfig(config);
+    }
+  }, [config]);
   
   const climateState = useClimateSync({
     isConnected,
