@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { homeAssistant, type HomeAssistantConfig, type EntityMapping } from "@/services/homeAssistant";
+import { haClient } from "@/api/homeAssistant/client";
 import { DevicesMapping, DeviceConfig } from "@/types/settings";
 
 const CONFIG_KEY = "ha_config";
@@ -76,7 +77,9 @@ export const useHomeAssistantConfig = () => {
           console.log('🔌 Found saved config, connecting to:', parsedConfig.baseUrl);
           setIsConnecting(true);
           setConfig(parsedConfig);
+          // Configure BOTH clients
           homeAssistant.setConfig(parsedConfig);
+          haClient.setConfig(parsedConfig);
           
           // Test connection before confirming
           try {
@@ -110,7 +113,9 @@ export const useHomeAssistantConfig = () => {
                 console.log('🔄 Trying auto-connect with recent URL...');
                 setIsConnecting(true);
                 const autoConfig = { baseUrl: recentUrls[0].url, accessToken: savedToken };
+                // Configure BOTH clients
                 homeAssistant.setConfig(autoConfig);
+                haClient.setConfig(autoConfig);
                 
                 try {
                   const result = await homeAssistant.testConnection();
@@ -159,7 +164,9 @@ export const useHomeAssistantConfig = () => {
     
     setConfig(newConfig);
     setEntityMapping(newMapping);
+    // Configure BOTH clients
     homeAssistant.setConfig(newConfig);
+    haClient.setConfig(newConfig);
     setIsConnected(true);
     console.log('🔌 Config saved and connected to:', newConfig.baseUrl);
   };
