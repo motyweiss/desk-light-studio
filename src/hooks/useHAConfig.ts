@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { homeAssistant } from '@/services/homeAssistant';
+import { haClient } from '@/api/homeAssistant/client';
 
 interface HAConfig {
   baseUrl: string;
@@ -60,11 +61,13 @@ export function useHAConfig(): UseHAConfigReturn {
           accessToken: data.access_token,
         });
         
-        // Configure the homeAssistant service for direct calls (temporary for migration)
-        homeAssistant.setConfig({
+        // Configure BOTH homeAssistant services to ensure all components work
+        const configObj = {
           baseUrl: data.base_url,
           accessToken: data.access_token,
-        });
+        };
+        homeAssistant.setConfig(configObj);
+        haClient.setConfig(configObj);
 
         // Test connection
         setIsConnecting(true);
@@ -122,8 +125,10 @@ export function useHAConfig(): UseHAConfigReturn {
       // Update local state
       setConfig({ baseUrl, accessToken });
       
-      // Configure homeAssistant service
-      homeAssistant.setConfig({ baseUrl, accessToken });
+      // Configure BOTH homeAssistant services
+      const configObj = { baseUrl, accessToken };
+      homeAssistant.setConfig(configObj);
+      haClient.setConfig(configObj);
 
       // Test connection
       setIsConnecting(true);
@@ -180,8 +185,10 @@ export function useHAConfig(): UseHAConfigReturn {
   // Test connection without saving
   const testConnection = useCallback(async (baseUrl: string, accessToken: string): Promise<{ success: boolean; version?: string; error?: string }> => {
     try {
-      // Temporarily set config to test
-      homeAssistant.setConfig({ baseUrl, accessToken });
+      // Temporarily set config to test on both clients
+      const configObj = { baseUrl, accessToken };
+      homeAssistant.setConfig(configObj);
+      haClient.setConfig(configObj);
       const result = await homeAssistant.testConnection();
       return result;
     } catch (err) {
