@@ -1,7 +1,6 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { CircularProgress } from "./CircularProgress";
 import { TrendGraph } from "./TrendGraph";
-import { ColorLegend } from "./ColorLegend";
 import { LucideIcon } from "lucide-react";
 import { useRef, useState, useEffect } from "react";
 import { createPortal } from "react-dom";
@@ -186,9 +185,6 @@ export const ClimateIndicatorTooltip = ({
                   colorType={colorType}
                 />
               </motion.div>
-
-              {/* Color Legend */}
-              <ColorLegend colorType={colorType} />
             </div>
           </motion.div>
         </AnimatePresence>,
