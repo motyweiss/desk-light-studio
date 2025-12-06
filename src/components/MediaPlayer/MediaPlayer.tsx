@@ -39,6 +39,13 @@ export const MediaPlayer = () => {
     handleSeek,
   } = useMediaPlayer();
 
+  // Reset image loading state when track changes - MUST be before early returns
+  useEffect(() => {
+    if (playerState?.currentTrack) {
+      setIsImageLoading(true);
+    }
+  }, [playerState?.currentTrack?.title, playerState?.currentTrack?.albumArt]);
+
   // Hide player only during loading or if no player state
   if (isLoading || !playerState) {
     return null;
@@ -56,11 +63,6 @@ export const MediaPlayer = () => {
 
   const currentTrack = playerState.currentTrack;
   const albumArtUrl = currentTrack?.albumArt ? homeAssistant.getFullImageUrl(currentTrack.albumArt) : null;
-
-  // Reset image loading state when track changes
-  useEffect(() => {
-    setIsImageLoading(true);
-  }, [currentTrack?.title, currentTrack?.albumArt]);
 
   // Calculate album art sizes
   const albumArtSize = {
