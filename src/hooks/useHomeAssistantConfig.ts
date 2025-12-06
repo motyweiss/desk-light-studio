@@ -165,10 +165,27 @@ export const useHomeAssistantConfig = () => {
     localStorage.setItem(ENTITY_MAPPING_KEY, JSON.stringify(newMapping));
     // Save token separately for auto-connect feature
     localStorage.setItem('ha_token', newConfig.accessToken);
+    
+    // Also save to recent URLs for consistency with auto-connect
+    const recentUrlsStr = localStorage.getItem(RECENT_URLS_KEY);
+    let recentUrls = recentUrlsStr ? JSON.parse(recentUrlsStr) : [];
+    const existingIndex = recentUrls.findIndex((r: any) => r.url === newConfig.baseUrl);
+    if (existingIndex >= 0) {
+      recentUrls[existingIndex].lastUsed = Date.now();
+    } else {
+      recentUrls.unshift({
+        url: newConfig.baseUrl,
+        label: 'Home Assistant',
+        lastUsed: Date.now()
+      });
+    }
+    localStorage.setItem(RECENT_URLS_KEY, JSON.stringify(recentUrls.slice(0, 5)));
+    
     setConfig(newConfig);
     setEntityMapping(newMapping);
     homeAssistant.setConfig(newConfig);
     setIsConnected(true);
+    console.log('🔌 Config saved and connected to:', newConfig.baseUrl);
   };
 
   const saveDevicesMapping = (newDevicesMapping: DevicesMapping) => {
