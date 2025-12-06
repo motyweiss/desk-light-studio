@@ -456,7 +456,8 @@ class HomeAssistantService {
     if (relativePath.startsWith('http://') || relativePath.startsWith('https://')) {
       return relativePath;
     }
-    return `${this.config?.baseUrl}${relativePath}`;
+    if (!this.config?.baseUrl) return null;
+    return `${this.config.baseUrl}${relativePath}`;
   }
 
   async setMediaShuffle(entityId: string, shuffle: boolean): Promise<boolean> {
