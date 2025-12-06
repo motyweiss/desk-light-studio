@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Loader2, CheckCircle2, XCircle, Zap, Globe, Server, Clock, X } from "lucide-react";
+import { Loader2, CheckCircle2, XCircle, Zap, Globe, Server, Clock, X, Cloud } from "lucide-react";
 import { homeAssistant } from "@/services/homeAssistant";
 
 const RECENT_URLS_KEY = "ha_recent_urls";
@@ -19,10 +19,10 @@ interface QuickConnectSuggestionsProps {
 }
 
 const COMMON_HA_URLS = [
+  { url: "https://YOUR-ID.ui.nabu.casa", label: "Nabu Casa Cloud", icon: Cloud, isTemplate: true },
   { url: "http://homeassistant.local:8123", label: "homeassistant.local", icon: Globe },
   { url: "http://homeassistant:8123", label: "homeassistant", icon: Server },
   { url: "http://192.168.1.1:8123", label: "192.168.1.1", icon: Server },
-  { url: "http://192.168.0.1:8123", label: "192.168.0.1", icon: Server },
 ];
 
 const getRecentUrls = (): RecentUrl[] => {
@@ -234,10 +234,28 @@ export const QuickConnectSuggestions = ({
         </div>
 
         <div className="grid grid-cols-2 gap-2">
-          {COMMON_HA_URLS.map(({ url, label, icon: Icon }) => {
+          {COMMON_HA_URLS.map(({ url, label, icon: Icon, isTemplate }) => {
             const isActive = currentUrl === url.replace(/\/+$/, '');
             const isTesting = testingUrl === url;
             const result = results[url];
+
+            // For Nabu Casa template, show as info card not clickable test
+            if (isTemplate) {
+              return (
+                <motion.div
+                  key={url}
+                  className="col-span-2 flex items-center gap-3 px-3 py-2.5 rounded-lg text-left text-sm bg-blue-500/10 border border-blue-500/20 text-blue-200"
+                >
+                  <Icon className="w-4 h-4 flex-shrink-0 text-blue-400" />
+                  <div className="flex-1">
+                    <span className="font-medium">{label}</span>
+                    <p className="text-xs text-blue-300/60 mt-0.5">
+                      Use your Nabu Casa URL: https://xxxxx.ui.nabu.casa
+                    </p>
+                  </div>
+                </motion.div>
+              );
+            }
 
             return (
               <motion.button
