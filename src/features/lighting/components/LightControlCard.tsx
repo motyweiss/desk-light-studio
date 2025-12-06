@@ -3,7 +3,7 @@ import { Slider } from "@/components/ui/slider";
 import { useState, useRef, useCallback, useEffect } from "react";
 import { getIconForLight } from "@/components/icons/LightIcons";
 import { Loader2 } from "lucide-react";
-import { LIGHT_ANIMATION } from "@/constants/animations";
+import { LIGHT_ANIMATION, DATA_TRANSITION } from "@/constants/animations";
 import { useLightAnimation } from "../hooks/useLightAnimation";
 
 interface LightControlCardProps {
@@ -110,57 +110,60 @@ export const LightControlCard = ({
     }, 300);
   }, [displayNumber, onChange, animateTo]);
 
-  // Skeleton loading state
+  // Skeleton loading state with smooth shimmer
   if (isLoading) {
     return (
       <motion.div
         layout
-        className="w-full rounded-3xl px-8 py-4 text-left transition-all duration-500 relative overflow-hidden border-0"
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.4 }}
+        className="w-full rounded-2xl md:rounded-3xl px-4 md:px-8 py-3 md:py-4 text-left relative overflow-hidden border border-white/10 backdrop-blur-xl"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        transition={{ duration: DATA_TRANSITION.fadeIn.duration }}
         style={{
-          backgroundColor: 'rgba(255, 255, 255, 0.05)',
-          borderColor: 'transparent',
+          backgroundColor: 'rgba(255, 255, 255, 0.06)',
         }}
       >
+        {/* Shimmer overlay */}
         <motion.div
-          className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent"
+          className="absolute inset-0 bg-gradient-to-r from-transparent via-white/6 to-transparent"
           animate={{ x: ['-100%', '100%'] }}
           transition={{ 
-            duration: 1.5, 
+            duration: DATA_TRANSITION.skeleton.shimmerDuration, 
             repeat: Infinity,
             ease: "easeInOut"
           }}
         />
 
-        <div className="flex items-center gap-6 relative z-10">
+        <div className="flex items-center gap-3 md:gap-6 relative z-10">
+          {/* Icon skeleton */}
           <motion.div
-            className="flex-shrink-0 w-7 h-7 rounded-full bg-white/5"
+            className="flex-shrink-0 w-5 h-5 md:w-7 md:h-7 rounded-full bg-white/10"
             animate={{ opacity: [0.3, 0.5, 0.3] }}
             transition={{ 
-              duration: 1.5, 
+              duration: DATA_TRANSITION.skeleton.shimmerDuration, 
               repeat: Infinity,
               ease: "easeInOut"
             }}
           />
 
-          <div className="flex-1 space-y-2">
+          {/* Text skeleton */}
+          <div className="flex-1 space-y-1.5">
             <motion.div 
-              className="h-4 w-24 bg-white/5 rounded"
+              className="h-4 w-20 md:w-24 bg-white/10 rounded"
               animate={{ opacity: [0.3, 0.5, 0.3] }}
               transition={{ 
-                duration: 1.5, 
+                duration: DATA_TRANSITION.skeleton.shimmerDuration, 
                 repeat: Infinity,
                 ease: "easeInOut",
                 delay: 0.1
               }}
             />
             <motion.div 
-              className="h-3 w-12 bg-white/5 rounded"
+              className="h-3 w-10 bg-white/10 rounded"
               animate={{ opacity: [0.3, 0.5, 0.3] }}
               transition={{ 
-                duration: 1.5, 
+                duration: DATA_TRANSITION.skeleton.shimmerDuration, 
                 repeat: Infinity,
                 ease: "easeInOut",
                 delay: 0.2
@@ -168,13 +171,14 @@ export const LightControlCard = ({
             />
           </div>
 
-          <div className="flex-shrink-0 flex items-center gap-3">
-            <div className="w-4 h-4" />
+          {/* Slider skeleton */}
+          <div className="flex-shrink-0 flex items-center gap-2 md:gap-3">
+            <div className="w-3 h-3 md:w-4 md:h-4" />
             <motion.div 
-              className="w-32 h-2 bg-white/5 rounded-full"
+              className="w-20 md:w-32 h-2 bg-white/10 rounded-full"
               animate={{ opacity: [0.3, 0.5, 0.3] }}
               transition={{ 
-                duration: 1.5, 
+                duration: DATA_TRANSITION.skeleton.shimmerDuration, 
                 repeat: Infinity,
                 ease: "easeInOut",
                 delay: 0.3

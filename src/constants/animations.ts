@@ -130,3 +130,20 @@ export const HEADER_ANIMATIONS = {
   },
   indicatorStagger: 0.08,
 } as const;
+
+// Data transition animations for skeleton → data reveal
+export const DATA_TRANSITION = {
+  skeleton: {
+    shimmerDuration: 1.5,
+    pulseEase: 'easeInOut',
+  },
+  reveal: {
+    duration: 0.5,
+    stagger: 0.08,
+    ease: [0.22, 0.03, 0.26, 1] as const,
+  },
+  fadeIn: {
+    duration: 0.4,
+    ease: [0.25, 0.1, 0.25, 1] as const,
+  },
+} as const;

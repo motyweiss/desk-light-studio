@@ -1,6 +1,6 @@
 import React from "react";
-import { motion } from "framer-motion";
-import { PAGE_LOAD_SEQUENCE } from "@/constants/animations";
+import { motion, AnimatePresence } from "framer-motion";
+import { DATA_TRANSITION } from "@/constants/animations";
 
 interface CircularProgressProps {
   value: number;
@@ -10,6 +10,7 @@ interface CircularProgressProps {
   strokeWidth?: number;
   children: React.ReactNode;
   isLoaded?: boolean;
+  showSkeleton?: boolean;
   colorType?: 'temperature' | 'humidity' | 'airQuality' | 'battery' | 'default';
   delay?: number;
 }
@@ -22,8 +23,9 @@ export const CircularProgress = ({
   strokeWidth = 2, 
   children,
   isLoaded = true,
+  showSkeleton = false,
   colorType = 'default',
-  delay = PAGE_LOAD_SEQUENCE.circularProgress.delay
+  delay = 0.3
 }: CircularProgressProps) => {
   const radius = (size - strokeWidth) / 2;
   const circumference = 2 * Math.PI * radius;
@@ -62,6 +64,67 @@ export const CircularProgress = ({
         return 'hsl(var(--warm-glow))';
     }
   };
+
+  // Skeleton state - gray pulsing ring
+  if (showSkeleton) {
+    return (
+      <div className="relative" style={{ width: size, height: size }}>
+        <svg className="absolute inset-0 -rotate-90" width={size} height={size}>
+          {/* Background ring */}
+          <circle
+            cx={size/2} 
+            cy={size/2} 
+            r={radius}
+            stroke="rgba(255,255,255,0.1)"
+            strokeWidth={strokeWidth}
+            fill="none"
+          />
+          {/* Skeleton shimmer ring */}
+          <motion.circle
+            cx={size/2} 
+            cy={size/2} 
+            r={radius}
+            strokeWidth={strokeWidth}
+            fill="none"
+            strokeLinecap="round"
+            style={{ 
+              strokeDasharray: circumference,
+              strokeDashoffset: circumference * 0.7,
+              stroke: 'rgba(255,255,255,0.15)',
+            }}
+            animate={{ 
+              opacity: [0.3, 0.6, 0.3],
+              rotate: [0, 360],
+            }}
+            transition={{ 
+              opacity: {
+                duration: DATA_TRANSITION.skeleton.shimmerDuration,
+                repeat: Infinity,
+                ease: DATA_TRANSITION.skeleton.pulseEase,
+              },
+              rotate: {
+                duration: 3,
+                repeat: Infinity,
+                ease: 'linear',
+              }
+            }}
+          />
+        </svg>
+        {/* Icon container with pulse */}
+        <motion.div 
+          className="absolute inset-0 flex items-center justify-center"
+          animate={{ opacity: [0.4, 0.7, 0.4] }}
+          transition={{
+            duration: DATA_TRANSITION.skeleton.shimmerDuration,
+            repeat: Infinity,
+            ease: DATA_TRANSITION.skeleton.pulseEase,
+          }}
+        >
+          {children}
+        </motion.div>
+      </div>
+    );
+  }
   
   return (
     <div className="relative" style={{ width: size, height: size }}>
@@ -84,17 +147,19 @@ export const CircularProgress = ({
           fill="none"
           strokeLinecap="round"
           initial={false}
-          animate={{ strokeDashoffset: isLoaded ? offset : circumference }}
+          animate={{ 
+            strokeDashoffset: isLoaded ? offset : circumference,
+            stroke: getProgressColor(value, colorType),
+          }}
           style={{ 
             strokeDasharray: circumference,
-            stroke: getProgressColor(value, colorType),
-            willChange: 'stroke-dashoffset',
+            willChange: 'stroke-dashoffset, stroke',
           }}
           transition={{ 
             strokeDashoffset: {
-              duration: 0.8,
-              delay: isLoaded ? Math.max(0, delay - 0.5) : 0,
-              ease: [0.22, 0.03, 0.26, 1]
+              duration: DATA_TRANSITION.reveal.duration,
+              delay: isLoaded ? delay : 0,
+              ease: DATA_TRANSITION.reveal.ease,
             },
             stroke: {
               duration: 0.5,
@@ -104,9 +169,14 @@ export const CircularProgress = ({
         />
       </svg>
       {/* Icon container */}
-      <div className="absolute inset-0 flex items-center justify-center">
+      <motion.div 
+        className="absolute inset-0 flex items-center justify-center"
+        initial={false}
+        animate={{ opacity: isLoaded ? 1 : 0.5 }}
+        transition={{ duration: DATA_TRANSITION.fadeIn.duration }}
+      >
         {children}
-      </div>
+      </motion.div>
     </div>
   );
 };
