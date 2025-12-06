@@ -63,43 +63,57 @@ export const SPEAKER_SHEET_TRANSITIONS = {
   ease: [0.25, 0.1, 0.25, 1] as const,
 } as const;
 
-// Coordinated page load animation sequence
+// Coordinated page load animation sequence - smooth hierarchy
 export const PAGE_LOAD_SEQUENCE = {
   overlayExit: {
-    duration: 0.4,
+    duration: 0.5, // Longer, smoother exit
+    ease: [0.25, 0.1, 0.25, 1] as const,
+  },
+  contentDelay: 0.1, // Small delay after overlay starts fading
+  container: {
+    duration: 0.6,
     ease: [0.22, 0.03, 0.26, 1] as const,
   },
-  contentDelay: 0.15, // Wait after overlay starts fading
   header: {
     delay: 0,
-    duration: 0.5,
+    duration: 0.6,
     ease: [0.22, 0.03, 0.26, 1] as const,
+    y: 12, // Subtle slide up
   },
   masterSwitch: {
-    delay: 0.08,
+    delay: 0.06,
     duration: 0.5,
     ease: [0.22, 0.03, 0.26, 1] as const,
   },
   devices: {
     delay: 0.12,
+    stagger: 0.08,
     duration: 0.5,
     ease: [0.22, 0.03, 0.26, 1] as const,
+    y: 10,
   },
   lightCards: {
     delay: 0.18,
-    stagger: 0.06,
-    duration: 0.4,
+    stagger: 0.07,
+    duration: 0.45,
     ease: [0.22, 0.03, 0.26, 1] as const,
+    y: 12,
   },
   deskImage: {
-    delay: 0.25,
-    duration: 0.6,
+    delay: 0.15,
+    duration: 0.7,
     ease: [0.22, 0.03, 0.26, 1] as const,
+    scale: 0.985, // Subtle scale
   },
   circularProgress: {
-    delay: 0.8,
-    duration: 1.0,
+    delay: 0.6,
+    duration: 0.8,
     ease: [0.22, 0.03, 0.26, 1] as const,
+  },
+  glowLayers: {
+    delay: 0.4,
+    duration: 0.8,
+    ease: [0.25, 0.1, 0.25, 1] as const,
   },
 } as const;
 

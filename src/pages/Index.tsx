@@ -242,19 +242,22 @@ const Index = () => {
           isLoaded={contentReady && dataReady}
         />
 
-        {/* Main content area */}
+      {/* Main content area */}
         <div className="w-full h-full max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-center md:justify-between gap-4 md:gap-8 lg:gap-10 relative z-10">
           {/* Desk Display */}
           <motion.div
             className="w-full md:w-[45%] lg:w-[43%] flex-shrink-0 md:order-1 order-2 max-w-[320px] md:max-w-none"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: isLoaded ? 1 : 0 }}
+            initial={{ opacity: 0, scale: PAGE_LOAD_SEQUENCE.deskImage.scale }}
+            animate={{ 
+              opacity: contentReady ? 1 : 0,
+              scale: contentReady ? 1 : PAGE_LOAD_SEQUENCE.deskImage.scale
+            }}
             transition={{ 
               duration: PAGE_LOAD_SEQUENCE.deskImage.duration, 
-              delay: PAGE_LOAD_SEQUENCE.deskImage.delay, 
+              delay: contentReady ? PAGE_LOAD_SEQUENCE.deskImage.delay : 0, 
               ease: PAGE_LOAD_SEQUENCE.deskImage.ease
             }}
-            style={{ willChange: 'opacity' }}
+            style={{ willChange: 'opacity, transform' }}
           >
             <DeskDisplay
               spotlightIntensity={lights.spotlight.targetValue}
@@ -264,23 +267,13 @@ const Index = () => {
               onDeskLampChange={createLightChangeHandler('deskLamp')}
               onMonitorLightChange={createLightChangeHandler('monitorLight')}
               hoveredLightId={hoveredLight}
-              isLoaded={isLoaded}
+              isLoaded={contentReady}
               dataReady={dataReady}
             />
           </motion.div>
 
-          {/* Room Info Panel */}
-          <motion.div
-            className="w-full md:w-[52%] flex-shrink-0 md:order-2 order-1"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: isLoaded ? 1 : 0 }}
-            transition={{ 
-              duration: PAGE_LOAD_SEQUENCE.header.duration, 
-              delay: 0, 
-              ease: PAGE_LOAD_SEQUENCE.header.ease
-            }}
-            style={{ willChange: 'opacity' }}
-          >
+          {/* Room Info Panel - no wrapper animation, handled internally */}
+          <div className="w-full md:w-[52%] flex-shrink-0 md:order-2 order-1">
             <RoomInfoPanel
               roomName="Office Desk"
               devices={[
@@ -325,11 +318,11 @@ const Index = () => {
               masterSwitchOn={masterSwitchOn}
               onMasterToggle={handleMasterToggle}
               onLightHover={setHoveredLight}
-              isLoaded={isLoaded}
+              isLoaded={contentReady}
               showSkeleton={showSkeleton}
               dataReady={dataReady}
             />
-          </motion.div>
+          </div>
         </div>
       </motion.div>
     </>
