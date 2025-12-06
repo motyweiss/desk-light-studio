@@ -92,7 +92,7 @@ export const ClimateIndicators = () => {
 
   return (
     <motion.div 
-      className="flex items-center gap-4"
+      className="flex items-center gap-2 md:gap-4"
       initial={{ opacity: 0, y: 10 }}
       animate={{ 
         opacity: 1,

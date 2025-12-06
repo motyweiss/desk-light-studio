@@ -197,7 +197,7 @@ const Index = () => {
       <LoadingOverlay isLoading={isLoading} />
       <Toaster />
 
-      <div className="h-full min-h-0 flex items-center justify-center p-4 md:p-8 relative overflow-hidden">
+      <div className="h-full min-h-0 flex items-center justify-center p-3 md:p-8 relative overflow-hidden">
         {/* Dynamic color overlay that responds to lighting */}
         <motion.div
           className="fixed inset-0 pointer-events-none z-0"
@@ -233,10 +233,10 @@ const Index = () => {
         />
 
         {/* Main content area */}
-        <div className="w-full h-full max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-8 md:gap-8 lg:gap-10 relative z-10">
+        <div className="w-full h-full max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-center md:justify-between gap-4 md:gap-8 lg:gap-10 relative z-10">
           {/* Desk Display */}
           <motion.div
-            className="w-full md:w-[45%] lg:w-[43%] flex-shrink-0 md:order-1 order-2"
+            className="w-full md:w-[45%] lg:w-[43%] flex-shrink-0 md:order-1 order-2 max-w-[320px] md:max-w-none"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: isLoaded ? 1 : 0, y: isLoaded ? 0 : 20 }}
             transition={{ 

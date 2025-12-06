@@ -192,7 +192,7 @@ export const LightControlCard = ({
       onClick={handleCardClick}
       onMouseEnter={() => onHover(id)}
       onMouseLeave={() => onHover(null)}
-      className="w-full rounded-3xl px-8 py-4 cursor-pointer text-left border transition-all duration-500 backdrop-blur-xl relative overflow-hidden"
+      className="w-full rounded-2xl md:rounded-3xl px-4 md:px-8 py-3 md:py-4 cursor-pointer text-left border transition-all duration-500 backdrop-blur-xl relative overflow-hidden"
       initial={{
         backgroundColor: isOn ? 'rgba(255, 255, 255, 0.18)' : 'rgba(255, 255, 255, 0.08)',
         borderColor: isOn ? 'rgba(255, 255, 255, 0.25)' : 'rgba(255, 255, 255, 0.15)',
@@ -241,7 +241,7 @@ export const LightControlCard = ({
         />
       )}
 
-      <div className="flex items-center gap-6 relative z-10">
+      <div className="flex items-center gap-3 md:gap-6 relative z-10">
         {/* Icon */}
         <motion.div
           className="flex-shrink-0"
@@ -257,14 +257,14 @@ export const LightControlCard = ({
             color: { duration: 0.5, ease: LIGHT_ANIMATION.turnOn.ease }
           }}
         >
-          <IconComponent className="w-7 h-7" />
+          <IconComponent className="w-5 h-5 md:w-7 md:h-7" />
         </motion.div>
 
         {/* Text Info */}
-        <div className="flex-1 text-left min-w-0 space-y-0.5">
-          <div className="font-light text-base text-white tracking-wide">{label}</div>
+        <div className="flex-1 text-left min-w-0 space-y-0">
+          <div className="font-light text-sm md:text-base text-white tracking-wide">{label}</div>
           <motion.div 
-            className="text-xs font-light tracking-wide tabular-nums"
+            className="text-[10px] md:text-xs font-light tracking-wide tabular-nums"
             animate={{
               color: isOn ? 'rgba(255, 255, 255, 0.65)' : 'rgba(255, 255, 255, 0.5)'
             }}
@@ -276,13 +276,13 @@ export const LightControlCard = ({
 
         {/* Slider with Pending Indicator */}
         <div 
-          className="flex-shrink-0 flex items-center gap-3"
+          className="flex-shrink-0 flex items-center gap-2 md:gap-3"
           data-slider
           onClick={(e) => e.stopPropagation()}
           onPointerDown={(e) => e.stopPropagation()}
         >
           {/* Spinner - Left of Slider with fixed width */}
-          <div className="w-4 h-4 flex items-center justify-center flex-shrink-0">
+          <div className="w-3 h-3 md:w-4 md:h-4 flex items-center justify-center flex-shrink-0">
             <AnimatePresence>
               {isPending && (
                 <motion.div
@@ -292,7 +292,7 @@ export const LightControlCard = ({
                   transition={{ duration: 0.2 }}
                 >
                   <Loader2 
-                    className="w-4 h-4 text-white/40 animate-spin" 
+                    className="w-3 h-3 md:w-4 md:h-4 text-white/40 animate-spin" 
                     strokeWidth={2}
                   />
                 </motion.div>
@@ -305,7 +305,7 @@ export const LightControlCard = ({
             onValueChange={handleSliderChange}
             max={100}
             step={1}
-            className="w-32"
+            className="w-20 md:w-32"
           />
         </div>
       </div>

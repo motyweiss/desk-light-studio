@@ -38,10 +38,10 @@ interface RoomInfoPanelProps {
 export const RoomInfoPanel = ({ roomName, masterSwitchOn, onMasterToggle, onLightHover, lights, devices, isLoaded }: RoomInfoPanelProps) => {
 
   return (
-    <div className="space-y-6 md:space-y-8">
-      {/* Room Title with Master Switch - Hidden on mobile (shown in Index.tsx) */}
+    <div className="space-y-4 md:space-y-8">
+      {/* Room Title with Master Switch */}
       <motion.div 
-        className="hidden md:flex items-start justify-between gap-6"
+        className="flex items-center justify-between gap-4 md:gap-6"
         initial={{ opacity: 0, y: 10 }}
         animate={{ 
           opacity: isLoaded ? 1 : 0,
@@ -53,7 +53,7 @@ export const RoomInfoPanel = ({ roomName, masterSwitchOn, onMasterToggle, onLigh
           ease: [0.22, 0.03, 0.26, 1]
         }}
       >
-        <h1 className="text-3xl md:text-4xl font-display font-light tracking-tight md:tracking-tight text-foreground leading-tight">
+        <h1 className="text-2xl md:text-4xl font-display font-light tracking-tight text-foreground leading-tight">
           {roomName}
         </h1>
         
@@ -72,7 +72,7 @@ export const RoomInfoPanel = ({ roomName, masterSwitchOn, onMasterToggle, onLigh
             ease: [0.22, 0.03, 0.26, 1]
           }}
           onClick={() => onMasterToggle(!masterSwitchOn)}
-          className="w-10 h-10 rounded-full backdrop-blur-xl border transition-all duration-500 flex-shrink-0"
+          className="w-9 h-9 md:w-10 md:h-10 rounded-full backdrop-blur-xl border transition-all duration-500 flex-shrink-0"
           whileHover={{
             backgroundColor: masterSwitchOn ? 'rgba(255, 255, 255, 0.12)' : 'rgba(255, 255, 255, 0.05)',
             borderColor: masterSwitchOn ? 'rgba(255, 255, 255, 0.3)' : 'rgba(255, 255, 255, 0.15)',
@@ -146,7 +146,7 @@ export const RoomInfoPanel = ({ roomName, masterSwitchOn, onMasterToggle, onLigh
 
       {/* Light Controls Section */}
       <motion.div
-        className="space-y-2 mt-6"
+        className="space-y-2 md:mt-6"
         variants={{
           hidden: { opacity: 0 },
           show: {

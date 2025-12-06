@@ -131,7 +131,7 @@ const Auth = () => {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[hsl(28_20%_18%)] px-4">
+    <div className="min-h-screen flex items-center justify-center bg-[hsl(28_20%_18%)] px-4 py-8">
       <motion.div
         initial={{ opacity: 0, y: 20, scale: 0.95 }}
         animate={{ opacity: 1, y: 0, scale: 1 }}
@@ -139,18 +139,18 @@ const Auth = () => {
         className="w-full max-w-md"
       >
         {/* Glass card */}
-        <div className="backdrop-blur-xl bg-white/[0.06] border border-white/10 rounded-2xl p-8 shadow-2xl">
+        <div className="backdrop-blur-xl bg-white/[0.06] border border-white/10 rounded-2xl p-5 md:p-8 shadow-2xl">
           {/* Header */}
           <motion.div 
-            className="text-center mb-8"
+            className="text-center mb-6 md:mb-8"
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1, duration: 0.4 }}
           >
-            <h1 className="text-3xl font-light text-white mb-2" style={{ fontFamily: 'Cormorant Garamond, serif' }}>
+            <h1 className="text-2xl md:text-3xl font-light text-white mb-2" style={{ fontFamily: 'Cormorant Garamond, serif' }}>
               {isLogin ? 'Welcome Back' : 'Create Account'}
             </h1>
-            <p className="text-white/40 text-sm">
+            <p className="text-white/40 text-xs md:text-sm">
               {isLogin ? 'Sign in to your smart home' : 'Join your smart home experience'}
             </p>
           </motion.div>

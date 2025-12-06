@@ -80,7 +80,7 @@ export const RootLayout = ({ children }: RootLayoutProps) => {
           )}
 
           {/* Page Content with AnimatePresence for smooth transitions */}
-          <div className={`flex-1 overflow-auto ${!isSettingsPage ? 'pt-[68px]' : 'pt-0'} ${isSettingsPage ? 'pb-0' : 'pb-[96px]'}`}>
+          <div className={`flex-1 overflow-auto ${!isSettingsPage ? 'pt-[56px] md:pt-[68px]' : 'pt-0'} ${isSettingsPage ? 'pb-0' : 'pb-[88px] md:pb-[96px]'}`}>
             <AnimatePresence mode="sync" initial={false}>
               <motion.div
                 key={location.pathname}
