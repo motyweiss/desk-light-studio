@@ -1,3 +1,4 @@
+import React from "react";
 import { motion } from "framer-motion";
 import { PAGE_LOAD_SEQUENCE } from "@/constants/animations";
 
