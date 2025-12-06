@@ -8,39 +8,31 @@ import { Toaster } from "@/components/ui/toaster";
 import { useClimate } from "@/features/climate";
 import { useLighting } from "@/features/lighting";
 import { useAppLoad } from "@/contexts/AppLoadContext";
-import { usePageLoadSequence } from "@/hooks/usePageLoadSequence";
-import { LIGHT_ANIMATION, PAGE_LOAD_SEQUENCE, DATA_TRANSITION, EASING } from "@/constants/animations";
+import { usePageLoadSequence, LOAD_TIMING_SECONDS } from "@/hooks/usePageLoadSequence";
+import { LIGHT_ANIMATION, PAGE_LOAD, EASING } from "@/constants/animations";
 
-// Import all desk images for preloading
+// Import primary desk image for preloading
 import desk000 from "@/assets/desk-000.png";
-import desk001 from "@/assets/desk-001.png";
-import desk010 from "@/assets/desk-010.png";
-import desk011 from "@/assets/desk-011.png";
-import desk100 from "@/assets/desk-100.png";
-import desk101 from "@/assets/desk-101.png";
-import desk110 from "@/assets/desk-110.png";
-import desk111 from "@/assets/desk-111.png";
 
 const Index = () => {
   const { hasInitiallyLoaded, setInitiallyLoaded } = useAppLoad();
-  const [isLoading, setIsLoading] = useState(!hasInitiallyLoaded);
-  const [isTransitioning, setIsTransitioning] = useState(false);
+  const [isOverlayComplete, setIsOverlayComplete] = useState(hasInitiallyLoaded);
   
   // Get climate data from global context
   const climate = useClimate();
 
   // Get lighting state and controls from unified context
-  const { lights, setLightIntensity, isConnected, connectionType } = useLighting();
+  const { lights, setLightIntensity, isConnected } = useLighting();
 
   // Unified page load sequence
   const { 
+    stage,
     showContent, 
     showSkeleton, 
     showData,
-    getStaggerDelay,
-    markContentReady,
+    onOverlayExitComplete,
   } = usePageLoadSequence({
-    overlayComplete: !isLoading,
+    overlayComplete: isOverlayComplete,
     isConnected,
     isDataLoaded: climate.isLoaded,
   });
@@ -48,16 +40,10 @@ const Index = () => {
   // Hover states for coordinated UI
   const [hoveredLight, setHoveredLight] = useState<string | null>(null);
 
-  // Handle overlay exit complete
-  const handleOverlayExitComplete = useCallback(() => {
-    markContentReady();
-  }, [markContentReady]);
-
-  // Optimized image loading - only on initial load
+  // Image preloading - only on initial load
   useEffect(() => {
     if (hasInitiallyLoaded) {
-      setIsLoading(false);
-      markContentReady();
+      setIsOverlayComplete(true);
       return;
     }
 
@@ -80,10 +66,15 @@ const Index = () => {
       const remainingTime = Math.max(0, minLoadTime - elapsed);
       
       setTimeout(() => {
-        setIsLoading(false);
+        setIsOverlayComplete(true);
         setInitiallyLoaded();
         
-        const remainingImages = [desk001, desk010, desk011, desk100, desk101, desk110, desk111];
+        // Preload remaining images in background
+        const remainingImages = [
+          '/assets/desk-001.png', '/assets/desk-010.png', '/assets/desk-011.png',
+          '/assets/desk-100.png', '/assets/desk-101.png', '/assets/desk-110.png',
+          '/assets/desk-111.png'
+        ];
         remainingImages.forEach(src => {
           const img = new Image();
           img.src = src;
@@ -91,15 +82,8 @@ const Index = () => {
       }, remainingTime);
     };
     
-    bgImage.onload = () => { 
-      bgLoaded = true; 
-      checkAllLoaded(); 
-    };
-    
-    primaryImage.onload = () => { 
-      deskLoaded = true; 
-      checkAllLoaded(); 
-    };
+    bgImage.onload = () => { bgLoaded = true; checkAllLoaded(); };
+    primaryImage.onload = () => { deskLoaded = true; checkAllLoaded(); };
     
     const fallbackTimer = setTimeout(() => {
       bgLoaded = true;
@@ -108,7 +92,7 @@ const Index = () => {
     }, 5000);
     
     return () => clearTimeout(fallbackTimer);
-  }, [hasInitiallyLoaded, setInitiallyLoaded, markContentReady]);
+  }, [hasInitiallyLoaded, setInitiallyLoaded]);
 
   // Master switch logic
   const allLightsOn = lights.spotlight.targetValue > 0 || lights.deskLamp.targetValue > 0 || lights.monitorLight.targetValue > 0;
@@ -140,18 +124,15 @@ const Index = () => {
       switch (e.key) {
         case '1':
           e.preventDefault();
-          const newDeskLampIntensity = lights.deskLamp.targetValue > 0 ? 0 : 100;
-          await setLightIntensity('deskLamp', newDeskLampIntensity, 'user');
+          await setLightIntensity('deskLamp', lights.deskLamp.targetValue > 0 ? 0 : 100, 'user');
           break;
         case '2':
           e.preventDefault();
-          const newMonitorIntensity = lights.monitorLight.targetValue > 0 ? 0 : 100;
-          await setLightIntensity('monitorLight', newMonitorIntensity, 'user');
+          await setLightIntensity('monitorLight', lights.monitorLight.targetValue > 0 ? 0 : 100, 'user');
           break;
         case '3':
           e.preventDefault();
-          const newSpotlightIntensity = lights.spotlight.targetValue > 0 ? 0 : 100;
-          await setLightIntensity('spotlight', newSpotlightIntensity, 'user');
+          await setLightIntensity('spotlight', lights.spotlight.targetValue > 0 ? 0 : 100, 'user');
           break;
         case ' ':
           e.preventDefault();
@@ -164,7 +145,7 @@ const Index = () => {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [masterSwitchOn, lights, handleMasterToggle, setLightIntensity]);
 
-  // Calculate binary lighting state
+  // Calculate binary lighting state for background color
   const lightingState = useMemo(() => {
     const spotlightBit = lights.spotlight.targetValue > 0 ? "1" : "0";
     const deskLampBit = lights.deskLamp.targetValue > 0 ? "1" : "0";
@@ -172,32 +153,18 @@ const Index = () => {
     return `${spotlightBit}${deskLampBit}${monitorLightBit}`;
   }, [lights.spotlight.targetValue, lights.deskLamp.targetValue, lights.monitorLight.targetValue]);
 
-  // Track binary state changes only
-  const isFirstRenderRef = useRef(true);
-  
-  useEffect(() => {
-    if (isFirstRenderRef.current) {
-      isFirstRenderRef.current = false;
-      return;
-    }
-    
-    setIsTransitioning(true);
-    const timer = setTimeout(() => {
-      setIsTransitioning(false);
-    }, 1500);
-    
-    return () => clearTimeout(timer);
-  }, [lightingState]);
-
-  // Unified transition config
-  const smoothTransition = {
-    duration: PAGE_LOAD_SEQUENCE.container.duration,
+  // Content transition config
+  const contentTransition = {
+    duration: LOAD_TIMING_SECONDS.contentEntryDuration,
     ease: EASING.entrance,
   };
 
   return (
     <>
-      <LoadingOverlay isLoading={isLoading} onExitComplete={handleOverlayExitComplete} />
+      <LoadingOverlay 
+        isLoading={stage === 'loading' || stage === 'exiting'} 
+        onExitComplete={onOverlayExitComplete} 
+      />
       <Toaster />
 
       <motion.div 
@@ -205,9 +172,9 @@ const Index = () => {
         initial={{ opacity: 0 }}
         animate={{ opacity: showContent ? 1 : 0 }}
         transition={{ 
-          duration: smoothTransition.duration,
-          delay: PAGE_LOAD_SEQUENCE.container.delay,
-          ease: smoothTransition.ease,
+          duration: contentTransition.duration,
+          delay: LOAD_TIMING_SECONDS.contentEntryDelay,
+          ease: contentTransition.ease,
         }}
         style={{ willChange: 'opacity' }}
       >
@@ -244,7 +211,8 @@ const Index = () => {
           deskLampIntensity={showData ? lights.deskLamp.targetValue : 0}
           monitorLightIntensity={showData ? lights.monitorLight.targetValue : 0}
           allLightsOn={allLightsOn}
-          isLoaded={showContent && showData}
+          isLoaded={showContent}
+          dataReady={showData}
         />
 
         {/* Main content area */}
@@ -252,17 +220,14 @@ const Index = () => {
           {/* Desk Display */}
           <motion.div
             className="w-full md:w-[45%] lg:w-[43%] flex-shrink-0 md:order-1 order-2 max-w-[320px] md:max-w-none"
-            initial={{ opacity: 0, scale: PAGE_LOAD_SEQUENCE.deskImage.scale }}
-            animate={{ 
-              opacity: showContent ? 1 : 0,
-              scale: showContent ? 1 : PAGE_LOAD_SEQUENCE.deskImage.scale
-            }}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: showContent ? 1 : 0 }}
             transition={{ 
-              duration: PAGE_LOAD_SEQUENCE.deskImage.duration, 
-              delay: PAGE_LOAD_SEQUENCE.deskImage.delay, 
-              ease: PAGE_LOAD_SEQUENCE.deskImage.ease
+              duration: PAGE_LOAD.elements.deskImage.duration, 
+              delay: PAGE_LOAD.elements.deskImage.delay, 
+              ease: EASING.entrance
             }}
-            style={{ willChange: 'opacity, transform' }}
+            style={{ willChange: 'opacity' }}
           >
             <DeskDisplay
               spotlightIntensity={lights.spotlight.targetValue}

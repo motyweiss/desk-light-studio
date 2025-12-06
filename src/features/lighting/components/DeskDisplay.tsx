@@ -36,20 +36,6 @@ const lightingStates: Record<string, string> = {
   "111": desk111,
 };
 
-// Preload all images
-const preloadImages = (images: Record<string, string>): Promise<void[]> => {
-  return Promise.all(
-    Object.values(images).map(src => {
-      return new Promise<void>((resolve) => {
-        const img = new Image();
-        img.onload = () => resolve();
-        img.onerror = () => resolve();
-        img.src = src;
-      });
-    })
-  );
-};
-
 export const DeskDisplay = ({ 
   spotlightIntensity, 
   deskLampIntensity, 
@@ -61,7 +47,7 @@ export const DeskDisplay = ({
   isLoaded,
   dataReady = true
 }: DeskDisplayProps) => {
-  // Calculate initial state from props
+  // Calculate state from props
   const getStateFromIntensities = useCallback(() => {
     const spotlightBit = spotlightIntensity > 0 ? "1" : "0";
     const deskLampBit = deskLampIntensity > 0 ? "1" : "0";
@@ -69,29 +55,23 @@ export const DeskDisplay = ({
     return `${spotlightBit}${deskLampBit}${monitorLightBit}`;
   }, [spotlightIntensity, deskLampIntensity, monitorLightIntensity]);
 
-  const [currentState, setCurrentState] = useState("000"); // Always start with lights off
+  const [currentState, setCurrentState] = useState("000");
   const [previousState, setPreviousState] = useState("000");
   const [isHovered, setIsHovered] = useState(false);
   const [isTransitioning, setIsTransitioning] = useState(false);
-  const [allImagesLoaded, setAllImagesLoaded] = useState(false);
-  const [hasInitialRender, setHasInitialRender] = useState(false);
+  const [isReady, setIsReady] = useState(false);
   const transitionTimeoutRef = useRef<number | null>(null);
 
-  // Preload all images on mount
+  // Mark ready after initial load and data is available
   useEffect(() => {
-    preloadImages(lightingStates).then(() => {
-      setAllImagesLoaded(true);
-    });
-  }, []);
-
-  // Mark initial render complete when loaded and images ready
-  useEffect(() => {
-    if (isLoaded && allImagesLoaded) {
-      queueMicrotask(() => {
-        setHasInitialRender(true);
-      });
+    if (isLoaded && dataReady && !isReady) {
+      // Small delay to let other animations settle
+      const timer = setTimeout(() => {
+        setIsReady(true);
+      }, 100);
+      return () => clearTimeout(timer);
     }
-  }, [isLoaded, allImagesLoaded]);
+  }, [isLoaded, dataReady, isReady]);
 
   // Spring animations for parallax effect
   const springConfig = { stiffness: 150, damping: 20 };
@@ -123,12 +103,12 @@ export const DeskDisplay = ({
   // Determine if turning on or off
   const isTurningOn = countLightsOn(currentState) > countLightsOn(previousState);
 
-  // Update state when intensities change - animate only after initial render AND data is ready
+  // Update state when intensities change - only animate after ready
   useEffect(() => {
     const newState = getStateFromIntensities();
     
-    // During initial load or before data is ready, update state immediately without animation
-    if (!hasInitialRender || !dataReady) {
+    // Before ready, just snap to state without animation
+    if (!isReady) {
       setCurrentState(newState);
       setPreviousState(newState);
       return;
@@ -157,7 +137,7 @@ export const DeskDisplay = ({
         clearTimeout(transitionTimeoutRef.current);
       }
     };
-  }, [getStateFromIntensities, currentState, hasInitialRender, dataReady]);
+  }, [getStateFromIntensities, currentState, isReady]);
 
   // Transition config based on direction
   const transitionConfig = useMemo(() => {
@@ -208,17 +188,15 @@ export const DeskDisplay = ({
             const wasPrevious = state === previousState;
             const showAsPrevious = isTransitioning && wasPrevious && !isActive;
             
-            // Show "000" immediately on load, then transition to actual state
             let targetOpacity = 0;
-            if (isActive && isLoaded && allImagesLoaded) {
+            if (isActive && isLoaded) {
               targetOpacity = 1;
             } else if (showAsPrevious) {
-              // Previous state fades out smoothly
               targetOpacity = 0;
             }
             
-            // Both active and previous states should animate
-            const shouldAnimate = hasInitialRender && dataReady && (isActive || showAsPrevious);
+            // Only animate if ready, otherwise snap
+            const shouldAnimate = isReady && (isActive || showAsPrevious);
             const animDuration = shouldAnimate ? transitionConfig.duration : 0;
             
             return (

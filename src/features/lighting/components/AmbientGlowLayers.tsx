@@ -1,6 +1,6 @@
 import { motion } from "framer-motion";
 import { useMemo, useCallback, useState, useEffect } from "react";
-import { LIGHT_ANIMATION, PAGE_LOAD_SEQUENCE } from "@/constants/animations";
+import { LIGHT_ANIMATION, PAGE_LOAD } from "@/constants/animations";
 
 interface AmbientGlowLayersProps {
   spotlightIntensity: number;
@@ -8,6 +8,7 @@ interface AmbientGlowLayersProps {
   monitorLightIntensity: number;
   allLightsOn: boolean;
   isLoaded?: boolean;
+  dataReady?: boolean;
 }
 
 export const AmbientGlowLayers = ({
@@ -15,55 +16,55 @@ export const AmbientGlowLayers = ({
   deskLampIntensity,
   monitorLightIntensity,
   allLightsOn,
-  isLoaded = true
+  isLoaded = true,
+  dataReady = true
 }: AmbientGlowLayersProps) => {
   // Track if initial animation has completed
   const [hasAnimatedIn, setHasAnimatedIn] = useState(false);
 
-  // Delay glow appearance until after content has entered
+  // Only animate in after content has entered AND data is ready
   useEffect(() => {
-    if (isLoaded && !hasAnimatedIn) {
+    if (isLoaded && dataReady && !hasAnimatedIn) {
       const timer = setTimeout(() => {
         setHasAnimatedIn(true);
-      }, PAGE_LOAD_SEQUENCE.glowLayers.delay * 1000);
+      }, PAGE_LOAD.effects.glowLayers.delay * 1000);
       return () => clearTimeout(timer);
     }
-  }, [isLoaded, hasAnimatedIn]);
+  }, [isLoaded, dataReady, hasAnimatedIn]);
 
-  // Only calculate opacities when loaded and animated in
+  // Only calculate opacities when fully ready
   const spotlightOpacity = useMemo(() => 
-    (isLoaded && hasAnimatedIn) ? Math.pow(spotlightIntensity / 100, 2.2) * 0.5 : 0, 
-    [spotlightIntensity, isLoaded, hasAnimatedIn]
+    hasAnimatedIn ? Math.pow(spotlightIntensity / 100, 2.2) * 0.5 : 0, 
+    [spotlightIntensity, hasAnimatedIn]
   );
   const deskLampOpacity = useMemo(() => 
-    (isLoaded && hasAnimatedIn) ? Math.pow(deskLampIntensity / 100, 2.2) * 0.5 : 0, 
-    [deskLampIntensity, isLoaded, hasAnimatedIn]
+    hasAnimatedIn ? Math.pow(deskLampIntensity / 100, 2.2) * 0.5 : 0, 
+    [deskLampIntensity, hasAnimatedIn]
   );
   const monitorLightOpacity = useMemo(() => 
-    (isLoaded && hasAnimatedIn) ? Math.pow(monitorLightIntensity / 100, 2.2) * 0.5 : 0, 
-    [monitorLightIntensity, isLoaded, hasAnimatedIn]
+    hasAnimatedIn ? Math.pow(monitorLightIntensity / 100, 2.2) * 0.5 : 0, 
+    [monitorLightIntensity, hasAnimatedIn]
   );
 
   // Unified animation timing
   const getDuration = useCallback((targetOpacity: number) => {
-    // Use longer duration for initial entry
-    if (!hasAnimatedIn) return PAGE_LOAD_SEQUENCE.glowLayers.duration;
+    if (!hasAnimatedIn) return PAGE_LOAD.effects.glowLayers.duration;
     return targetOpacity > 0 ? LIGHT_ANIMATION.turnOn.duration : LIGHT_ANIMATION.turnOff.duration;
   }, [hasAnimatedIn]);
 
   const getEasing = useCallback((targetOpacity: number) => {
-    if (!hasAnimatedIn) return PAGE_LOAD_SEQUENCE.glowLayers.ease;
+    if (!hasAnimatedIn) return PAGE_LOAD.overlay.ease;
     return targetOpacity > 0 ? LIGHT_ANIMATION.turnOn.ease : LIGHT_ANIMATION.turnOff.ease;
   }, [hasAnimatedIn]);
 
-  // Don't render anything until loaded
+  // Don't render until loaded
   if (!isLoaded) {
     return null;
   }
 
   return (
     <>
-      {/* Spotlight ambient glow - warm golden orange */}
+      {/* Spotlight ambient glow */}
       <motion.div
         className="fixed inset-0 pointer-events-none z-0"
         style={{
@@ -80,7 +81,7 @@ export const AmbientGlowLayers = ({
         }}
       />
       
-      {/* Desk lamp ambient glow - rich warm gold */}
+      {/* Desk lamp ambient glow */}
       <motion.div
         className="fixed inset-0 pointer-events-none z-0"
         style={{
@@ -97,7 +98,7 @@ export const AmbientGlowLayers = ({
         }}
       />
       
-      {/* Monitor light ambient glow - warm cream beige */}
+      {/* Monitor light ambient glow */}
       <motion.div
         className="fixed inset-0 pointer-events-none z-0"
         style={{
