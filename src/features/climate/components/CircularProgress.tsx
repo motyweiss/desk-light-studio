@@ -1,5 +1,5 @@
-import { motion, useMotionValue, useSpring, useTransform } from "framer-motion";
-import { useEffect, useMemo } from "react";
+import { motion } from "framer-motion";
+import { PAGE_LOAD_SEQUENCE } from "@/constants/animations";
 
 interface CircularProgressProps {
   value: number;
@@ -22,7 +22,7 @@ export const CircularProgress = ({
   children,
   isLoaded = true,
   colorType = 'default',
-  delay = 0
+  delay = PAGE_LOAD_SEQUENCE.circularProgress.delay
 }: CircularProgressProps) => {
   const radius = (size - strokeWidth) / 2;
   const circumference = 2 * Math.PI * radius;
@@ -32,14 +32,13 @@ export const CircularProgress = ({
   const getProgressColor = (val: number, type: string): string => {
     switch (type) {
       case 'temperature':
-        // Blue to red gradient for temperature only
-        if (val <= 18) return 'hsl(210 80% 55%)'; // cold - blue
-        if (val <= 20) return 'hsl(190 70% 50%)'; // cool - cyan-blue
-        if (val <= 22) return 'hsl(160 60% 48%)'; // mild - teal
-        if (val <= 24) return 'hsl(45 80% 55%)';  // comfortable - yellow
-        if (val <= 26) return 'hsl(30 85% 55%)';  // warm - orange
-        if (val <= 28) return 'hsl(15 85% 55%)';  // warmer - red-orange
-        return 'hsl(0 80% 55%)'; // hot - red
+        if (val <= 18) return 'hsl(210 80% 55%)';
+        if (val <= 20) return 'hsl(190 70% 50%)';
+        if (val <= 22) return 'hsl(160 60% 48%)';
+        if (val <= 24) return 'hsl(45 80% 55%)';
+        if (val <= 26) return 'hsl(30 85% 55%)';
+        if (val <= 28) return 'hsl(15 85% 55%)';
+        return 'hsl(0 80% 55%)';
         
       case 'humidity':
         if (val >= 40 && val <= 60) return 'hsl(var(--status-optimal))';
@@ -83,22 +82,22 @@ export const CircularProgress = ({
           strokeWidth={strokeWidth}
           fill="none"
           strokeLinecap="round"
-          initial={{ 
-            strokeDashoffset: circumference,
-          }}
-          animate={{ 
-            strokeDashoffset: isLoaded ? offset : circumference,
-          }}
+          initial={{ strokeDashoffset: circumference }}
+          animate={{ strokeDashoffset: isLoaded ? offset : circumference }}
           style={{ 
             strokeDasharray: circumference,
             stroke: getProgressColor(value, colorType),
-            transition: 'stroke 0.7s ease-in-out'
+            willChange: 'stroke-dashoffset',
           }}
           transition={{ 
             strokeDashoffset: {
-              duration: isLoaded ? 1.5 : 0,
-              delay: isLoaded ? delay : 0,
-              ease: [0.22, 0.03, 0.26, 1]
+              duration: PAGE_LOAD_SEQUENCE.circularProgress.duration,
+              delay: delay,
+              ease: PAGE_LOAD_SEQUENCE.circularProgress.ease
+            },
+            stroke: {
+              duration: 0.5,
+              ease: 'easeInOut'
             }
           }}
         />

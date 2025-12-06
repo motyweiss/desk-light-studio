@@ -63,6 +63,46 @@ export const SPEAKER_SHEET_TRANSITIONS = {
   ease: [0.25, 0.1, 0.25, 1] as const,
 } as const;
 
+// Coordinated page load animation sequence
+export const PAGE_LOAD_SEQUENCE = {
+  overlayExit: {
+    duration: 0.4,
+    ease: [0.22, 0.03, 0.26, 1] as const,
+  },
+  contentDelay: 0.15, // Wait after overlay starts fading
+  header: {
+    delay: 0,
+    duration: 0.5,
+    ease: [0.22, 0.03, 0.26, 1] as const,
+  },
+  masterSwitch: {
+    delay: 0.08,
+    duration: 0.5,
+    ease: [0.22, 0.03, 0.26, 1] as const,
+  },
+  devices: {
+    delay: 0.12,
+    duration: 0.5,
+    ease: [0.22, 0.03, 0.26, 1] as const,
+  },
+  lightCards: {
+    delay: 0.18,
+    stagger: 0.06,
+    duration: 0.4,
+    ease: [0.22, 0.03, 0.26, 1] as const,
+  },
+  deskImage: {
+    delay: 0.25,
+    duration: 0.6,
+    ease: [0.22, 0.03, 0.26, 1] as const,
+  },
+  circularProgress: {
+    delay: 0.8,
+    duration: 1.0,
+    ease: [0.22, 0.03, 0.26, 1] as const,
+  },
+} as const;
+
 export const MEDIA_PLAYER_ANIMATIONS = {
   trackChange: {
     duration: 0.4,
