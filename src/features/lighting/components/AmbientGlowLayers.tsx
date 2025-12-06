@@ -7,17 +7,28 @@ interface AmbientGlowLayersProps {
   deskLampIntensity: number;
   monitorLightIntensity: number;
   allLightsOn: boolean;
+  isLoaded?: boolean;
 }
 
 export const AmbientGlowLayers = ({
   spotlightIntensity,
   deskLampIntensity,
   monitorLightIntensity,
-  allLightsOn
+  allLightsOn,
+  isLoaded = true
 }: AmbientGlowLayersProps) => {
-  const spotlightOpacity = useMemo(() => Math.pow(spotlightIntensity / 100, 2.2) * 0.5, [spotlightIntensity]);
-  const deskLampOpacity = useMemo(() => Math.pow(deskLampIntensity / 100, 2.2) * 0.5, [deskLampIntensity]);
-  const monitorLightOpacity = useMemo(() => Math.pow(monitorLightIntensity / 100, 2.2) * 0.5, [monitorLightIntensity]);
+  const spotlightOpacity = useMemo(() => 
+    isLoaded ? Math.pow(spotlightIntensity / 100, 2.2) * 0.5 : 0, 
+    [spotlightIntensity, isLoaded]
+  );
+  const deskLampOpacity = useMemo(() => 
+    isLoaded ? Math.pow(deskLampIntensity / 100, 2.2) * 0.5 : 0, 
+    [deskLampIntensity, isLoaded]
+  );
+  const monitorLightOpacity = useMemo(() => 
+    isLoaded ? Math.pow(monitorLightIntensity / 100, 2.2) * 0.5 : 0, 
+    [monitorLightIntensity, isLoaded]
+  );
 
   // Unified animation timing with stagger delay
   const getDuration = useCallback((targetOpacity: number) => {
@@ -36,11 +47,10 @@ export const AmbientGlowLayers = ({
         style={{
           background: `radial-gradient(ellipse 70% 70% at 50% 35%, hsl(var(--glow-warm-orange) / 0.12) 0%, hsl(var(--glow-base) / 0.06) 30%, transparent 60%)`,
           filter: 'blur(90px)',
+          willChange: 'opacity',
         }}
-        initial={{ opacity: 0 }}
-        animate={{
-          opacity: spotlightOpacity,
-        }}
+        initial={false}
+        animate={{ opacity: spotlightOpacity }}
         transition={{
           duration: getDuration(spotlightOpacity),
           delay: LIGHT_ANIMATION.stagger.glow,
@@ -54,11 +64,10 @@ export const AmbientGlowLayers = ({
         style={{
           background: `radial-gradient(ellipse 65% 65% at 30% 55%, hsl(var(--glow-warm-gold) / 0.11) 0%, hsl(var(--glow-warm-orange) / 0.05) 35%, transparent 58%)`,
           filter: 'blur(85px)',
+          willChange: 'opacity',
         }}
-        initial={{ opacity: 0 }}
-        animate={{
-          opacity: deskLampOpacity,
-        }}
+        initial={false}
+        animate={{ opacity: deskLampOpacity }}
         transition={{
           duration: getDuration(deskLampOpacity),
           delay: LIGHT_ANIMATION.stagger.glow,
@@ -72,11 +81,10 @@ export const AmbientGlowLayers = ({
         style={{
           background: `radial-gradient(ellipse 75% 75% at 50% 40%, hsl(var(--glow-warm-cream) / 0.10) 0%, hsl(var(--glow-base) / 0.04) 38%, transparent 62%)`,
           filter: 'blur(80px)',
+          willChange: 'opacity',
         }}
-        initial={{ opacity: 0 }}
-        animate={{
-          opacity: monitorLightOpacity,
-        }}
+        initial={false}
+        animate={{ opacity: monitorLightOpacity }}
         transition={{
           duration: getDuration(monitorLightOpacity),
           delay: LIGHT_ANIMATION.stagger.glow,
@@ -90,11 +98,12 @@ export const AmbientGlowLayers = ({
         style={{
           background: `radial-gradient(ellipse 80% 80% at 50% 50%, hsl(var(--glow-base) / 0.04) 0%, transparent 70%)`,
           filter: 'blur(120px)',
+          willChange: 'opacity',
         }}
-        initial={{ opacity: 0, scale: 1 }}
+        initial={false}
         animate={{
-          opacity: [(allLightsOn ? 0.15 : 0), (allLightsOn ? 0.25 : 0), (allLightsOn ? 0.15 : 0)],
-          scale: [1, 1.05, 1],
+          opacity: isLoaded && allLightsOn ? [0.15, 0.25, 0.15] : 0,
+          scale: isLoaded && allLightsOn ? [1, 1.05, 1] : 1,
         }}
         transition={{
           duration: 4,

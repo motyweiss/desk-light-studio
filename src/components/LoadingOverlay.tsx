@@ -9,7 +9,7 @@ interface LoadingOverlayProps {
 
 export const LoadingOverlay = ({ isLoading, onExitComplete }: LoadingOverlayProps) => {
   return (
-    <AnimatePresence mode="wait" onExitComplete={onExitComplete}>
+    <AnimatePresence onExitComplete={onExitComplete}>
       {isLoading && (
         <motion.div
           className="fixed inset-0 z-50 flex items-center justify-center"
