@@ -1,5 +1,6 @@
 import { Music } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { useAuthenticatedImage } from '@/hooks/useAuthenticatedImage';
 
 interface AlbumArtProps {
   albumArt: string | null;
@@ -7,6 +8,8 @@ interface AlbumArtProps {
 }
 
 export const AlbumArt = ({ albumArt, isPlaying }: AlbumArtProps) => {
+  const { imageUrl, isLoading, error } = useAuthenticatedImage(albumArt);
+
   return (
     <motion.div
       className="relative w-16 h-16 rounded-xl overflow-hidden bg-white/5 flex-shrink-0"
@@ -23,9 +26,11 @@ export const AlbumArt = ({ albumArt, isPlaying }: AlbumArtProps) => {
         ease: 'easeInOut'
       }}
     >
-      {albumArt ? (
+      {isLoading ? (
+        <div className="w-full h-full bg-white/5 animate-pulse" />
+      ) : imageUrl && !error ? (
         <img 
-          src={albumArt} 
+          src={imageUrl} 
           alt="Album art" 
           className="w-full h-full object-cover"
         />
