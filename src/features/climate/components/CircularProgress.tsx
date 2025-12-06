@@ -1,6 +1,5 @@
 import React from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import { DATA_TRANSITION } from "@/constants/animations";
+import { motion } from "framer-motion";
 
 interface CircularProgressProps {
   value: number;
@@ -14,6 +13,12 @@ interface CircularProgressProps {
   colorType?: 'temperature' | 'humidity' | 'airQuality' | 'battery' | 'default';
   delay?: number;
 }
+
+// Smooth transition config
+const smoothTransition = {
+  duration: 0.5,
+  ease: [0.25, 0.1, 0.25, 1] as [number, number, number, number],
+};
 
 export const CircularProgress = ({ 
   value, 
@@ -65,71 +70,12 @@ export const CircularProgress = ({
     }
   };
 
-  // Skeleton state - gray pulsing ring
-  if (showSkeleton) {
-    return (
-      <div className="relative" style={{ width: size, height: size }}>
-        <svg className="absolute inset-0 -rotate-90" width={size} height={size}>
-          {/* Background ring */}
-          <circle
-            cx={size/2} 
-            cy={size/2} 
-            r={radius}
-            stroke="rgba(255,255,255,0.1)"
-            strokeWidth={strokeWidth}
-            fill="none"
-          />
-          {/* Skeleton shimmer ring */}
-          <motion.circle
-            cx={size/2} 
-            cy={size/2} 
-            r={radius}
-            strokeWidth={strokeWidth}
-            fill="none"
-            strokeLinecap="round"
-            style={{ 
-              strokeDasharray: circumference,
-              strokeDashoffset: circumference * 0.7,
-              stroke: 'rgba(255,255,255,0.15)',
-            }}
-            animate={{ 
-              opacity: [0.3, 0.6, 0.3],
-              rotate: [0, 360],
-            }}
-            transition={{ 
-              opacity: {
-                duration: DATA_TRANSITION.skeleton.shimmerDuration,
-                repeat: Infinity,
-                ease: DATA_TRANSITION.skeleton.pulseEase,
-              },
-              rotate: {
-                duration: 3,
-                repeat: Infinity,
-                ease: 'linear',
-              }
-            }}
-          />
-        </svg>
-        {/* Icon container with pulse */}
-        <motion.div 
-          className="absolute inset-0 flex items-center justify-center"
-          animate={{ opacity: [0.4, 0.7, 0.4] }}
-          transition={{
-            duration: DATA_TRANSITION.skeleton.shimmerDuration,
-            repeat: Infinity,
-            ease: DATA_TRANSITION.skeleton.pulseEase,
-          }}
-        >
-          {children}
-        </motion.div>
-      </div>
-    );
-  }
-  
+  const isShowingSkeleton = showSkeleton || !isLoaded;
+
   return (
     <div className="relative" style={{ width: size, height: size }}>
       <svg className="absolute inset-0 -rotate-90" width={size} height={size}>
-        {/* Background ring */}
+        {/* Background ring - always visible */}
         <circle
           cx={size/2} 
           cy={size/2} 
@@ -138,7 +84,8 @@ export const CircularProgress = ({
           strokeWidth={strokeWidth}
           fill="none"
         />
-        {/* Progress ring with animation */}
+        
+        {/* Skeleton shimmer ring - crossfade with progress */}
         <motion.circle
           cx={size/2} 
           cy={size/2} 
@@ -146,34 +93,74 @@ export const CircularProgress = ({
           strokeWidth={strokeWidth}
           fill="none"
           strokeLinecap="round"
-          initial={false}
-          animate={{ 
-            strokeDashoffset: isLoaded ? offset : circumference,
-            stroke: getProgressColor(value, colorType),
-          }}
           style={{ 
             strokeDasharray: circumference,
-            willChange: 'stroke-dashoffset, stroke',
+            strokeDashoffset: circumference * 0.7,
+            stroke: 'rgba(255,255,255,0.15)',
+          }}
+          initial={false}
+          animate={{ 
+            opacity: isShowingSkeleton ? [0.3, 0.6, 0.3] : 0,
+            rotate: isShowingSkeleton ? [0, 360] : 0,
+          }}
+          transition={isShowingSkeleton ? { 
+            opacity: {
+              duration: 1.5,
+              repeat: Infinity,
+              ease: "easeInOut",
+            },
+            rotate: {
+              duration: 3,
+              repeat: Infinity,
+              ease: 'linear',
+            }
+          } : smoothTransition}
+        />
+        
+        {/* Progress ring - crossfade in when data ready */}
+        <motion.circle
+          cx={size/2} 
+          cy={size/2} 
+          r={radius}
+          strokeWidth={strokeWidth}
+          fill="none"
+          strokeLinecap="round"
+          style={{ 
+            strokeDasharray: circumference,
+          }}
+          initial={false}
+          animate={{ 
+            strokeDashoffset: isShowingSkeleton ? circumference : offset,
+            stroke: getProgressColor(value, colorType),
+            opacity: isShowingSkeleton ? 0 : 1,
           }}
           transition={{ 
             strokeDashoffset: {
-              duration: DATA_TRANSITION.reveal.duration,
-              delay: isLoaded ? delay : 0,
-              ease: DATA_TRANSITION.reveal.ease,
+              duration: 0.6,
+              delay: isShowingSkeleton ? 0 : delay,
+              ease: smoothTransition.ease,
             },
             stroke: {
               duration: 0.5,
               ease: 'easeInOut'
-            }
+            },
+            opacity: smoothTransition
           }}
         />
       </svg>
-      {/* Icon container */}
+      
+      {/* Icon container - smooth opacity */}
       <motion.div 
         className="absolute inset-0 flex items-center justify-center"
         initial={false}
-        animate={{ opacity: isLoaded ? 1 : 0.5 }}
-        transition={{ duration: DATA_TRANSITION.fadeIn.duration }}
+        animate={{ 
+          opacity: isShowingSkeleton ? [0.4, 0.7, 0.4] : 1 
+        }}
+        transition={isShowingSkeleton ? {
+          duration: 1.5,
+          repeat: Infinity,
+          ease: "easeInOut",
+        } : smoothTransition}
       >
         {children}
       </motion.div>
