@@ -62,6 +62,14 @@ export const useClimateSync = (config: UseClimateSyncConfig): ClimateData => {
       return;
     }
 
+    // Debug: Log the entity mapping received
+    console.log('🔋 [ClimateSync] Entity mapping received:', {
+      iphoneBattery: entityMapping.iphoneBattery,
+      iphoneBatteryState: entityMapping.iphoneBatteryState,
+      airpodsMaxBattery: entityMapping.airpodsMaxBattery,
+      airpodsMaxBatteryState: entityMapping.airpodsMaxBatteryState,
+    });
+
     const entityIds = [
       entityMapping.temperatureSensor,
       entityMapping.humiditySensor,
@@ -71,6 +79,8 @@ export const useClimateSync = (config: UseClimateSyncConfig): ClimateData => {
       entityMapping.airpodsMaxBattery,
       entityMapping.airpodsMaxBatteryState,
     ].filter(Boolean) as string[];
+
+    console.log('🔋 [ClimateSync] Querying entity IDs:', entityIds);
 
     // If no entities configured, mark as loaded with defaults
     if (entityIds.length === 0) {
@@ -82,6 +92,19 @@ export const useClimateSync = (config: UseClimateSyncConfig): ClimateData => {
     try {
       logger.info('Syncing climate data...');
       const states = await sensors.getMultipleStates(entityIds);
+      
+      // Debug: Log raw states received
+      console.log('🔋 [ClimateSync] Raw states received:', states);
+      
+      // Debug: Log iPhone battery specifically
+      if (entityMapping.iphoneBattery) {
+        const batteryState = states[entityMapping.iphoneBattery];
+        console.log('🔋 [ClimateSync] iPhone battery entity:', entityMapping.iphoneBattery, '→', batteryState);
+      }
+      if (entityMapping.iphoneBatteryState) {
+        const chargingState = states[entityMapping.iphoneBatteryState];
+        console.log('🔋 [ClimateSync] iPhone charging entity:', entityMapping.iphoneBatteryState, '→', chargingState);
+      }
 
       setClimateData(prev => {
         const newData = { ...prev };
@@ -125,21 +148,44 @@ export const useClimateSync = (config: UseClimateSyncConfig): ClimateData => {
         }
 
         newData.isLoaded = true;
+        
+        // Debug: Log final parsed values
+        console.log('🔋 [ClimateSync] Final parsed values:', {
+          iphoneBatteryLevel: newData.iphoneBatteryLevel,
+          iphoneBatteryCharging: newData.iphoneBatteryCharging,
+          airpodsMaxBatteryLevel: newData.airpodsMaxBatteryLevel,
+          airpodsMaxBatteryCharging: newData.airpodsMaxBatteryCharging,
+        });
+        
         logger.info('Climate data synced successfully');
         return newData;
       });
     } catch (error) {
       logger.error('Failed to sync climate data', error);
+      console.error('🔋 [ClimateSync] Error syncing:', error);
       // Still mark as loaded on error to prevent infinite loading
       setClimateData(prev => ({ ...prev, isLoaded: true }));
     }
   }, [isConnected, entityMapping]);
 
-  // Immediate first sync on mount when connected
+  // Initial sync and entity discovery
   useEffect(() => {
     if (isConnected && haClient.getConfig()) {
       logger.info('Initial climate sync triggered');
       syncClimateData();
+      
+      // Discover iPhone battery entities for debugging
+      haClient.searchEntities(['iphone', 'battery']).then(entities => {
+        console.log('🔍 [EntityDiscovery] iPhone battery entities found:', 
+          entities.map(e => ({
+            entity_id: e.entity_id,
+            friendly_name: e.attributes?.friendly_name,
+            state: e.state,
+          }))
+        );
+      }).catch(err => {
+        console.error('🔍 [EntityDiscovery] Failed to search entities:', err);
+      });
     }
   }, [isConnected, syncClimateData]);
 
