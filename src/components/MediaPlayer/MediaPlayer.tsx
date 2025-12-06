@@ -60,10 +60,10 @@ export const MediaPlayer = () => {
 
   const currentTrack = playerState.currentTrack;
 
-  // Calculate album art sizes
+  // Calculate album art sizes - smaller on mobile
   const albumArtSize = {
-    width: isMinimized ? 56 : 64,
-    height: isMinimized ? 56 : 64,
+    width: isMinimized ? 48 : 56,
+    height: isMinimized ? 48 : 56,
   };
 
   
@@ -85,10 +85,10 @@ export const MediaPlayer = () => {
       >
         <motion.div 
           onClick={() => setIsMinimized(!isMinimized)}
-          className="bg-white/8 backdrop-blur-[24px] border-t border-white/20 rounded-t-2xl shadow-[0_4px_24px_rgba(0,0,0,0.15)] relative cursor-pointer"
+          className="bg-white/8 backdrop-blur-[24px] border-t border-white/20 rounded-t-xl md:rounded-t-2xl shadow-[0_4px_24px_rgba(0,0,0,0.15)] relative cursor-pointer"
           initial={false}
           animate={{ 
-            height: isMinimized ? 88 : 'auto',
+            height: isMinimized ? 72 : 'auto',
           }}
           transition={{ 
             duration: 0.5, 
@@ -100,15 +100,15 @@ export const MediaPlayer = () => {
         >
 
           {/* Content Container */}
-          <div className="px-4 md:px-6 py-3 max-w-7xl mx-auto">
+          <div className="px-3 md:px-6 py-2 md:py-3 max-w-7xl mx-auto">
             {/* Grid layout: 3 columns in mini mode, single column in full mode */}
             <div className={`${isMinimized 
-              ? 'grid grid-cols-[auto_1fr_auto] items-center gap-3 sm:gap-4 lg:gap-6' 
+              ? 'grid grid-cols-[auto_1fr_auto] items-center gap-2 sm:gap-4 lg:gap-6'
               : 'flex flex-col'
             }`}>
               
               {/* Left Section: Album Art + Track Info */}
-              <div className="flex items-center gap-3 sm:gap-4 min-w-0">
+              <div className="flex items-center gap-2 sm:gap-4 min-w-0">
                 {/* Album Art - Shared Element */}
                 <motion.div
                   layoutId="player-album-art"
