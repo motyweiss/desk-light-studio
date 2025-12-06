@@ -37,10 +37,12 @@ export const useConnectionTransition = (
     minSkeletonTime = 400,
   } = options;
 
-  const [displayPhase, setDisplayPhase] = useState<ConnectionPhase>('disconnected');
-  const [showSkeleton, setShowSkeleton] = useState(false);
-  const skeletonStartTimeRef = useRef<number | null>(null);
+  // Start with skeleton showing until we have real data
+  const [displayPhase, setDisplayPhase] = useState<ConnectionPhase>('connecting');
+  const [showSkeleton, setShowSkeleton] = useState(true);
+  const skeletonStartTimeRef = useRef<number | null>(Date.now());
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const hasEverConnected = useRef(false);
 
   useEffect(() => {
     // Clear any pending timeouts
@@ -48,11 +50,25 @@ export const useConnectionTransition = (
       clearTimeout(timeoutRef.current);
     }
 
+    // Track if we've ever connected
+    if (isConnected) {
+      hasEverConnected.current = true;
+    }
+
     if (!isConnected) {
-      // Not connected - show placeholder data immediately
-      setDisplayPhase('disconnected');
-      setShowSkeleton(false);
-      skeletonStartTimeRef.current = null;
+      // Not connected yet - show skeleton/loading state
+      if (!hasEverConnected.current) {
+        // Never connected - show skeleton while waiting
+        setDisplayPhase('connecting');
+        setShowSkeleton(true);
+        if (!skeletonStartTimeRef.current) {
+          skeletonStartTimeRef.current = Date.now();
+        }
+      } else {
+        // Was connected before, now disconnected - keep showing data
+        setDisplayPhase('disconnected');
+        setShowSkeleton(false);
+      }
       return;
     }
 
@@ -63,7 +79,9 @@ export const useConnectionTransition = (
       // Start skeleton after small delay to prevent flash
       timeoutRef.current = setTimeout(() => {
         setShowSkeleton(true);
-        skeletonStartTimeRef.current = Date.now();
+        if (!skeletonStartTimeRef.current) {
+          skeletonStartTimeRef.current = Date.now();
+        }
       }, skeletonDelay);
       return;
     }
@@ -98,7 +116,8 @@ export const useConnectionTransition = (
   return {
     displayPhase,
     showSkeleton,
-    dataReady: displayPhase === 'ready' || (!isConnected && displayPhase === 'disconnected'),
+    // Only ready when we have real data from connection
+    dataReady: displayPhase === 'ready',
     isLoading: showSkeleton || displayPhase === 'connecting' || displayPhase === 'fetching',
   };
 };
