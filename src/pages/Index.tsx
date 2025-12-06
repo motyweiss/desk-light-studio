@@ -1,7 +1,5 @@
 import { useState, useEffect, useMemo, useCallback, useRef } from "react";
 import { motion } from "framer-motion";
-import { Link } from "react-router-dom";
-import { Settings, WifiOff } from "lucide-react";
 import { DeskDisplay } from "@/features/lighting/components/DeskDisplay";
 import { RoomInfoPanel } from "@/components/RoomInfoPanel";
 import { AmbientGlowLayers } from "@/features/lighting/components/AmbientGlowLayers";
@@ -10,7 +8,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { useClimate } from "@/features/climate";
 import { useLighting } from "@/features/lighting";
 import { useAppLoad } from "@/contexts/AppLoadContext";
-import { LIGHT_ANIMATION, type AnimationSource } from "@/constants/animations";
+import { LIGHT_ANIMATION, PAGE_LOAD_SEQUENCE } from "@/constants/animations";
 
 // Import all desk images for preloading
 import desk000 from "@/assets/desk-000.png";
@@ -27,6 +25,7 @@ const Index = () => {
   const [isLoading, setIsLoading] = useState(!hasInitiallyLoaded);
   const [isLoaded, setIsLoaded] = useState(hasInitiallyLoaded);
   const [isTransitioning, setIsTransitioning] = useState(false);
+  const [overlayExited, setOverlayExited] = useState(hasInitiallyLoaded);
   
   // Get climate data from global context
   const climate = useClimate();
@@ -37,17 +36,27 @@ const Index = () => {
   // Hover states for coordinated UI
   const [hoveredLight, setHoveredLight] = useState<string | null>(null);
 
+  // Handle overlay exit complete - trigger content animations
+  const handleOverlayExitComplete = useCallback(() => {
+    setOverlayExited(true);
+    // Small delay before triggering content animations
+    requestAnimationFrame(() => {
+      setIsLoaded(true);
+    });
+  }, []);
+
   // Optimized image loading - only on initial load
   useEffect(() => {
     // If already loaded once, skip loading entirely
     if (hasInitiallyLoaded) {
       setIsLoading(false);
       setIsLoaded(true);
+      setOverlayExited(true);
       return;
     }
 
     const startTime = Date.now();
-    const minLoadTime = 500; // Minimum 500ms loading time
+    const minLoadTime = 400; // Reduced minimum loading time
     
     // Preload BOTH background and desk image
     const bgImage = new Image();
@@ -68,12 +77,7 @@ const Index = () => {
       // Wait for minimum load time before hiding spinner
       setTimeout(() => {
         setIsLoading(false);
-        
-        // Coordinate state updates in single frame to prevent flashing
-        requestAnimationFrame(() => {
-          setIsLoaded(true);
-          setInitiallyLoaded(); // Mark as initially loaded
-        });
+        setInitiallyLoaded();
         
         // Preload remaining images in background after primary loads
         const remainingImages = [desk001, desk010, desk011, desk100, desk101, desk110, desk111];
@@ -94,12 +98,12 @@ const Index = () => {
       checkAllLoaded(); 
     };
     
-    // Fallback timeout in case images take too long (8 seconds max + min load time)
+    // Fallback timeout in case images take too long (5 seconds max)
     const fallbackTimer = setTimeout(() => {
       bgLoaded = true;
       deskLoaded = true;
       checkAllLoaded();
-    }, 8000 + minLoadTime);
+    }, 5000);
     
     return () => clearTimeout(fallbackTimer);
   }, [hasInitiallyLoaded, setInitiallyLoaded]);
@@ -199,11 +203,19 @@ const Index = () => {
 
   return (
     <>
-      <LoadingOverlay isLoading={isLoading} />
+      <LoadingOverlay isLoading={isLoading} onExitComplete={handleOverlayExitComplete} />
       <Toaster />
 
-
-      <div className="h-full min-h-0 flex items-center justify-center p-3 md:p-8 relative overflow-hidden">
+      <motion.div 
+        className="h-full min-h-0 flex items-center justify-center p-3 md:p-8 relative overflow-hidden"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: overlayExited ? 1 : 0 }}
+        transition={{ 
+          duration: 0.3,
+          ease: [0.22, 0.03, 0.26, 1]
+        }}
+        style={{ willChange: 'opacity' }}
+      >
         {/* Dynamic color overlay that responds to lighting */}
         <motion.div
           className="fixed inset-0 pointer-events-none z-0"
@@ -243,13 +255,14 @@ const Index = () => {
           {/* Desk Display */}
           <motion.div
             className="w-full md:w-[45%] lg:w-[43%] flex-shrink-0 md:order-1 order-2 max-w-[320px] md:max-w-none"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: isLoaded ? 1 : 0, y: isLoaded ? 0 : 20 }}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: isLoaded ? 1 : 0 }}
             transition={{ 
-              duration: 0.8, 
-              delay: 0.5, 
-              ease: [0.22, 0.03, 0.26, 1]
+              duration: PAGE_LOAD_SEQUENCE.deskImage.duration, 
+              delay: PAGE_LOAD_SEQUENCE.deskImage.delay, 
+              ease: PAGE_LOAD_SEQUENCE.deskImage.ease
             }}
+            style={{ willChange: 'opacity' }}
           >
             <DeskDisplay
               spotlightIntensity={lights.spotlight.targetValue}
@@ -266,13 +279,14 @@ const Index = () => {
           {/* Room Info Panel */}
           <motion.div
             className="w-full md:w-[52%] flex-shrink-0 md:order-2 order-1"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: isLoaded ? 1 : 0, y: isLoaded ? 0 : 20 }}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: isLoaded ? 1 : 0 }}
             transition={{ 
-              duration: 0.8, 
-              delay: 0.6, 
-              ease: [0.22, 0.03, 0.26, 1]
+              duration: PAGE_LOAD_SEQUENCE.header.duration, 
+              delay: 0, 
+              ease: PAGE_LOAD_SEQUENCE.header.ease
             }}
+            style={{ willChange: 'opacity' }}
           >
           <RoomInfoPanel
             roomName="Office Desk"
@@ -322,7 +336,7 @@ const Index = () => {
             />
           </motion.div>
         </div>
-      </div>
+      </motion.div>
     </>
   );
 };

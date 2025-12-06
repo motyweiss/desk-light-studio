@@ -1,12 +1,10 @@
-import { motion, useMotionValue, useTransform, animate } from "framer-motion";
-import { Thermometer, Droplets, Power, Wind, Zap } from "lucide-react";
+import { motion } from "framer-motion";
+import { Power, Zap } from "lucide-react";
 import { LightControlCard } from "@/features/lighting/components/LightControlCard";
 import { CircularProgress } from "@/features/climate/components/CircularProgress";
-import { ClimateIndicatorTooltip } from "@/features/climate/components/ClimateIndicatorTooltip";
-import { useTrendData } from "@/features/climate/hooks/useTrendData";
 import { AirPodsMaxIcon } from "./icons/AirPodsMaxIcon";
 import { IPhoneIcon } from "./icons/IPhoneIcon";
-import { useEffect, useState } from "react";
+import { PAGE_LOAD_SEQUENCE } from "@/constants/animations";
 
 interface Light {
   id: string;
@@ -36,22 +34,21 @@ interface RoomInfoPanelProps {
 }
 
 export const RoomInfoPanel = ({ roomName, masterSwitchOn, onMasterToggle, onLightHover, lights, devices, isLoaded }: RoomInfoPanelProps) => {
+  const { header, masterSwitch, devices: devicesAnim, lightCards } = PAGE_LOAD_SEQUENCE;
 
   return (
     <div className="space-y-4 md:space-y-8">
       {/* Room Title with Master Switch */}
       <motion.div 
         className="flex items-center justify-between gap-4 md:gap-6"
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ 
-          opacity: isLoaded ? 1 : 0,
-          y: isLoaded ? 0 : 10
-        }}
+        initial={{ opacity: 0 }}
+        animate={{ opacity: isLoaded ? 1 : 0 }}
         transition={{ 
-          duration: 0.6,
-          delay: 0,
-          ease: [0.22, 0.03, 0.26, 1]
+          duration: header.duration,
+          delay: header.delay,
+          ease: header.ease
         }}
+        style={{ willChange: 'opacity' }}
       >
         <h1 className="text-2xl md:text-4xl font-display font-light tracking-tight text-foreground leading-tight">
           {roomName}
@@ -59,20 +56,24 @@ export const RoomInfoPanel = ({ roomName, masterSwitchOn, onMasterToggle, onLigh
         
         {/* Master Switch - Circular Frosted Glass Button */}
         <motion.button
-          initial={{ opacity: 0, scale: 0.9 }}
+          initial={{ opacity: 0 }}
           animate={{ 
             opacity: isLoaded ? 1 : 0,
-            scale: isLoaded ? 1 : 0.9,
             backgroundColor: masterSwitchOn ? 'rgba(255, 255, 255, 0.08)' : 'rgba(255, 255, 255, 0)',
             borderColor: masterSwitchOn ? 'rgba(255, 255, 255, 0.25)' : 'rgba(255, 255, 255, 0.1)'
           }}
           transition={{ 
-            duration: 0.6,
-            delay: 0.15,
-            ease: [0.22, 0.03, 0.26, 1]
+            opacity: {
+              duration: masterSwitch.duration,
+              delay: masterSwitch.delay,
+              ease: masterSwitch.ease
+            },
+            backgroundColor: { duration: 0.3 },
+            borderColor: { duration: 0.3 }
           }}
           onClick={() => onMasterToggle(!masterSwitchOn)}
-          className="w-9 h-9 md:w-10 md:h-10 rounded-full backdrop-blur-xl border transition-all duration-500 flex-shrink-0"
+          className="w-9 h-9 md:w-10 md:h-10 rounded-full backdrop-blur-xl border transition-colors duration-300 flex-shrink-0"
+          style={{ willChange: 'opacity' }}
           whileHover={{
             backgroundColor: masterSwitchOn ? 'rgba(255, 255, 255, 0.12)' : 'rgba(255, 255, 255, 0.05)',
             borderColor: masterSwitchOn ? 'rgba(255, 255, 255, 0.3)' : 'rgba(255, 255, 255, 0.15)',
@@ -84,7 +85,7 @@ export const RoomInfoPanel = ({ roomName, masterSwitchOn, onMasterToggle, onLigh
             animate={{
               color: masterSwitchOn ? 'rgba(255, 255, 255, 0.95)' : 'rgba(255, 255, 255, 0.4)',
             }}
-            transition={{ duration: 0.5, ease: [0.22, 0.03, 0.26, 1] }}
+            transition={{ duration: 0.3 }}
             className="flex items-center justify-center"
           >
             <Power className="w-4 h-4" strokeWidth={2} />
@@ -95,16 +96,14 @@ export const RoomInfoPanel = ({ roomName, masterSwitchOn, onMasterToggle, onLigh
       {/* Devices Battery Section - Desktop only */}
       <motion.div
         className="hidden md:block rounded-2xl py-6 px-6"
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ 
-          opacity: isLoaded ? 1 : 0,
-          y: isLoaded ? 0 : 10
-        }}
+        initial={{ opacity: 0 }}
+        animate={{ opacity: isLoaded ? 1 : 0 }}
         transition={{ 
-          duration: 0.6,
-          delay: 0.2,
-          ease: [0.22, 0.03, 0.26, 1]
+          duration: devicesAnim.duration,
+          delay: devicesAnim.delay,
+          ease: devicesAnim.ease
         }}
+        style={{ willChange: 'opacity' }}
       >
         {/* Devices Battery Section */}
         {devices && devices.length > 0 && (
@@ -122,7 +121,7 @@ export const RoomInfoPanel = ({ roomName, masterSwitchOn, onMasterToggle, onLigh
                     strokeWidth={2.5}
                     isLoaded={isLoaded}
                     colorType="battery"
-                    delay={1.0 + (index * 0.2)}
+                    delay={PAGE_LOAD_SEQUENCE.circularProgress.delay + (index * 0.15)}
                   >
                     <DeviceIcon className="w-5 h-5 text-white/60" strokeWidth={1.5} />
                   </CircularProgress>
@@ -147,27 +146,26 @@ export const RoomInfoPanel = ({ roomName, masterSwitchOn, onMasterToggle, onLigh
       {/* Light Controls Section */}
       <motion.div
         className="space-y-2 md:mt-6"
-        variants={{
-          hidden: { opacity: 0 },
-          show: {
-            opacity: 1,
-            transition: {
-              delayChildren: 0.3,
-              staggerChildren: 0.25
-            }
-          }
+        initial={{ opacity: 0 }}
+        animate={{ opacity: isLoaded ? 1 : 0 }}
+        transition={{ 
+          duration: lightCards.duration,
+          delay: lightCards.delay,
+          ease: lightCards.ease
         }}
-        initial="hidden"
-        animate={isLoaded ? "show" : "hidden"}
+        style={{ willChange: 'opacity' }}
       >
-        {lights.map((light) => (
+        {lights.map((light, index) => (
           <motion.div
             key={light.id}
-            variants={{
-              hidden: { opacity: 0, y: 20, scale: 0.95 },
-              show: { opacity: 1, y: 0, scale: 1 }
+            initial={{ opacity: 0 }}
+            animate={{ opacity: isLoaded ? 1 : 0 }}
+            transition={{ 
+              duration: lightCards.duration,
+              delay: lightCards.delay + (index * lightCards.stagger),
+              ease: lightCards.ease
             }}
-            transition={{ duration: 0.5, ease: [0.22, 0.03, 0.26, 1] }}
+            style={{ willChange: 'opacity' }}
           >
             <LightControlCard
               id={light.id}

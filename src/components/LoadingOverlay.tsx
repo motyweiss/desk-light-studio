@@ -1,13 +1,15 @@
 import { motion, AnimatePresence } from "framer-motion";
 import officeChairIcon from "@/assets/office-chair.svg";
+import { PAGE_LOAD_SEQUENCE } from "@/constants/animations";
 
 interface LoadingOverlayProps {
   isLoading: boolean;
+  onExitComplete?: () => void;
 }
 
-export const LoadingOverlay = ({ isLoading }: LoadingOverlayProps) => {
+export const LoadingOverlay = ({ isLoading, onExitComplete }: LoadingOverlayProps) => {
   return (
-    <AnimatePresence mode="wait">
+    <AnimatePresence mode="wait" onExitComplete={onExitComplete}>
       {isLoading && (
         <motion.div
           className="fixed inset-0 z-50 flex items-center justify-center"
@@ -15,21 +17,22 @@ export const LoadingOverlay = ({ isLoading }: LoadingOverlayProps) => {
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           transition={{ 
-            duration: 0.6,
-            ease: [0.22, 0.03, 0.26, 1]
+            duration: PAGE_LOAD_SEQUENCE.overlayExit.duration,
+            ease: PAGE_LOAD_SEQUENCE.overlayExit.ease
           }}
           style={{
             backgroundColor: "#96856e",
+            willChange: 'opacity',
           }}
         >
           {/* Minimalist spinner - larger with white color */}
           <motion.div 
             className="relative w-32 h-32"
-            initial={{ scale: 0.85, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            exit={{ scale: 0.85, opacity: 0 }}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
             transition={{ 
-              duration: 0.5,
+              duration: 0.3,
               ease: [0.22, 0.03, 0.26, 1]
             }}
           >
@@ -40,6 +43,7 @@ export const LoadingOverlay = ({ isLoading }: LoadingOverlayProps) => {
                 border: '3px solid transparent',
                 borderTopColor: 'rgba(255, 255, 255, 0.8)',
                 borderRightColor: 'rgba(255, 255, 255, 0.5)',
+                willChange: 'transform',
               }}
               animate={{
                 rotate: 360,
@@ -56,9 +60,9 @@ export const LoadingOverlay = ({ isLoading }: LoadingOverlayProps) => {
               className="absolute inset-0 rounded-full"
               style={{
                 background: 'radial-gradient(circle, rgba(255, 255, 255, 0.15) 0%, transparent 70%)',
+                willChange: 'opacity',
               }}
               animate={{
-                scale: [1, 1.15, 1],
                 opacity: [0.4, 0.6, 0.4],
               }}
               transition={{
@@ -71,11 +75,11 @@ export const LoadingOverlay = ({ isLoading }: LoadingOverlayProps) => {
             {/* Office Chair Icon in center */}
             <motion.div
               className="absolute inset-0 flex items-center justify-center"
-              initial={{ scale: 0.8, opacity: 0 }}
-              animate={{ scale: 1, opacity: 0.85 }}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 0.85 }}
               transition={{
-                duration: 0.4,
-                delay: 0.2,
+                duration: 0.3,
+                delay: 0.1,
                 ease: [0.22, 0.03, 0.26, 1]
               }}
             >
