@@ -94,7 +94,21 @@ const HAConnectionContext = createContext<HAConnectionContextValue | null>(null)
 export const useHAConnection = () => {
   const context = useContext(HAConnectionContext);
   if (!context) {
-    throw new Error('useHAConnection must be used within HAConnectionProvider');
+    // Return a safe default instead of throwing - allows components to render during initialization
+    return {
+      config: null,
+      entityMapping: DEFAULT_ENTITY_MAPPING,
+      devicesMapping: DEFAULT_DEVICES_MAPPING,
+      isConnected: false,
+      isLoading: true,
+      connectionStatus: 'disconnected' as const,
+      haVersion: null,
+      error: null,
+      saveConfig: async () => ({ success: false, error: 'Provider not ready' }),
+      saveDevicesMapping: async () => ({ success: false, error: 'Provider not ready' }),
+      testConnection: async () => ({ success: false, error: 'Provider not ready' }),
+      reconnect: async () => {},
+    };
   }
   return context;
 };
