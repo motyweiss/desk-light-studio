@@ -1,7 +1,7 @@
 import { motion, AnimatePresence } from 'framer-motion';
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef } from 'react';
 import { Music } from 'lucide-react';
-import { homeAssistant } from '@/services/homeAssistant';
+import { useAuthenticatedImage } from '@/hooks/useAuthenticatedImage';
 import { useMediaPlayer } from '@/features/mediaPlayer';
 import { ProgressBar } from './ProgressBar';
 import { PlaybackControls } from './PlaybackControls';
@@ -15,7 +15,6 @@ import { MusicParticles } from './MusicParticles';
 export const MediaPlayer = () => {
   const [isMinimized, setIsMinimized] = useState(true);
   const [speakerPopoverOpen, setSpeakerPopoverOpen] = useState(false);
-  const [isImageLoading, setIsImageLoading] = useState(true);
   const speakerBadgeRef = useRef<HTMLButtonElement>(null);
 
   const {
@@ -39,12 +38,10 @@ export const MediaPlayer = () => {
     handleSeek,
   } = useMediaPlayer();
 
-  // Reset image loading state when track changes - MUST be before early returns
-  useEffect(() => {
-    if (playerState?.currentTrack) {
-      setIsImageLoading(true);
-    }
-  }, [playerState?.currentTrack?.title, playerState?.currentTrack?.albumArt]);
+  // Fetch album art with authentication
+  const { imageUrl: albumArtUrl, isLoading: isAlbumArtLoading, error: albumArtError } = useAuthenticatedImage(
+    playerState?.currentTrack?.albumArt || null
+  );
 
   // Hide player only during loading or if no player state
   if (isLoading || !playerState) {
@@ -62,7 +59,6 @@ export const MediaPlayer = () => {
   }
 
   const currentTrack = playerState.currentTrack;
-  const albumArtUrl = currentTrack?.albumArt ? homeAssistant.getFullImageUrl(currentTrack.albumArt) : null;
 
   // Calculate album art sizes
   const albumArtSize = {
@@ -142,7 +138,7 @@ export const MediaPlayer = () => {
                       className="absolute inset-0"
                     >
                       {/* Skeleton loader */}
-                      {isImageLoading && albumArtUrl && (
+                      {isAlbumArtLoading && (
                         <div className="absolute inset-0 bg-white/5 animate-pulse">
                           <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent animate-[shimmer_1.5s_infinite]" 
                             style={{
@@ -153,15 +149,13 @@ export const MediaPlayer = () => {
                         </div>
                       )}
                       
-                      {albumArtUrl ? (
+                      {albumArtUrl && !albumArtError ? (
                         <img 
                           src={albumArtUrl} 
                           alt="Album art" 
-                          className={`w-full h-full object-cover transition-opacity duration-300 ${isImageLoading ? 'opacity-0' : 'opacity-100'}`}
-                          onLoad={() => setIsImageLoading(false)}
-                          onError={() => setIsImageLoading(false)}
+                          className="w-full h-full object-cover"
                         />
-                      ) : (
+                      ) : !isAlbumArtLoading && (
                         <div className="w-full h-full flex items-center justify-center">
                           <Music className="w-8 h-8 text-white/20" />
                         </div>
