@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useState, useCallback, useEffect, useRef } from 'react';
 import { websocketService } from '@/api/homeAssistant';
 import { haClient, lights as lightsAPI } from '@/api/homeAssistant';
-import { useHomeAssistantConfig } from '@/hooks/useHomeAssistantConfig';
+import { useHAConnection } from '@/contexts/HAConnectionContext';
 import { useToast } from '@/hooks/use-toast';
 import { usePolling } from '@/shared/hooks';
 import { logger } from '@/shared/utils/logger';
@@ -43,7 +43,8 @@ export const useLighting = () => {
 };
 
 export const LightingProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const { config, entityMapping, isConnected: haConnected } = useHomeAssistantConfig();
+  // Get config from global HAConnectionContext - Single Source of Truth
+  const { config, entityMapping, isConnected: haConnected } = useHAConnection();
   const { toast } = useToast();
   
   const [connectionType, setConnectionType] = useState<'websocket' | 'polling' | 'disconnected'>('disconnected');
@@ -74,7 +75,7 @@ export const LightingProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     }
   }, [entityMapping]);
 
-  // Fetch initial light states - uses ref to avoid dependency loop
+  // Fetch initial light states
   const fetchInitialStates = useCallback(async () => {
     if (!entityMapping) return;
 
@@ -132,7 +133,6 @@ export const LightingProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         const light = prev[lightId];
         if (light.isPending) return prev;
 
-        // We'll fetch and update in the next tick to avoid stale closure
         lightsAPI.getState(entityId).then(state => {
           if (state) {
             const intensity = state.state === 'on'
@@ -168,14 +168,14 @@ export const LightingProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     }
   }, [entityMapping, getLightEntity]);
 
-  // Setup polling with shared hook - uses state instead of ref
+  // Setup polling
   usePolling(pollLights, {
     interval: 1000,
     enabled: pollingEnabled,
     runOnFocus: true,
   });
 
-  // Initialize connection - separate effect without connectionType in deps
+  // Initialize connection when HA is connected
   useEffect(() => {
     if (!haConnected || !config || !entityMapping) {
       setConnectionType('disconnected');
@@ -183,9 +183,7 @@ export const LightingProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       return;
     }
 
-    // Configure API client
-    haClient.setConfig(config);
-    logger.connection('HA config set, attempting connection...');
+    logger.connection('HA connected, initializing lighting...');
 
     let isMounted = true;
 
@@ -245,7 +243,7 @@ export const LightingProvider: React.FC<{ children: React.ReactNode }> = ({ chil
           websocketService.disconnect();
         };
 
-        // Fetch initial states after WebSocket is ready
+        // Fetch initial states
         await fetchInitialStates();
 
       } catch (error) {
@@ -256,7 +254,6 @@ export const LightingProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         connectionTypeRef.current = 'polling';
         setPollingEnabled(true);
         
-        // Fetch initial states for polling mode too
         fetchInitialStates();
       }
     };
@@ -299,7 +296,6 @@ export const LightingProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         clearTimeout(existingTimer);
       }
 
-      // Get current value for comparison
       const currentValue = lights[lightId].targetValue;
       const delay = Math.abs(value - currentValue) > 50 ? 0 : 300;
       

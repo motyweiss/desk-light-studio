@@ -7,8 +7,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import ConnectionTab from "@/components/settings/ConnectionTab";
 import DevicesTab from "@/components/settings/DevicesTab";
 import SettingsConnectionBadge from "@/components/settings/SettingsConnectionBadge";
-import { useHAConfig } from "@/hooks/useHAConfig";
-import { useHomeAssistantConfig } from "@/hooks/useHomeAssistantConfig";
+import { useHAConnection } from "@/contexts/HAConnectionContext";
 import { homeAssistant, type HAEntity } from "@/services/homeAssistant";
 import { useToast } from "@/hooks/use-toast";
 import { DeviceConfig } from "@/types/settings";
@@ -28,17 +27,16 @@ const Settings = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   
-  // Use the new secure hook for connection config
+  // Use the global HAConnection context - Single Source of Truth
   const { 
     config: haConfig, 
     isLoading: isLoadingHAConfig,
     isConnected,
+    devicesMapping,
     saveConfig: saveHAConfig,
+    saveDevicesMapping: saveHADevicesMapping,
     testConnection 
-  } = useHAConfig();
-  
-  // Use legacy hook for devices mapping (will be migrated separately)
-  const { devicesMapping, saveDevicesMapping } = useHomeAssistantConfig();
+  } = useHAConnection();
   
   const [baseUrl, setBaseUrl] = useState("");
   const [accessToken, setAccessToken] = useState("");
@@ -49,7 +47,7 @@ const Settings = () => {
   const [isDirty, setIsDirty] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
 
-  // Initialize form with secure config
+  // Initialize form with config from context
   useEffect(() => {
     if (haConfig) {
       setBaseUrl(haConfig.baseUrl);
@@ -66,7 +64,6 @@ const Settings = () => {
     const fetchEntitiesOnLoad = async () => {
       if (haConfig?.baseUrl && haConfig?.accessToken) {
         setIsLoadingEntities(true);
-        homeAssistant.setConfig({ baseUrl: haConfig.baseUrl, accessToken: haConfig.accessToken });
         
         try {
           const entities = await homeAssistant.getEntitiesWithContext();
@@ -150,21 +147,31 @@ const Settings = () => {
     setIsSaving(true);
     
     try {
-      // Save connection config securely to database
-      const result = await saveHAConfig(baseUrl, accessToken);
+      // Save connection config to database via context
+      const configResult = await saveHAConfig(baseUrl, accessToken);
       
-      if (!result.success) {
+      if (!configResult.success) {
         toast({
           title: "Error Saving",
-          description: result.error || "Failed to save connection settings",
+          description: configResult.error || "Failed to save connection settings",
           variant: "destructive",
         });
         setIsSaving(false);
         return;
       }
       
-      // Save devices mapping (still uses localStorage for now)
-      saveDevicesMapping(localDevicesMapping);
+      // Save devices mapping to database via context
+      const devicesResult = await saveHADevicesMapping(localDevicesMapping);
+      
+      if (!devicesResult.success) {
+        toast({
+          title: "Error Saving Devices",
+          description: devicesResult.error || "Failed to save device mappings",
+          variant: "destructive",
+        });
+        setIsSaving(false);
+        return;
+      }
       
       toast({
         title: "Settings Saved",

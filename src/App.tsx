@@ -1,23 +1,25 @@
-import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { TooltipProvider } from "@/components/ui/tooltip";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 
 import { LightingProvider } from "@/features/lighting";
 import { ClimateProvider } from "@/features/climate";
+import { HAConnectionProvider } from "@/contexts/HAConnectionContext";
 import { AppLoadProvider } from "./contexts/AppLoadContext";
 import { AuthProvider } from "./contexts/AuthContext";
 import { RootLayout } from "./layouts/RootLayout";
+import { ProtectedRoute } from "./components/ProtectedRoute";
 import { UpdatePrompt } from "./components/UpdatePrompt";
 import { OfflineIndicator } from "./components/OfflineIndicator";
-import { ProtectedRoute } from "./components/ProtectedRoute";
+
 import Index from "./pages/Index";
 import Settings from "./pages/Settings";
 import DesignSystem from "./pages/DesignSystem";
 import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
 
-const queryClient = new QueryClient(); // Force rebuild
+const queryClient = new QueryClient();
 
 const App = () => (
   <ErrorBoundary>
@@ -25,7 +27,8 @@ const App = () => (
       <TooltipProvider>
         <BrowserRouter>
           <AuthProvider>
-            <AppLoadProvider>
+            <HAConnectionProvider>
+              <AppLoadProvider>
                 <LightingProvider>
                   <ClimateProvider>
                     <RootLayout>
@@ -42,7 +45,8 @@ const App = () => (
                     <OfflineIndicator />
                   </ClimateProvider>
                 </LightingProvider>
-            </AppLoadProvider>
+              </AppLoadProvider>
+            </HAConnectionProvider>
           </AuthProvider>
         </BrowserRouter>
       </TooltipProvider>
