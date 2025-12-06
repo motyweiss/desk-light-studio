@@ -150,10 +150,18 @@ export const MediaPlayer = () => {
                       )}
                       
                       {albumArtUrl && !albumArtError ? (
-                        <img 
+                        <motion.img 
+                          key={albumArtUrl}
                           src={albumArtUrl} 
                           alt="Album art" 
                           className="w-full h-full object-cover"
+                          initial={{ filter: 'blur(20px)', opacity: 0, scale: 1.1 }}
+                          animate={{ filter: 'blur(0px)', opacity: 1, scale: 1 }}
+                          transition={{ 
+                            duration: 0.8, 
+                            ease: [0.25, 0.1, 0.25, 1],
+                            filter: { duration: 0.6 }
+                          }}
                         />
                       ) : !isAlbumArtLoading && (
                         <div className="w-full h-full flex items-center justify-center">
