@@ -1,5 +1,5 @@
 import { motion, AnimatePresence } from 'framer-motion';
-import { Check, Speaker, Smartphone, Monitor, Volume2, Users, Star } from 'lucide-react';
+import { Check, Speaker, Smartphone, Monitor, Volume2, Users, Star, Tv } from 'lucide-react';
 import { useState, useLayoutEffect } from 'react';
 import type { HAMediaPlayerEntity } from '@/api/homeAssistant/types';
 import type { SpeakerGroup } from '@/config/speakerGroups';
@@ -168,6 +168,8 @@ export const SpeakerPopover = ({
                     <div className="space-y-1">
                       {predefinedGroups.map((group) => {
                         const isActive = currentPlaybackTarget?.type === 'group' && currentPlaybackTarget.groupId === group.id;
+                        const isTV = group.name.toLowerCase().includes('tv');
+                        const GroupIcon = isTV ? Tv : Users;
                         
                         return (
                           <motion.button
@@ -189,7 +191,7 @@ export const SpeakerPopover = ({
                               w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0
                               ${isActive ? 'bg-[hsl(44_85%_58%)]/20' : 'bg-white/5'}
                             `}>
-                              <Users className={`w-3.5 h-3.5 ${isActive ? 'text-[hsl(44_85%_58%)]' : 'text-white/50'}`} />
+                              <GroupIcon className={`w-3.5 h-3.5 ${isActive ? 'text-[hsl(44_85%_58%)]' : 'text-white/50'}`} />
                             </div>
                             
                             <span className={`
