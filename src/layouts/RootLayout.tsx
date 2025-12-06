@@ -15,7 +15,7 @@ interface RootLayoutProps {
 
 export const RootLayout = ({ children }: RootLayoutProps) => {
   const location = useLocation();
-  const { entityMapping, isConnected } = useHomeAssistantConfig();
+  const { entityMapping, isConnected, isConnecting } = useHomeAssistantConfig();
   const [isReconnecting, setIsReconnecting] = useState(false);
   const [pendingLights] = useState<Set<string>>(new Set());
   const [bgReady, setBgReady] = useState(false);
@@ -74,6 +74,7 @@ export const RootLayout = ({ children }: RootLayoutProps) => {
             <TopNavigationBar
               currentPath={location.pathname}
               isConnected={isConnected}
+              isConnecting={isConnecting}
               isReconnecting={isReconnecting}
               onReconnectClick={attemptReconnect}
             />

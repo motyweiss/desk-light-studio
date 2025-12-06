@@ -1,11 +1,12 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { useState, useRef, useCallback } from "react";
 import { createPortal } from "react-dom";
-import { Zap } from "lucide-react";
+import { Zap, Loader2 } from "lucide-react";
 
 interface ConnectionStatusIndicatorProps {
   isConnected: boolean;
   isReconnecting?: boolean;
+  isConnecting?: boolean;
   onReconnectClick?: () => void;
   inline?: boolean;
 }
@@ -13,6 +14,7 @@ interface ConnectionStatusIndicatorProps {
 export const ConnectionStatusIndicator = ({ 
   isConnected,
   isReconnecting = false,
+  isConnecting = false,
   onReconnectClick,
   inline = false
 }: ConnectionStatusIndicatorProps) => {
@@ -41,24 +43,26 @@ export const ConnectionStatusIndicator = ({
   };
 
   const getStatusColor = () => {
+    if (isConnecting) return "text-yellow-500";
     if (isReconnecting) return "text-yellow-500 animate-pulse";
     if (!isConnected) return "text-foreground/30";
     return "text-white";
   };
 
   const getTooltipText = () => {
+    if (isConnecting) return "Connecting to Home Assistant...";
     if (isReconnecting) return "Reconnecting to Home Assistant...";
     if (!isConnected) return "Disconnected - Click to reconnect";
     return "Connected to Home Assistant";
   };
 
   const handleClick = () => {
-    if (!isConnected && !isReconnecting && onReconnectClick) {
+    if (!isConnected && !isReconnecting && !isConnecting && onReconnectClick) {
       onReconnectClick();
     }
   };
 
-  const isClickable = !isConnected && !isReconnecting;
+  const isClickable = !isConnected && !isReconnecting && !isConnecting;
 
   // Render tooltip in portal to avoid clipping issues
   const renderTooltip = () => {
@@ -117,7 +121,11 @@ export const ConnectionStatusIndicator = ({
         transition={inline ? undefined : { duration: 0.3, delay: 0.6 }}
         aria-label={getTooltipText()}
       >
-        <Zap className="w-5 h-5" strokeWidth={1.5} />
+        {isConnecting ? (
+          <Loader2 className="w-5 h-5 animate-spin" strokeWidth={1.5} />
+        ) : (
+          <Zap className="w-5 h-5" strokeWidth={1.5} />
+        )}
       </motion.button>
 
       {renderTooltip()}

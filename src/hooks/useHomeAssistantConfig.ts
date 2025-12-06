@@ -61,6 +61,7 @@ export const useHomeAssistantConfig = () => {
   const [entityMapping, setEntityMapping] = useState<EntityMapping>(DEFAULT_ENTITY_MAPPING);
   const [devicesMapping, setDevicesMapping] = useState<DevicesMapping>(migrateToNewFormat(DEFAULT_ENTITY_MAPPING));
   const [isConnected, setIsConnected] = useState(false);
+  const [isConnecting, setIsConnecting] = useState(false);
 
   useEffect(() => {
     const initConfig = async () => {
@@ -72,11 +73,29 @@ export const useHomeAssistantConfig = () => {
       if (savedConfig) {
         try {
           const parsedConfig = JSON.parse(savedConfig);
+          console.log('🔌 Found saved config, connecting to:', parsedConfig.baseUrl);
+          setIsConnecting(true);
           setConfig(parsedConfig);
           homeAssistant.setConfig(parsedConfig);
-          setIsConnected(true);
+          
+          // Test connection before confirming
+          try {
+            const result = await homeAssistant.testConnection();
+            if (result.success) {
+              console.log('✅ Auto-connected successfully');
+              setIsConnected(true);
+            } else {
+              console.log('⚠️ Saved config exists but connection failed');
+              setIsConnected(false);
+            }
+          } catch {
+            console.log('⚠️ Connection test failed');
+            setIsConnected(false);
+          }
+          setIsConnecting(false);
         } catch (e) {
           console.error("Failed to parse saved config:", e);
+          setIsConnecting(false);
         }
       } else {
         // Try to auto-connect using recent URLs if no saved config
@@ -88,13 +107,15 @@ export const useHomeAssistantConfig = () => {
               // Check if there's a saved token (separate from full config)
               const savedToken = localStorage.getItem('ha_token');
               if (savedToken) {
+                console.log('🔄 Trying auto-connect with recent URL...');
+                setIsConnecting(true);
                 const autoConfig = { baseUrl: recentUrls[0].url, accessToken: savedToken };
                 homeAssistant.setConfig(autoConfig);
                 
                 try {
                   const result = await homeAssistant.testConnection();
                   if (result.success) {
-                    console.log('🔌 Auto-connected using recent URL');
+                    console.log('✅ Auto-connected using recent URL');
                     setConfig(autoConfig);
                     localStorage.setItem(CONFIG_KEY, JSON.stringify(autoConfig));
                     setIsConnected(true);
@@ -102,58 +123,13 @@ export const useHomeAssistantConfig = () => {
                 } catch {
                   console.log('Auto-connect failed, user needs to configure manually');
                 }
+                setIsConnecting(false);
               }
             }
           } catch {
             console.log('Failed to parse recent URLs for auto-connect');
           }
         }
-      }
-
-      // Load DevicesMapping (prioritize new format)
-      if (savedDevicesMapping) {
-        try {
-          const parsedDevicesMapping = JSON.parse(savedDevicesMapping);
-          setDevicesMapping(parsedDevicesMapping);
-          // Also set legacy entityMapping for backward compatibility
-          setEntityMapping(convertToLegacyFormat(parsedDevicesMapping));
-        } catch (e) {
-          console.error("Failed to parse saved devices mapping:", e);
-        }
-      } else if (savedMapping) {
-        // Migrate from old format
-        try {
-          const parsedMapping = JSON.parse(savedMapping);
-          
-          // Fix old media_player.living_room to media_player.spotify
-          if (parsedMapping.mediaPlayer === 'media_player.living_room') {
-            console.log('🔄 Migrating old media player entity to media_player.spotify');
-            parsedMapping.mediaPlayer = 'media_player.spotify';
-          }
-          
-          // Merge with defaults to add any new sensor mappings
-          const mergedMapping = {
-            ...DEFAULT_ENTITY_MAPPING,
-            ...parsedMapping,
-          };
-          setEntityMapping(mergedMapping);
-          
-          // Migrate to new format
-          const migratedDevicesMapping = migrateToNewFormat(mergedMapping);
-          setDevicesMapping(migratedDevicesMapping);
-          
-          // Save both formats
-          localStorage.setItem(ENTITY_MAPPING_KEY, JSON.stringify(mergedMapping));
-          localStorage.setItem(DEVICES_MAPPING_KEY, JSON.stringify(migratedDevicesMapping));
-        } catch (e) {
-          console.error("Failed to parse saved mapping:", e);
-          setEntityMapping(DEFAULT_ENTITY_MAPPING);
-          setDevicesMapping(migrateToNewFormat(DEFAULT_ENTITY_MAPPING));
-        }
-      } else {
-        // Use default mapping if no saved mapping exists
-        setEntityMapping(DEFAULT_ENTITY_MAPPING);
-        setDevicesMapping(migrateToNewFormat(DEFAULT_ENTITY_MAPPING));
       }
     };
 
@@ -259,6 +235,7 @@ export const useHomeAssistantConfig = () => {
     entityMapping,
     devicesMapping,
     isConnected,
+    isConnecting,
     saveConfig,
     saveDevicesMapping,
     addDevice,

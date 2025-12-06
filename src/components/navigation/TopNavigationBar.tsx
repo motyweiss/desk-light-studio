@@ -8,6 +8,7 @@ import { LogoutButton } from '@/components/LogoutButton';
 interface TopNavigationBarProps {
   currentPath: string;
   isConnected: boolean;
+  isConnecting?: boolean;
   isReconnecting: boolean;
   onReconnectClick: () => void;
 }
@@ -15,6 +16,7 @@ interface TopNavigationBarProps {
 export const TopNavigationBar = ({
   currentPath,
   isConnected,
+  isConnecting = false,
   isReconnecting,
   onReconnectClick,
 }: TopNavigationBarProps) => {
@@ -63,6 +65,7 @@ export const TopNavigationBar = ({
             <div className="hidden md:block">
               <ConnectionStatusIndicator
                 isConnected={isConnected}
+                isConnecting={isConnecting}
                 isReconnecting={isReconnecting}
                 onReconnectClick={onReconnectClick}
                 inline={true}
