@@ -4,11 +4,11 @@ import { Thermometer, Droplets, Wind } from 'lucide-react';
 import { useClimate } from '../context/ClimateContext';
 import { ClimateIndicatorTooltip } from './ClimateIndicatorTooltip';
 import { useHistoryData } from '../hooks/useHistoryData';
-import { useHomeAssistantConfig } from '@/hooks/useHomeAssistantConfig';
+import { useHAConnection } from '@/contexts/HAConnectionContext';
 
 export const ClimateIndicators = () => {
   const climate = useClimate();
-  const { isConnected, entityMapping } = useHomeAssistantConfig();
+  const { isConnected, entityMapping } = useHAConnection();
   const [hoveredIndicator, setHoveredIndicator] = useState<string | null>(null);
   
   // Animated counters - start from 0 for smooth initial animation

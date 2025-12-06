@@ -1,0 +1,389 @@
+import React, { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react';
+import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/contexts/AuthContext';
+import { homeAssistant, type EntityMapping } from '@/services/homeAssistant';
+import { haClient } from '@/api/homeAssistant/client';
+import { websocketService } from '@/api/homeAssistant';
+import { DevicesMapping, DeviceConfig, RoomConfig } from '@/types/settings';
+import { logger } from '@/shared/utils/logger';
+
+// ============= Types =============
+interface HAConfig {
+  baseUrl: string;
+  accessToken: string;
+}
+
+interface ConnectionResult {
+  success: boolean;
+  version?: string;
+  error?: string;
+}
+
+interface HAConnectionContextValue {
+  // State
+  config: HAConfig | null;
+  entityMapping: EntityMapping;
+  devicesMapping: DevicesMapping;
+  isConnected: boolean;
+  isLoading: boolean;
+  connectionStatus: 'connected' | 'disconnected' | 'connecting' | 'error';
+  haVersion: string | null;
+  error: string | null;
+
+  // Actions
+  saveConfig: (baseUrl: string, accessToken: string) => Promise<{ success: boolean; error?: string }>;
+  saveDevicesMapping: (mapping: DevicesMapping) => Promise<{ success: boolean; error?: string }>;
+  testConnection: (baseUrl: string, accessToken: string) => Promise<ConnectionResult>;
+  reconnect: () => Promise<void>;
+}
+
+// ============= Default Entity Mapping =============
+const DEFAULT_ENTITY_MAPPING: EntityMapping = {
+  deskLamp: 'light.go',
+  monitorLight: 'light.screen',
+  spotlight: 'light.door',
+  temperatureSensor: 'sensor.dyson_pure_temperature',
+  humiditySensor: 'sensor.dyson_pure_humidity',
+  airQualitySensor: 'sensor.dyson_pure_pm_2_5',
+  iphoneBatteryLevel: 'sensor.motys_iphone_battery_level',
+  iphoneBatteryState: 'sensor.motys_iphone_battery_state',
+  mediaPlayer: 'media_player.spotify',
+};
+
+const DEFAULT_DEVICES_MAPPING: DevicesMapping = {
+  rooms: [{
+    id: 'office',
+    name: 'Office',
+    lights: [
+      { id: 'desk_lamp', label: 'Desk Lamp', entity_id: 'light.go' },
+      { id: 'monitor_light', label: 'Monitor Light', entity_id: 'light.screen' },
+      { id: 'spotlight', label: 'Spotlight', entity_id: 'light.door' },
+    ],
+    sensors: [
+      { id: 'temperature', label: 'Temperature', entity_id: 'sensor.dyson_pure_temperature', type: 'temperature' },
+      { id: 'humidity', label: 'Humidity', entity_id: 'sensor.dyson_pure_humidity', type: 'humidity' },
+      { id: 'air_quality', label: 'Air Quality', entity_id: 'sensor.dyson_pure_pm_2_5', type: 'air_quality' },
+    ],
+    mediaPlayers: [
+      { id: 'spotify', label: 'Spotify', entity_id: 'media_player.spotify' },
+    ],
+  }]
+};
+
+// ============= Helper Functions =============
+const convertToLegacyFormat = (devicesMapping: DevicesMapping): EntityMapping => {
+  const office = devicesMapping.rooms[0];
+  if (!office) return DEFAULT_ENTITY_MAPPING;
+  
+  return {
+    deskLamp: office.lights.find(l => l.id === 'desk_lamp')?.entity_id || 'light.go',
+    monitorLight: office.lights.find(l => l.id === 'monitor_light')?.entity_id || 'light.screen',
+    spotlight: office.lights.find(l => l.id === 'spotlight')?.entity_id || 'light.door',
+    temperatureSensor: office.sensors.find(s => s.type === 'temperature')?.entity_id || 'sensor.dyson_pure_temperature',
+    humiditySensor: office.sensors.find(s => s.type === 'humidity')?.entity_id || 'sensor.dyson_pure_humidity',
+    airQualitySensor: office.sensors.find(s => s.type === 'air_quality')?.entity_id || 'sensor.dyson_pure_pm_2_5',
+    iphoneBatteryLevel: DEFAULT_ENTITY_MAPPING.iphoneBatteryLevel,
+    iphoneBatteryState: DEFAULT_ENTITY_MAPPING.iphoneBatteryState,
+    mediaPlayer: office.mediaPlayers[0]?.entity_id || 'media_player.spotify',
+  };
+};
+
+// ============= Context =============
+const HAConnectionContext = createContext<HAConnectionContextValue | null>(null);
+
+export const useHAConnection = () => {
+  const context = useContext(HAConnectionContext);
+  if (!context) {
+    throw new Error('useHAConnection must be used within HAConnectionProvider');
+  }
+  return context;
+};
+
+// ============= Provider =============
+export const HAConnectionProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const { user } = useAuth();
+  
+  // State
+  const [config, setConfig] = useState<HAConfig | null>(null);
+  const [devicesMapping, setDevicesMapping] = useState<DevicesMapping>(DEFAULT_DEVICES_MAPPING);
+  const [entityMapping, setEntityMapping] = useState<EntityMapping>(DEFAULT_ENTITY_MAPPING);
+  const [isLoading, setIsLoading] = useState(true);
+  const [connectionStatus, setConnectionStatus] = useState<'connected' | 'disconnected' | 'connecting' | 'error'>('disconnected');
+  const [haVersion, setHaVersion] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
+
+  const isConnected = connectionStatus === 'connected';
+  const configuredRef = useRef(false);
+
+  // ============= Configure HA Clients =============
+  const configureClients = useCallback((haConfig: HAConfig) => {
+    const configObj = {
+      baseUrl: haConfig.baseUrl.replace(/\/+$/, ''),
+      accessToken: haConfig.accessToken,
+    };
+    
+    homeAssistant.setConfig(configObj);
+    haClient.setConfig(configObj);
+    
+    logger.connection('All HA clients configured', { baseUrl: configObj.baseUrl });
+  }, []);
+
+  // ============= Test Connection =============
+  const testConnection = useCallback(async (baseUrl: string, accessToken: string): Promise<ConnectionResult> => {
+    try {
+      const tempConfig = { baseUrl: baseUrl.replace(/\/+$/, ''), accessToken };
+      homeAssistant.setConfig(tempConfig);
+      haClient.setConfig(tempConfig);
+      
+      const result = await homeAssistant.testConnection();
+      return result;
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Connection failed';
+      return { success: false, error: message };
+    }
+  }, []);
+
+  // ============= Load Config from Database =============
+  const loadFromDatabase = useCallback(async () => {
+    if (!user) {
+      setConfig(null);
+      setIsLoading(false);
+      setConnectionStatus('disconnected');
+      return;
+    }
+
+    setIsLoading(true);
+    logger.connection('Loading HA config from database...');
+
+    try {
+      // Load config from user_ha_configs
+      const { data: configData, error: configError } = await supabase
+        .from('user_ha_configs')
+        .select('base_url, access_token')
+        .eq('user_id', user.id)
+        .maybeSingle();
+
+      if (configError) {
+        logger.error('Error loading HA config', configError);
+        setError(configError.message);
+        setIsLoading(false);
+        return;
+      }
+
+      // Load devices mapping from user_ha_devices
+      const { data: devicesData, error: devicesError } = await supabase
+        .from('user_ha_devices')
+        .select('devices_mapping')
+        .eq('user_id', user.id)
+        .maybeSingle();
+
+      if (devicesError && devicesError.code !== 'PGRST116') {
+        logger.error('Error loading devices mapping', devicesError);
+      }
+
+      // Set devices mapping
+      if (devicesData?.devices_mapping) {
+        const mapping = devicesData.devices_mapping as unknown as DevicesMapping;
+        setDevicesMapping(mapping);
+        setEntityMapping(convertToLegacyFormat(mapping));
+        logger.connection('Loaded devices mapping from database');
+      } else {
+        // Use defaults
+        setDevicesMapping(DEFAULT_DEVICES_MAPPING);
+        setEntityMapping(DEFAULT_ENTITY_MAPPING);
+      }
+
+      // Set config and connect
+      if (configData) {
+        const haConfig: HAConfig = {
+          baseUrl: configData.base_url,
+          accessToken: configData.access_token,
+        };
+        
+        setConfig(haConfig);
+        configureClients(haConfig);
+
+        // Test connection
+        setConnectionStatus('connecting');
+        const result = await homeAssistant.testConnection();
+        
+        if (result.success) {
+          setConnectionStatus('connected');
+          setHaVersion(result.version || null);
+          logger.connection('Connected to Home Assistant', { version: result.version });
+        } else {
+          setConnectionStatus('error');
+          setError(result.error || 'Connection failed');
+          logger.error('HA connection failed', result.error);
+        }
+      } else {
+        setConnectionStatus('disconnected');
+        logger.connection('No HA config found in database');
+      }
+
+      // Clear legacy localStorage data
+      localStorage.removeItem('ha_config');
+      localStorage.removeItem('ha_token');
+      localStorage.removeItem('ha_entity_mapping');
+      localStorage.removeItem('ha_devices_mapping');
+      localStorage.removeItem('ha_recent_urls');
+
+    } catch (err) {
+      logger.error('Exception loading config', err);
+      setError(err instanceof Error ? err.message : 'Failed to load config');
+      setConnectionStatus('error');
+    } finally {
+      setIsLoading(false);
+    }
+  }, [user, configureClients]);
+
+  // ============= Save Config to Database =============
+  const saveConfig = useCallback(async (baseUrl: string, accessToken: string): Promise<{ success: boolean; error?: string }> => {
+    if (!user) {
+      return { success: false, error: 'Not authenticated' };
+    }
+
+    try {
+      const cleanBaseUrl = baseUrl.replace(/\/+$/, '');
+      
+      // Upsert config to database
+      const { error: upsertError } = await supabase
+        .from('user_ha_configs')
+        .upsert({
+          user_id: user.id,
+          base_url: cleanBaseUrl,
+          access_token: accessToken,
+        }, {
+          onConflict: 'user_id',
+        });
+
+      if (upsertError) {
+        logger.error('Error saving HA config', upsertError);
+        return { success: false, error: upsertError.message };
+      }
+
+      // Update local state
+      const newConfig: HAConfig = { baseUrl: cleanBaseUrl, accessToken };
+      setConfig(newConfig);
+      configureClients(newConfig);
+
+      // Test connection
+      setConnectionStatus('connecting');
+      const result = await homeAssistant.testConnection();
+      
+      if (result.success) {
+        setConnectionStatus('connected');
+        setHaVersion(result.version || null);
+        logger.connection('Saved config and connected', { version: result.version });
+      } else {
+        setConnectionStatus('error');
+      }
+
+      return { success: true };
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Failed to save config';
+      return { success: false, error: message };
+    }
+  }, [user, configureClients]);
+
+  // ============= Save Devices Mapping to Database =============
+  const saveDevicesMapping = useCallback(async (mapping: DevicesMapping): Promise<{ success: boolean; error?: string }> => {
+    if (!user) {
+      return { success: false, error: 'Not authenticated' };
+    }
+
+    try {
+      const { error: upsertError } = await supabase
+        .from('user_ha_devices')
+        .upsert({
+          user_id: user.id,
+          devices_mapping: mapping as any,
+        }, {
+          onConflict: 'user_id',
+        });
+
+      if (upsertError) {
+        logger.error('Error saving devices mapping', upsertError);
+        return { success: false, error: upsertError.message };
+      }
+
+      // Update local state
+      setDevicesMapping(mapping);
+      setEntityMapping(convertToLegacyFormat(mapping));
+      
+      logger.connection('Saved devices mapping to database');
+      return { success: true };
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Failed to save devices';
+      return { success: false, error: message };
+    }
+  }, [user]);
+
+  // ============= Reconnect =============
+  const reconnect = useCallback(async () => {
+    if (!config) return;
+
+    setConnectionStatus('connecting');
+    logger.connection('Attempting reconnection...');
+
+    try {
+      configureClients(config);
+      
+      // Try WebSocket first
+      try {
+        await websocketService.connect(config);
+        setConnectionStatus('connected');
+        logger.connection('Reconnected via WebSocket');
+      } catch {
+        // Fallback to HTTP
+        const result = await homeAssistant.testConnection();
+        if (result.success) {
+          setConnectionStatus('connected');
+          setHaVersion(result.version || null);
+          logger.connection('Reconnected via HTTP');
+        } else {
+          setConnectionStatus('error');
+          setError(result.error || 'Reconnection failed');
+        }
+      }
+    } catch (err) {
+      logger.error('Reconnection failed', err);
+      setConnectionStatus('error');
+    }
+  }, [config, configureClients]);
+
+  // ============= Initial Load =============
+  useEffect(() => {
+    if (user && !configuredRef.current) {
+      configuredRef.current = true;
+      loadFromDatabase();
+    } else if (!user) {
+      configuredRef.current = false;
+      setConfig(null);
+      setConnectionStatus('disconnected');
+      setIsLoading(false);
+    }
+  }, [user, loadFromDatabase]);
+
+  // ============= Context Value =============
+  const value: HAConnectionContextValue = {
+    config,
+    entityMapping,
+    devicesMapping,
+    isConnected,
+    isLoading,
+    connectionStatus,
+    haVersion,
+    error,
+    saveConfig,
+    saveDevicesMapping,
+    testConnection,
+    reconnect,
+  };
+
+  return (
+    <HAConnectionContext.Provider value={value}>
+      {children}
+    </HAConnectionContext.Provider>
+  );
+};

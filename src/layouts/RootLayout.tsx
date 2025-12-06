@@ -2,12 +2,10 @@ import { ReactNode, useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
 import { MediaPlayerProvider } from '@/features/mediaPlayer';
-import { ClimateProvider } from '@/features/climate';
 import { MediaPlayer } from '@/components/MediaPlayer/MediaPlayer';
 import { TopNavigationBar } from '@/components/navigation/TopNavigationBar';
-import { useHomeAssistantConfig } from '@/hooks/useHomeAssistantConfig';
+import { useHAConnection } from '@/contexts/HAConnectionContext';
 import { useHomeAssistantSync } from '@/hooks/useHomeAssistantSync';
-import { EASING } from '@/constants/animations';
 
 interface RootLayoutProps {
   children: ReactNode;
@@ -15,7 +13,7 @@ interface RootLayoutProps {
 
 export const RootLayout = ({ children }: RootLayoutProps) => {
   const location = useLocation();
-  const { entityMapping, isConnected, isConnecting } = useHomeAssistantConfig();
+  const { entityMapping, isConnected, isLoading: isConnecting, reconnect } = useHAConnection();
   const [isReconnecting, setIsReconnecting] = useState(false);
   const [pendingLights] = useState<Set<string>>(new Set());
   const [bgReady, setBgReady] = useState(false);
@@ -39,12 +37,11 @@ export const RootLayout = ({ children }: RootLayoutProps) => {
   const isSettingsPage = location.pathname === '/settings';
 
   return (
-    <ClimateProvider>
-      <MediaPlayerProvider 
-        entityId={entityMapping.mediaPlayer} 
-        isConnected={isConnected}
-      >
-        <div className="h-screen w-full relative flex flex-col overflow-hidden">
+    <MediaPlayerProvider 
+      entityId={entityMapping?.mediaPlayer || ''} 
+      isConnected={isConnected}
+    >
+      <div className="h-screen w-full relative flex flex-col overflow-hidden">
         {/* Solid background color - always visible */}
         <div 
           className="absolute inset-0"
@@ -103,7 +100,6 @@ export const RootLayout = ({ children }: RootLayoutProps) => {
           {!isSettingsPage && <MediaPlayer />}
         </div>
       </div>
-      </MediaPlayerProvider>
-    </ClimateProvider>
+    </MediaPlayerProvider>
   );
 };
