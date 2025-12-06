@@ -3,7 +3,7 @@ import { Slider } from "@/components/ui/slider";
 import { useState, useRef, useCallback, useEffect } from "react";
 import { getIconForLight } from "@/components/icons/LightIcons";
 import { Loader2 } from "lucide-react";
-import { LIGHT_ANIMATION, DATA_TRANSITION } from "@/constants/animations";
+import { LIGHT_ANIMATION } from "@/constants/animations";
 import { useLightAnimation } from "../hooks/useLightAnimation";
 
 interface LightControlCardProps {
@@ -17,6 +17,12 @@ interface LightControlCardProps {
   onHover: (lightId: string | null) => void;
   onRetry?: () => void;
 }
+
+// Smooth transition config used throughout
+const smoothTransition = {
+  duration: 0.5,
+  ease: [0.25, 0.1, 0.25, 1] as [number, number, number, number],
+};
 
 export const LightControlCard = ({ 
   id, 
@@ -33,7 +39,7 @@ export const LightControlCard = ({
   const isOn = intensity > 0;
   
   // Use unified animation hook
-  const { displayValue, isAnimating, animateTo } = useLightAnimation(id, { 
+  const { displayValue, animateTo } = useLightAnimation(id, { 
     initialValue: intensity 
   });
   
@@ -68,7 +74,6 @@ export const LightControlCard = ({
   };
 
   const handleCardClick = (e: React.MouseEvent) => {
-    // Only toggle if clicking outside the slider
     if ((e.target as HTMLElement).closest('[data-slider]')) {
       return;
     }
@@ -77,12 +82,10 @@ export const LightControlCard = ({
     
     const targetIntensity = isOn ? 0 : 100;
     
-    // Animate and notify immediately
     userInteractingRef.current = true;
     animateTo(targetIntensity, 'user');
     onChange(targetIntensity);
     
-    // Reset user interaction flag after animation
     setTimeout(() => {
       userInteractingRef.current = false;
     }, LIGHT_ANIMATION.turnOn.duration * 1000);
@@ -94,143 +97,73 @@ export const LightControlCard = ({
       triggerHaptic();
     }
     
-    // Update display immediately
     userInteractingRef.current = true;
     animateTo(newValue, 'user', { immediate: true });
     
-    // Clear existing debounce timer
     if (debounceTimerRef.current) {
       clearTimeout(debounceTimerRef.current);
     }
     
-    // Debounce: Send to onChange after 300ms
     debounceTimerRef.current = setTimeout(() => {
       onChange(newValue);
       userInteractingRef.current = false;
     }, 300);
   }, [displayNumber, onChange, animateTo]);
 
-  // Skeleton loading state with smooth shimmer
-  if (isLoading) {
-    return (
-      <motion.div
-        layout
-        className="w-full rounded-2xl md:rounded-3xl px-4 md:px-8 py-3 md:py-4 text-left relative overflow-hidden border border-white/10 backdrop-blur-xl"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
-        transition={{ duration: DATA_TRANSITION.fadeIn.duration }}
-        style={{
-          backgroundColor: 'rgba(255, 255, 255, 0.06)',
-        }}
-      >
-        {/* Shimmer overlay */}
-        <motion.div
-          className="absolute inset-0 bg-gradient-to-r from-transparent via-white/6 to-transparent"
-          animate={{ x: ['-100%', '100%'] }}
-          transition={{ 
-            duration: DATA_TRANSITION.skeleton.shimmerDuration, 
-            repeat: Infinity,
-            ease: "easeInOut"
-          }}
-        />
-
-        <div className="flex items-center gap-3 md:gap-6 relative z-10">
-          {/* Icon skeleton */}
-          <motion.div
-            className="flex-shrink-0 w-5 h-5 md:w-7 md:h-7 rounded-full bg-white/10"
-            animate={{ opacity: [0.3, 0.5, 0.3] }}
-            transition={{ 
-              duration: DATA_TRANSITION.skeleton.shimmerDuration, 
-              repeat: Infinity,
-              ease: "easeInOut"
-            }}
-          />
-
-          {/* Text skeleton */}
-          <div className="flex-1 space-y-1.5">
-            <motion.div 
-              className="h-4 w-20 md:w-24 bg-white/10 rounded"
-              animate={{ opacity: [0.3, 0.5, 0.3] }}
-              transition={{ 
-                duration: DATA_TRANSITION.skeleton.shimmerDuration, 
-                repeat: Infinity,
-                ease: "easeInOut",
-                delay: 0.1
-              }}
-            />
-            <motion.div 
-              className="h-3 w-10 bg-white/10 rounded"
-              animate={{ opacity: [0.3, 0.5, 0.3] }}
-              transition={{ 
-                duration: DATA_TRANSITION.skeleton.shimmerDuration, 
-                repeat: Infinity,
-                ease: "easeInOut",
-                delay: 0.2
-              }}
-            />
-          </div>
-
-          {/* Slider skeleton */}
-          <div className="flex-shrink-0 flex items-center gap-2 md:gap-3">
-            <div className="w-3 h-3 md:w-4 md:h-4" />
-            <motion.div 
-              className="w-20 md:w-32 h-2 bg-white/10 rounded-full"
-              animate={{ opacity: [0.3, 0.5, 0.3] }}
-              transition={{ 
-                duration: DATA_TRANSITION.skeleton.shimmerDuration, 
-                repeat: Infinity,
-                ease: "easeInOut",
-                delay: 0.3
-              }}
-            />
-          </div>
-        </div>
-      </motion.div>
-    );
-  }
-
   return (
     <motion.button
-      layout
       onClick={handleCardClick}
       onMouseEnter={() => onHover(id)}
       onMouseLeave={() => onHover(null)}
-      className="w-full rounded-2xl md:rounded-3xl px-4 md:px-8 py-3 md:py-4 cursor-pointer text-left border transition-all duration-500 backdrop-blur-xl relative overflow-hidden"
-      initial={{
-        backgroundColor: isOn ? 'rgba(255, 255, 255, 0.18)' : 'rgba(255, 255, 255, 0.08)',
-        borderColor: isOn ? 'rgba(255, 255, 255, 0.25)' : 'rgba(255, 255, 255, 0.15)',
-      }}
+      className="w-full rounded-2xl md:rounded-3xl px-4 md:px-8 py-3 md:py-4 cursor-pointer text-left border backdrop-blur-xl relative overflow-hidden"
+      initial={false}
       animate={{
-        backgroundColor: isOn ? 'rgba(255, 255, 255, 0.18)' : 'rgba(255, 255, 255, 0.08)',
-        borderColor: isOn ? 'rgba(255, 255, 255, 0.25)' : 'rgba(255, 255, 255, 0.15)',
+        backgroundColor: isLoading 
+          ? 'rgba(255, 255, 255, 0.06)' 
+          : isOn 
+            ? 'rgba(255, 255, 255, 0.18)' 
+            : 'rgba(255, 255, 255, 0.08)',
+        borderColor: isLoading
+          ? 'rgba(255, 255, 255, 0.1)'
+          : isOn 
+            ? 'rgba(255, 255, 255, 0.25)' 
+            : 'rgba(255, 255, 255, 0.15)',
       }}
-      transition={{
-        layout: { duration: 0.25, ease: LIGHT_ANIMATION.slider.ease },
-        backgroundColor: { duration: 0.5, ease: LIGHT_ANIMATION.turnOn.ease },
-        borderColor: { duration: 0.5, ease: LIGHT_ANIMATION.turnOn.ease },
-      }}
-      whileHover={{
+      transition={smoothTransition}
+      whileHover={!isLoading ? {
         backgroundColor: isOn ? 'rgba(255, 255, 255, 0.22)' : 'rgba(255, 255, 255, 0.12)',
-        borderColor: isOn ? 'rgba(255, 255, 255, 0.3)' : 'rgba(255, 255, 255, 0.2)',
         scale: 1.005,
-        transition: { duration: 0.4, ease: LIGHT_ANIMATION.turnOn.ease }
-      }}
-      whileTap={{ scale: 0.985 }}
+      } : undefined}
+      whileTap={!isLoading ? { scale: 0.985 } : undefined}
+      style={{ pointerEvents: isLoading ? 'none' : 'auto' }}
     >
+      {/* Shimmer overlay - only visible during loading */}
+      <motion.div
+        className="absolute inset-0 bg-gradient-to-r from-transparent via-white/8 to-transparent"
+        initial={false}
+        animate={{ 
+          x: isLoading ? ['0%', '200%'] : '0%',
+          opacity: isLoading ? 1 : 0
+        }}
+        transition={isLoading ? { 
+          x: { duration: 1.5, repeat: Infinity, ease: "easeInOut" },
+          opacity: smoothTransition
+        } : { opacity: smoothTransition }}
+      />
+
       {/* Pending State Overlay */}
-      {isPending && (
-        <motion.div
-          className="absolute inset-0 bg-white/5"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: [0.3, 0.6, 0.3] }}
-          transition={{ 
-            duration: 1.5, 
-            repeat: Infinity,
-            ease: "easeInOut"
-          }}
-        />
-      )}
+      <motion.div
+        className="absolute inset-0 bg-white/5"
+        initial={false}
+        animate={{ 
+          opacity: isPending ? [0.3, 0.6, 0.3] : 0 
+        }}
+        transition={isPending ? { 
+          duration: 1.5, 
+          repeat: Infinity,
+          ease: "easeInOut"
+        } : smoothTransition}
+      />
 
       {/* Error State Overlay */}
       {hasError && (
@@ -246,46 +179,101 @@ export const LightControlCard = ({
       )}
 
       <div className="flex items-center gap-3 md:gap-6 relative z-10">
-        {/* Icon */}
-        <motion.div
-          className="flex-shrink-0"
-          initial={false}
-          animate={{
-            color: isOn ? 'hsl(44 92% 62%)' : 'rgba(255, 255, 255, 0.3)'
-          }}
-          transition={{ 
-            color: { duration: 0.5, ease: LIGHT_ANIMATION.turnOn.ease }
-          }}
-          style={{ willChange: 'color' }}
-        >
-          <IconComponent className="w-5 h-5 md:w-7 md:h-7" />
-        </motion.div>
-
-        {/* Text Info */}
-        <div className="flex-1 text-left min-w-0 space-y-0">
-          <div className="font-light text-sm md:text-base text-white tracking-wide">{label}</div>
-          <motion.div 
-            className="text-[10px] md:text-xs font-light tracking-wide tabular-nums"
-            animate={{
-              color: isOn ? 'rgba(255, 255, 255, 0.65)' : 'rgba(255, 255, 255, 0.5)'
+        {/* Icon - crossfade between skeleton and real */}
+        <div className="relative flex-shrink-0 w-5 h-5 md:w-7 md:h-7">
+          {/* Skeleton circle */}
+          <motion.div
+            className="absolute inset-0 rounded-full bg-white/10"
+            initial={false}
+            animate={{ 
+              opacity: isLoading ? [0.3, 0.5, 0.3] : 0 
             }}
-            transition={{ duration: 0.5 }}
+            transition={isLoading ? { 
+              duration: 1.5, 
+              repeat: Infinity,
+              ease: "easeInOut"
+            } : smoothTransition}
+          />
+          {/* Real icon */}
+          <motion.div
+            className="absolute inset-0 flex items-center justify-center"
+            initial={false}
+            animate={{
+              opacity: isLoading ? 0 : 1,
+              color: isOn ? 'hsl(44 92% 62%)' : 'rgba(255, 255, 255, 0.3)'
+            }}
+            transition={smoothTransition}
           >
-            {isOn ? `${displayNumber}%` : 'Off'}
+            <IconComponent className="w-5 h-5 md:w-7 md:h-7" />
           </motion.div>
         </div>
 
-        {/* Slider with Pending Indicator */}
+        {/* Text Info - crossfade between skeleton and real */}
+        <div className="flex-1 text-left min-w-0 space-y-1">
+          {/* Label row */}
+          <div className="relative h-4 md:h-5">
+            <motion.div 
+              className="absolute inset-y-0 left-0 w-20 md:w-24 bg-white/10 rounded"
+              initial={false}
+              animate={{ 
+                opacity: isLoading ? [0.3, 0.5, 0.3] : 0 
+              }}
+              transition={isLoading ? { 
+                duration: 1.5, 
+                repeat: Infinity,
+                ease: "easeInOut"
+              } : smoothTransition}
+            />
+            <motion.div 
+              className="font-light text-sm md:text-base text-white tracking-wide"
+              initial={false}
+              animate={{ opacity: isLoading ? 0 : 1 }}
+              transition={smoothTransition}
+            >
+              {label}
+            </motion.div>
+          </div>
+          
+          {/* Status row */}
+          <div className="relative h-3 md:h-4">
+            <motion.div 
+              className="absolute inset-y-0 left-0 w-10 bg-white/10 rounded"
+              initial={false}
+              animate={{ 
+                opacity: isLoading ? [0.3, 0.5, 0.3] : 0 
+              }}
+              transition={isLoading ? { 
+                duration: 1.5, 
+                repeat: Infinity,
+                ease: "easeInOut",
+                delay: 0.1
+              } : smoothTransition}
+            />
+            <motion.div 
+              className="text-[10px] md:text-xs font-light tracking-wide tabular-nums"
+              initial={false}
+              animate={{
+                opacity: isLoading ? 0 : 1,
+                color: isOn ? 'rgba(255, 255, 255, 0.65)' : 'rgba(255, 255, 255, 0.5)'
+              }}
+              transition={smoothTransition}
+            >
+              {isOn ? `${displayNumber}%` : 'Off'}
+            </motion.div>
+          </div>
+        </div>
+
+        {/* Slider area - crossfade between skeleton and real */}
         <div 
           className="flex-shrink-0 flex items-center gap-2 md:gap-3"
           data-slider
           onClick={(e) => e.stopPropagation()}
           onPointerDown={(e) => e.stopPropagation()}
         >
-          {/* Spinner - Left of Slider with fixed width */}
+          {/* Spinner placeholder */}
           <div className="w-3 h-3 md:w-4 md:h-4 flex items-center justify-center flex-shrink-0">
             <AnimatePresence>
-              {isPending && (
+              {isPending && !isLoading && (
                 <motion.div
                   initial={{ opacity: 0, scale: 0.7 }}
                   animate={{ opacity: 1, scale: 1 }}
@@ -301,13 +289,43 @@ export const LightControlCard = ({
             </AnimatePresence>
           </div>
           
-          <Slider
-            value={[displayNumber]}
-            onValueChange={handleSliderChange}
-            max={100}
-            step={1}
-            className="w-20 md:w-32"
-          />
+          {/* Slider container with crossfade */}
+          <div className="relative w-20 md:w-32 h-5">
+            {/* Skeleton slider */}
+            <motion.div 
+              className="absolute inset-y-0 left-0 right-0 flex items-center"
+              initial={false}
+              animate={{ opacity: isLoading ? 1 : 0 }}
+              transition={smoothTransition}
+            >
+              <motion.div 
+                className="w-full h-2 bg-white/10 rounded-full"
+                animate={{ opacity: [0.3, 0.5, 0.3] }}
+                transition={{ 
+                  duration: 1.5, 
+                  repeat: Infinity,
+                  ease: "easeInOut",
+                  delay: 0.2
+                }}
+              />
+            </motion.div>
+            
+            {/* Real slider */}
+            <motion.div 
+              className="absolute inset-0"
+              initial={false}
+              animate={{ opacity: isLoading ? 0 : 1 }}
+              transition={smoothTransition}
+            >
+              <Slider
+                value={[displayNumber]}
+                onValueChange={handleSliderChange}
+                max={100}
+                step={1}
+                className="w-20 md:w-32"
+              />
+            </motion.div>
+          </div>
         </div>
       </div>
     </motion.button>

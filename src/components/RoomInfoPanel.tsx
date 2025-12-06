@@ -1,10 +1,10 @@
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import { Power, Zap } from "lucide-react";
 import { LightControlCard } from "@/features/lighting/components/LightControlCard";
 import { CircularProgress } from "@/features/climate/components/CircularProgress";
 import { AirPodsMaxIcon } from "./icons/AirPodsMaxIcon";
 import { IPhoneIcon } from "./icons/IPhoneIcon";
-import { PAGE_LOAD_SEQUENCE, DATA_TRANSITION } from "@/constants/animations";
+import { PAGE_LOAD_SEQUENCE } from "@/constants/animations";
 
 interface Light {
   id: string;
@@ -35,68 +35,10 @@ interface RoomInfoPanelProps {
   dataReady?: boolean;
 }
 
-// Stagger container variants
-const containerVariants = {
-  hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: {
-      duration: PAGE_LOAD_SEQUENCE.container.duration,
-      ease: PAGE_LOAD_SEQUENCE.container.ease,
-      staggerChildren: 0.08,
-      delayChildren: 0.05,
-    }
-  }
-};
-
-// Child item variants with subtle slide-up
-const itemVariants = {
-  hidden: { 
-    opacity: 0, 
-    y: 12 
-  },
-  visible: { 
-    opacity: 1, 
-    y: 0,
-    transition: {
-      duration: 0.5,
-      ease: [0.22, 0.03, 0.26, 1] as [number, number, number, number],
-    }
-  }
-};
-
-// Device item variants with stagger
-const deviceVariants = {
-  hidden: { 
-    opacity: 0, 
-    y: PAGE_LOAD_SEQUENCE.devices.y 
-  },
-  visible: (index: number) => ({ 
-    opacity: 1, 
-    y: 0,
-    transition: {
-      duration: PAGE_LOAD_SEQUENCE.devices.duration,
-      ease: PAGE_LOAD_SEQUENCE.devices.ease as [number, number, number, number],
-      delay: PAGE_LOAD_SEQUENCE.devices.stagger * index,
-    }
-  })
-};
-
-// Light card variants with stagger
-const lightCardVariants = {
-  hidden: { 
-    opacity: 0, 
-    y: PAGE_LOAD_SEQUENCE.lightCards.y 
-  },
-  visible: (index: number) => ({ 
-    opacity: 1, 
-    y: 0,
-    transition: {
-      duration: PAGE_LOAD_SEQUENCE.lightCards.duration,
-      ease: PAGE_LOAD_SEQUENCE.lightCards.ease as [number, number, number, number],
-      delay: PAGE_LOAD_SEQUENCE.lightCards.delay + (PAGE_LOAD_SEQUENCE.lightCards.stagger * index),
-    }
-  })
+// Unified smooth transition config
+const smoothTransition = {
+  duration: 0.6,
+  ease: [0.25, 0.1, 0.25, 1] as [number, number, number, number],
 };
 
 export const RoomInfoPanel = ({ 
@@ -114,35 +56,45 @@ export const RoomInfoPanel = ({
   return (
     <motion.div 
       className="space-y-4 md:space-y-8"
-      variants={containerVariants}
-      initial="hidden"
-      animate={isLoaded ? "visible" : "hidden"}
+      initial={{ opacity: 0, y: 15 }}
+      animate={{ 
+        opacity: isLoaded ? 1 : 0,
+        y: isLoaded ? 0 : 15
+      }}
+      transition={{
+        ...smoothTransition,
+        delay: 0.05,
+      }}
     >
       {/* Room Title with Master Switch */}
       <motion.div 
         className="flex items-center justify-between gap-4 md:gap-6"
-        variants={itemVariants}
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ 
+          opacity: isLoaded ? 1 : 0,
+          y: isLoaded ? 0 : 10
+        }}
+        transition={{
+          ...smoothTransition,
+          delay: 0.1,
+        }}
       >
         <h1 className="text-2xl md:text-4xl font-display font-light tracking-tight text-foreground leading-tight">
           {roomName}
         </h1>
         
-        {/* Master Switch - Circular Frosted Glass Button */}
+        {/* Master Switch */}
         <motion.button
           initial={false}
           animate={{ 
             backgroundColor: masterSwitchOn ? 'rgba(255, 255, 255, 0.08)' : 'rgba(255, 255, 255, 0)',
             borderColor: masterSwitchOn ? 'rgba(255, 255, 255, 0.25)' : 'rgba(255, 255, 255, 0.1)'
           }}
-          transition={{ 
-            backgroundColor: { duration: 0.3 },
-            borderColor: { duration: 0.3 }
-          }}
+          transition={{ duration: 0.4 }}
           onClick={() => onMasterToggle(!masterSwitchOn)}
-          className="w-9 h-9 md:w-10 md:h-10 rounded-full backdrop-blur-xl border transition-colors duration-300 flex-shrink-0"
+          className="w-9 h-9 md:w-10 md:h-10 rounded-full backdrop-blur-xl border flex-shrink-0"
           whileHover={{
             backgroundColor: masterSwitchOn ? 'rgba(255, 255, 255, 0.12)' : 'rgba(255, 255, 255, 0.05)',
-            borderColor: masterSwitchOn ? 'rgba(255, 255, 255, 0.3)' : 'rgba(255, 255, 255, 0.15)',
           }}
           whileTap={{ scale: 0.92 }}
           aria-label="Toggle all lights"
@@ -151,7 +103,7 @@ export const RoomInfoPanel = ({
             animate={{
               color: masterSwitchOn ? 'rgba(255, 255, 255, 0.95)' : 'rgba(255, 255, 255, 0.4)',
             }}
-            transition={{ duration: 0.3 }}
+            transition={{ duration: 0.4 }}
             className="flex items-center justify-center"
           >
             <Power className="w-4 h-4" strokeWidth={2} />
@@ -162,7 +114,15 @@ export const RoomInfoPanel = ({
       {/* Devices Battery Section - Desktop only */}
       <motion.div 
         className="hidden md:block rounded-2xl py-6 px-6"
-        variants={itemVariants}
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ 
+          opacity: isLoaded ? 1 : 0,
+          y: isLoaded ? 0 : 10
+        }}
+        transition={{
+          ...smoothTransition,
+          delay: 0.15,
+        }}
       >
         {devices && devices.length > 0 && (
           <div className="flex flex-row gap-10">
@@ -173,10 +133,15 @@ export const RoomInfoPanel = ({
                 <motion.div 
                   key={device.id} 
                   className="flex items-center gap-3"
-                  variants={deviceVariants}
-                  custom={index}
-                  initial="hidden"
-                  animate={isLoaded ? "visible" : "hidden"}
+                  initial={{ opacity: 0, y: 8 }}
+                  animate={{ 
+                    opacity: isLoaded ? 1 : 0,
+                    y: isLoaded ? 0 : 8
+                  }}
+                  transition={{
+                    ...smoothTransition,
+                    delay: 0.2 + (index * 0.08),
+                  }}
                 >
                   <CircularProgress 
                     value={device.batteryLevel} 
@@ -187,7 +152,7 @@ export const RoomInfoPanel = ({
                     isLoaded={dataReady}
                     showSkeleton={showSkeleton}
                     colorType="battery"
-                    delay={0.2 + (index * 0.1)}
+                    delay={0.3 + (index * 0.1)}
                   >
                     <DeviceIcon className="w-5 h-5 text-white/60" strokeWidth={1.5} />
                   </CircularProgress>
@@ -196,40 +161,40 @@ export const RoomInfoPanel = ({
                     <span className="text-[9px] text-white/55 font-light tracking-[0.2em] uppercase mb-1">
                       {device.name}
                     </span>
-                    <AnimatePresence mode="wait">
-                      {showSkeleton ? (
-                        <motion.div
-                          key="skeleton"
-                          className="h-5 w-12 bg-white/10 rounded"
-                          initial={{ opacity: 0 }}
-                          animate={{ opacity: [0.3, 0.6, 0.3] }}
-                          exit={{ opacity: 0 }}
-                          transition={{
-                            opacity: {
-                              duration: DATA_TRANSITION.skeleton.shimmerDuration,
-                              repeat: Infinity,
-                              ease: DATA_TRANSITION.skeleton.pulseEase,
-                            }
-                          }}
-                        />
-                      ) : (
-                        <motion.div 
-                          key="value"
-                          className="text-base font-light text-white tabular-nums flex items-center gap-1.5"
-                          initial={{ opacity: 0, y: 5 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          transition={{ 
-                            duration: DATA_TRANSITION.fadeIn.duration,
-                            delay: 0.1 + (index * 0.05)
-                          }}
-                        >
-                          <span>{device.batteryLevel}%</span>
-                          {device.isCharging && (
-                            <Zap className="w-3.5 h-3.5 text-status-caution" fill="currentColor" />
-                          )}
-                        </motion.div>
-                      )}
-                    </AnimatePresence>
+                    {/* Smooth crossfade between skeleton and value */}
+                    <div className="relative h-5">
+                      {/* Skeleton layer */}
+                      <motion.div
+                        className="absolute inset-0 h-5 w-12 bg-white/10 rounded"
+                        initial={false}
+                        animate={{ 
+                          opacity: showSkeleton ? [0.3, 0.5, 0.3] : 0,
+                        }}
+                        transition={{
+                          opacity: showSkeleton 
+                            ? { duration: 1.5, repeat: Infinity, ease: "easeInOut" }
+                            : { duration: 0.4, ease: smoothTransition.ease }
+                        }}
+                      />
+                      {/* Value layer */}
+                      <motion.div 
+                        className="text-base font-light text-white tabular-nums flex items-center gap-1.5"
+                        initial={false}
+                        animate={{ 
+                          opacity: dataReady && !showSkeleton ? 1 : 0,
+                        }}
+                        transition={{ 
+                          duration: 0.5,
+                          ease: smoothTransition.ease,
+                          delay: showSkeleton ? 0 : 0.1
+                        }}
+                      >
+                        <span>{device.batteryLevel}%</span>
+                        {device.isCharging && (
+                          <Zap className="w-3.5 h-3.5 text-status-caution" fill="currentColor" />
+                        )}
+                      </motion.div>
+                    </div>
                   </div>
                 </motion.div>
               );
@@ -241,15 +206,22 @@ export const RoomInfoPanel = ({
       {/* Light Controls Section */}
       <motion.div 
         className="space-y-2 md:mt-6"
-        variants={itemVariants}
+        initial={{ opacity: 0 }}
+        animate={{ opacity: isLoaded ? 1 : 0 }}
+        transition={{ ...smoothTransition, delay: 0.2 }}
       >
         {lights.map((light, index) => (
           <motion.div 
             key={light.id}
-            variants={lightCardVariants}
-            custom={index}
-            initial="hidden"
-            animate={isLoaded ? "visible" : "hidden"}
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ 
+              opacity: isLoaded ? 1 : 0,
+              y: isLoaded ? 0 : 12
+            }}
+            transition={{
+              ...smoothTransition,
+              delay: 0.25 + (index * 0.07),
+            }}
           >
             <LightControlCard
               id={light.id}
