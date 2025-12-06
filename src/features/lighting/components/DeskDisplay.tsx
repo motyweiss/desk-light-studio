@@ -22,6 +22,7 @@ interface DeskDisplayProps {
   onMonitorLightChange: (intensity: number) => void;
   hoveredLightId: string | null;
   isLoaded: boolean;
+  dataReady?: boolean;
 }
 
 const lightingStates: Record<string, string> = {
@@ -57,7 +58,8 @@ export const DeskDisplay = ({
   onDeskLampChange,
   onMonitorLightChange,
   hoveredLightId,
-  isLoaded
+  isLoaded,
+  dataReady = true
 }: DeskDisplayProps) => {
   // Calculate initial state from props
   const getStateFromIntensities = useCallback(() => {
@@ -67,8 +69,8 @@ export const DeskDisplay = ({
     return `${spotlightBit}${deskLampBit}${monitorLightBit}`;
   }, [spotlightIntensity, deskLampIntensity, monitorLightIntensity]);
 
-  const [currentState, setCurrentState] = useState(() => getStateFromIntensities());
-  const [previousState, setPreviousState] = useState(() => getStateFromIntensities());
+  const [currentState, setCurrentState] = useState("000"); // Always start with lights off
+  const [previousState, setPreviousState] = useState("000");
   const [isHovered, setIsHovered] = useState(false);
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [allImagesLoaded, setAllImagesLoaded] = useState(false);
@@ -82,10 +84,9 @@ export const DeskDisplay = ({
     });
   }, []);
 
-  // Mark initial render complete immediately when loaded
+  // Mark initial render complete when loaded and images ready
   useEffect(() => {
     if (isLoaded && allImagesLoaded) {
-      // Use microtask to ensure state is set in next tick, not RAF
       queueMicrotask(() => {
         setHasInitialRender(true);
       });
@@ -122,19 +123,18 @@ export const DeskDisplay = ({
   // Determine if turning on or off
   const isTurningOn = countLightsOn(currentState) > countLightsOn(previousState);
 
-  // Update state when intensities change - ONLY after initial render
+  // Update state when intensities change - animate only after initial render AND data is ready
   useEffect(() => {
     const newState = getStateFromIntensities();
     
-    // Skip animation during initial load
-    if (!hasInitialRender) {
+    // During initial load or before data is ready, update state immediately without animation
+    if (!hasInitialRender || !dataReady) {
       setCurrentState(newState);
       setPreviousState(newState);
       return;
     }
     
     if (newState !== currentState) {
-      // Clear any pending timeout
       if (transitionTimeoutRef.current) {
         clearTimeout(transitionTimeoutRef.current);
       }
@@ -143,7 +143,6 @@ export const DeskDisplay = ({
       setCurrentState(newState);
       setIsTransitioning(true);
       
-      // Determine animation duration
       const lightsOnNew = countLightsOn(newState);
       const lightsOnCurrent = countLightsOn(currentState);
       const animConfig = lightsOnNew > lightsOnCurrent ? LIGHT_ANIMATION.turnOn : LIGHT_ANIMATION.turnOff;
@@ -158,7 +157,7 @@ export const DeskDisplay = ({
         clearTimeout(transitionTimeoutRef.current);
       }
     };
-  }, [getStateFromIntensities, currentState, hasInitialRender]);
+  }, [getStateFromIntensities, currentState, hasInitialRender, dataReady]);
 
   // Transition config based on direction
   const transitionConfig = useMemo(() => {
@@ -194,7 +193,7 @@ export const DeskDisplay = ({
           }}
         />
         
-        {/* Image stack - opacity only, no scale */}
+        {/* Image stack */}
         <div 
           className="absolute inset-0"
           style={{
@@ -209,7 +208,7 @@ export const DeskDisplay = ({
             const wasPrevious = state === previousState;
             const showAsPrevious = isTransitioning && wasPrevious && !isActive;
             
-            // Determine opacity - simple logic, no complex conditions
+            // Show "000" immediately on load, then transition to actual state
             let targetOpacity = 0;
             if (isActive && isLoaded && allImagesLoaded) {
               targetOpacity = 1;
@@ -217,8 +216,8 @@ export const DeskDisplay = ({
               targetOpacity = 1;
             }
             
-            // Determine animation duration - instant for initial, animated for changes
-            const animDuration = hasInitialRender && isActive ? transitionConfig.duration : 0;
+            // Instant for initial render, animated for subsequent changes
+            const animDuration = hasInitialRender && dataReady && isActive ? transitionConfig.duration : 0;
             
             return (
               <motion.img

@@ -1,6 +1,6 @@
 import { motion } from "framer-motion";
 import { useMemo, useCallback } from "react";
-import { LIGHT_ANIMATION } from "@/constants/animations";
+import { LIGHT_ANIMATION, DATA_TRANSITION } from "@/constants/animations";
 
 interface AmbientGlowLayersProps {
   spotlightIntensity: number;
@@ -17,6 +17,7 @@ export const AmbientGlowLayers = ({
   allLightsOn,
   isLoaded = true
 }: AmbientGlowLayersProps) => {
+  // Only calculate opacities when loaded
   const spotlightOpacity = useMemo(() => 
     isLoaded ? Math.pow(spotlightIntensity / 100, 2.2) * 0.5 : 0, 
     [spotlightIntensity, isLoaded]
@@ -32,12 +33,19 @@ export const AmbientGlowLayers = ({
 
   // Unified animation timing with stagger delay
   const getDuration = useCallback((targetOpacity: number) => {
+    if (!isLoaded) return DATA_TRANSITION.fadeIn.duration;
     return targetOpacity > 0 ? LIGHT_ANIMATION.turnOn.duration : LIGHT_ANIMATION.turnOff.duration;
-  }, []);
+  }, [isLoaded]);
 
   const getEasing = useCallback((targetOpacity: number) => {
+    if (!isLoaded) return DATA_TRANSITION.fadeIn.ease;
     return targetOpacity > 0 ? LIGHT_ANIMATION.turnOn.ease : LIGHT_ANIMATION.turnOff.ease;
-  }, []);
+  }, [isLoaded]);
+
+  // Don't render anything until loaded
+  if (!isLoaded) {
+    return null;
+  }
 
   return (
     <>
@@ -49,7 +57,7 @@ export const AmbientGlowLayers = ({
           filter: 'blur(90px)',
           willChange: 'opacity',
         }}
-        initial={false}
+        initial={{ opacity: 0 }}
         animate={{ opacity: spotlightOpacity }}
         transition={{
           duration: getDuration(spotlightOpacity),
@@ -66,7 +74,7 @@ export const AmbientGlowLayers = ({
           filter: 'blur(85px)',
           willChange: 'opacity',
         }}
-        initial={false}
+        initial={{ opacity: 0 }}
         animate={{ opacity: deskLampOpacity }}
         transition={{
           duration: getDuration(deskLampOpacity),
@@ -83,7 +91,7 @@ export const AmbientGlowLayers = ({
           filter: 'blur(80px)',
           willChange: 'opacity',
         }}
-        initial={false}
+        initial={{ opacity: 0 }}
         animate={{ opacity: monitorLightOpacity }}
         transition={{
           duration: getDuration(monitorLightOpacity),
@@ -92,7 +100,7 @@ export const AmbientGlowLayers = ({
         }}
       />
       
-      {/* Additional subtle pulsing glow layer - creates living, breathing atmosphere */}
+      {/* Subtle pulsing glow layer */}
       <motion.div
         className="fixed inset-0 pointer-events-none z-0"
         style={{
@@ -100,10 +108,10 @@ export const AmbientGlowLayers = ({
           filter: 'blur(120px)',
           willChange: 'opacity',
         }}
-        initial={false}
+        initial={{ opacity: 0, scale: 1 }}
         animate={{
-          opacity: isLoaded && allLightsOn ? [0.15, 0.25, 0.15] : 0,
-          scale: isLoaded && allLightsOn ? [1, 1.05, 1] : 1,
+          opacity: allLightsOn ? [0.15, 0.25, 0.15] : 0,
+          scale: allLightsOn ? [1, 1.05, 1] : 1,
         }}
         transition={{
           duration: 4,
