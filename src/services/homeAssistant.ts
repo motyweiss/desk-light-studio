@@ -12,6 +12,8 @@ export interface EntityMapping {
   airQualitySensor?: string;
   iphoneBatteryLevel?: string;
   iphoneBatteryState?: string;
+  airpodsMaxBatteryLevel?: string;
+  airpodsMaxBatteryState?: string;
   mediaPlayer?: string;
 }
 

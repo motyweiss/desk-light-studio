@@ -75,6 +75,17 @@ const convertToLegacyFormat = (devicesMapping: DevicesMapping): EntityMapping =>
   const office = devicesMapping.rooms[0];
   if (!office) return DEFAULT_ENTITY_MAPPING;
   
+  // Find battery sensors from devices mapping
+  const batterySensors = office.sensors.filter(s => s.type === 'battery');
+  const iphoneBatterySensor = batterySensors.find(s => 
+    s.entity_id.toLowerCase().includes('iphone') || 
+    s.label.toLowerCase().includes('iphone')
+  );
+  const airpodsBatterySensor = batterySensors.find(s => 
+    s.entity_id.toLowerCase().includes('airpods') || 
+    s.label.toLowerCase().includes('airpods')
+  );
+  
   return {
     deskLamp: office.lights.find(l => l.id === 'desk_lamp')?.entity_id || 'light.go',
     monitorLight: office.lights.find(l => l.id === 'monitor_light')?.entity_id || 'light.screen',
@@ -82,8 +93,10 @@ const convertToLegacyFormat = (devicesMapping: DevicesMapping): EntityMapping =>
     temperatureSensor: office.sensors.find(s => s.type === 'temperature')?.entity_id || 'sensor.dyson_pure_temperature',
     humiditySensor: office.sensors.find(s => s.type === 'humidity')?.entity_id || 'sensor.dyson_pure_humidity',
     airQualitySensor: office.sensors.find(s => s.type === 'air_quality')?.entity_id || 'sensor.dyson_pure_pm_2_5',
-    iphoneBatteryLevel: DEFAULT_ENTITY_MAPPING.iphoneBatteryLevel,
-    iphoneBatteryState: DEFAULT_ENTITY_MAPPING.iphoneBatteryState,
+    iphoneBatteryLevel: iphoneBatterySensor?.entity_id || DEFAULT_ENTITY_MAPPING.iphoneBatteryLevel,
+    iphoneBatteryState: iphoneBatterySensor ? iphoneBatterySensor.entity_id.replace('_battery_level', '_battery_state').replace('_level', '_state') : DEFAULT_ENTITY_MAPPING.iphoneBatteryState,
+    airpodsMaxBatteryLevel: airpodsBatterySensor?.entity_id,
+    airpodsMaxBatteryState: airpodsBatterySensor ? airpodsBatterySensor.entity_id.replace('_battery_level', '_battery_state').replace('_level', '_state') : undefined,
     mediaPlayer: office.mediaPlayers[0]?.entity_id || 'media_player.spotify',
   };
 };
