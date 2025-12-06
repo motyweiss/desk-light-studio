@@ -224,6 +224,17 @@ export const DeskDisplay = ({
             const shouldShowAsPrevious = isTransitioning && wasPrevious && !isActive;
             const shouldAnimate = isActive;
             
+            // Subtle depth effect: new state zooms in slightly from 1.02, previous zooms out slightly
+            const getScale = () => {
+              if (shouldAnimate && isLoaded && allImagesLoaded) {
+                return 1; // Active state settles to normal scale
+              }
+              if (shouldShowAsPrevious) {
+                return 0.98; // Previous state zooms out slightly
+              }
+              return 1.02; // Inactive states are slightly zoomed for entry effect
+            };
+            
             return (
               <motion.img
                 key={state}
@@ -238,6 +249,7 @@ export const DeskDisplay = ({
                     : shouldAnimate && isLoaded && allImagesLoaded 
                       ? 1 
                       : 0,
+                  scale: getScale(),
                   zIndex: shouldAnimate ? 10 : shouldShowAsPrevious ? 5 : 1,
                 }}
                 transition={{ 
@@ -245,11 +257,16 @@ export const DeskDisplay = ({
                     duration: shouldAnimate ? transitionConfig.duration : 0,
                     ease: transitionConfig.ease,
                   },
+                  scale: {
+                    duration: shouldAnimate ? transitionConfig.duration * 1.2 : transitionConfig.duration * 0.8,
+                    ease: [0.25, 0.1, 0.25, 1],
+                  },
                   zIndex: { duration: 0 }
                 }}
                 style={{
                   pointerEvents: isActive ? 'auto' : 'none',
-                  willChange: 'opacity',
+                  willChange: 'opacity, transform',
+                  transformOrigin: 'center center',
                 }}
                 loading="eager"
                 decoding="async"
