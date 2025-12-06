@@ -29,8 +29,8 @@ export const LIGHT_ANIMATION = {
     ease: [0.22, 0.03, 0.26, 1] as const,
   },
   turnOff: {
-    duration: 1.0, // Softer, more gradual fade out
-    ease: [0.25, 0.1, 0.25, 1] as const, // Gentle easing for pleasant transition
+    duration: 1.4, // Even longer, more gradual fade out
+    ease: [0.16, 0.1, 0.3, 1] as const, // Very gentle easing for pleasant transition
   },
   slider: {
     duration: 0.2,
