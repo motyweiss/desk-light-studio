@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import ConnectionTab from "@/components/settings/ConnectionTab";
 import DevicesTab from "@/components/settings/DevicesTab";
+import SettingsConnectionBadge from "@/components/settings/SettingsConnectionBadge";
 import { useHomeAssistantConfig } from "@/hooks/useHomeAssistantConfig";
 import { homeAssistant, type HAEntity } from "@/services/homeAssistant";
 import { useToast } from "@/hooks/use-toast";
@@ -197,7 +198,7 @@ const Settings = () => {
           >
             Settings
           </h1>
-          <div className="w-20" />
+          <SettingsConnectionBadge baseUrl={config?.baseUrl || ""} accessToken={config?.accessToken || ""} />
         </div>
       </motion.div>
 
