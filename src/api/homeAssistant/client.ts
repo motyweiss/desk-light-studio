@@ -116,6 +116,23 @@ class HomeAssistantClient {
   }
 
   /**
+   * Search entities by keywords (case-insensitive)
+   */
+  async searchEntities(keywords: string[]): Promise<HAEntity[]> {
+    const allEntities = await this.getAllStates();
+    const lowerKeywords = keywords.map(k => k.toLowerCase());
+    
+    return allEntities.filter(entity => {
+      const entityIdLower = entity.entity_id.toLowerCase();
+      const friendlyNameLower = (entity.attributes?.friendly_name || '').toLowerCase();
+      
+      return lowerKeywords.every(keyword => 
+        entityIdLower.includes(keyword) || friendlyNameLower.includes(keyword)
+      );
+    });
+  }
+
+  /**
    * Call a service
    */
   async callService(
