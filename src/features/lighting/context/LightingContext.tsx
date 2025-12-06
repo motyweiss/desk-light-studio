@@ -47,6 +47,7 @@ export const LightingProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   const { toast } = useToast();
   
   const [connectionType, setConnectionType] = useState<'websocket' | 'polling' | 'disconnected'>('disconnected');
+  const [pollingEnabled, setPollingEnabled] = useState(false);
   const [lights, setLights] = useState<LightingContextValue['lights']>({
     spotlight: { targetValue: 0, displayValue: 0, confirmedValue: 0, isAnimating: false, isPending: false, source: 'initial' },
     deskLamp: { targetValue: 0, displayValue: 0, confirmedValue: 0, isAnimating: false, isPending: false, source: 'initial' },
@@ -54,7 +55,13 @@ export const LightingProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   });
 
   const debounceTimersRef = useRef<Map<string, NodeJS.Timeout>>(new Map());
-  const pollingEnabledRef = useRef(false);
+  const wsCleanupRef = useRef<(() => void) | null>(null);
+  const connectionTypeRef = useRef(connectionType);
+
+  // Keep ref in sync with state
+  useEffect(() => {
+    connectionTypeRef.current = connectionType;
+  }, [connectionType]);
 
   // Map light IDs to entity IDs
   const getLightEntity = useCallback((lightId: 'spotlight' | 'deskLamp' | 'monitorLight') => {
@@ -67,10 +74,11 @@ export const LightingProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     }
   }, [entityMapping]);
 
-  // Fetch initial light states
+  // Fetch initial light states - uses ref to avoid dependency loop
   const fetchInitialStates = useCallback(async () => {
     if (!entityMapping) return;
 
+    logger.connection('Fetching initial light states...');
     const lightIds: Array<'spotlight' | 'deskLamp' | 'monitorLight'> = ['spotlight', 'deskLamp', 'monitorLight'];
     
     for (const lightId of lightIds) {
@@ -79,7 +87,7 @@ export const LightingProvider: React.FC<{ children: React.ReactNode }> = ({ chil
 
       try {
         let state;
-        if (connectionType === 'websocket') {
+        if (connectionTypeRef.current === 'websocket') {
           state = await websocketService.getEntityState(entityId);
         } else {
           state = await lightsAPI.getState(entityId);
@@ -108,7 +116,7 @@ export const LightingProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         logger.error(`Failed to fetch initial state for ${lightId}`, error);
       }
     }
-  }, [entityMapping, getLightEntity, connectionType]);
+  }, [entityMapping, getLightEntity]);
 
   // Polling function
   const pollLights = useCallback(async () => {
@@ -120,61 +128,77 @@ export const LightingProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       const entityId = getLightEntity(lightId);
       if (!entityId) continue;
 
-      const light = lights[lightId];
-      if (light.isPending) continue;
+      setLights(prev => {
+        const light = prev[lightId];
+        if (light.isPending) return prev;
 
-      try {
-        const state = await lightsAPI.getState(entityId);
-        if (state) {
-          const intensity = state.state === 'on'
-            ? Math.round(((state.attributes?.brightness || 255) / 255) * 100)
-            : 0;
+        // We'll fetch and update in the next tick to avoid stale closure
+        lightsAPI.getState(entityId).then(state => {
+          if (state) {
+            const intensity = state.state === 'on'
+              ? Math.round(((state.attributes?.brightness || 255) / 255) * 100)
+              : 0;
 
-          if (light.confirmedValue !== intensity) {
-            logger.light(lightId, `Polled change: ${intensity}%`);
-            
-            setLights(prev => ({
-              ...prev,
-              [lightId]: {
-                ...prev[lightId],
-                targetValue: intensity,
-                confirmedValue: intensity,
-                source: 'external',
+            setLights(innerPrev => {
+              const innerLight = innerPrev[lightId];
+              if (innerLight.isPending) return innerPrev;
+              
+              if (innerLight.confirmedValue !== intensity) {
+                logger.light(lightId, `Polled change: ${intensity}%`);
+                
+                return {
+                  ...innerPrev,
+                  [lightId]: {
+                    ...innerLight,
+                    targetValue: intensity,
+                    confirmedValue: intensity,
+                    source: 'external',
+                  }
+                };
               }
-            }));
+              return innerPrev;
+            });
           }
-        }
-      } catch (error) {
-        logger.error(`Polling failed for ${lightId}`, error);
-      }
-    }
-  }, [entityMapping, lights, getLightEntity]);
+        }).catch(error => {
+          logger.error(`Polling failed for ${lightId}`, error);
+        });
 
-  // Setup polling with shared hook
+        return prev;
+      });
+    }
+  }, [entityMapping, getLightEntity]);
+
+  // Setup polling with shared hook - uses state instead of ref
   usePolling(pollLights, {
     interval: 1000,
-    enabled: pollingEnabledRef.current && connectionType === 'polling',
+    enabled: pollingEnabled,
     runOnFocus: true,
   });
 
-  // Initialize WebSocket connection
+  // Initialize connection - separate effect without connectionType in deps
   useEffect(() => {
     if (!haConnected || !config || !entityMapping) {
       setConnectionType('disconnected');
-      pollingEnabledRef.current = false;
+      setPollingEnabled(false);
       return;
     }
 
     // Configure API client
     haClient.setConfig(config);
+    logger.connection('HA config set, attempting connection...');
+
+    let isMounted = true;
 
     const connectWebSocket = async () => {
       try {
         logger.connection('Attempting WebSocket connection...');
         await websocketService.connect(config);
         
+        if (!isMounted) return;
+        
         setConnectionType('websocket');
-        pollingEnabledRef.current = false;
+        setPollingEnabled(false);
+        connectionTypeRef.current = 'websocket';
         logger.connection('WebSocket connected - real-time sync active');
 
         // Subscribe to light entity changes
@@ -215,27 +239,39 @@ export const LightingProvider: React.FC<{ children: React.ReactNode }> = ({ chil
           }
         });
 
+        // Store cleanup function
+        wsCleanupRef.current = () => {
+          unsubscribers.forEach(unsub => unsub());
+          websocketService.disconnect();
+        };
+
+        // Fetch initial states after WebSocket is ready
         await fetchInitialStates();
 
-        return () => {
-          unsubscribers.forEach(unsub => unsub());
-        };
       } catch (error) {
+        if (!isMounted) return;
+        
         logger.warn('WebSocket connection failed, falling back to polling', error);
         setConnectionType('polling');
-        pollingEnabledRef.current = true;
+        connectionTypeRef.current = 'polling';
+        setPollingEnabled(true);
+        
+        // Fetch initial states for polling mode too
+        fetchInitialStates();
       }
     };
 
     connectWebSocket();
 
     return () => {
-      if (connectionType === 'websocket') {
-        websocketService.disconnect();
+      isMounted = false;
+      if (wsCleanupRef.current) {
+        wsCleanupRef.current();
+        wsCleanupRef.current = null;
       }
-      pollingEnabledRef.current = false;
+      setPollingEnabled(false);
     };
-  }, [haConnected, config, entityMapping, getLightEntity, fetchInitialStates, connectionType]);
+  }, [haConnected, config, entityMapping, getLightEntity, fetchInitialStates]);
 
   // Set light intensity
   const setLightIntensity = useCallback(async (
@@ -263,7 +299,9 @@ export const LightingProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         clearTimeout(existingTimer);
       }
 
-      const delay = Math.abs(value - lights[lightId].targetValue) > 50 ? 0 : 300;
+      // Get current value for comparison
+      const currentValue = lights[lightId].targetValue;
+      const delay = Math.abs(value - currentValue) > 50 ? 0 : 300;
       
       const timer = setTimeout(async () => {
         logger.light(lightId, `Setting to ${value}%`);
@@ -317,7 +355,8 @@ export const LightingProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       logger.connection('Manual reconnection attempt...');
       await websocketService.connect(config);
       setConnectionType('websocket');
-      pollingEnabledRef.current = false;
+      connectionTypeRef.current = 'websocket';
+      setPollingEnabled(false);
       await fetchInitialStates();
       
       toast({
@@ -327,7 +366,8 @@ export const LightingProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     } catch (error) {
       logger.error('Reconnection failed', error);
       setConnectionType('polling');
-      pollingEnabledRef.current = true;
+      connectionTypeRef.current = 'polling';
+      setPollingEnabled(true);
     }
   }, [config, entityMapping, fetchInitialStates, toast]);
 
