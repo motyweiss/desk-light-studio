@@ -1,5 +1,7 @@
 import { useState, useEffect, useMemo, useCallback, useRef } from "react";
 import { motion } from "framer-motion";
+import { Link } from "react-router-dom";
+import { Settings, WifiOff } from "lucide-react";
 import { DeskDisplay } from "@/features/lighting/components/DeskDisplay";
 import { RoomInfoPanel } from "@/components/RoomInfoPanel";
 import { AmbientGlowLayers } from "@/features/lighting/components/AmbientGlowLayers";
@@ -192,10 +194,31 @@ const Index = () => {
     return () => clearTimeout(timer);
   }, [lightingState]);
 
+  // Check if HA is connected
+  const isHAConnected = connectionType !== 'disconnected';
+
   return (
     <>
       <LoadingOverlay isLoading={isLoading} />
       <Toaster />
+
+      {/* Connection Status Banner - only show when disconnected */}
+      {!isHAConnected && isLoaded && (
+        <motion.div
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="fixed top-16 md:top-20 left-1/2 -translate-x-1/2 z-50"
+        >
+          <Link 
+            to="/settings"
+            className="flex items-center gap-2 px-4 py-2 rounded-full bg-amber-500/20 backdrop-blur-xl border border-amber-500/30 text-amber-200 text-sm hover:bg-amber-500/30 transition-colors"
+          >
+            <WifiOff className="w-4 h-4" />
+            <span>Not connected to Home Assistant</span>
+            <Settings className="w-4 h-4" />
+          </Link>
+        </motion.div>
+      )}
 
       <div className="h-full min-h-0 flex items-center justify-center p-3 md:p-8 relative overflow-hidden">
         {/* Dynamic color overlay that responds to lighting */}
