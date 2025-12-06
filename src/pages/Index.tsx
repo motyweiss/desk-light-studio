@@ -8,8 +8,8 @@ import { Toaster } from "@/components/ui/toaster";
 import { useClimate } from "@/features/climate";
 import { useLighting } from "@/features/lighting";
 import { useAppLoad } from "@/contexts/AppLoadContext";
-import { useConnectionTransition } from "@/hooks/useConnectionTransition";
-import { LIGHT_ANIMATION, PAGE_LOAD_SEQUENCE, DATA_TRANSITION } from "@/constants/animations";
+import { usePageLoadSequence } from "@/hooks/usePageLoadSequence";
+import { LIGHT_ANIMATION, PAGE_LOAD_SEQUENCE, DATA_TRANSITION, EASING } from "@/constants/animations";
 
 // Import all desk images for preloading
 import desk000 from "@/assets/desk-000.png";
@@ -24,9 +24,7 @@ import desk111 from "@/assets/desk-111.png";
 const Index = () => {
   const { hasInitiallyLoaded, setInitiallyLoaded } = useAppLoad();
   const [isLoading, setIsLoading] = useState(!hasInitiallyLoaded);
-  const [isLoaded, setIsLoaded] = useState(hasInitiallyLoaded);
   const [isTransitioning, setIsTransitioning] = useState(false);
-  const [contentReady, setContentReady] = useState(hasInitiallyLoaded);
   
   // Get climate data from global context
   const climate = useClimate();
@@ -34,32 +32,32 @@ const Index = () => {
   // Get lighting state and controls from unified context
   const { lights, setLightIntensity, isConnected, connectionType } = useLighting();
 
-  // Connection transition management for smooth state changes
-  const { showSkeleton, dataReady } = useConnectionTransition(
+  // Unified page load sequence
+  const { 
+    showContent, 
+    showSkeleton, 
+    showData,
+    getStaggerDelay,
+    markContentReady,
+  } = usePageLoadSequence({
+    overlayComplete: !isLoading,
     isConnected,
-    climate.isLoaded,
-    {
-      skeletonDelay: 150,
-      dataReadyDelay: 200,
-      minSkeletonTime: 300,
-    }
-  );
+    isDataLoaded: climate.isLoaded,
+  });
 
   // Hover states for coordinated UI
   const [hoveredLight, setHoveredLight] = useState<string | null>(null);
 
-  // Handle overlay exit - use onExitComplete for perfect timing
+  // Handle overlay exit complete
   const handleOverlayExitComplete = useCallback(() => {
-    setContentReady(true);
-    setIsLoaded(true);
-  }, []);
+    markContentReady();
+  }, [markContentReady]);
 
   // Optimized image loading - only on initial load
   useEffect(() => {
     if (hasInitiallyLoaded) {
       setIsLoading(false);
-      setIsLoaded(true);
-      setContentReady(true);
+      markContentReady();
       return;
     }
 
@@ -110,7 +108,7 @@ const Index = () => {
     }, 5000);
     
     return () => clearTimeout(fallbackTimer);
-  }, [hasInitiallyLoaded, setInitiallyLoaded]);
+  }, [hasInitiallyLoaded, setInitiallyLoaded, markContentReady]);
 
   // Master switch logic
   const allLightsOn = lights.spotlight.targetValue > 0 || lights.deskLamp.targetValue > 0 || lights.monitorLight.targetValue > 0;
@@ -191,6 +189,12 @@ const Index = () => {
     return () => clearTimeout(timer);
   }, [lightingState]);
 
+  // Unified transition config
+  const smoothTransition = {
+    duration: PAGE_LOAD_SEQUENCE.container.duration,
+    ease: EASING.entrance,
+  };
+
   return (
     <>
       <LoadingOverlay isLoading={isLoading} onExitComplete={handleOverlayExitComplete} />
@@ -199,10 +203,11 @@ const Index = () => {
       <motion.div 
         className="h-full min-h-0 flex items-center justify-center p-3 md:p-8 relative overflow-hidden"
         initial={{ opacity: 0 }}
-        animate={{ opacity: contentReady ? 1 : 0 }}
+        animate={{ opacity: showContent ? 1 : 0 }}
         transition={{ 
-          duration: DATA_TRANSITION.fadeIn.duration,
-          ease: DATA_TRANSITION.fadeIn.ease
+          duration: smoothTransition.duration,
+          delay: PAGE_LOAD_SEQUENCE.container.delay,
+          ease: smoothTransition.ease,
         }}
         style={{ willChange: 'opacity' }}
       >
@@ -233,28 +238,28 @@ const Index = () => {
           }}
         />
 
-        {/* Ambient glow effects - only show when data is ready */}
+        {/* Ambient glow effects */}
         <AmbientGlowLayers
-          spotlightIntensity={dataReady ? lights.spotlight.targetValue : 0}
-          deskLampIntensity={dataReady ? lights.deskLamp.targetValue : 0}
-          monitorLightIntensity={dataReady ? lights.monitorLight.targetValue : 0}
+          spotlightIntensity={showData ? lights.spotlight.targetValue : 0}
+          deskLampIntensity={showData ? lights.deskLamp.targetValue : 0}
+          monitorLightIntensity={showData ? lights.monitorLight.targetValue : 0}
           allLightsOn={allLightsOn}
-          isLoaded={contentReady && dataReady}
+          isLoaded={showContent && showData}
         />
 
-      {/* Main content area */}
+        {/* Main content area */}
         <div className="w-full h-full max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-center md:justify-between gap-4 md:gap-8 lg:gap-10 relative z-10">
           {/* Desk Display */}
           <motion.div
             className="w-full md:w-[45%] lg:w-[43%] flex-shrink-0 md:order-1 order-2 max-w-[320px] md:max-w-none"
             initial={{ opacity: 0, scale: PAGE_LOAD_SEQUENCE.deskImage.scale }}
             animate={{ 
-              opacity: contentReady ? 1 : 0,
-              scale: contentReady ? 1 : PAGE_LOAD_SEQUENCE.deskImage.scale
+              opacity: showContent ? 1 : 0,
+              scale: showContent ? 1 : PAGE_LOAD_SEQUENCE.deskImage.scale
             }}
             transition={{ 
               duration: PAGE_LOAD_SEQUENCE.deskImage.duration, 
-              delay: contentReady ? PAGE_LOAD_SEQUENCE.deskImage.delay : 0, 
+              delay: PAGE_LOAD_SEQUENCE.deskImage.delay, 
               ease: PAGE_LOAD_SEQUENCE.deskImage.ease
             }}
             style={{ willChange: 'opacity, transform' }}
@@ -267,12 +272,12 @@ const Index = () => {
               onDeskLampChange={createLightChangeHandler('deskLamp')}
               onMonitorLightChange={createLightChangeHandler('monitorLight')}
               hoveredLightId={hoveredLight}
-              isLoaded={contentReady}
-              dataReady={dataReady}
+              isLoaded={showContent}
+              dataReady={showData}
             />
           </motion.div>
 
-          {/* Room Info Panel - no wrapper animation, handled internally */}
+          {/* Room Info Panel */}
           <div className="w-full md:w-[52%] flex-shrink-0 md:order-2 order-1">
             <RoomInfoPanel
               roomName="Office Desk"
@@ -318,9 +323,9 @@ const Index = () => {
               masterSwitchOn={masterSwitchOn}
               onMasterToggle={handleMasterToggle}
               onLightHover={setHoveredLight}
-              isLoaded={contentReady}
+              isLoaded={showContent}
               showSkeleton={showSkeleton}
-              dataReady={dataReady}
+              dataReady={showData}
             />
           </div>
         </div>
