@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Home, Settings as SettingsIcon } from 'lucide-react';
 import { ClimateIndicators } from '@/features/climate/components/ClimateIndicators';
 import { ConnectionStatusIndicator } from '@/components/ConnectionStatusIndicator';
+import { LogoutButton } from '@/components/LogoutButton';
 
 interface TopNavigationBarProps {
   currentPath: string;
@@ -51,9 +52,9 @@ export const TopNavigationBar = ({
             <ClimateIndicators />
           </motion.div>
 
-          {/* Right: Connection Status + Settings - hidden on mobile */}
+          {/* Right: Connection Status + Settings + Logout - hidden on mobile */}
           <motion.div 
-            className="hidden md:flex items-center gap-4 overflow-visible"
+            className="hidden md:flex items-center gap-2 overflow-visible"
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.5, delay: 0.2 }}
@@ -74,6 +75,8 @@ export const TopNavigationBar = ({
             >
               <SettingsIcon className="w-5 h-5" strokeWidth={1.5} />
             </motion.button>
+
+            <LogoutButton />
           </motion.div>
         </div>
       </div>
