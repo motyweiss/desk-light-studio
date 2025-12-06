@@ -22,11 +22,11 @@ const App = () => (
   <ErrorBoundary>
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
-        <AuthProvider>
-          <AppLoadProvider>
-            <ClimateProvider>
-              <LightingProvider>
-                <BrowserRouter>
+        <BrowserRouter>
+          <AuthProvider>
+            <AppLoadProvider>
+              <ClimateProvider>
+                <LightingProvider>
                   <RootLayout>
                     <Routes>
                       <Route path="/auth" element={<Auth />} />
@@ -37,13 +37,13 @@ const App = () => (
                       <Route path="*" element={<NotFound />} />
                     </Routes>
                   </RootLayout>
-                </BrowserRouter>
-                <UpdatePrompt />
-                <OfflineIndicator />
-              </LightingProvider>
-            </ClimateProvider>
-          </AppLoadProvider>
-        </AuthProvider>
+                  <UpdatePrompt />
+                  <OfflineIndicator />
+                </LightingProvider>
+              </ClimateProvider>
+            </AppLoadProvider>
+          </AuthProvider>
+        </BrowserRouter>
       </TooltipProvider>
     </QueryClientProvider>
   </ErrorBoundary>
