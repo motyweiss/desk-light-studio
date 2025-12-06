@@ -29,10 +29,10 @@ export const ClimateProvider = ({ children }: { children: ReactNode }) => {
       temperatureSensor: entityMapping?.temperatureSensor,
       humiditySensor: entityMapping?.humiditySensor,
       airQualitySensor: entityMapping?.airQualitySensor,
-      iphoneBattery: (entityMapping as any)?.iphoneBatteryLevel,
-      iphoneBatteryState: (entityMapping as any)?.iphoneBatteryState,
-      airpodsMaxBattery: (entityMapping as any)?.airpodsMaxBatteryLevel,
-      airpodsMaxBatteryState: (entityMapping as any)?.airpodsMaxBatteryState,
+      iphoneBattery: entityMapping?.iphoneBatteryLevel,
+      iphoneBatteryState: entityMapping?.iphoneBatteryState,
+      airpodsMaxBattery: entityMapping?.airpodsMaxBatteryLevel,
+      airpodsMaxBatteryState: entityMapping?.airpodsMaxBatteryState,
     },
   });
 
