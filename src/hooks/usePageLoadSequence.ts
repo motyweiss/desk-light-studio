@@ -192,10 +192,10 @@ export const usePageLoadSequence = (
     return (baseDelayMs + (index * LOAD_TIMING.stagger.base)) / 1000;
   }, []);
 
-  // Derived state
+  // Derived state - mutually exclusive skeleton/data states
   const showContent = stage === 'entering' || stage === 'hydrating' || stage === 'complete';
-  const showSkeleton = (stage === 'entering' || stage === 'hydrating') && !hasTransitionedToData.current;
-  const showData = stage === 'hydrating' || stage === 'complete';
+  const showSkeleton = stage === 'entering' && !hasTransitionedToData.current;
+  const showData = hasTransitionedToData.current || stage === 'hydrating' || stage === 'complete';
 
   return {
     stage,
