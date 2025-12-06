@@ -1,6 +1,6 @@
 import { motion } from "framer-motion";
-import { useMemo, useCallback } from "react";
-import { LIGHT_ANIMATION, DATA_TRANSITION } from "@/constants/animations";
+import { useMemo, useCallback, useState, useEffect } from "react";
+import { LIGHT_ANIMATION, PAGE_LOAD_SEQUENCE } from "@/constants/animations";
 
 interface AmbientGlowLayersProps {
   spotlightIntensity: number;
@@ -17,30 +17,44 @@ export const AmbientGlowLayers = ({
   allLightsOn,
   isLoaded = true
 }: AmbientGlowLayersProps) => {
-  // Only calculate opacities when loaded
+  // Track if initial animation has completed
+  const [hasAnimatedIn, setHasAnimatedIn] = useState(false);
+
+  // Delay glow appearance until after content has entered
+  useEffect(() => {
+    if (isLoaded && !hasAnimatedIn) {
+      const timer = setTimeout(() => {
+        setHasAnimatedIn(true);
+      }, PAGE_LOAD_SEQUENCE.glowLayers.delay * 1000);
+      return () => clearTimeout(timer);
+    }
+  }, [isLoaded, hasAnimatedIn]);
+
+  // Only calculate opacities when loaded and animated in
   const spotlightOpacity = useMemo(() => 
-    isLoaded ? Math.pow(spotlightIntensity / 100, 2.2) * 0.5 : 0, 
-    [spotlightIntensity, isLoaded]
+    (isLoaded && hasAnimatedIn) ? Math.pow(spotlightIntensity / 100, 2.2) * 0.5 : 0, 
+    [spotlightIntensity, isLoaded, hasAnimatedIn]
   );
   const deskLampOpacity = useMemo(() => 
-    isLoaded ? Math.pow(deskLampIntensity / 100, 2.2) * 0.5 : 0, 
-    [deskLampIntensity, isLoaded]
+    (isLoaded && hasAnimatedIn) ? Math.pow(deskLampIntensity / 100, 2.2) * 0.5 : 0, 
+    [deskLampIntensity, isLoaded, hasAnimatedIn]
   );
   const monitorLightOpacity = useMemo(() => 
-    isLoaded ? Math.pow(monitorLightIntensity / 100, 2.2) * 0.5 : 0, 
-    [monitorLightIntensity, isLoaded]
+    (isLoaded && hasAnimatedIn) ? Math.pow(monitorLightIntensity / 100, 2.2) * 0.5 : 0, 
+    [monitorLightIntensity, isLoaded, hasAnimatedIn]
   );
 
-  // Unified animation timing with stagger delay
+  // Unified animation timing
   const getDuration = useCallback((targetOpacity: number) => {
-    if (!isLoaded) return DATA_TRANSITION.fadeIn.duration;
+    // Use longer duration for initial entry
+    if (!hasAnimatedIn) return PAGE_LOAD_SEQUENCE.glowLayers.duration;
     return targetOpacity > 0 ? LIGHT_ANIMATION.turnOn.duration : LIGHT_ANIMATION.turnOff.duration;
-  }, [isLoaded]);
+  }, [hasAnimatedIn]);
 
   const getEasing = useCallback((targetOpacity: number) => {
-    if (!isLoaded) return DATA_TRANSITION.fadeIn.ease;
+    if (!hasAnimatedIn) return PAGE_LOAD_SEQUENCE.glowLayers.ease;
     return targetOpacity > 0 ? LIGHT_ANIMATION.turnOn.ease : LIGHT_ANIMATION.turnOff.ease;
-  }, [isLoaded]);
+  }, [hasAnimatedIn]);
 
   // Don't render anything until loaded
   if (!isLoaded) {
@@ -57,11 +71,11 @@ export const AmbientGlowLayers = ({
           filter: 'blur(90px)',
           willChange: 'opacity',
         }}
-        initial={{ opacity: 0 }}
+        initial={false}
         animate={{ opacity: spotlightOpacity }}
         transition={{
           duration: getDuration(spotlightOpacity),
-          delay: LIGHT_ANIMATION.stagger.glow,
+          delay: hasAnimatedIn ? LIGHT_ANIMATION.stagger.glow : 0,
           ease: getEasing(spotlightOpacity)
         }}
       />
@@ -74,11 +88,11 @@ export const AmbientGlowLayers = ({
           filter: 'blur(85px)',
           willChange: 'opacity',
         }}
-        initial={{ opacity: 0 }}
+        initial={false}
         animate={{ opacity: deskLampOpacity }}
         transition={{
           duration: getDuration(deskLampOpacity),
-          delay: LIGHT_ANIMATION.stagger.glow,
+          delay: hasAnimatedIn ? LIGHT_ANIMATION.stagger.glow : 0,
           ease: getEasing(deskLampOpacity)
         }}
       />
@@ -91,11 +105,11 @@ export const AmbientGlowLayers = ({
           filter: 'blur(80px)',
           willChange: 'opacity',
         }}
-        initial={{ opacity: 0 }}
+        initial={false}
         animate={{ opacity: monitorLightOpacity }}
         transition={{
           duration: getDuration(monitorLightOpacity),
-          delay: LIGHT_ANIMATION.stagger.glow,
+          delay: hasAnimatedIn ? LIGHT_ANIMATION.stagger.glow : 0,
           ease: getEasing(monitorLightOpacity)
         }}
       />
@@ -108,10 +122,10 @@ export const AmbientGlowLayers = ({
           filter: 'blur(120px)',
           willChange: 'opacity',
         }}
-        initial={{ opacity: 0, scale: 1 }}
+        initial={false}
         animate={{
-          opacity: allLightsOn ? [0.15, 0.25, 0.15] : 0,
-          scale: allLightsOn ? [1, 1.05, 1] : 1,
+          opacity: (allLightsOn && hasAnimatedIn) ? [0.15, 0.25, 0.15] : 0,
+          scale: (allLightsOn && hasAnimatedIn) ? [1, 1.05, 1] : 1,
         }}
         transition={{
           duration: 4,

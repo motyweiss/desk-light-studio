@@ -17,8 +17,8 @@ export const LoadingOverlay = ({ isLoading, onExitComplete }: LoadingOverlayProp
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           transition={{ 
-            duration: PAGE_LOAD_SEQUENCE.overlayExit.duration,
-            ease: PAGE_LOAD_SEQUENCE.overlayExit.ease
+            duration: 0.5,
+            ease: [0.25, 0.1, 0.25, 1]
           }}
           style={{
             backgroundColor: "#96856e",
