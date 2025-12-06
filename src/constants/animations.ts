@@ -57,100 +57,103 @@ export const LIGHT_ANIMATION = {
 } as const;
 
 // ============================================================
-// PAGE LOAD ANIMATION SEQUENCE
-// Synchronized timing for smooth initial page load
+// UNIFIED PAGE LOAD SEQUENCE
+// All timings coordinated from a single source
 // ============================================================
-export const PAGE_LOAD_SEQUENCE = {
-  // Phase 1: Overlay exit
-  overlayExit: {
-    duration: 0.5,
+export const PAGE_LOAD = {
+  // Overlay phase
+  overlay: {
+    exitDuration: 0.5,
     ease: EASING.smooth,
   },
   
-  // Phase 2: Content container fade in
+  // Content container (starts after overlay exit completes)
   container: {
     delay: 0.05,
     duration: 0.5,
     ease: EASING.entrance,
   },
   
-  // Phase 3: Header elements
-  header: {
-    delay: 0.08,
+  // Individual element timing (relative to container start)
+  elements: {
+    header: {
+      delay: 0,
+      duration: 0.5,
+      y: 8,
+    },
+    masterSwitch: {
+      delay: 0.04,
+      duration: 0.45,
+    },
+    devices: {
+      delay: 0.1,
+      stagger: 0.06,
+      duration: 0.45,
+      y: 6,
+    },
+    lightCards: {
+      delay: 0.16,
+      stagger: 0.06,
+      duration: 0.45,
+      y: 8,
+    },
+    deskImage: {
+      delay: 0.08,
+      duration: 0.55,
+    },
+  },
+  
+  // Post-content effects
+  effects: {
+    progressRings: {
+      delay: 0.2,
+      duration: 0.6,
+    },
+    glowLayers: {
+      delay: 0.3,
+      duration: 0.8,
+    },
+  },
+  
+  // Skeleton to data crossfade
+  crossfade: {
     duration: 0.5,
-    ease: EASING.entrance,
-    y: 10,
-  },
-  
-  // Phase 4: Master switch
-  masterSwitch: {
-    delay: 0.1,
-    duration: 0.45,
-    ease: EASING.entrance,
-  },
-  
-  // Phase 5: Device battery indicators
-  devices: {
-    delay: 0.15,
-    stagger: 0.06,
-    duration: 0.45,
-    ease: EASING.entrance,
-    y: 8,
-  },
-  
-  // Phase 6: Light control cards
-  lightCards: {
-    delay: 0.2,
-    stagger: 0.06,
-    duration: 0.45,
-    ease: EASING.entrance,
-    y: 10,
-  },
-  
-  // Phase 7: Desk image
-  deskImage: {
-    delay: 0.12,
-    duration: 0.6,
-    ease: EASING.entrance,
-    scale: 0.985,
-  },
-  
-  // Phase 8: Progress rings
-  circularProgress: {
-    delay: 0.4,
-    duration: 0.7,
-    ease: EASING.entrance,
-  },
-  
-  // Phase 9: Glow effects
-  glowLayers: {
-    delay: 0.5,
-    duration: 0.8,
+    blur: 4,
     ease: EASING.smooth,
   },
 } as const;
 
+// Legacy alias for backwards compatibility
+export const PAGE_LOAD_SEQUENCE = {
+  overlayExit: PAGE_LOAD.overlay,
+  container: PAGE_LOAD.container,
+  header: { ...PAGE_LOAD.elements.header, ease: EASING.entrance },
+  masterSwitch: { ...PAGE_LOAD.elements.masterSwitch, ease: EASING.entrance },
+  devices: { ...PAGE_LOAD.elements.devices, ease: EASING.entrance },
+  lightCards: { ...PAGE_LOAD.elements.lightCards, ease: EASING.entrance },
+  deskImage: { ...PAGE_LOAD.elements.deskImage, ease: EASING.entrance, scale: 1 },
+  circularProgress: { ...PAGE_LOAD.effects.progressRings, ease: EASING.entrance },
+  glowLayers: { ...PAGE_LOAD.effects.glowLayers, ease: EASING.smooth },
+} as const;
+
 // ============================================================
 // SKELETON TO DATA TRANSITION
-// Smooth crossfade between loading and real content
 // ============================================================
 export const DATA_TRANSITION = {
   skeleton: {
-    shimmerDuration: 1.5,
+    shimmerDuration: 1.8,
     pulseEase: 'easeInOut',
   },
-  // Skeleton fade out
   skeletonExit: {
-    duration: 0.35,
+    duration: PAGE_LOAD.crossfade.duration,
     ease: EASING.smooth,
   },
-  // Data fade in (starts slightly before skeleton fully gone)
   dataEnter: {
-    duration: 0.45,
-    delay: 0.1,
+    duration: PAGE_LOAD.crossfade.duration,
+    delay: 0.05,
     ease: EASING.smooth,
+    blur: PAGE_LOAD.crossfade.blur,
   },
-  // Combined reveal
   reveal: {
     duration: 0.5,
     stagger: 0.06,

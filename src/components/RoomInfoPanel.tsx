@@ -4,7 +4,7 @@ import { LightControlCard } from "@/features/lighting/components/LightControlCar
 import { CircularProgress } from "@/features/climate/components/CircularProgress";
 import { AirPodsMaxIcon } from "./icons/AirPodsMaxIcon";
 import { IPhoneIcon } from "./icons/IPhoneIcon";
-import { PAGE_LOAD_SEQUENCE, DATA_TRANSITION, EASING } from "@/constants/animations";
+import { PAGE_LOAD, DATA_TRANSITION, EASING } from "@/constants/animations";
 
 interface Light {
   id: string;
@@ -35,13 +35,13 @@ interface RoomInfoPanelProps {
   dataReady?: boolean;
 }
 
-// Unified transition configs
-const containerTransition = {
-  duration: PAGE_LOAD_SEQUENCE.container.duration,
+// Unified transition config
+const entryTransition = {
+  duration: PAGE_LOAD.container.duration,
   ease: EASING.entrance,
 };
 
-const dataTransition = {
+const crossfadeTransition = {
   duration: DATA_TRANSITION.dataEnter.duration,
   ease: EASING.smooth,
 };
@@ -64,22 +64,24 @@ export const RoomInfoPanel = ({
       initial={{ opacity: 0 }}
       animate={{ opacity: isLoaded ? 1 : 0 }}
       transition={{
-        ...containerTransition,
-        delay: PAGE_LOAD_SEQUENCE.container.delay,
+        ...entryTransition,
+        delay: PAGE_LOAD.container.delay,
       }}
+      style={{ willChange: 'opacity' }}
     >
       {/* Room Title with Master Switch */}
       <motion.div 
         className="flex items-center justify-between gap-4 md:gap-6"
-        initial={{ opacity: 0, y: PAGE_LOAD_SEQUENCE.header.y }}
+        initial={{ opacity: 0, y: PAGE_LOAD.elements.header.y }}
         animate={{ 
           opacity: isLoaded ? 1 : 0,
-          y: isLoaded ? 0 : PAGE_LOAD_SEQUENCE.header.y
+          y: isLoaded ? 0 : PAGE_LOAD.elements.header.y
         }}
         transition={{
-          ...containerTransition,
-          delay: PAGE_LOAD_SEQUENCE.header.delay,
+          ...entryTransition,
+          delay: PAGE_LOAD.elements.header.delay,
         }}
+        style={{ willChange: 'opacity, transform' }}
       >
         <h1 className="text-2xl md:text-4xl font-display font-light tracking-tight text-foreground leading-tight">
           {roomName}
@@ -117,15 +119,16 @@ export const RoomInfoPanel = ({
       {devices && devices.length > 0 && (
         <motion.div 
           className="hidden md:block rounded-2xl py-6 px-6"
-          initial={{ opacity: 0, y: PAGE_LOAD_SEQUENCE.devices.y }}
+          initial={{ opacity: 0, y: PAGE_LOAD.elements.devices.y }}
           animate={{ 
             opacity: isLoaded ? 1 : 0,
-            y: isLoaded ? 0 : PAGE_LOAD_SEQUENCE.devices.y
+            y: isLoaded ? 0 : PAGE_LOAD.elements.devices.y
           }}
           transition={{
-            ...containerTransition,
-            delay: PAGE_LOAD_SEQUENCE.devices.delay,
+            ...entryTransition,
+            delay: PAGE_LOAD.elements.devices.delay,
           }}
+          style={{ willChange: 'opacity, transform' }}
         >
           <div className="flex flex-row gap-10">
             {devices.map((device, index) => {
@@ -135,14 +138,11 @@ export const RoomInfoPanel = ({
                 <motion.div 
                   key={device.id} 
                   className="flex items-center gap-3"
-                  initial={{ opacity: 0, y: 6 }}
-                  animate={{ 
-                    opacity: isLoaded ? 1 : 0,
-                    y: isLoaded ? 0 : 6
-                  }}
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: isLoaded ? 1 : 0 }}
                   transition={{
-                    ...containerTransition,
-                    delay: PAGE_LOAD_SEQUENCE.devices.delay + (index * PAGE_LOAD_SEQUENCE.devices.stagger),
+                    ...entryTransition,
+                    delay: PAGE_LOAD.elements.devices.delay + (index * PAGE_LOAD.elements.devices.stagger),
                   }}
                 >
                   <CircularProgress 
@@ -154,7 +154,7 @@ export const RoomInfoPanel = ({
                     isLoaded={dataReady}
                     showSkeleton={showSkeleton}
                     colorType="battery"
-                    delay={PAGE_LOAD_SEQUENCE.circularProgress.delay + (index * 0.08)}
+                    delay={PAGE_LOAD.effects.progressRings.delay + (index * 0.06)}
                   >
                     <DeviceIcon className="w-5 h-5 text-white/60" strokeWidth={1.5} />
                   </CircularProgress>
@@ -163,7 +163,7 @@ export const RoomInfoPanel = ({
                     <span className="text-[9px] text-white/55 font-light tracking-[0.2em] uppercase mb-1">
                       {device.name}
                     </span>
-                    {/* Smooth crossfade between skeleton and value */}
+                    {/* Crossfade container */}
                     <div className="relative h-5">
                       {/* Skeleton layer */}
                       <motion.div
@@ -172,28 +172,23 @@ export const RoomInfoPanel = ({
                         animate={{ 
                           opacity: showSkeleton ? [0.3, 0.5, 0.3] : 0,
                         }}
-                        transition={{
-                          opacity: showSkeleton 
-                            ? { duration: DATA_TRANSITION.skeleton.shimmerDuration, repeat: Infinity, ease: "easeInOut" }
-                            : { ...dataTransition }
-                        }}
+                        transition={showSkeleton ? {
+                          duration: DATA_TRANSITION.skeleton.shimmerDuration,
+                          repeat: Infinity,
+                          ease: "easeInOut"
+                        } : crossfadeTransition}
                       />
-                      {/* Value layer - blur-to-sharp reveal */}
+                      {/* Value layer */}
                       <motion.div 
                         className="text-base font-light text-white tabular-nums flex items-center gap-1.5"
                         initial={false}
                         animate={{ 
                           opacity: dataReady && !showSkeleton ? 1 : 0,
-                          filter: dataReady && !showSkeleton ? 'blur(0px)' : 'blur(4px)',
+                          filter: dataReady && !showSkeleton ? 'blur(0px)' : `blur(${DATA_TRANSITION.dataEnter.blur}px)`,
                         }}
                         transition={{ 
-                          ...dataTransition,
+                          ...crossfadeTransition,
                           delay: showSkeleton ? 0 : DATA_TRANSITION.dataEnter.delay,
-                          filter: { 
-                            duration: 0.4, 
-                            delay: showSkeleton ? 0 : DATA_TRANSITION.dataEnter.delay,
-                            ease: dataTransition.ease 
-                          }
                         }}
                       >
                         <span>{device.batteryLevel}%</span>
@@ -216,22 +211,24 @@ export const RoomInfoPanel = ({
         initial={{ opacity: 0 }}
         animate={{ opacity: isLoaded ? 1 : 0 }}
         transition={{ 
-          ...containerTransition, 
-          delay: PAGE_LOAD_SEQUENCE.lightCards.delay 
+          ...entryTransition, 
+          delay: PAGE_LOAD.elements.lightCards.delay 
         }}
+        style={{ willChange: 'opacity' }}
       >
         {lights.map((light, index) => (
           <motion.div 
             key={light.id}
-            initial={{ opacity: 0, y: PAGE_LOAD_SEQUENCE.lightCards.y }}
+            initial={{ opacity: 0, y: PAGE_LOAD.elements.lightCards.y }}
             animate={{ 
               opacity: isLoaded ? 1 : 0,
-              y: isLoaded ? 0 : PAGE_LOAD_SEQUENCE.lightCards.y
+              y: isLoaded ? 0 : PAGE_LOAD.elements.lightCards.y
             }}
             transition={{
-              ...containerTransition,
-              delay: PAGE_LOAD_SEQUENCE.lightCards.delay + (index * PAGE_LOAD_SEQUENCE.lightCards.stagger),
+              ...entryTransition,
+              delay: PAGE_LOAD.elements.lightCards.delay + (index * PAGE_LOAD.elements.lightCards.stagger),
             }}
+            style={{ willChange: 'opacity, transform' }}
           >
             <LightControlCard
               id={light.id}

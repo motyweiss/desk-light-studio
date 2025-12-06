@@ -3,7 +3,7 @@ import { Slider } from "@/components/ui/slider";
 import { useState, useRef, useCallback, useEffect } from "react";
 import { getIconForLight } from "@/components/icons/LightIcons";
 import { Loader2 } from "lucide-react";
-import { LIGHT_ANIMATION } from "@/constants/animations";
+import { LIGHT_ANIMATION, DATA_TRANSITION, EASING } from "@/constants/animations";
 import { useLightAnimation } from "../hooks/useLightAnimation";
 
 interface LightControlCardProps {
@@ -18,10 +18,15 @@ interface LightControlCardProps {
   onRetry?: () => void;
 }
 
-// Smooth transition config used throughout
+// Smooth transition config
 const smoothTransition = {
   duration: 0.5,
-  ease: [0.25, 0.1, 0.25, 1] as [number, number, number, number],
+  ease: EASING.smooth,
+};
+
+const crossfadeTransition = {
+  duration: DATA_TRANSITION.dataEnter.duration,
+  ease: EASING.smooth,
 };
 
 export const LightControlCard = ({ 
@@ -146,9 +151,9 @@ export const LightControlCard = ({
           opacity: isLoading ? 1 : 0
         }}
         transition={isLoading ? { 
-          x: { duration: 1.5, repeat: Infinity, ease: "easeInOut" },
-          opacity: smoothTransition
-        } : { opacity: smoothTransition }}
+          x: { duration: DATA_TRANSITION.skeleton.shimmerDuration, repeat: Infinity, ease: "easeInOut" },
+          opacity: crossfadeTransition
+        } : { opacity: crossfadeTransition }}
       />
 
       {/* Pending State Overlay */}
@@ -189,30 +194,30 @@ export const LightControlCard = ({
               opacity: isLoading ? [0.3, 0.5, 0.3] : 0 
             }}
             transition={isLoading ? { 
-              duration: 1.5, 
+              duration: DATA_TRANSITION.skeleton.shimmerDuration, 
               repeat: Infinity,
               ease: "easeInOut"
-            } : smoothTransition}
+            } : crossfadeTransition}
           />
-          {/* Real icon - blur-to-sharp reveal */}
+          {/* Real icon */}
           <motion.div
             className="absolute inset-0 flex items-center justify-center"
             initial={false}
             animate={{
               opacity: isLoading ? 0 : 1,
-              filter: isLoading ? 'blur(4px)' : 'blur(0px)',
+              filter: isLoading ? `blur(${DATA_TRANSITION.dataEnter.blur}px)` : 'blur(0px)',
               color: isOn ? 'hsl(44 92% 62%)' : 'rgba(255, 255, 255, 0.3)'
             }}
             transition={{
-              ...smoothTransition,
-              filter: { duration: 0.35, ease: smoothTransition.ease }
+              ...crossfadeTransition,
+              filter: { duration: 0.35, ease: EASING.smooth }
             }}
           >
             <IconComponent className="w-5 h-5 md:w-7 md:h-7" />
           </motion.div>
         </div>
 
-        {/* Text Info - single line layout */}
+        {/* Text Info */}
         <div className="flex-1 text-left min-w-0">
           {/* Label */}
           <div className="relative">
@@ -223,21 +228,21 @@ export const LightControlCard = ({
                 opacity: isLoading ? [0.3, 0.5, 0.3] : 0 
               }}
               transition={isLoading ? { 
-                duration: 1.5, 
+                duration: DATA_TRANSITION.skeleton.shimmerDuration, 
                 repeat: Infinity,
                 ease: "easeInOut"
-              } : smoothTransition}
+              } : crossfadeTransition}
             />
             <motion.div 
               className="font-light text-sm md:text-base text-white tracking-wide leading-tight"
               initial={false}
               animate={{ 
                 opacity: isLoading ? 0 : 1,
-                filter: isLoading ? 'blur(3px)' : 'blur(0px)',
+                filter: isLoading ? `blur(${DATA_TRANSITION.dataEnter.blur}px)` : 'blur(0px)',
               }}
               transition={{
-                ...smoothTransition,
-                filter: { duration: 0.35, ease: smoothTransition.ease }
+                ...crossfadeTransition,
+                filter: { duration: 0.35, ease: EASING.smooth }
               }}
             >
               {label}
@@ -253,23 +258,23 @@ export const LightControlCard = ({
                 opacity: isLoading ? [0.3, 0.5, 0.3] : 0 
               }}
               transition={isLoading ? { 
-                duration: 1.5, 
+                duration: DATA_TRANSITION.skeleton.shimmerDuration, 
                 repeat: Infinity,
                 ease: "easeInOut",
                 delay: 0.1
-              } : smoothTransition}
+              } : crossfadeTransition}
             />
             <motion.div 
               className="text-[10px] md:text-xs font-light tracking-wide tabular-nums leading-tight"
               initial={false}
               animate={{
                 opacity: isLoading ? 0 : 1,
-                filter: isLoading ? 'blur(3px)' : 'blur(0px)',
+                filter: isLoading ? `blur(${DATA_TRANSITION.dataEnter.blur}px)` : 'blur(0px)',
                 color: isOn ? 'rgba(255, 255, 255, 0.65)' : 'rgba(255, 255, 255, 0.5)'
               }}
               transition={{
-                ...smoothTransition,
-                filter: { duration: 0.35, ease: smoothTransition.ease }
+                ...crossfadeTransition,
+                filter: { duration: 0.35, ease: EASING.smooth }
               }}
             >
               {isOn ? `${displayNumber}%` : 'Off'}
@@ -310,13 +315,13 @@ export const LightControlCard = ({
               className="absolute inset-0 flex items-center"
               initial={false}
               animate={{ opacity: isLoading ? 1 : 0 }}
-              transition={smoothTransition}
+              transition={crossfadeTransition}
             >
               <motion.div 
                 className="w-full h-2 bg-white/10 rounded-full"
                 animate={{ opacity: [0.3, 0.5, 0.3] }}
                 transition={{ 
-                  duration: 1.5, 
+                  duration: DATA_TRANSITION.skeleton.shimmerDuration, 
                   repeat: Infinity,
                   ease: "easeInOut",
                   delay: 0.2
@@ -324,17 +329,17 @@ export const LightControlCard = ({
               />
             </motion.div>
             
-            {/* Real slider - blur-to-sharp reveal */}
+            {/* Real slider */}
             <motion.div 
               className="w-full"
               initial={false}
               animate={{ 
                 opacity: isLoading ? 0 : 1,
-                filter: isLoading ? 'blur(4px)' : 'blur(0px)',
+                filter: isLoading ? `blur(${DATA_TRANSITION.dataEnter.blur}px)` : 'blur(0px)',
               }}
               transition={{
-                ...smoothTransition,
-                filter: { duration: 0.4, ease: smoothTransition.ease }
+                ...crossfadeTransition,
+                filter: { duration: 0.4, ease: EASING.smooth }
               }}
             >
               <Slider

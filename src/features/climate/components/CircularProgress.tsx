@@ -1,5 +1,6 @@
 import React from "react";
 import { motion } from "framer-motion";
+import { DATA_TRANSITION, EASING } from "@/constants/animations";
 
 interface CircularProgressProps {
   value: number;
@@ -16,8 +17,8 @@ interface CircularProgressProps {
 
 // Smooth transition config
 const smoothTransition = {
-  duration: 0.5,
-  ease: [0.25, 0.1, 0.25, 1] as [number, number, number, number],
+  duration: DATA_TRANSITION.dataEnter.duration,
+  ease: EASING.smooth,
 };
 
 export const CircularProgress = ({ 
@@ -30,7 +31,7 @@ export const CircularProgress = ({
   isLoaded = true,
   showSkeleton = false,
   colorType = 'default',
-  delay = 0.3
+  delay = 0.2
 }: CircularProgressProps) => {
   const radius = (size - strokeWidth) / 2;
   const circumference = 2 * Math.PI * radius;
@@ -75,7 +76,7 @@ export const CircularProgress = ({
   return (
     <div className="relative" style={{ width: size, height: size }}>
       <svg className="absolute inset-0 -rotate-90" width={size} height={size}>
-        {/* Background ring - always visible */}
+        {/* Background ring */}
         <circle
           cx={size/2} 
           cy={size/2} 
@@ -85,7 +86,7 @@ export const CircularProgress = ({
           fill="none"
         />
         
-        {/* Skeleton shimmer ring - crossfade with progress */}
+        {/* Skeleton shimmer ring */}
         <motion.circle
           cx={size/2} 
           cy={size/2} 
@@ -105,7 +106,7 @@ export const CircularProgress = ({
           }}
           transition={isShowingSkeleton ? { 
             opacity: {
-              duration: 1.5,
+              duration: DATA_TRANSITION.skeleton.shimmerDuration,
               repeat: Infinity,
               ease: "easeInOut",
             },
@@ -117,7 +118,7 @@ export const CircularProgress = ({
           } : smoothTransition}
         />
         
-        {/* Progress ring - crossfade in when data ready */}
+        {/* Progress ring */}
         <motion.circle
           cx={size/2} 
           cy={size/2} 
@@ -138,7 +139,7 @@ export const CircularProgress = ({
             strokeDashoffset: {
               duration: 0.6,
               delay: isShowingSkeleton ? 0 : delay,
-              ease: smoothTransition.ease,
+              ease: EASING.entrance,
             },
             stroke: {
               duration: 0.5,
@@ -149,24 +150,24 @@ export const CircularProgress = ({
         />
       </svg>
       
-      {/* Icon container - blur-to-sharp reveal */}
+      {/* Icon container */}
       <motion.div 
         className="absolute inset-0 flex items-center justify-center"
         initial={false}
         animate={{ 
           opacity: isShowingSkeleton ? [0.4, 0.7, 0.4] : 1,
-          filter: isShowingSkeleton ? 'blur(2px)' : 'blur(0px)',
+          filter: isShowingSkeleton ? `blur(${DATA_TRANSITION.dataEnter.blur / 2}px)` : 'blur(0px)',
         }}
         transition={isShowingSkeleton ? {
           opacity: {
-            duration: 1.5,
+            duration: DATA_TRANSITION.skeleton.shimmerDuration,
             repeat: Infinity,
             ease: "easeInOut",
           },
           filter: { duration: 0.1 }
         } : {
           ...smoothTransition,
-          filter: { duration: 0.4, ease: smoothTransition.ease }
+          filter: { duration: 0.35, ease: EASING.smooth }
         }}
       >
         {children}
