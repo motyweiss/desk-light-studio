@@ -107,6 +107,57 @@ export const SpeakerPopover = ({
           >
             <div className="overflow-y-auto max-h-[360px] scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent">
               <div className="p-3 space-y-3">
+              {/* Spotify Connect Sources - Now at top */}
+                {hasSpotifySources && (
+                  <div className="space-y-2">
+                    <h4 className="text-white/40 text-[10px] font-light uppercase tracking-wider px-1">
+                      Spotify Connect
+                    </h4>
+                    <div className="space-y-1">
+                      {spotifySources.map((source) => {
+                        const isActive = currentPlaybackTarget?.type === 'spotify' && currentPlaybackTarget.name === source;
+                        const Icon = getIconForSpeaker(source);
+                        
+                        return (
+                          <motion.button
+                            key={source}
+                            onClick={() => handleSpotifySelect(source)}
+                            className={`
+                              w-full flex items-center gap-2.5 px-3 py-2 rounded-lg
+                              transition-all duration-200
+                              ${isActive 
+                                ? 'bg-[hsl(44_85%_58%)]/15 border-[hsl(44_85%_58%)]/30' 
+                                : 'bg-white/5 border-white/10 hover:bg-white/10 hover:border-white/20'
+                              }
+                              border backdrop-blur-sm
+                            `}
+                            whileHover={{ scale: 1.02 }}
+                            whileTap={{ scale: 0.98 }}
+                          >
+                            <div className={`
+                              w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0
+                              ${isActive ? 'bg-[hsl(44_85%_58%)]/20' : 'bg-white/5'}
+                            `}>
+                              <Icon className={`w-3.5 h-3.5 ${isActive ? 'text-[hsl(44_85%_58%)]' : 'text-white/50'}`} />
+                            </div>
+                            
+                            <span className={`
+                              flex-1 text-left text-xs font-light truncate
+                              ${isActive ? 'text-white' : 'text-white/70'}
+                            `}>
+                              {source}
+                            </span>
+
+                            {isActive && (
+                              <Check className="w-3.5 h-3.5 text-[hsl(44_85%_58%)] flex-shrink-0" />
+                            )}
+                          </motion.button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+
                 {/* Speaker Groups */}
                 {hasGroups && (
                   <div className="space-y-2">
@@ -151,57 +202,6 @@ export const SpeakerPopover = ({
                             {group.isDefault && (
                               <Star className="w-3 h-3 text-[hsl(44_85%_58%)] fill-[hsl(44_85%_58%)] flex-shrink-0" />
                             )}
-
-                            {isActive && (
-                              <Check className="w-3.5 h-3.5 text-[hsl(44_85%_58%)] flex-shrink-0" />
-                            )}
-                          </motion.button>
-                        );
-                      })}
-                    </div>
-                  </div>
-                )}
-
-                {/* Spotify Connect Sources */}
-                {hasSpotifySources && (
-                  <div className="space-y-2">
-                    <h4 className="text-white/40 text-[10px] font-light uppercase tracking-wider px-1">
-                      Spotify Connect
-                    </h4>
-                    <div className="space-y-1">
-                      {spotifySources.map((source) => {
-                        const isActive = currentPlaybackTarget?.type === 'spotify' && currentPlaybackTarget.name === source;
-                        const Icon = getIconForSpeaker(source);
-                        
-                        return (
-                          <motion.button
-                            key={source}
-                            onClick={() => handleSpotifySelect(source)}
-                            className={`
-                              w-full flex items-center gap-2.5 px-3 py-2 rounded-lg
-                              transition-all duration-200
-                              ${isActive 
-                                ? 'bg-[hsl(44_85%_58%)]/15 border-[hsl(44_85%_58%)]/30' 
-                                : 'bg-white/5 border-white/10 hover:bg-white/10 hover:border-white/20'
-                              }
-                              border backdrop-blur-sm
-                            `}
-                            whileHover={{ scale: 1.02 }}
-                            whileTap={{ scale: 0.98 }}
-                          >
-                            <div className={`
-                              w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0
-                              ${isActive ? 'bg-[hsl(44_85%_58%)]/20' : 'bg-white/5'}
-                            `}>
-                              <Icon className={`w-3.5 h-3.5 ${isActive ? 'text-[hsl(44_85%_58%)]' : 'text-white/50'}`} />
-                            </div>
-                            
-                            <span className={`
-                              flex-1 text-left text-xs font-light truncate
-                              ${isActive ? 'text-white' : 'text-white/70'}
-                            `}>
-                              {source}
-                            </span>
 
                             {isActive && (
                               <Check className="w-3.5 h-3.5 text-[hsl(44_85%_58%)] flex-shrink-0" />
