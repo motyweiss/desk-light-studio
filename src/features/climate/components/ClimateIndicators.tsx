@@ -116,11 +116,13 @@ export const ClimateIndicators = () => {
           unit="°C"
           trendData={temperatureTrend}
           color={
-            climate.temperature <= 17 ? "hsl(var(--status-cold))" :
-            climate.temperature <= 20 ? "hsl(var(--status-cool))" :
-            climate.temperature <= 24 ? "hsl(var(--status-comfortable))" :
-            climate.temperature <= 28 ? "hsl(var(--status-warm))" :
-            "hsl(var(--status-hot))"
+            climate.temperature <= 18 ? "hsl(210 80% 55%)" :
+            climate.temperature <= 20 ? "hsl(190 70% 50%)" :
+            climate.temperature <= 22 ? "hsl(160 60% 48%)" :
+            climate.temperature <= 24 ? "hsl(45 80% 55%)" :
+            climate.temperature <= 26 ? "hsl(30 85% 55%)" :
+            climate.temperature <= 28 ? "hsl(15 85% 55%)" :
+            "hsl(0 80% 55%)"
           }
           onToggle={() => {}}
           progressValue={climate.temperature}
