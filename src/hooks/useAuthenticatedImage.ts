@@ -13,9 +13,7 @@ export const useAuthenticatedImage = (relativePath: string | null) => {
   const { config, isConnected } = useHAConnection();
 
   const fetchImage = useCallback(async (path: string) => {
-    // Ensure config is set before attempting fetch
     if (!config) {
-      console.log('[useAuthenticatedImage] Config not available yet, waiting...');
       return null;
     }
 
@@ -29,6 +27,7 @@ export const useAuthenticatedImage = (relativePath: string | null) => {
   }, [config]);
 
   useEffect(() => {
+    // Reset when path is null
     if (!relativePath) {
       setImageUrl(null);
       setIsLoading(false);
@@ -43,28 +42,38 @@ export const useAuthenticatedImage = (relativePath: string | null) => {
       return;
     }
 
-    // Skip if same path and we already have the image
-    if (relativePath === lastPathRef.current && imageUrl) {
+    // Check if path actually changed (compare cache param too)
+    const pathChanged = relativePath !== lastPathRef.current;
+    
+    if (!pathChanged) {
       return;
     }
 
+    // Clear previous image immediately when track changes
+    setImageUrl(null);
     lastPathRef.current = relativePath;
     setIsLoading(true);
     setError(false);
     retryCountRef.current = 0;
 
+    // Clear the image cache for this path to force fresh fetch
+    homeAssistant.clearImageCache();
+
     const attemptFetch = async () => {
       const dataUrl = await fetchImage(relativePath);
+      
+      // Verify we're still fetching the same path
+      if (relativePath !== lastPathRef.current) {
+        return;
+      }
       
       if (dataUrl) {
         setImageUrl(dataUrl);
         setError(false);
         setIsLoading(false);
       } else if (retryCountRef.current < maxRetries) {
-        // Retry with exponential backoff
         retryCountRef.current++;
         const delay = Math.pow(2, retryCountRef.current) * 200;
-        console.log(`[useAuthenticatedImage] Retry ${retryCountRef.current}/${maxRetries} in ${delay}ms`);
         setTimeout(attemptFetch, delay);
       } else {
         setError(true);
@@ -73,14 +82,7 @@ export const useAuthenticatedImage = (relativePath: string | null) => {
     };
 
     attemptFetch();
-  }, [relativePath, isConnected, config, fetchImage, imageUrl]);
-
-  // Re-fetch when connection becomes available
-  useEffect(() => {
-    if (isConnected && config && relativePath && !imageUrl && !isLoading) {
-      lastPathRef.current = null; // Reset to trigger refetch
-    }
-  }, [isConnected, config, relativePath, imageUrl, isLoading]);
+  }, [relativePath, isConnected, config, fetchImage]);
 
   return { imageUrl, isLoading, error };
 };
