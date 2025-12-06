@@ -208,12 +208,12 @@ export const LightControlCard = ({
           </motion.div>
         </div>
 
-        {/* Text Info - crossfade between skeleton and real */}
-        <div className="flex-1 text-left min-w-0 space-y-1">
-          {/* Label row */}
-          <div className="relative h-4 md:h-5">
+        {/* Text Info - single line layout */}
+        <div className="flex-1 text-left min-w-0">
+          {/* Label */}
+          <div className="relative">
             <motion.div 
-              className="absolute inset-y-0 left-0 w-20 md:w-24 bg-white/10 rounded"
+              className="absolute top-0 left-0 h-4 w-20 md:w-24 bg-white/10 rounded"
               initial={false}
               animate={{ 
                 opacity: isLoading ? [0.3, 0.5, 0.3] : 0 
@@ -225,7 +225,7 @@ export const LightControlCard = ({
               } : smoothTransition}
             />
             <motion.div 
-              className="font-light text-sm md:text-base text-white tracking-wide"
+              className="font-light text-sm md:text-base text-white tracking-wide leading-tight"
               initial={false}
               animate={{ opacity: isLoading ? 0 : 1 }}
               transition={smoothTransition}
@@ -234,10 +234,10 @@ export const LightControlCard = ({
             </motion.div>
           </div>
           
-          {/* Status row */}
-          <div className="relative h-3 md:h-4">
+          {/* Status */}
+          <div className="relative mt-0.5">
             <motion.div 
-              className="absolute inset-y-0 left-0 w-10 bg-white/10 rounded"
+              className="absolute top-0 left-0 h-3 w-10 bg-white/10 rounded"
               initial={false}
               animate={{ 
                 opacity: isLoading ? [0.3, 0.5, 0.3] : 0 
@@ -250,7 +250,7 @@ export const LightControlCard = ({
               } : smoothTransition}
             />
             <motion.div 
-              className="text-[10px] md:text-xs font-light tracking-wide tabular-nums"
+              className="text-[10px] md:text-xs font-light tracking-wide tabular-nums leading-tight"
               initial={false}
               animate={{
                 opacity: isLoading ? 0 : 1,
@@ -263,9 +263,9 @@ export const LightControlCard = ({
           </div>
         </div>
 
-        {/* Slider area - crossfade between skeleton and real */}
+        {/* Slider area */}
         <div 
-          className="flex-shrink-0 flex items-center gap-2 md:gap-3"
+          className="flex-shrink-0 flex items-center gap-2 md:gap-3 self-center"
           data-slider
           onClick={(e) => e.stopPropagation()}
           onPointerDown={(e) => e.stopPropagation()}
@@ -289,11 +289,11 @@ export const LightControlCard = ({
             </AnimatePresence>
           </div>
           
-          {/* Slider container with crossfade */}
-          <div className="relative w-20 md:w-32 h-5">
+          {/* Slider container */}
+          <div className="relative w-20 md:w-32 flex items-center">
             {/* Skeleton slider */}
             <motion.div 
-              className="absolute inset-y-0 left-0 right-0 flex items-center"
+              className="absolute inset-0 flex items-center"
               initial={false}
               animate={{ opacity: isLoading ? 1 : 0 }}
               transition={smoothTransition}
@@ -312,7 +312,7 @@ export const LightControlCard = ({
             
             {/* Real slider */}
             <motion.div 
-              className="absolute inset-0"
+              className="w-full"
               initial={false}
               animate={{ opacity: isLoading ? 0 : 1 }}
               transition={smoothTransition}
