@@ -245,17 +245,14 @@ export const LightControlCard = ({
         {/* Icon */}
         <motion.div
           className="flex-shrink-0"
-          initial={{ scale: 0.5, opacity: 0 }}
+          initial={false}
           animate={{
-            scale: 1,
-            opacity: 1,
             color: isOn ? 'hsl(44 92% 62%)' : 'rgba(255, 255, 255, 0.3)'
           }}
           transition={{ 
-            scale: { duration: 0.4, ease: LIGHT_ANIMATION.turnOn.ease },
-            opacity: { duration: 0.35, ease: LIGHT_ANIMATION.turnOn.ease },
             color: { duration: 0.5, ease: LIGHT_ANIMATION.turnOn.ease }
           }}
+          style={{ willChange: 'color' }}
         >
           <IconComponent className="w-5 h-5 md:w-7 md:h-7" />
         </motion.div>

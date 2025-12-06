@@ -38,11 +38,9 @@ const Index = () => {
 
   // Handle overlay exit - use onExitComplete for perfect timing
   const handleOverlayExitComplete = useCallback(() => {
-    // Wait one frame to ensure overlay is fully gone
-    requestAnimationFrame(() => {
-      setContentReady(true);
-      setIsLoaded(true);
-    });
+    // Set immediately without RAF to prevent flicker
+    setContentReady(true);
+    setIsLoaded(true);
   }, []);
 
   // Optimized image loading - only on initial load
@@ -248,6 +246,7 @@ const Index = () => {
           deskLampIntensity={lights.deskLamp.targetValue}
           monitorLightIntensity={lights.monitorLight.targetValue}
           allLightsOn={allLightsOn}
+          isLoaded={contentReady}
         />
 
         {/* Main content area */}

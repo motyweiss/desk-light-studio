@@ -82,7 +82,7 @@ export const CircularProgress = ({
           strokeWidth={strokeWidth}
           fill="none"
           strokeLinecap="round"
-          initial={{ strokeDashoffset: circumference }}
+          initial={false}
           animate={{ strokeDashoffset: isLoaded ? offset : circumference }}
           style={{ 
             strokeDasharray: circumference,
@@ -91,9 +91,9 @@ export const CircularProgress = ({
           }}
           transition={{ 
             strokeDashoffset: {
-              duration: PAGE_LOAD_SEQUENCE.circularProgress.duration,
-              delay: delay,
-              ease: PAGE_LOAD_SEQUENCE.circularProgress.ease
+              duration: 0.8,
+              delay: isLoaded ? Math.max(0, delay - 0.5) : 0,
+              ease: [0.22, 0.03, 0.26, 1]
             },
             stroke: {
               duration: 0.5,

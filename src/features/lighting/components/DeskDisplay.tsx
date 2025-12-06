@@ -82,13 +82,13 @@ export const DeskDisplay = ({
     });
   }, []);
 
-  // Mark initial render complete after a brief delay
+  // Mark initial render complete immediately when loaded
   useEffect(() => {
     if (isLoaded && allImagesLoaded) {
-      const timer = setTimeout(() => {
+      // Use microtask to ensure state is set in next tick, not RAF
+      queueMicrotask(() => {
         setHasInitialRender(true);
-      }, 100);
-      return () => clearTimeout(timer);
+      });
     }
   }, [isLoaded, allImagesLoaded]);
 
