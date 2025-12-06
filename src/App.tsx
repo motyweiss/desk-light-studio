@@ -16,7 +16,7 @@ import DesignSystem from "./pages/DesignSystem";
 import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient(); // Force rebuild
 
 const App = () => (
   <ErrorBoundary>
