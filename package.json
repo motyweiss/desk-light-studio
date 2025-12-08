@@ -12,7 +12,7 @@
   },
   "dependencies": {
     "@commitlint/cli": "^20.1.0",
-    "@commitlint/config-conventional": "^20.0.0",
+    "@commitlint/config-conventional": "^20.2.0",
     "@playwright/test": "^1.57.0",
     "@radix-ui/react-dialog": "^1.0.5",
     "@radix-ui/react-popover": "^1.0.7",
