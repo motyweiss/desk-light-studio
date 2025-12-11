@@ -145,19 +145,19 @@ export const usePageLoadSequence = (
     }
   }, [overlayComplete, stage]);
 
-  // Handle data becoming ready
+  // Handle data becoming ready OR timeout to proceed without HA connection
   useEffect(() => {
-    if (!isConnected || !isDataLoaded || hasTransitionedToData.current) {
+    if (hasTransitionedToData.current || stage !== 'entering') {
       return;
     }
 
-    // Only transition if we're in entering stage or later
-    if (stage !== 'entering') {
-      return;
-    }
+    // If connected and data loaded, proceed immediately
+    // Otherwise, use a short timeout to show content anyway
+    const shouldProceed = isConnected && isDataLoaded;
+    const timeoutDelay = shouldProceed ? 0 : 300; // Show content after 300ms even without HA
 
     const skeletonShown = Date.now() - skeletonStartRef.current;
-    const remaining = Math.max(0, LOAD_TIMING.minSkeletonTime - skeletonShown);
+    const remaining = Math.max(timeoutDelay, LOAD_TIMING.minSkeletonTime - skeletonShown);
 
     addTimeout(() => {
       hasTransitionedToData.current = true;
