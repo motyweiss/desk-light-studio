@@ -1,4 +1,4 @@
-import { Speaker, Smartphone, Users } from 'lucide-react';
+import { Speaker, Smartphone, Users, Tv } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { forwardRef, useMemo } from 'react';
 import type { PlaybackTarget } from '@/types/mediaPlayer';
@@ -14,8 +14,9 @@ export const MiniSpeakerBadge = forwardRef<HTMLButtonElement, MiniSpeakerBadgePr
     const displayText = useMemo(() => {
       if (!playbackTarget) return 'Select Speaker';
       
+      // Always show full group name
       if (playbackTarget.type === 'group') {
-        return `${playbackTarget.name}`;
+        return playbackTarget.name;
       }
       
       if (playbackTarget.type === 'speaker' && playbackTarget.entityIds.length > 1) {
@@ -27,7 +28,11 @@ export const MiniSpeakerBadge = forwardRef<HTMLButtonElement, MiniSpeakerBadgePr
 
     const Icon = useMemo(() => {
       if (!playbackTarget) return Speaker;
-      if (playbackTarget.type === 'group') return Users;
+      if (playbackTarget.type === 'group') {
+        // Use TV icon if group name contains TV
+        const isTV = playbackTarget.name.toLowerCase().includes('tv');
+        return isTV ? Tv : Users;
+      }
       if (playbackTarget.type === 'speaker') return Speaker;
       return Smartphone; // Spotify Connect
     }, [playbackTarget]);
