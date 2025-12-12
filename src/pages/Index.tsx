@@ -162,7 +162,7 @@ const Index = () => {
   return (
     <>
       <LoadingOverlay 
-        isLoading={stage === 'loading' || stage === 'exiting'} 
+        isLoading={stage === 'loading'} 
         onExitComplete={onOverlayExitComplete} 
       />
       <Toaster />
