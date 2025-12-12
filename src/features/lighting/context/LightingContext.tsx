@@ -119,7 +119,7 @@ export const LightingProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     }
   }, [entityMapping, getLightEntity]);
 
-  // Polling function
+  // Polling function - fetch all lights sequentially  
   const pollLights = useCallback(async () => {
     if (!entityMapping) return;
 
@@ -129,48 +129,42 @@ export const LightingProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       const entityId = getLightEntity(lightId);
       if (!entityId) continue;
 
-      setLights(prev => {
-        const light = prev[lightId];
-        if (light.isPending) return prev;
+      try {
+        const state = await lightsAPI.getState(entityId);
+        if (state) {
+          const intensity = state.state === 'on'
+            ? Math.round(((state.attributes?.brightness || 255) / 255) * 100)
+            : 0;
 
-        lightsAPI.getState(entityId).then(state => {
-          if (state) {
-            const intensity = state.state === 'on'
-              ? Math.round(((state.attributes?.brightness || 255) / 255) * 100)
-              : 0;
-
-            setLights(innerPrev => {
-              const innerLight = innerPrev[lightId];
-              if (innerLight.isPending) return innerPrev;
+          setLights(prev => {
+            const light = prev[lightId];
+            if (light.isPending) return prev;
+            
+            if (light.confirmedValue !== intensity) {
+              logger.light(lightId, `Polled change: ${intensity}%`);
               
-              if (innerLight.confirmedValue !== intensity) {
-                logger.light(lightId, `Polled change: ${intensity}%`);
-                
-                return {
-                  ...innerPrev,
-                  [lightId]: {
-                    ...innerLight,
-                    targetValue: intensity,
-                    confirmedValue: intensity,
-                    source: 'external',
-                  }
-                };
-              }
-              return innerPrev;
-            });
-          }
-        }).catch(error => {
-          logger.error(`Polling failed for ${lightId}`, error);
-        });
-
-        return prev;
-      });
+              return {
+                ...prev,
+                [lightId]: {
+                  ...light,
+                  targetValue: intensity,
+                  confirmedValue: intensity,
+                  source: 'external',
+                }
+              };
+            }
+            return prev;
+          });
+        }
+      } catch (error) {
+        logger.error(`Polling failed for ${lightId}`, error);
+      }
     }
   }, [entityMapping, getLightEntity]);
 
-  // Setup polling
+  // Setup polling - 1.5 second interval
   usePolling(pollLights, {
-    interval: 1000,
+    interval: 1500,
     enabled: pollingEnabled,
     runOnFocus: true,
   });

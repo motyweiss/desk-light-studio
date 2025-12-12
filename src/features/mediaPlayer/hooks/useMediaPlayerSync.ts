@@ -97,6 +97,13 @@ export const useMediaPlayerSync = (config: UseMediaPlayerSyncConfig): UseMediaPl
     };
   }, []);
 
+  // Keep refs for sync to avoid dependency cycles
+  const playerStateRef = useRef<MediaPlayerState | null>(null);
+  
+  useEffect(() => {
+    playerStateRef.current = playerState;
+  }, [playerState]);
+
   /**
    * Sync state from Home Assistant
    */
@@ -110,9 +117,10 @@ export const useMediaPlayerSync = (config: UseMediaPlayerSyncConfig): UseMediaPl
       const entity = await mediaPlayer.getState(entityId);
 
       if (entity) {
+        const currentState = playerStateRef.current;
         const trackChanged = 
-          playerState?.currentTrack?.title !== entity.attributes.media_title ||
-          entity.state !== (playerState?.isPlaying ? 'playing' : playerState?.isPaused ? 'paused' : 'off');
+          currentState?.currentTrack?.title !== entity.attributes.media_title ||
+          entity.state !== (currentState?.isPlaying ? 'playing' : currentState?.isPaused ? 'paused' : 'off');
 
         const newState = entityToState(entity, trackChanged);
         setPlayerState(newState);
@@ -124,7 +132,7 @@ export const useMediaPlayerSync = (config: UseMediaPlayerSyncConfig): UseMediaPl
       logger.error('Failed to sync media player', error);
       setIsLoading(false);
     }
-  }, [enabled, entityId, playerState, entityToState]);
+  }, [enabled, entityId, entityToState]);
 
   /**
    * Detect active playback target
@@ -221,17 +229,16 @@ export const useMediaPlayerSync = (config: UseMediaPlayerSyncConfig): UseMediaPl
     return () => clearInterval(interval);
   }, [playerState?.isPlaying]);
 
-  // Setup polling
+  // Setup polling - handles both periodic and initial poll
   usePolling(syncFromRemote, {
     interval: pollInterval,
     enabled,
     runOnFocus: true,
   });
 
-  // Initial load
+  // Load available speakers once
   useEffect(() => {
     if (enabled && entityId) {
-      syncFromRemote();
       loadAvailableSpeakers();
 
       // Timeout for initial load
@@ -244,7 +251,7 @@ export const useMediaPlayerSync = (config: UseMediaPlayerSyncConfig): UseMediaPl
 
       return () => clearTimeout(timeout);
     }
-  }, [enabled, entityId, syncFromRemote, loadAvailableSpeakers, isLoading]);
+  }, [enabled, entityId, loadAvailableSpeakers, isLoading]);
 
   return {
     playerState,
