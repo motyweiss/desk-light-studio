@@ -47,51 +47,22 @@ const Index = () => {
       return;
     }
 
-    const startTime = Date.now();
-    const minLoadTime = 400;
-    
-    const bgImage = new Image();
-    bgImage.src = '/bg.png';
-    
+    // Simple approach: show overlay briefly then proceed
+    const timer = setTimeout(() => {
+      setIsOverlayComplete(true);
+      setInitiallyLoaded();
+    }, 800);
+
+    // Also try to preload primary image
     const primaryImage = new Image();
     primaryImage.src = desk000;
-    
-    let bgLoaded = false;
-    let deskLoaded = false;
-    
-    const checkAllLoaded = () => {
-      if (!bgLoaded || !deskLoaded) return;
-      
-      const elapsed = Date.now() - startTime;
-      const remainingTime = Math.max(0, minLoadTime - elapsed);
-      
-      setTimeout(() => {
-        setIsOverlayComplete(true);
-        setInitiallyLoaded();
-        
-        // Preload remaining images in background
-        const remainingImages = [
-          '/assets/desk-001.png', '/assets/desk-010.png', '/assets/desk-011.png',
-          '/assets/desk-100.png', '/assets/desk-101.png', '/assets/desk-110.png',
-          '/assets/desk-111.png'
-        ];
-        remainingImages.forEach(src => {
-          const img = new Image();
-          img.src = src;
-        });
-      }, remainingTime);
+    primaryImage.onload = () => {
+      clearTimeout(timer);
+      setIsOverlayComplete(true);
+      setInitiallyLoaded();
     };
     
-    bgImage.onload = () => { bgLoaded = true; checkAllLoaded(); };
-    primaryImage.onload = () => { deskLoaded = true; checkAllLoaded(); };
-    
-    const fallbackTimer = setTimeout(() => {
-      bgLoaded = true;
-      deskLoaded = true;
-      checkAllLoaded();
-    }, 5000);
-    
-    return () => clearTimeout(fallbackTimer);
+    return () => clearTimeout(timer);
   }, [hasInitiallyLoaded, setInitiallyLoaded]);
 
   // Master switch logic
