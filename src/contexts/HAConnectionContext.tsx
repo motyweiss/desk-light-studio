@@ -170,67 +170,88 @@ export const HAConnectionProvider: React.FC<{ children: React.ReactNode }> = ({ 
     }
   }, []);
 
-  // ============= Load Config from Database =============
-  const loadFromDatabase = useCallback(async () => {
-    if (!user) {
-      setConfig(null);
-      setIsLoading(false);
-      setConnectionStatus('disconnected');
-      return;
-    }
-
+  // ============= Load Config (from DB if user exists, or localStorage for dev) =============
+  const loadConfig = useCallback(async () => {
     setIsLoading(true);
-    logger.connection('Loading HA config from database...');
+    logger.connection('Loading HA config...');
 
     try {
-      // Load config from user_ha_configs
-      const { data: configData, error: configError } = await supabase
-        .from('user_ha_configs')
-        .select('base_url, access_token')
-        .eq('user_id', user.id)
-        .maybeSingle();
+      let haConfig: HAConfig | null = null;
+      let loadedDevicesMapping: DevicesMapping | null = null;
 
-      if (configError) {
-        logger.error('Error loading HA config', configError);
-        setError(configError.message);
-        setIsLoading(false);
-        return;
-      }
+      if (user) {
+        // Load from database when authenticated
+        const { data: configData, error: configError } = await supabase
+          .from('user_ha_configs')
+          .select('base_url, access_token')
+          .eq('user_id', user.id)
+          .maybeSingle();
 
-      // Load devices mapping from user_ha_devices
-      const { data: devicesData, error: devicesError } = await supabase
-        .from('user_ha_devices')
-        .select('devices_mapping')
-        .eq('user_id', user.id)
-        .maybeSingle();
+        if (configError) {
+          logger.error('Error loading HA config', configError);
+          setError(configError.message);
+          setIsLoading(false);
+          return;
+        }
 
-      if (devicesError && devicesError.code !== 'PGRST116') {
-        logger.error('Error loading devices mapping', devicesError);
-      }
+        if (configData) {
+          haConfig = {
+            baseUrl: configData.base_url,
+            accessToken: configData.access_token,
+          };
+        }
 
-      // Set devices mapping
-      if (devicesData?.devices_mapping) {
-        const mapping = devicesData.devices_mapping as unknown as DevicesMapping;
-        setDevicesMapping(mapping);
-        setEntityMapping(convertToLegacyFormat(mapping));
-        logger.connection('Loaded devices mapping from database');
+        // Load devices mapping from database
+        const { data: devicesData, error: devicesError } = await supabase
+          .from('user_ha_devices')
+          .select('devices_mapping')
+          .eq('user_id', user.id)
+          .maybeSingle();
+
+        if (devicesError && devicesError.code !== 'PGRST116') {
+          logger.error('Error loading devices mapping', devicesError);
+        }
+
+        if (devicesData?.devices_mapping) {
+          loadedDevicesMapping = devicesData.devices_mapping as unknown as DevicesMapping;
+        }
       } else {
-        // Use defaults
+        // DEV MODE: Load from localStorage when no user
+        const storedConfig = localStorage.getItem('ha_config_dev');
+        if (storedConfig) {
+          try {
+            haConfig = JSON.parse(storedConfig);
+            logger.connection('Loaded HA config from localStorage (dev mode)');
+          } catch (e) {
+            logger.error('Failed to parse stored config', e);
+          }
+        }
+
+        const storedDevices = localStorage.getItem('ha_devices_dev');
+        if (storedDevices) {
+          try {
+            loadedDevicesMapping = JSON.parse(storedDevices);
+          } catch (e) {
+            logger.error('Failed to parse stored devices', e);
+          }
+        }
+      }
+
+      // Apply devices mapping
+      if (loadedDevicesMapping) {
+        setDevicesMapping(loadedDevicesMapping);
+        setEntityMapping(convertToLegacyFormat(loadedDevicesMapping));
+        logger.connection('Loaded devices mapping');
+      } else {
         setDevicesMapping(DEFAULT_DEVICES_MAPPING);
         setEntityMapping(DEFAULT_ENTITY_MAPPING);
       }
 
-      // Set config and connect
-      if (configData) {
-        const haConfig: HAConfig = {
-          baseUrl: configData.base_url,
-          accessToken: configData.access_token,
-        };
-        
+      // Configure and connect if we have config
+      if (haConfig) {
         setConfig(haConfig);
         configureClients(haConfig);
 
-        // Test connection
         setConnectionStatus('connecting');
         const result = await homeAssistant.testConnection();
         
@@ -245,15 +266,8 @@ export const HAConnectionProvider: React.FC<{ children: React.ReactNode }> = ({ 
         }
       } else {
         setConnectionStatus('disconnected');
-        logger.connection('No HA config found in database');
+        logger.connection('No HA config found');
       }
-
-      // Clear legacy localStorage data
-      localStorage.removeItem('ha_config');
-      localStorage.removeItem('ha_token');
-      localStorage.removeItem('ha_entity_mapping');
-      localStorage.removeItem('ha_devices_mapping');
-      localStorage.removeItem('ha_recent_urls');
 
     } catch (err) {
       logger.error('Exception loading config', err);
@@ -264,33 +278,35 @@ export const HAConnectionProvider: React.FC<{ children: React.ReactNode }> = ({ 
     }
   }, [user, configureClients]);
 
-  // ============= Save Config to Database =============
+  // ============= Save Config =============
   const saveConfig = useCallback(async (baseUrl: string, accessToken: string): Promise<{ success: boolean; error?: string }> => {
-    if (!user) {
-      return { success: false, error: 'Not authenticated' };
-    }
-
     try {
       const cleanBaseUrl = baseUrl.replace(/\/+$/, '');
-      
-      // Upsert config to database
-      const { error: upsertError } = await supabase
-        .from('user_ha_configs')
-        .upsert({
-          user_id: user.id,
-          base_url: cleanBaseUrl,
-          access_token: accessToken,
-        }, {
-          onConflict: 'user_id',
-        });
+      const newConfig: HAConfig = { baseUrl: cleanBaseUrl, accessToken };
 
-      if (upsertError) {
-        logger.error('Error saving HA config', upsertError);
-        return { success: false, error: upsertError.message };
+      if (user) {
+        // Save to database when authenticated
+        const { error: upsertError } = await supabase
+          .from('user_ha_configs')
+          .upsert({
+            user_id: user.id,
+            base_url: cleanBaseUrl,
+            access_token: accessToken,
+          }, {
+            onConflict: 'user_id',
+          });
+
+        if (upsertError) {
+          logger.error('Error saving HA config', upsertError);
+          return { success: false, error: upsertError.message };
+        }
+      } else {
+        // DEV MODE: Save to localStorage
+        localStorage.setItem('ha_config_dev', JSON.stringify(newConfig));
+        logger.connection('Saved HA config to localStorage (dev mode)');
       }
 
       // Update local state
-      const newConfig: HAConfig = { baseUrl: cleanBaseUrl, accessToken };
       setConfig(newConfig);
       configureClients(newConfig);
 
@@ -313,32 +329,35 @@ export const HAConnectionProvider: React.FC<{ children: React.ReactNode }> = ({ 
     }
   }, [user, configureClients]);
 
-  // ============= Save Devices Mapping to Database =============
+  // ============= Save Devices Mapping =============
   const saveDevicesMapping = useCallback(async (mapping: DevicesMapping): Promise<{ success: boolean; error?: string }> => {
-    if (!user) {
-      return { success: false, error: 'Not authenticated' };
-    }
-
     try {
-      const { error: upsertError } = await supabase
-        .from('user_ha_devices')
-        .upsert({
-          user_id: user.id,
-          devices_mapping: mapping as any,
-        }, {
-          onConflict: 'user_id',
-        });
+      if (user) {
+        // Save to database when authenticated
+        const { error: upsertError } = await supabase
+          .from('user_ha_devices')
+          .upsert({
+            user_id: user.id,
+            devices_mapping: mapping as any,
+          }, {
+            onConflict: 'user_id',
+          });
 
-      if (upsertError) {
-        logger.error('Error saving devices mapping', upsertError);
-        return { success: false, error: upsertError.message };
+        if (upsertError) {
+          logger.error('Error saving devices mapping', upsertError);
+          return { success: false, error: upsertError.message };
+        }
+      } else {
+        // DEV MODE: Save to localStorage
+        localStorage.setItem('ha_devices_dev', JSON.stringify(mapping));
+        logger.connection('Saved devices mapping to localStorage (dev mode)');
       }
 
       // Update local state
       setDevicesMapping(mapping);
       setEntityMapping(convertToLegacyFormat(mapping));
       
-      logger.connection('Saved devices mapping to database');
+      logger.connection('Saved devices mapping');
       return { success: true };
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Failed to save devices';
@@ -381,16 +400,11 @@ export const HAConnectionProvider: React.FC<{ children: React.ReactNode }> = ({ 
 
   // ============= Initial Load =============
   useEffect(() => {
-    if (user && !configuredRef.current) {
+    if (!configuredRef.current) {
       configuredRef.current = true;
-      loadFromDatabase();
-    } else if (!user) {
-      configuredRef.current = false;
-      setConfig(null);
-      setConnectionStatus('disconnected');
-      setIsLoading(false);
+      loadConfig();
     }
-  }, [user, loadFromDatabase]);
+  }, [loadConfig]);
 
   // ============= Context Value =============
   const value: HAConnectionContextValue = {
