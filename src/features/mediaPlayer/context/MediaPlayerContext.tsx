@@ -48,6 +48,7 @@ interface MediaPlayerContextType {
   currentPlaybackTarget: PlaybackTarget | null;
   entityId: string | undefined;
   isConnected: boolean;
+  connectionType: 'websocket' | 'polling' | 'disconnected';
   handlePlayPause: () => Promise<void>;
   handleNext: () => Promise<void>;
   handlePrevious: () => Promise<void>;
@@ -78,7 +79,8 @@ export const MediaPlayerProvider = ({ children, entityId, isConnected }: MediaPl
     syncFromRemote, 
     setPlayerState,
     availableSpeakers,
-    detectActiveTarget
+    detectActiveTarget,
+    connectionType
   } = useMediaPlayerSync({
     entityId,
     enabled: isConnected && !!entityId,
@@ -273,6 +275,7 @@ export const MediaPlayerProvider = ({ children, entityId, isConnected }: MediaPl
     currentPlaybackTarget,
     entityId,
     isConnected,
+    connectionType: isDemoMode ? 'disconnected' : connectionType,
     handlePlayPause,
     handleNext,
     handlePrevious,
