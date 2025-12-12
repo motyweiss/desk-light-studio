@@ -1,6 +1,6 @@
 import { useState, useCallback, useRef, useEffect } from 'react';
 import { usePolling } from '@/shared/hooks';
-import { mediaPlayer } from '@/api/homeAssistant';
+import { mediaPlayer, websocketService } from '@/api/homeAssistant';
 import { logger } from '@/shared/utils/logger';
 import type { MediaPlayerState, PlaybackTarget } from '@/types/mediaPlayer';
 import type { HAMediaPlayerEntity } from '@/api/homeAssistant/types';
@@ -19,6 +19,7 @@ interface UseMediaPlayerSyncReturn {
   setPlayerState: React.Dispatch<React.SetStateAction<MediaPlayerState | null>>;
   availableSpeakers: HAMediaPlayerEntity[];
   detectActiveTarget: (state: MediaPlayerState) => PlaybackTarget | null;
+  connectionType: 'websocket' | 'polling' | 'disconnected';
 }
 
 /**
@@ -26,15 +27,18 @@ interface UseMediaPlayerSyncReturn {
  * Handles polling, state management, and playback target detection
  */
 export const useMediaPlayerSync = (config: UseMediaPlayerSyncConfig): UseMediaPlayerSyncReturn => {
-  const { entityId, enabled, pollInterval = 2000 } = config;
+  const { entityId, enabled, pollInterval = 3000 } = config;
 
   const [playerState, setPlayerState] = useState<MediaPlayerState | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [availableSpeakers, setAvailableSpeakers] = useState<HAMediaPlayerEntity[]>([]);
+  const [connectionType, setConnectionType] = useState<'websocket' | 'polling' | 'disconnected'>('disconnected');
+  const [usePollingFallback, setUsePollingFallback] = useState(false);
 
   const lastPositionUpdateRef = useRef<number>(0);
   const localPositionRef = useRef<number>(0);
   const isPlayingRef = useRef(false);
+  const wsUnsubscribeRef = useRef<(() => void) | null>(null);
 
   /**
    * Convert HA entity to MediaPlayerState
@@ -229,10 +233,64 @@ export const useMediaPlayerSync = (config: UseMediaPlayerSyncConfig): UseMediaPl
     return () => clearInterval(interval);
   }, [playerState?.isPlaying]);
 
-  // Setup polling - handles both periodic and initial poll
+  // WebSocket subscription for real-time updates
+  useEffect(() => {
+    if (!enabled || !entityId) {
+      setConnectionType('disconnected');
+      return;
+    }
+
+    // Check if WebSocket is connected
+    if (websocketService.isConnected()) {
+      logger.media('Setting up WebSocket subscription for media player');
+      setConnectionType('websocket');
+      setUsePollingFallback(false);
+
+      const unsubscribe = websocketService.subscribe(entityId, (state: any) => {
+        logger.media('WebSocket media player update received');
+        
+        const entity: HAMediaPlayerEntity = {
+          entity_id: entityId,
+          state: state.state,
+          attributes: state.attributes,
+          last_changed: state.last_changed,
+          last_updated: state.last_updated,
+        };
+
+        const currentState = playerStateRef.current;
+        const trackChanged = 
+          currentState?.currentTrack?.title !== entity.attributes.media_title ||
+          entity.state !== (currentState?.isPlaying ? 'playing' : currentState?.isPaused ? 'paused' : 'off');
+
+        const newState = entityToState(entity, trackChanged);
+        setPlayerState(newState);
+        isPlayingRef.current = newState.isPlaying;
+        setIsLoading(false);
+      });
+
+      wsUnsubscribeRef.current = unsubscribe;
+
+      // Still do initial fetch for immediate data
+      syncFromRemote();
+
+      return () => {
+        if (wsUnsubscribeRef.current) {
+          wsUnsubscribeRef.current();
+          wsUnsubscribeRef.current = null;
+        }
+      };
+    } else {
+      // Fallback to polling if WebSocket not available
+      logger.media('WebSocket not connected, using polling for media player');
+      setConnectionType('polling');
+      setUsePollingFallback(true);
+    }
+  }, [enabled, entityId, entityToState, syncFromRemote]);
+
+  // Fallback polling - only enabled if WebSocket is not available
   usePolling(syncFromRemote, {
     interval: pollInterval,
-    enabled,
+    enabled: enabled && usePollingFallback,
     runOnFocus: true,
   });
 
@@ -260,5 +318,6 @@ export const useMediaPlayerSync = (config: UseMediaPlayerSyncConfig): UseMediaPl
     setPlayerState,
     availableSpeakers,
     detectActiveTarget,
+    connectionType,
   };
 };
