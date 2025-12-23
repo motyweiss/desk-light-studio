@@ -7,6 +7,15 @@ interface ProtectedRouteProps {
 }
 
 export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
-  // TODO: DEV MODE - Bypass authentication for testing. Remove this to restore auth.
+  const { user, loading } = useAuth();
+
+  if (loading) {
+    return <LoadingOverlay isLoading={true} />;
+  }
+
+  if (!user) {
+    return <Navigate to="/auth" replace />;
+  }
+
   return <>{children}</>;
 };
