@@ -41,8 +41,8 @@ export const TopNavigationBar = ({
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.5, delay: 0.2 }}
           >
-            <Home className="w-4 h-4 md:w-5 md:h-5 text-white/60" strokeWidth={1.5} />
-            <span className="text-sm md:text-lg font-light text-white/90">Moty's Home</span>
+            <Home className="w-4 h-4 md:w-5 md:h-5 text-white/70" strokeWidth={1.5} />
+            <span className="text-sm md:text-lg font-light text-white/90">My Home</span>
           </motion.div>
 
           {/* Center: Climate Indicators - Hidden on mobile */}
