@@ -1,7 +1,6 @@
 import { useState, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { 
-  Search, 
   Loader2, 
   Lightbulb, 
   Thermometer, 
@@ -44,12 +43,12 @@ interface EntityAutoDiscoveryProps {
 }
 
 const CATEGORY_CONFIG = {
-  lights: { icon: Lightbulb, label: 'Lights', color: 'hsl(43 88% 60%)' },
-  temperature: { icon: Thermometer, label: 'Temperature Sensors', color: 'hsl(0 75% 55%)' },
-  humidity: { icon: Droplets, label: 'Humidity Sensors', color: 'hsl(200 70% 55%)' },
-  airQuality: { icon: Wind, label: 'Air Quality Sensors', color: 'hsl(142 70% 45%)' },
-  battery: { icon: Battery, label: 'Battery Sensors', color: 'hsl(43 88% 60%)' },
-  mediaPlayers: { icon: Speaker, label: 'Media Players', color: 'hsl(280 60% 55%)' },
+  lights: { icon: Lightbulb, label: 'Lights', color: 'text-amber-400' },
+  temperature: { icon: Thermometer, label: 'Temperature', color: 'text-red-400' },
+  humidity: { icon: Droplets, label: 'Humidity', color: 'text-blue-400' },
+  airQuality: { icon: Wind, label: 'Air Quality', color: 'text-emerald-400' },
+  battery: { icon: Battery, label: 'Battery', color: 'text-amber-400' },
+  mediaPlayers: { icon: Speaker, label: 'Media Players', color: 'text-purple-400' },
 };
 
 const categorizeEntities = (entities: HAEntity[]): CategorizedEntities => {
@@ -90,19 +89,16 @@ const categorizeEntities = (entities: HAEntity[]): CategorizedEntities => {
 
     // Sensors - categorize by device_class or entity name
     if (domain === 'sensor') {
-      // Temperature
       if (deviceClass === 'temperature' || entityId.includes('temperature') || entityId.includes('temp')) {
         result.temperature.push(discovered);
         return;
       }
 
-      // Humidity
       if (deviceClass === 'humidity' || entityId.includes('humidity')) {
         result.humidity.push(discovered);
         return;
       }
 
-      // Air Quality (PM2.5, PM10, AQI)
       if (deviceClass === 'pm25' || deviceClass === 'pm10' || deviceClass === 'aqi' || 
           entityId.includes('pm_2_5') || entityId.includes('pm2') || entityId.includes('pm10') ||
           entityId.includes('air_quality') || entityId.includes('aqi')) {
@@ -110,7 +106,6 @@ const categorizeEntities = (entities: HAEntity[]): CategorizedEntities => {
         return;
       }
 
-      // Battery
       if (deviceClass === 'battery' || entityId.includes('battery')) {
         result.battery.push(discovered);
         return;
@@ -174,111 +169,58 @@ export const EntityAutoDiscovery = ({
 
   const isConfigured = (entityId: string) => configuredEntityIds.includes(entityId);
 
-  const renderEntityList = (categoryKey: keyof CategorizedEntities, entityList: DiscoveredEntity[]) => {
-    if (entityList.length === 0) return null;
-
-    const config = CATEGORY_CONFIG[categoryKey];
-    const Icon = config.icon;
-
-    return (
-      <div key={categoryKey} className="space-y-2">
-        <div className="flex items-center gap-2 text-xs font-medium text-white/60 uppercase tracking-wider">
-          <Icon className="w-3.5 h-3.5" style={{ color: config.color }} />
-          {config.label} ({entityList.length})
-        </div>
-        
-        <div className="space-y-1">
-          {entityList.map(entity => {
-            const configured = isConfigured(entity.entity_id);
-            
-            return (
-              <motion.div
-                key={entity.entity_id}
-                initial={{ opacity: 0, x: -10 }}
-                animate={{ opacity: 1, x: 0 }}
-                className={`
-                  flex items-center justify-between gap-3 p-2.5 rounded-lg
-                  ${configured ? 'bg-white/5 opacity-60' : 'bg-white/[0.03] hover:bg-white/[0.06]'}
-                  transition-colors duration-200
-                `}
-              >
-                <div className="flex-1 min-w-0">
-                  <div className="text-sm font-light text-white truncate">
-                    {entity.friendly_name}
-                  </div>
-                  <div className="flex items-center gap-2 text-[10px] text-white/40 font-light">
-                    <span className="font-mono truncate">{entity.entity_id}</span>
-                    {entity.state && (
-                      <>
-                        <span>•</span>
-                        <span>{entity.state}{entity.unit_of_measurement || ''}</span>
-                      </>
-                    )}
-                  </div>
-                </div>
-
-                <button
-                  onClick={() => handleAddEntity(entity, categoryKey)}
-                  disabled={configured}
-                  className={`
-                    flex-shrink-0 w-7 h-7 rounded-lg flex items-center justify-center
-                    transition-all duration-200
-                    ${configured 
-                      ? 'bg-[hsl(43_88%_60%)]/20 text-[hsl(43_88%_60%)] cursor-default' 
-                      : 'bg-white/10 hover:bg-[hsl(43_88%_60%)]/30 text-white/70 hover:text-[hsl(43_88%_60%)]'
-                    }
-                  `}
-                >
-                  {configured ? (
-                    <Check className="w-3.5 h-3.5" />
-                  ) : (
-                    <Plus className="w-3.5 h-3.5" />
-                  )}
-                </button>
-              </motion.div>
-            );
-          })}
-        </div>
-      </div>
-    );
-  };
-
   const totalEntities = entities 
     ? Object.values(entities).reduce((sum, arr) => sum + arr.length, 0)
     : 0;
 
+  // Flatten all entities for the unified list
+  const allEntitiesList = entities ? [
+    ...entities.lights.map(e => ({ ...e, category: 'lights' as const })),
+    ...entities.temperature.map(e => ({ ...e, category: 'temperature' as const })),
+    ...entities.humidity.map(e => ({ ...e, category: 'humidity' as const })),
+    ...entities.airQuality.map(e => ({ ...e, category: 'airQuality' as const })),
+    ...entities.battery.map(e => ({ ...e, category: 'battery' as const })),
+    ...entities.mediaPlayers.map(e => ({ ...e, category: 'mediaPlayers' as const })),
+  ] : [];
+
   return (
-    <div className="space-y-3">
+    <div className="space-y-5">
+      {/* Header */}
+      <h3 className="text-sm font-light text-white/70">Auto Discovery</h3>
+
       {/* Scan Button */}
-      <button
+      <motion.button
         onClick={scanForDevices}
         disabled={!isConnected || isScanning}
+        whileHover={isConnected && !isScanning ? { scale: 1.01 } : {}}
+        whileTap={isConnected && !isScanning ? { scale: 0.99 } : {}}
         className={`
-          w-full flex items-center justify-center gap-2.5 py-3 px-4 rounded-lg
-          text-sm font-light transition-all duration-200
+          w-full flex items-center justify-center gap-3 py-4 px-6 rounded-2xl
+          text-sm font-light transition-all duration-300
+          border-2
           ${isConnected 
-            ? 'bg-[hsl(43_88%_60%)]/10 hover:bg-[hsl(43_88%_60%)]/20 text-[hsl(43_88%_60%)] border border-[hsl(43_88%_60%)]/20' 
-            : 'bg-white/5 text-white/30 cursor-not-allowed border border-white/10'
+            ? 'bg-transparent hover:bg-amber-500/5 text-amber-400 border-amber-400/30 hover:border-amber-400/50' 
+            : 'bg-white/[0.02] text-white/30 cursor-not-allowed border-white/10'
           }
         `}
       >
         {isScanning ? (
           <>
             <Loader2 className="w-4 h-4 animate-spin" />
-            Scanning for devices...
+            <span>Scanning for devices...</span>
           </>
         ) : entities ? (
           <>
             <RefreshCw className="w-4 h-4" />
-            Rescan ({totalEntities} devices found)
+            <span>Rescan ({totalEntities} devices found)</span>
           </>
         ) : (
           <>
-            <Search className="w-4 h-4" />
-            Scan for Available Devices
+            <RefreshCw className="w-4 h-4" />
+            <span>Scan for Available Devices</span>
           </>
         )}
-      </button>
+      </motion.button>
 
       {error && (
         <p className="text-xs text-red-400/80 text-center">{error}</p>
@@ -286,38 +228,109 @@ export const EntityAutoDiscovery = ({
 
       {/* Results */}
       <AnimatePresence>
-        {entities && isExpanded && (
+        {entities && (
           <motion.div
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: 'auto' }}
             exit={{ opacity: 0, height: 0 }}
+            transition={{ duration: 0.3, ease: [0.22, 0.03, 0.26, 1] }}
             className="overflow-hidden"
           >
-            <div className="space-y-4 pt-2">
+            <div className="space-y-4">
               {/* Toggle header */}
               <button
                 onClick={() => setIsExpanded(!isExpanded)}
-                className="w-full flex items-center justify-between text-xs text-white/50 hover:text-white/70 transition-colors"
+                className="w-full flex items-center justify-between py-2 text-sm text-white/50 hover:text-white/70 transition-colors"
               >
-                <span>Discovered Devices</span>
-                {isExpanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+                <span className="font-light">Discovered Devices</span>
+                <motion.div
+                  animate={{ rotate: isExpanded ? 180 : 0 }}
+                  transition={{ duration: 0.2 }}
+                >
+                  <ChevronUp className="w-4 h-4" />
+                </motion.div>
               </button>
 
-              {/* Entity categories */}
-              <div className="space-y-4 max-h-[400px] overflow-y-auto pr-1 -mr-1">
-                {renderEntityList('lights', entities.lights)}
-                {renderEntityList('temperature', entities.temperature)}
-                {renderEntityList('humidity', entities.humidity)}
-                {renderEntityList('airQuality', entities.airQuality)}
-                {renderEntityList('battery', entities.battery)}
-                {renderEntityList('mediaPlayers', entities.mediaPlayers)}
-              </div>
+              {/* Entity list */}
+              <AnimatePresence>
+                {isExpanded && (
+                  <motion.div
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: 'auto' }}
+                    exit={{ opacity: 0, height: 0 }}
+                    transition={{ duration: 0.2 }}
+                    className="space-y-2 max-h-[500px] overflow-y-auto"
+                  >
+                    {allEntitiesList.map((entity, index) => {
+                      const configured = isConfigured(entity.entity_id);
+                      const config = CATEGORY_CONFIG[entity.category];
+                      const Icon = config.icon;
+                      
+                      return (
+                        <motion.div
+                          key={entity.entity_id}
+                          initial={{ opacity: 0, y: 8 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ duration: 0.2, delay: index * 0.015 }}
+                          className={`
+                            group flex items-center justify-between gap-4 p-4 rounded-2xl
+                            transition-all duration-200
+                            ${configured 
+                              ? 'bg-white/[0.04] border border-amber-400/20' 
+                              : 'bg-white/[0.03] hover:bg-white/[0.05] border border-transparent hover:border-white/10'
+                            }
+                          `}
+                        >
+                          <div className="flex items-start gap-3 flex-1 min-w-0">
+                            <div className={`mt-0.5 ${config.color}`}>
+                              <Icon className="w-4 h-4" strokeWidth={1.5} />
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <div className="text-[15px] font-light text-white leading-snug">
+                                {entity.friendly_name}
+                              </div>
+                              <div className="flex items-center gap-2 mt-1 text-xs text-white/40 font-light">
+                                <span className="font-mono truncate">{entity.entity_id}</span>
+                                <span className="text-white/20">•</span>
+                                <span className={entity.state === 'on' ? 'text-emerald-400/70' : 'text-white/30'}>
+                                  {entity.state}
+                                </span>
+                              </div>
+                            </div>
+                          </div>
 
-              {totalEntities === 0 && (
-                <p className="text-xs text-white/40 text-center py-4">
-                  No supported devices found. Make sure your Home Assistant has available entities.
-                </p>
-              )}
+                          <motion.button
+                            onClick={() => handleAddEntity(entity, entity.category)}
+                            disabled={configured}
+                            whileHover={!configured ? { scale: 1.1 } : {}}
+                            whileTap={!configured ? { scale: 0.95 } : {}}
+                            className={`
+                              flex-shrink-0 w-9 h-9 rounded-full flex items-center justify-center
+                              transition-all duration-200
+                              ${configured 
+                                ? 'bg-amber-400/10 text-amber-400 cursor-default' 
+                                : 'bg-white/[0.06] hover:bg-amber-400/20 text-white/50 hover:text-amber-400'
+                              }
+                            `}
+                          >
+                            {configured ? (
+                              <Check className="w-4 h-4" strokeWidth={2} />
+                            ) : (
+                              <Plus className="w-4 h-4" strokeWidth={2} />
+                            )}
+                          </motion.button>
+                        </motion.div>
+                      );
+                    })}
+
+                    {totalEntities === 0 && (
+                      <p className="text-sm text-white/40 text-center py-8 font-light">
+                        No supported devices found
+                      </p>
+                    )}
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </div>
           </motion.div>
         )}
