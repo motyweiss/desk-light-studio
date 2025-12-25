@@ -71,7 +71,16 @@ interface MediaPlayerProviderProps {
 }
 
 export const MediaPlayerProvider = ({ children, entityId, isConnected }: MediaPlayerProviderProps) => {
-  const [currentPlaybackTarget, setCurrentPlaybackTarget] = useState<PlaybackTarget | null>(null);
+  // Default to first predefined group for demo mode
+  const defaultGroup = PREDEFINED_GROUPS.find(g => g.isDefault) || PREDEFINED_GROUPS[0];
+  const defaultTarget: PlaybackTarget | null = defaultGroup ? {
+    type: 'group',
+    name: defaultGroup.name,
+    entityIds: defaultGroup.entityIds,
+    groupId: defaultGroup.id,
+  } : null;
+  
+  const [currentPlaybackTarget, setCurrentPlaybackTarget] = useState<PlaybackTarget | null>(defaultTarget);
   
   const { 
     playerState, 
