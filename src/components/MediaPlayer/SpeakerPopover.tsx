@@ -116,8 +116,9 @@ export const SpeakerPopover = ({
                     <div className="space-y-1">
                       {predefinedGroups.map((group) => {
                         const isActive = currentPlaybackTarget?.type === 'group' && currentPlaybackTarget.groupId === group.id;
+                        const isSonos = group.name.toLowerCase().includes('sonos');
                         const isTV = group.name.toLowerCase().includes('tv');
-                        const GroupIcon = isTV ? Tv : Users;
+                        const GroupIcon = isSonos ? Speaker : isTV ? Tv : Users;
                         
                         return (
                           <motion.button
