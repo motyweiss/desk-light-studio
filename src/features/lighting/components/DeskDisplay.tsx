@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo, useCallback, useRef } from "react";
-import { motion, useSpring, useTransform } from "framer-motion";
+import { motion } from "framer-motion";
 import { LightHotspot } from "./LightHotspot";
 import { LIGHT_ANIMATION } from "@/constants/animations";
 
@@ -69,38 +69,8 @@ export const DeskDisplay = ({
     }
   }, [isLoaded, dataReady, isReady]);
 
-  // Spring animations for smooth parallax effect
-  const springConfig = { stiffness: 100, damping: 25, mass: 0.5 };
-  const mouseX = useSpring(0, springConfig);
-  const mouseY = useSpring(0, springConfig);
-  
-  // Transform mouse position to rotation and translation - increased intensity
-  const rotateX = useTransform(mouseY, [-1, 1], [12, -12]);
-  const rotateY = useTransform(mouseX, [-1, 1], [-12, 12]);
-  const translateX = useTransform(mouseX, [-1, 1], [-25, 25]);
-  const translateY = useTransform(mouseY, [-1, 1], [-25, 25]);
-  const scale = useTransform(
-    mouseX,
-    [-1, 0, 1],
-    [1.05, 1, 1.05]
-  );
-
-  const handleMouseMove = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
-    const rect = e.currentTarget.getBoundingClientRect();
-    const centerX = rect.left + rect.width / 2;
-    const centerY = rect.top + rect.height / 2;
-    const normalizedX = Math.max(-1, Math.min(1, (e.clientX - centerX) / (rect.width / 2)));
-    const normalizedY = Math.max(-1, Math.min(1, (e.clientY - centerY) / (rect.height / 2)));
-    mouseX.set(normalizedX);
-    mouseY.set(normalizedY);
-  }, [mouseX, mouseY]);
-
   const handleMouseEnter = () => setIsHovered(true);
-  const handleMouseLeave = () => {
-    setIsHovered(false);
-    mouseX.set(0);
-    mouseY.set(0);
-  };
+  const handleMouseLeave = () => setIsHovered(false);
 
   // Count lights on
   const countLightsOn = (state: string) => state.split('').filter(bit => bit === '1').length;
@@ -158,26 +128,10 @@ export const DeskDisplay = ({
       className="relative w-full aspect-square"
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
-      onMouseMove={handleMouseMove}
     >
-      <motion.div 
+      <div 
         className="relative w-full h-full overflow-hidden rounded-[2rem]"
-        style={{
-          perspective: 1200,
-          transformStyle: 'preserve-3d',
-        }}
       >
-        <motion.div
-          className="relative w-full h-full"
-          style={{
-            rotateX,
-            rotateY,
-            x: translateX,
-            y: translateY,
-            scale,
-            transformStyle: 'preserve-3d',
-          }}
-        >
         {/* Gradient mask overlay */}
         <div 
           className="absolute inset-0 z-20 pointer-events-none"
@@ -241,8 +195,7 @@ export const DeskDisplay = ({
             );
           })}
         </div>
-        </motion.div>
-      </motion.div>
+      </div>
 
       {/* Hotspots - Desktop Only */}
       <div className="hidden md:block absolute inset-0 z-30 pointer-events-none">
