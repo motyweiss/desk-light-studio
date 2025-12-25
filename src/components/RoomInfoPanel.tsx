@@ -6,6 +6,11 @@ import { IPhoneIcon } from "./icons/IPhoneIcon";
 import { MagicKeyboardIcon } from "./icons/MagicKeyboardIcon";
 import { MagicMouseIcon } from "./icons/MagicMouseIcon";
 import { PAGE_LOAD, DATA_TRANSITION, EASING } from "@/constants/animations";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from '@/components/ui/tooltip';
 
 interface Light {
   id: string;
@@ -78,31 +83,38 @@ export const RoomInfoPanel = ({
         </h1>
         
         {/* Master Switch */}
-        <motion.button
-          initial={false}
-          animate={{ 
-            backgroundColor: masterSwitchOn ? 'rgba(255, 255, 255, 0.08)' : 'rgba(255, 255, 255, 0)',
-            borderColor: masterSwitchOn ? 'rgba(255, 255, 255, 0.25)' : 'rgba(255, 255, 255, 0.1)'
-          }}
-          transition={{ duration: 0.4, ease: EASING.smooth }}
-          onClick={() => onMasterToggle(!masterSwitchOn)}
-          className="w-9 h-9 md:w-10 md:h-10 rounded-full backdrop-blur-xl border flex-shrink-0"
-          whileHover={{
-            backgroundColor: masterSwitchOn ? 'rgba(255, 255, 255, 0.12)' : 'rgba(255, 255, 255, 0.05)',
-          }}
-          whileTap={{ scale: 0.92 }}
-          aria-label="Toggle all lights"
-        >
-          <motion.div
-            animate={{
-              color: masterSwitchOn ? 'rgba(255, 255, 255, 0.95)' : 'rgba(255, 255, 255, 0.4)',
-            }}
-            transition={{ duration: 0.4, ease: EASING.smooth }}
-            className="flex items-center justify-center"
-          >
-            <Power className="w-4 h-4" strokeWidth={2} />
-          </motion.div>
-        </motion.button>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <motion.button
+              initial={false}
+              animate={{ 
+                backgroundColor: masterSwitchOn ? 'rgba(255, 255, 255, 0.08)' : 'rgba(255, 255, 255, 0)',
+                borderColor: masterSwitchOn ? 'rgba(255, 255, 255, 0.25)' : 'rgba(255, 255, 255, 0.1)'
+              }}
+              transition={{ duration: 0.4, ease: EASING.smooth }}
+              onClick={() => onMasterToggle(!masterSwitchOn)}
+              className="w-9 h-9 md:w-10 md:h-10 rounded-full backdrop-blur-xl border flex-shrink-0"
+              whileHover={{
+                backgroundColor: masterSwitchOn ? 'rgba(255, 255, 255, 0.12)' : 'rgba(255, 255, 255, 0.05)',
+              }}
+              whileTap={{ scale: 0.92 }}
+              aria-label="Toggle all lights"
+            >
+              <motion.div
+                animate={{
+                  color: masterSwitchOn ? 'rgba(255, 255, 255, 0.95)' : 'rgba(255, 255, 255, 0.4)',
+                }}
+                transition={{ duration: 0.4, ease: EASING.smooth }}
+                className="flex items-center justify-center"
+              >
+                <Power className="w-4 h-4" strokeWidth={2} />
+              </motion.div>
+            </motion.button>
+          </TooltipTrigger>
+          <TooltipContent side="bottom">
+            <p>{masterSwitchOn ? 'Turn all lights off' : 'Turn all lights on'}</p>
+          </TooltipContent>
+        </Tooltip>
       </motion.div>
 
       {/* Devices Battery Section - Desktop only */}
