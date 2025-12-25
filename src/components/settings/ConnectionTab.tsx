@@ -46,10 +46,14 @@ const ConnectionTab = ({
 
     try {
       const normalizedUrl = baseUrl.replace(/\/+$/, '');
-      homeAssistant.setConfig({ baseUrl: normalizedUrl, accessToken });
-      const result = await homeAssistant.testConnection();
+      
+      // Use direct connection test (bypasses Supabase auth requirement)
+      const result = await homeAssistant.testDirectConnection(normalizedUrl, accessToken);
 
       if (result.success) {
+        // Set config for future use
+        homeAssistant.setConfig({ baseUrl: normalizedUrl, accessToken });
+        
         // Fetch entities after successful connection
         const entities = await homeAssistant.getEntitiesWithContext();
         
