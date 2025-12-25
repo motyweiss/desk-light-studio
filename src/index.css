@@ -53,16 +53,6 @@ All colors MUST be HSL.
     --glow-warm-cream: 41 48% 52%;
     --glow-base: 41 40% 48%;
     
-    /* Background system colors */
-    --bg-base-hue: 35;
-    --bg-base-saturation: 16%;
-    --bg-base-lightness: 51%;
-    --bg-warm-hue: 42;
-    --bg-warm-saturation: 28%;
-    --bg-warm-lightness: 56%;
-    --bg-glass-blur: 120px;
-    --bg-glass-opacity: 0.08;
-    
     /* Status colors for sensors */
     --status-cold: 200 70% 55%;
     --status-cool: 180 60% 50%;

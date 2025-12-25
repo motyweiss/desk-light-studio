@@ -6,9 +6,6 @@ import { MediaPlayer } from '@/components/MediaPlayer/MediaPlayer';
 import { TopNavigationBar } from '@/components/navigation/TopNavigationBar';
 import { useHAConnection } from '@/contexts/HAConnectionContext';
 import { useHomeAssistantSync } from '@/hooks/useHomeAssistantSync';
-import { useLighting } from '@/features/lighting';
-import { DynamicBackground } from '@/features/background';
-import { useClimate } from '@/features/climate';
 
 interface RootLayoutProps {
   children: ReactNode;
@@ -19,12 +16,14 @@ export const RootLayout = ({ children }: RootLayoutProps) => {
   const { entityMapping, isConnected, isLoading: isConnecting, reconnect } = useHAConnection();
   const [isReconnecting, setIsReconnecting] = useState(false);
   const [pendingLights] = useState<Set<string>>(new Set());
+  const [bgReady, setBgReady] = useState(false);
 
-  // Get lighting intensities for dynamic background
-  const { lights } = useLighting();
-  
-  // Get climate data to know when data is ready
-  const climate = useClimate();
+  // Preload background image for smooth fade-in
+  useEffect(() => {
+    const bgImg = new Image();
+    bgImg.src = '/bg.png';
+    bgImg.onload = () => setBgReady(true);
+  }, []);
 
   const { attemptReconnect } = useHomeAssistantSync({
     isConnected,
@@ -36,7 +35,6 @@ export const RootLayout = ({ children }: RootLayoutProps) => {
   });
 
   const isSettingsPage = location.pathname === '/settings';
-  const isAuthPage = location.pathname === '/auth';
 
   return (
     <MediaPlayerProvider 
@@ -44,18 +42,32 @@ export const RootLayout = ({ children }: RootLayoutProps) => {
       isConnected={isConnected}
     >
       <div className="h-screen w-full relative flex flex-col overflow-hidden">
-        {/* Dynamic Background System - replaces static bg.png */}
-        <DynamicBackground
-          spotlightIntensity={lights.spotlight.targetValue}
-          deskLampIntensity={lights.deskLamp.targetValue}
-          monitorLightIntensity={lights.monitorLight.targetValue}
-          dataReady={climate.isLoaded}
+        {/* Solid background color - always visible */}
+        <div 
+          className="absolute inset-0"
+          style={{ backgroundColor: "#96856e" }}
+        />
+        
+        {/* Background image with fade-in */}
+        <motion.div
+          className="absolute inset-0"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: bgReady ? 1 : 0 }}
+          transition={{ 
+            duration: 0.8, 
+            ease: [0.25, 0.1, 0.25, 1] 
+          }}
+          style={{
+            backgroundImage: "url('/bg.png')",
+            backgroundSize: "cover",
+            backgroundPosition: "center",
+          }}
         />
         
         {/* Content */}
         <div className="relative z-10 h-full flex flex-col overflow-hidden">
-          {/* Global Top Navigation Bar - Fixed at top (hidden on mobile, settings, and auth page) */}
-          {!isSettingsPage && !isAuthPage && (
+          {/* Global Top Navigation Bar - Fixed at top (hidden on mobile and settings page) */}
+          {!isSettingsPage && (
             <TopNavigationBar
               currentPath={location.pathname}
               isConnected={isConnected}
@@ -66,7 +78,7 @@ export const RootLayout = ({ children }: RootLayoutProps) => {
           )}
 
           {/* Page Content with AnimatePresence for smooth transitions */}
-          <div className={`flex-1 overflow-auto ${!isSettingsPage && !isAuthPage ? 'pt-[56px] md:pt-[68px]' : 'pt-0'} ${isSettingsPage || isAuthPage ? 'pb-0' : 'pb-[88px] md:pb-[96px]'}`}>
+          <div className={`flex-1 overflow-auto ${!isSettingsPage ? 'pt-[56px] md:pt-[68px]' : 'pt-0'} ${isSettingsPage ? 'pb-0' : 'pb-[88px] md:pb-[96px]'}`}>
             <AnimatePresence mode="sync" initial={false}>
               <motion.div
                 key={location.pathname}
@@ -84,8 +96,8 @@ export const RootLayout = ({ children }: RootLayoutProps) => {
             </AnimatePresence>
           </div>
 
-          {/* Global Media Player - Fixed at bottom (hidden on settings and auth page) */}
-          {!isSettingsPage && !isAuthPage && <MediaPlayer />}
+          {/* Global Media Player - Fixed at bottom (hidden on settings page) */}
+          {!isSettingsPage && <MediaPlayer />}
         </div>
       </div>
     </MediaPlayerProvider>
