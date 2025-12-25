@@ -218,20 +218,19 @@ const Settings = () => {
         className="flex-shrink-0 bg-background/80 backdrop-blur-xl border-b border-white/10"
       >
         <div className="max-w-2xl mx-auto px-6 py-4 flex items-center justify-between">
-          <button
+          <motion.button
             onClick={handleCancel}
-            className="flex items-center gap-2 text-white/60 hover:text-white transition-colors"
+            className="w-10 h-10 rounded-full backdrop-blur-xl border border-white/10 flex items-center justify-center text-white/60 hover:text-white hover:border-white/25 hover:bg-white/5 transition-all duration-300"
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            aria-label="Go back"
           >
-            <ArrowLeft className="w-5 h-5" />
-            <span className="text-sm font-light">Back</span>
-          </button>
-          <h1 
-            className="text-3xl font-light text-white"
-            style={{ fontFamily: "'Cormorant Garamond', serif" }}
-          >
+            <ArrowLeft className="w-4 h-4" strokeWidth={2} />
+          </motion.button>
+          <h1 className="text-3xl font-display font-light text-white">
             Settings
           </h1>
-          <SettingsConnectionBadge baseUrl={haConfig?.baseUrl || ""} accessToken={haConfig?.accessToken || ""} />
+          <SettingsConnectionBadge />
         </div>
       </motion.div>
 
