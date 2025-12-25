@@ -5,6 +5,7 @@ import { AirPodsMaxIcon } from "./icons/AirPodsMaxIcon";
 import { IPhoneIcon } from "./icons/IPhoneIcon";
 import { MagicKeyboardIcon } from "./icons/MagicKeyboardIcon";
 import { MagicMouseIcon } from "./icons/MagicMouseIcon";
+import { HomeAssistantIcon } from "./icons/HomeAssistantIcon";
 import { PAGE_LOAD, DATA_TRANSITION, EASING } from "@/constants/animations";
 
 interface Light {
@@ -73,9 +74,12 @@ export const RoomInfoPanel = ({
         }}
         style={{ willChange: 'opacity' }}
       >
-        <h1 className="text-2xl md:text-4xl font-display font-light tracking-tight text-foreground leading-tight">
-          {roomName}
-        </h1>
+        <div className="flex items-center gap-3">
+          <HomeAssistantIcon className="w-8 h-8 md:w-10 md:h-10 text-white/90" />
+          <h1 className="text-2xl md:text-4xl font-display font-light tracking-tight text-foreground leading-tight">
+            {roomName}
+          </h1>
+        </div>
         
         {/* Master Switch */}
         <motion.button
