@@ -73,7 +73,7 @@ const DevicesTab = ({
       
 
       {/* Separator */}
-      <div className="h-px bg-white/10" />
+      
 
       {/* Room Sections */}
       <div className="space-y-6">
