@@ -5,6 +5,11 @@ import { ClimateIndicators } from '@/features/climate/components/ClimateIndicato
 import { ConnectionStatusIndicator } from '@/components/ConnectionStatusIndicator';
 import { LogoutButton } from '@/components/LogoutButton';
 import { HomeAssistantIcon } from '@/components/icons/HomeAssistantIcon';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from '@/components/ui/tooltip';
 
 interface TopNavigationBarProps {
   currentPath: string;
@@ -73,15 +78,22 @@ export const TopNavigationBar = ({
               />
             </div>
             
-            <motion.button
-              onClick={() => navigate('/settings')}
-              className="w-9 h-9 md:w-10 md:h-10 rounded-lg flex items-center justify-center text-white hover:text-white transition-colors hover:bg-white/5"
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              aria-label="Settings"
-            >
-              <SettingsIcon className="w-4 h-4 md:w-5 md:h-5" strokeWidth={1.5} />
-            </motion.button>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <motion.button
+                  onClick={() => navigate('/settings')}
+                  className="w-9 h-9 md:w-10 md:h-10 rounded-lg flex items-center justify-center text-white hover:text-white transition-colors hover:bg-white/5"
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  aria-label="Settings"
+                >
+                  <SettingsIcon className="w-4 h-4 md:w-5 md:h-5" strokeWidth={1.5} />
+                </motion.button>
+              </TooltipTrigger>
+              <TooltipContent side="bottom">
+                <p>Settings</p>
+              </TooltipContent>
+            </Tooltip>
 
             <div className="hidden md:block">
               <LogoutButton />
