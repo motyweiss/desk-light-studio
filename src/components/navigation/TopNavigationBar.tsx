@@ -1,9 +1,10 @@
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
-import { Home, Settings as SettingsIcon } from 'lucide-react';
+import { Settings as SettingsIcon } from 'lucide-react';
 import { ClimateIndicators } from '@/features/climate/components/ClimateIndicators';
 import { ConnectionStatusIndicator } from '@/components/ConnectionStatusIndicator';
 import { LogoutButton } from '@/components/LogoutButton';
+import { HomeAssistantIcon } from '@/components/icons/HomeAssistantIcon';
 
 interface TopNavigationBarProps {
   currentPath: string;
@@ -41,8 +42,8 @@ export const TopNavigationBar = ({
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.5, delay: 0.2 }}
           >
-            <Home className="w-4 h-4 md:w-5 md:h-5 text-white/70" strokeWidth={1.5} />
-            <span className="text-sm md:text-lg font-light text-white/90">My Home</span>
+            <HomeAssistantIcon className="w-5 h-5 md:w-6 md:h-6 text-white/90" />
+            <span className="text-sm md:text-lg font-light text-white/90">Home Assistant</span>
           </motion.div>
 
           {/* Center: Climate Indicators - Hidden on mobile */}
