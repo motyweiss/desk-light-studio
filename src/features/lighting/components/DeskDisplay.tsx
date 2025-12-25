@@ -130,26 +130,22 @@ export const DeskDisplay = ({
       onMouseLeave={handleMouseLeave}
     >
       <div 
-        className="relative w-full h-full overflow-hidden rounded-[2rem]"
+        className="relative w-full h-full overflow-hidden rounded-[2.5rem]"
       >
-        {/* Gradient mask overlay for soft edges */}
+        {/* Soft inner shadow for recessed niche effect */}
         <div 
-          className="absolute inset-0 z-20 pointer-events-none"
+          className="absolute inset-0 z-30 pointer-events-none rounded-[2.5rem]"
           style={{
-            maskImage: `radial-gradient(ellipse 90% 90% at 50% 50%, black 55%, transparent 100%)`,
-            WebkitMaskImage: `radial-gradient(ellipse 90% 90% at 50% 50%, black 55%, transparent 100%)`,
+            boxShadow: `
+              inset 0 0 80px 30px hsl(35 16% 51%),
+              inset 0 0 40px 15px hsl(35 16% 51% / 0.8)
+            `,
           }}
         />
         
-        {/* Image stack */}
+        {/* Image stack with very soft edges */}
         <div 
           className="absolute inset-0"
-          style={{
-            maskImage: `linear-gradient(to right, transparent 0%, black 6%, black 94%, transparent 100%), linear-gradient(to bottom, transparent 0%, black 6%, black 94%, transparent 100%)`,
-            WebkitMaskImage: `linear-gradient(to right, transparent 0%, black 6%, black 94%, transparent 100%), linear-gradient(to bottom, transparent 0%, black 6%, black 94%, transparent 100%)`,
-            maskComposite: 'intersect',
-            WebkitMaskComposite: 'source-in',
-          }}
         >
           {Object.entries(lightingStates).map(([state, image]) => {
             const isActive = state === currentState;
