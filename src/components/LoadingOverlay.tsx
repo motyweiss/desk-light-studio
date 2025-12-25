@@ -1,13 +1,22 @@
 import { motion, AnimatePresence } from "framer-motion";
 import officeChairIcon from "@/assets/office-chair.svg";
 import { PAGE_LOAD, EASING } from "@/constants/animations";
+import { BACKGROUND_COLORS } from "@/features/background";
 
 interface LoadingOverlayProps {
   isLoading: boolean;
   onExitComplete?: () => void;
 }
 
+/**
+ * Loading Overlay
+ * Uses the same base color as DynamicBackground for seamless transition
+ */
 export const LoadingOverlay = ({ isLoading, onExitComplete }: LoadingOverlayProps) => {
+  // Generate the base background color matching DynamicBackground
+  const { base } = BACKGROUND_COLORS;
+  const baseColor = `hsl(${base.hue} ${base.saturation}% ${base.lightness}%)`;
+
   return (
     <AnimatePresence onExitComplete={onExitComplete}>
       {isLoading && (
@@ -21,10 +30,29 @@ export const LoadingOverlay = ({ isLoading, onExitComplete }: LoadingOverlayProp
             ease: EASING.smooth
           }}
           style={{
-            backgroundColor: "#96856e",
+            backgroundColor: baseColor,
             willChange: 'opacity',
           }}
         >
+          {/* Subtle gradient overlay matching DynamicBackground base */}
+          <div 
+            className="absolute inset-0 pointer-events-none"
+            style={{
+              background: `
+                radial-gradient(
+                  ellipse 80% 60% at 20% 30%,
+                  hsl(38 22% 58% / 0.12) 0%,
+                  transparent 50%
+                ),
+                radial-gradient(
+                  ellipse 70% 70% at 80% 70%,
+                  hsl(34 18% 54% / 0.10) 0%,
+                  transparent 50%
+                )
+              `,
+            }}
+          />
+
           {/* Minimalist spinner */}
           <motion.div 
             className="relative w-32 h-32"
