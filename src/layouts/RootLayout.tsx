@@ -1,4 +1,4 @@
-import { ReactNode, useState, useEffect } from 'react';
+import { ReactNode, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
 import { MediaPlayerProvider } from '@/features/mediaPlayer';
@@ -16,14 +16,6 @@ export const RootLayout = ({ children }: RootLayoutProps) => {
   const { entityMapping, isConnected, isLoading: isConnecting, reconnect } = useHAConnection();
   const [isReconnecting, setIsReconnecting] = useState(false);
   const [pendingLights] = useState<Set<string>>(new Set());
-  const [bgReady, setBgReady] = useState(false);
-
-  // Preload background image for smooth fade-in
-  useEffect(() => {
-    const bgImg = new Image();
-    bgImg.src = '/bg.png';
-    bgImg.onload = () => setBgReady(true);
-  }, []);
 
   const { attemptReconnect } = useHomeAssistantSync({
     isConnected,
@@ -41,28 +33,15 @@ export const RootLayout = ({ children }: RootLayoutProps) => {
       entityId={entityMapping?.mediaPlayer || ''} 
       isConnected={isConnected}
     >
-      <div className="h-screen w-full relative flex flex-col overflow-hidden">
-        {/* Solid background color - always visible */}
-        <div 
-          className="absolute inset-0"
-          style={{ backgroundColor: "#96856e" }}
-        />
-        
-        {/* Background image with fade-in */}
-        <motion.div
-          className="absolute inset-0"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: bgReady ? 1 : 0 }}
-          transition={{ 
-            duration: 0.8, 
-            ease: [0.25, 0.1, 0.25, 1] 
-          }}
-          style={{
-            backgroundImage: "url('/bg.png')",
-            backgroundSize: "cover",
-            backgroundPosition: "center",
-          }}
-        />
+      <div 
+        className="h-screen w-full relative flex flex-col overflow-hidden"
+        style={{
+          backgroundImage: "url('/bg.png')",
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+          backgroundColor: "#96856e",
+        }}
+      >
         
         {/* Content */}
         <div className="relative z-10 h-full flex flex-col overflow-hidden">
