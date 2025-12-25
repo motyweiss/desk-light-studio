@@ -64,8 +64,8 @@ export interface HAArea {
 }
 
 /**
- * Home Assistant Service - Uses Edge Function proxy to avoid CORS issues
- * All requests go through the ha-proxy edge function which has access to user's HA config
+ * Home Assistant Service - Uses Edge Function proxy with direct HTTP fallback
+ * Tries proxy first (secure), falls back to direct calls when unauthenticated
  */
 class HomeAssistantService {
   private config: HomeAssistantConfig | null = null;
@@ -78,11 +78,19 @@ class HomeAssistantService {
       ...config,
       baseUrl: config.baseUrl.replace(/\/+$/, '')
     };
+    // Also update the proxy client's direct config for fallback
+    haProxyClient.setDirectConfig(this.config);
   }
 
   getConfig(): HomeAssistantConfig | null {
     return this.config;
   }
+
+  // Test connection with direct HTTP (bypasses proxy, for Settings page testing)
+  async testDirectConnection(baseUrl: string, accessToken: string): Promise<{ success: boolean; version?: string; error?: string }> {
+    return haProxyClient.testDirectConnection({ baseUrl, accessToken });
+  }
+
 
   private async retryWithBackoff<T>(
     operation: () => Promise<T>,

@@ -158,12 +158,19 @@ export const HAConnectionProvider: React.FC<{ children: React.ReactNode }> = ({ 
   // ============= Test Connection =============
   const testConnection = useCallback(async (baseUrl: string, accessToken: string): Promise<ConnectionResult> => {
     try {
-      const tempConfig = { baseUrl: baseUrl.replace(/\/+$/, ''), accessToken };
-      homeAssistant.setConfig(tempConfig);
-      haClient.setConfig(tempConfig);
+      const cleanUrl = baseUrl.replace(/\/+$/, '');
       
-      const result = await homeAssistant.testConnection();
-      return result;
+      // Use direct connection test first (more reliable for testing)
+      const directResult = await homeAssistant.testDirectConnection(cleanUrl, accessToken);
+      
+      if (directResult.success) {
+        // If direct connection works, configure the clients
+        const tempConfig = { baseUrl: cleanUrl, accessToken };
+        homeAssistant.setConfig(tempConfig);
+        haClient.setConfig(tempConfig);
+      }
+      
+      return directResult;
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Connection failed';
       return { success: false, error: message };
@@ -253,16 +260,28 @@ export const HAConnectionProvider: React.FC<{ children: React.ReactNode }> = ({ 
         configureClients(haConfig);
 
         setConnectionStatus('connecting');
-        const result = await homeAssistant.testConnection();
         
-        if (result.success) {
+        // Try direct connection first (more reliable), then proxy
+        const directResult = await homeAssistant.testDirectConnection(haConfig.baseUrl, haConfig.accessToken);
+        
+        if (directResult.success) {
           setConnectionStatus('connected');
-          setHaVersion(result.version || null);
-          logger.connection('Connected to Home Assistant', { version: result.version });
+          setHaVersion(directResult.version || null);
+          setError(null);
+          logger.connection('Connected to Home Assistant (direct)', { version: directResult.version });
         } else {
-          setConnectionStatus('error');
-          setError(result.error || 'Connection failed');
-          logger.error('HA connection failed', result.error);
+          // Try through proxy as fallback
+          const proxyResult = await homeAssistant.testConnection();
+          if (proxyResult.success) {
+            setConnectionStatus('connected');
+            setHaVersion(proxyResult.version || null);
+            setError(null);
+            logger.connection('Connected to Home Assistant (proxy)', { version: proxyResult.version });
+          } else {
+            setConnectionStatus('error');
+            setError(directResult.error || 'Connection failed');
+            logger.error('HA connection failed', directResult.error);
+          }
         }
       } else {
         setConnectionStatus('disconnected');
