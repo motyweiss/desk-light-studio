@@ -108,7 +108,7 @@ export const RoomInfoPanel = ({
       {/* Devices Battery Section - Desktop only */}
       {devices && devices.length > 0 && (
         <div className="hidden md:block py-4">
-          <div className="flex flex-row items-center justify-start gap-8">
+          <div className="flex flex-row items-start justify-between">
             {devices.map((device, index) => {
               const DeviceIcon = device.icon === 'headphones' 
                 ? AirPodsMaxIcon 
@@ -121,7 +121,7 @@ export const RoomInfoPanel = ({
               return (
                 <motion.div 
                   key={device.id} 
-                  className="flex flex-col gap-1"
+                  className="flex flex-col gap-1.5"
                   initial={{ opacity: 0 }}
                   animate={{ opacity: isLoaded ? 1 : 0 }}
                   transition={{
@@ -132,10 +132,10 @@ export const RoomInfoPanel = ({
                   style={{ willChange: 'opacity' }}
                 >
                   {/* Row 1: Icon + Battery % */}
-                  <div className="relative h-5">
+                  <div className="relative h-7">
                     {/* Skeleton layer */}
                     <motion.div
-                      className="absolute inset-0 h-5 w-12 bg-white/10 rounded"
+                      className="absolute inset-0 h-7 w-16 bg-white/10 rounded"
                       initial={false}
                       animate={{ 
                         opacity: showSkeleton ? [0.3, 0.5, 0.3] : 0,
@@ -148,7 +148,7 @@ export const RoomInfoPanel = ({
                     />
                     {/* Value layer */}
                     <motion.div 
-                      className="flex items-center gap-1.5"
+                      className="flex items-center gap-2"
                       initial={false}
                       animate={{ 
                         opacity: dataReady && !showSkeleton ? 1 : 0,
@@ -159,16 +159,16 @@ export const RoomInfoPanel = ({
                         delay: showSkeleton ? 0 : DATA_TRANSITION.dataEnter.delay,
                       }}
                     >
-                      <DeviceIcon className="w-4 h-4 text-white/40" strokeWidth={1.5} />
-                      <span className="text-[15px] font-light text-white tabular-nums">{device.batteryLevel}%</span>
+                      <DeviceIcon className="w-5 h-5 text-white/50" strokeWidth={1.5} />
+                      <span className="text-xl font-light text-white tabular-nums">{device.batteryLevel}%</span>
                       {device.isCharging && (
-                        <Zap className="w-3 h-3 text-status-caution" fill="currentColor" />
+                        <Zap className="w-3.5 h-3.5 text-status-caution" fill="currentColor" />
                       )}
                     </motion.div>
                   </div>
                   
                   {/* Row 2: Device Name */}
-                  <span className="text-[9px] text-white/40 font-light tracking-[0.12em] uppercase whitespace-nowrap">
+                  <span className="text-[10px] text-white/40 font-light tracking-[0.15em] uppercase whitespace-nowrap">
                     {device.name}
                   </span>
                 </motion.div>
