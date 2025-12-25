@@ -2,7 +2,7 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Loader2, CheckCircle2, XCircle, Link2 } from "lucide-react";
+import { Loader2, CheckCircle2, XCircle, Link2, Eye, EyeOff } from "lucide-react";
 import { SettingsSection } from "./SettingsSection";
 import { SettingsField } from "./SettingsField";
 import { QuickConnectSuggestions } from "./QuickConnectSuggestions";
@@ -26,6 +26,7 @@ const ConnectionTab = ({
 }: ConnectionTabProps) => {
   const { toast } = useToast();
   const [testing, setTesting] = useState(false);
+  const [showToken, setShowToken] = useState(false);
   const [testResult, setTestResult] = useState<{
     success: boolean;
     message: string;
@@ -135,13 +136,26 @@ const ConnectionTab = ({
           label="Access Token"
           description="Long-lived access token from Home Assistant"
         >
-          <Input
-            type="password"
-            value={accessToken}
-            onChange={(e) => onAccessTokenChange(e.target.value)}
-            placeholder="eyJ0eXAiOiJKV1QiLCJhbGc..."
-            className="bg-white/5 border-white/20 text-white placeholder:text-white/30"
-          />
+          <div className="relative">
+            <Input
+              type={showToken ? "text" : "password"}
+              value={accessToken}
+              onChange={(e) => onAccessTokenChange(e.target.value)}
+              placeholder="eyJ0eXAiOiJKV1QiLCJhbGc..."
+              className="bg-white/5 border-white/20 text-white placeholder:text-white/30 pr-10"
+            />
+            <button
+              type="button"
+              onClick={() => setShowToken(!showToken)}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-white/50 hover:text-white/80 transition-colors"
+            >
+              {showToken ? (
+                <EyeOff className="w-4 h-4" />
+              ) : (
+                <Eye className="w-4 h-4" />
+              )}
+            </button>
+          </div>
         </SettingsField>
 
         <div className="flex flex-col gap-3 pt-2">
