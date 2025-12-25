@@ -41,6 +41,7 @@ export const CircularProgress = ({
   const getProgressColor = (val: number, type: string): string => {
     switch (type) {
       case 'temperature':
+        // Temperature keeps blue-to-red gradient
         if (val <= 18) return 'hsl(210 80% 55%)';
         if (val <= 20) return 'hsl(190 70% 50%)';
         if (val <= 22) return 'hsl(160 60% 48%)';
@@ -50,24 +51,13 @@ export const CircularProgress = ({
         return 'hsl(0 80% 55%)';
         
       case 'humidity':
-        if (val >= 40 && val <= 60) return 'hsl(var(--status-optimal))';
-        if ((val >= 30 && val < 40) || (val > 60 && val <= 70)) 
-          return 'hsl(var(--status-caution))';
-        return 'hsl(var(--status-danger))';
-        
       case 'airQuality':
-        if (val <= 12) return 'hsl(var(--status-comfortable))';
-        if (val <= 35) return 'hsl(var(--status-caution))';
-        if (val <= 55) return 'hsl(var(--status-warning))';
-        return 'hsl(var(--status-danger))';
-        
       case 'battery':
-        if (val >= 50) return 'hsl(var(--status-comfortable))';
-        if (val >= 20) return 'hsl(var(--status-caution))';
-        return 'hsl(var(--status-danger))';
+        // All non-temperature indicators use white
+        return 'rgba(255, 255, 255, 0.5)';
         
       default:
-        return 'hsl(var(--warm-glow))';
+        return 'rgba(255, 255, 255, 0.5)';
     }
   };
 
