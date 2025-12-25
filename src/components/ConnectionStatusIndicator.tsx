@@ -66,40 +66,40 @@ export const ConnectionStatusIndicator = ({
 
   // Render tooltip in portal to avoid clipping issues
   const renderTooltip = () => {
-    if (!isHovered) return null;
-
     return createPortal(
       <AnimatePresence>
-        <motion.div
-          className="fixed pointer-events-none z-[200] bg-white/12 backdrop-blur-[32px] px-5 py-2.5 rounded-full border border-white/25 [background:linear-gradient(135deg,rgba(255,255,255,0.15),rgba(255,255,255,0.05))]"
-          style={{
-            top: `${tooltipPosition.top}px`,
-            left: `${tooltipPosition.left}px`,
-            transform: 'translateX(-50%)',
-            transformOrigin: '50% 0%'
-          }}
-          initial={{ scale: 0.92, opacity: 0 }}
-          animate={{ 
-            scale: 1, 
-            opacity: 1,
-            transition: {
-              scale: { duration: 0.4, ease: [0.34, 1.56, 0.64, 1] },
-              opacity: { duration: 0.35, ease: [0.25, 0.46, 0.45, 0.94] }
-            }
-          }}
-          exit={{ 
-            scale: 0.92, 
-            opacity: 0,
-            transition: {
-              duration: 0.3,
-              ease: [0.4, 0, 0.6, 1]
-            }
-          }}
-        >
-          <div className="text-xs font-light text-white whitespace-nowrap">
-            {getTooltipText()}
-          </div>
-        </motion.div>
+        {isHovered && (
+          <motion.div
+            className="fixed pointer-events-none z-[200] bg-white/12 backdrop-blur-[32px] px-5 py-2.5 rounded-full border border-white/25 [background:linear-gradient(135deg,rgba(255,255,255,0.15),rgba(255,255,255,0.05))]"
+            style={{
+              top: `${tooltipPosition.top}px`,
+              left: `${tooltipPosition.left}px`,
+              transform: 'translateX(-50%)',
+              transformOrigin: '50% 0%'
+            }}
+            initial={{ scale: 0.92, opacity: 0 }}
+            animate={{ 
+              scale: 1, 
+              opacity: 1,
+              transition: {
+                scale: { duration: 0.4, ease: [0.34, 1.56, 0.64, 1] },
+                opacity: { duration: 0.35, ease: [0.25, 0.46, 0.45, 0.94] }
+              }
+            }}
+            exit={{ 
+              scale: 0.92, 
+              opacity: 0,
+              transition: {
+                duration: 0.3,
+                ease: [0.4, 0, 0.6, 1]
+              }
+            }}
+          >
+            <div className="text-xs font-light text-white whitespace-nowrap">
+              {getTooltipText()}
+            </div>
+          </motion.div>
+        )}
       </AnimatePresence>,
       document.body
     );
