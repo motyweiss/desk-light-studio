@@ -38,27 +38,9 @@ export const CircularProgress = ({
   const percentage = Math.min(Math.max((value - min) / (max - min), 0), 1);
   const offset = circumference * (1 - percentage);
   
-  const getProgressColor = (val: number, type: string): string => {
-    switch (type) {
-      case 'temperature':
-        // Temperature keeps blue-to-red gradient
-        if (val <= 18) return 'hsl(210 80% 55%)';
-        if (val <= 20) return 'hsl(190 70% 50%)';
-        if (val <= 22) return 'hsl(160 60% 48%)';
-        if (val <= 24) return 'hsl(45 80% 55%)';
-        if (val <= 26) return 'hsl(30 85% 55%)';
-        if (val <= 28) return 'hsl(15 85% 55%)';
-        return 'hsl(0 80% 55%)';
-        
-      case 'humidity':
-      case 'airQuality':
-      case 'battery':
-        // All non-temperature indicators use white
-        return 'rgba(255, 255, 255, 0.5)';
-        
-      default:
-        return 'rgba(255, 255, 255, 0.5)';
-    }
+  const getProgressColor = (): string => {
+    // All indicators use white
+    return 'rgba(255, 255, 255, 0.5)';
   };
 
   const isShowingSkeleton = showSkeleton || !isLoaded;
@@ -122,7 +104,7 @@ export const CircularProgress = ({
           initial={false}
           animate={{ 
             strokeDashoffset: isShowingSkeleton ? circumference : offset,
-            stroke: getProgressColor(value, colorType),
+            stroke: getProgressColor(),
             opacity: isShowingSkeleton ? 0 : 1,
           }}
           transition={{ 
