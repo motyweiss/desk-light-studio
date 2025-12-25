@@ -13,7 +13,7 @@ export const ClimateIndicators = () => {
   
   // Animated counters - start from 0 for smooth initial animation
   const tempCount = useMotionValue(0);
-  const tempDisplay = useTransform(tempCount, (latest) => latest.toFixed(1));
+  const tempDisplay = useTransform(tempCount, (latest) => Math.round(latest).toString());
   
   const humidityCount = useMotionValue(0);
   const humidityDisplay = useTransform(humidityCount, (latest) => Math.round(latest).toString());
