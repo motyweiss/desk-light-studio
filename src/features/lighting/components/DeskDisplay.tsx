@@ -74,15 +74,15 @@ export const DeskDisplay = ({
   const mouseX = useSpring(0, springConfig);
   const mouseY = useSpring(0, springConfig);
   
-  // Transform mouse position to rotation and translation
-  const rotateX = useTransform(mouseY, [-1, 1], [4, -4]);
-  const rotateY = useTransform(mouseX, [-1, 1], [-4, 4]);
-  const translateX = useTransform(mouseX, [-1, 1], [-8, 8]);
-  const translateY = useTransform(mouseY, [-1, 1], [-8, 8]);
+  // Transform mouse position to rotation and translation - increased intensity
+  const rotateX = useTransform(mouseY, [-1, 1], [12, -12]);
+  const rotateY = useTransform(mouseX, [-1, 1], [-12, 12]);
+  const translateX = useTransform(mouseX, [-1, 1], [-25, 25]);
+  const translateY = useTransform(mouseY, [-1, 1], [-25, 25]);
   const scale = useTransform(
     mouseX,
     [-1, 0, 1],
-    [1.02, 1, 1.02]
+    [1.05, 1, 1.05]
   );
 
   const handleMouseMove = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
