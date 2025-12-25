@@ -108,7 +108,7 @@ export const RoomInfoPanel = ({
       {/* Devices Battery Section - Desktop only */}
       {devices && devices.length > 0 && (
         <div className="hidden md:block py-4">
-          <div className="flex flex-row items-start justify-between pr-16">
+          <div className="flex flex-row items-start justify-between px-4">
             {devices.map((device, index) => {
               const DeviceIcon = device.icon === 'headphones' 
                 ? AirPodsMaxIcon 
