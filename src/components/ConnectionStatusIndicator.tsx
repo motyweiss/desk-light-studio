@@ -30,10 +30,10 @@ export const ConnectionStatusIndicator = ({
   };
 
   const getTooltipText = () => {
-    if (isConnecting) return "מתחבר...";
-    if (isReconnecting) return "מתחבר מחדש...";
-    if (!isConnected) return "מנותק";
-    return "מחובר";
+    if (isConnecting) return "Connecting...";
+    if (isReconnecting) return "Reconnecting...";
+    if (!isConnected) return "Disconnected";
+    return "Connected";
   };
 
   const handleClick = () => {
