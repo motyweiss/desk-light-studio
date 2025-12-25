@@ -7,7 +7,7 @@ interface BaseGradientLayerProps {
 
 /**
  * Layer 1: Static mesh gradient base
- * Provides depth and visual interest without animation overhead
+ * Very subtle - provides depth without competing with desk image
  */
 export const BaseGradientLayer = ({ isReady }: BaseGradientLayerProps) => {
   return (
@@ -22,19 +22,19 @@ export const BaseGradientLayer = ({ isReady }: BaseGradientLayerProps) => {
       style={{
         background: `
           radial-gradient(
-            ellipse 80% 60% at ${GRADIENTS.mesh[0].x}% ${GRADIENTS.mesh[0].y}%,
-            hsl(38 22% 58% / ${GRADIENTS.mesh[0].opacity}) 0%,
-            transparent 50%
-          ),
-          radial-gradient(
-            ellipse 70% 70% at ${GRADIENTS.mesh[1].x}% ${GRADIENTS.mesh[1].y}%,
-            hsl(34 18% 54% / ${GRADIENTS.mesh[1].opacity}) 0%,
-            transparent 50%
-          ),
-          radial-gradient(
-            ellipse 90% 80% at ${GRADIENTS.mesh[2].x}% ${GRADIENTS.mesh[2].y}%,
-            hsl(36 20% 56% / ${GRADIENTS.mesh[2].opacity}) 0%,
+            ellipse 90% 70% at ${GRADIENTS.mesh[0].x}% ${GRADIENTS.mesh[0].y}%,
+            hsl(36 18% 54% / ${GRADIENTS.mesh[0].opacity}) 0%,
             transparent 60%
+          ),
+          radial-gradient(
+            ellipse 80% 80% at ${GRADIENTS.mesh[1].x}% ${GRADIENTS.mesh[1].y}%,
+            hsl(34 15% 52% / ${GRADIENTS.mesh[1].opacity}) 0%,
+            transparent 55%
+          ),
+          radial-gradient(
+            ellipse 100% 90% at ${GRADIENTS.mesh[2].x}% ${GRADIENTS.mesh[2].y}%,
+            hsl(35 16% 53% / ${GRADIENTS.mesh[2].opacity}) 0%,
+            transparent 65%
           )
         `,
         willChange: 'opacity',

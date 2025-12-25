@@ -17,7 +17,7 @@ interface BackgroundValues {
 
 /**
  * Calculates dynamic background color values based on light intensities
- * Returns continuous values for smooth gradient transitions
+ * Uses subtle color shifts that harmonize with desk images
  */
 export const useBackgroundIntensity = (intensities: LightIntensities): BackgroundValues => {
   return useMemo(() => {
@@ -31,10 +31,11 @@ export const useBackgroundIntensity = (intensities: LightIntensities): Backgroun
       (monitorLight / 100) * weights.monitorLight
     );
     
-    // Apply gamma curve for more natural perception
-    const gammaCorrectedWarmth = Math.pow(warmth, 0.85);
+    // Apply subtle gamma curve for natural perception
+    // Using gentler curve to avoid drastic color changes
+    const gammaCorrectedWarmth = Math.pow(warmth, 0.9);
     
-    // Interpolate between base and warm colors
+    // Subtle interpolation between base and warm colors
     const lerp = (start: number, end: number, t: number) => 
       start + (end - start) * t;
     

@@ -6,8 +6,8 @@ interface GlassOverlayProps {
 }
 
 /**
- * Layer 3: Frosted glass effect
- * Adds subtle texture and depth with noise-like pattern
+ * Layer 3: Subtle frosted glass effect
+ * Very gentle - adds slight texture without overwhelming
  */
 export const GlassOverlay = ({ isReady }: GlassOverlayProps) => {
   return (
@@ -24,33 +24,31 @@ export const GlassOverlay = ({ isReady }: GlassOverlayProps) => {
         background: `
           linear-gradient(
             180deg,
-            hsl(35 15% 60% / ${GRADIENTS.glass.startOpacity}) 0%,
-            transparent 40%,
-            transparent 60%,
-            hsl(35 15% 45% / ${GRADIENTS.glass.endOpacity}) 100%
+            hsl(35 14% 56% / ${GRADIENTS.glass.startOpacity}) 0%,
+            transparent 35%,
+            transparent 65%,
+            hsl(35 14% 48% / ${GRADIENTS.glass.endOpacity}) 100%
           )
         `,
         willChange: 'opacity',
       }}
     >
-      {/* Subtle noise texture simulation with micro-gradients */}
+      {/* Very subtle noise texture simulation */}
       <motion.div
         className="absolute inset-0"
         style={{
           background: `
-            radial-gradient(circle at 25% 25%, hsl(40 20% 60% / 0.04) 0%, transparent 25%),
-            radial-gradient(circle at 75% 75%, hsl(30 15% 55% / 0.03) 0%, transparent 25%),
-            radial-gradient(circle at 50% 10%, hsl(38 18% 58% / 0.03) 0%, transparent 30%),
-            radial-gradient(circle at 10% 80%, hsl(35 16% 52% / 0.03) 0%, transparent 25%),
-            radial-gradient(circle at 90% 30%, hsl(36 17% 54% / 0.03) 0%, transparent 25%)
+            radial-gradient(circle at 30% 20%, hsl(36 16% 55% / 0.02) 0%, transparent 30%),
+            radial-gradient(circle at 70% 80%, hsl(34 14% 52% / 0.02) 0%, transparent 30%),
+            radial-gradient(circle at 50% 50%, hsl(35 15% 53% / 0.01) 0%, transparent 40%)
           `,
           opacity: GLASS_EFFECT.noiseOpacity * 10,
         }}
         animate={{
           opacity: [
-            GLASS_EFFECT.noiseOpacity * 10,
+            GLASS_EFFECT.noiseOpacity * 8,
             GLASS_EFFECT.noiseOpacity * 12,
-            GLASS_EFFECT.noiseOpacity * 10,
+            GLASS_EFFECT.noiseOpacity * 8,
           ],
         }}
         transition={{
