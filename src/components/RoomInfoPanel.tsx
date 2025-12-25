@@ -121,7 +121,7 @@ export const RoomInfoPanel = ({
               return (
                 <motion.div 
                   key={device.id} 
-                  className="flex items-center gap-3"
+                  className="flex flex-col gap-1"
                   initial={{ opacity: 0 }}
                   animate={{ opacity: isLoaded ? 1 : 0 }}
                   transition={{
@@ -131,47 +131,46 @@ export const RoomInfoPanel = ({
                   }}
                   style={{ willChange: 'opacity' }}
                 >
-                  <DeviceIcon className="w-5 h-5 text-white/40" strokeWidth={1.5} />
-                  
-                  <div className="flex flex-col gap-0.5">
-                    <span className="text-[9px] text-white/50 font-light tracking-[0.15em] uppercase whitespace-nowrap">
-                      {device.name}
-                    </span>
-                    {/* Crossfade container */}
-                    <div className="relative h-5">
-                      {/* Skeleton layer */}
-                      <motion.div
-                        className="absolute inset-0 h-5 w-10 bg-white/10 rounded"
-                        initial={false}
-                        animate={{ 
-                          opacity: showSkeleton ? [0.3, 0.5, 0.3] : 0,
-                        }}
-                        transition={showSkeleton ? {
-                          duration: DATA_TRANSITION.skeleton.shimmerDuration,
-                          repeat: Infinity,
-                          ease: "easeInOut"
-                        } : crossfadeTransition}
-                      />
-                      {/* Value layer */}
-                      <motion.div 
-                        className="text-[15px] font-light text-white tabular-nums flex items-center gap-1.5"
-                        initial={false}
-                        animate={{ 
-                          opacity: dataReady && !showSkeleton ? 1 : 0,
-                          filter: dataReady && !showSkeleton ? 'blur(0px)' : `blur(${DATA_TRANSITION.dataEnter.blur}px)`,
-                        }}
-                        transition={{ 
-                          ...crossfadeTransition,
-                          delay: showSkeleton ? 0 : DATA_TRANSITION.dataEnter.delay,
-                        }}
-                      >
-                        <span>{device.batteryLevel}%</span>
-                        {device.isCharging && (
-                          <Zap className="w-3 h-3 text-status-caution" fill="currentColor" />
-                        )}
-                      </motion.div>
-                    </div>
+                  {/* Row 1: Icon + Battery % */}
+                  <div className="relative h-5">
+                    {/* Skeleton layer */}
+                    <motion.div
+                      className="absolute inset-0 h-5 w-12 bg-white/10 rounded"
+                      initial={false}
+                      animate={{ 
+                        opacity: showSkeleton ? [0.3, 0.5, 0.3] : 0,
+                      }}
+                      transition={showSkeleton ? {
+                        duration: DATA_TRANSITION.skeleton.shimmerDuration,
+                        repeat: Infinity,
+                        ease: "easeInOut"
+                      } : crossfadeTransition}
+                    />
+                    {/* Value layer */}
+                    <motion.div 
+                      className="flex items-center gap-1.5"
+                      initial={false}
+                      animate={{ 
+                        opacity: dataReady && !showSkeleton ? 1 : 0,
+                        filter: dataReady && !showSkeleton ? 'blur(0px)' : `blur(${DATA_TRANSITION.dataEnter.blur}px)`,
+                      }}
+                      transition={{ 
+                        ...crossfadeTransition,
+                        delay: showSkeleton ? 0 : DATA_TRANSITION.dataEnter.delay,
+                      }}
+                    >
+                      <DeviceIcon className="w-4 h-4 text-white/40" strokeWidth={1.5} />
+                      <span className="text-[15px] font-light text-white tabular-nums">{device.batteryLevel}%</span>
+                      {device.isCharging && (
+                        <Zap className="w-3 h-3 text-status-caution" fill="currentColor" />
+                      )}
+                    </motion.div>
                   </div>
+                  
+                  {/* Row 2: Device Name */}
+                  <span className="text-[9px] text-white/40 font-light tracking-[0.12em] uppercase whitespace-nowrap">
+                    {device.name}
+                  </span>
                 </motion.div>
               );
             })}
