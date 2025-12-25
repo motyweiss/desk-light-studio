@@ -1,7 +1,6 @@
 import { motion } from "framer-motion";
 import { Power, Zap } from "lucide-react";
 import { LightControlCard } from "@/features/lighting/components/LightControlCard";
-import { CircularProgress } from "@/features/climate/components/CircularProgress";
 import { AirPodsMaxIcon } from "./icons/AirPodsMaxIcon";
 import { IPhoneIcon } from "./icons/IPhoneIcon";
 import { MagicKeyboardIcon } from "./icons/MagicKeyboardIcon";
@@ -132,19 +131,7 @@ export const RoomInfoPanel = ({
                   }}
                   style={{ willChange: 'opacity' }}
                 >
-                  <CircularProgress 
-                    value={device.batteryLevel} 
-                    min={0} 
-                    max={100} 
-                    size={42} 
-                    strokeWidth={2.5}
-                    isLoaded={dataReady}
-                    showSkeleton={showSkeleton}
-                    colorType="battery"
-                    delay={PAGE_LOAD.effects.progressRings.delay + (index * 0.06)}
-                  >
-                    <DeviceIcon className="w-3.5 h-3.5 text-white/60" strokeWidth={1.5} />
-                  </CircularProgress>
+                  <DeviceIcon className="w-5 h-5 text-white/40" strokeWidth={1.5} />
                   
                   <div className="flex flex-col gap-0.5">
                     <span className="text-[9px] text-white/50 font-light tracking-[0.15em] uppercase whitespace-nowrap">
