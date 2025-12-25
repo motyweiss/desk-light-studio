@@ -60,26 +60,40 @@ const DevicesTab = ({
       }
     }, 100);
   };
-  return <motion.div initial={{
-    opacity: 0,
-    y: 10
-  }} animate={{
-    opacity: 1,
-    y: 0
-  }} transition={{
-    duration: 0.3
-  }} className="space-y-6">
+  return (
+    <motion.div 
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.3 }}
+      className="space-y-8"
+    >
       {/* Auto Discovery Section */}
-      
+      <EntityAutoDiscovery
+        onAddEntity={handleAddDiscoveredEntity}
+        configuredEntityIds={configuredEntityIds}
+        isConnected={isConnected}
+      />
 
       {/* Separator */}
-      
+      <div className="h-px bg-white/[0.06]" />
 
       {/* Room Sections */}
       <div className="space-y-6">
         <h3 className="text-sm font-light text-white/70">Configured Devices</h3>
-        {devicesMapping.rooms.map(room => <RoomSection key={room.id} room={room} entities={entities} onAddDevice={category => onAddDevice(room.id, category)} onUpdateDevice={(category, deviceId, updates) => onUpdateDevice(room.id, category, deviceId, updates)} onRemoveDevice={(category, deviceId) => onRemoveDevice(room.id, category, deviceId)} isLoading={isLoading} />)}
+        {devicesMapping.rooms.map(room => (
+          <RoomSection 
+            key={room.id} 
+            room={room} 
+            entities={entities} 
+            onAddDevice={category => onAddDevice(room.id, category)} 
+            onUpdateDevice={(category, deviceId, updates) => onUpdateDevice(room.id, category, deviceId, updates)} 
+            onRemoveDevice={(category, deviceId) => onRemoveDevice(room.id, category, deviceId)} 
+            isLoading={isLoading} 
+          />
+        ))}
       </div>
-    </motion.div>;
+    </motion.div>
+  );
 };
+
 export default DevicesTab;
