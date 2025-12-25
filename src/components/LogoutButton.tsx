@@ -50,7 +50,7 @@ export const LogoutButton = () => {
           )}
         </motion.button>
       </TooltipTrigger>
-      <TooltipContent side="bottom" className="bg-black/80 text-white border-white/10">
+      <TooltipContent side="bottom">
         <p>Sign out</p>
       </TooltipContent>
     </Tooltip>
