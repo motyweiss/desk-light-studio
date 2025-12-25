@@ -20,9 +20,9 @@ export const AnimatedCounter = ({
 }: AnimatedCounterProps) => {
   const [hasAnimated, setHasAnimated] = useState(false);
   const springValue = useSpring(0, {
-    stiffness: 50,
-    damping: 20,
-    mass: 1,
+    stiffness: 120,
+    damping: 14,
+    mass: 0.8,
   });
   
   const displayValue = useTransform(springValue, (latest) => Math.round(latest));
