@@ -71,12 +71,12 @@ export const typography = {
   display: {
     font: 'Cormorant Garamond',
     weights: [300, 400] as const,
-    usage: 'Room titles, hero headings, display text',
+    usage: 'Room titles only',
   },
   body: {
-    font: 'Inter',
-    weights: [300, 400, 500] as const,
-    usage: 'Body text, labels, UI controls',
+    font: '-apple-system, BlinkMacSystemFont, SF Pro Text, SF Compact Text, system-ui',
+    weights: [300, 400, 500, 600] as const,
+    usage: 'All UI text, labels, controls',
   },
 } as const;
 

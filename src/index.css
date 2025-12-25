@@ -77,7 +77,34 @@ All colors MUST be HSL.
   }
 
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground antialiased;
+    font-feature-settings: 'kern' 1, 'liga' 1;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    letter-spacing: -0.01em;
+  }
+
+  /* Typography refinements for SF Compact */
+  h1, h2, h3, h4, h5, h6 {
+    letter-spacing: -0.02em;
+    font-weight: 500;
+  }
+
+  /* Display font override for room titles */
+  .font-display {
+    letter-spacing: 0.02em;
+    font-weight: 300;
+  }
+
+  /* Small text optimization */
+  small, .text-xs, .text-sm {
+    letter-spacing: 0;
+    font-weight: 400;
+  }
+
+  /* Labels and controls */
+  label, button {
+    letter-spacing: -0.005em;
   }
 }
 

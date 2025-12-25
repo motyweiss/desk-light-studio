@@ -14,8 +14,14 @@ export default {
     },
     extend: {
       fontFamily: {
-        sans: ['Inter', 'system-ui', 'sans-serif'],
+        sans: ['-apple-system', 'BlinkMacSystemFont', 'SF Pro Text', 'SF Compact Text', 'system-ui', 'Segoe UI', 'Roboto', 'sans-serif'],
         display: ['Cormorant Garamond', 'serif'],
+      },
+      letterSpacing: {
+        tighter: '-0.02em',
+        tight: '-0.01em',
+        normal: '0',
+        wide: '0.01em',
       },
       colors: {
         border: "hsl(var(--border))",
