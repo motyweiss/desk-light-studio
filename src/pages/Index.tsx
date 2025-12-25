@@ -231,6 +231,20 @@ const Index = () => {
                   batteryLevel: climate.airpodsMaxBatteryLevel,
                   isCharging: climate.airpodsMaxBatteryCharging,
                   icon: 'headphones' as const
+                },
+                {
+                  id: 'keyboard',
+                  name: "Magic Keyboard",
+                  batteryLevel: 92,
+                  isCharging: false,
+                  icon: 'keyboard' as const
+                },
+                {
+                  id: 'mouse',
+                  name: "Magic Mouse",
+                  batteryLevel: 78,
+                  isCharging: false,
+                  icon: 'mouse' as const
                 }
               ]}
               lights={[

@@ -4,6 +4,8 @@ import { LightControlCard } from "@/features/lighting/components/LightControlCar
 import { CircularProgress } from "@/features/climate/components/CircularProgress";
 import { AirPodsMaxIcon } from "./icons/AirPodsMaxIcon";
 import { IPhoneIcon } from "./icons/IPhoneIcon";
+import { MagicKeyboardIcon } from "./icons/MagicKeyboardIcon";
+import { MagicMouseIcon } from "./icons/MagicMouseIcon";
 import { PAGE_LOAD, DATA_TRANSITION, EASING } from "@/constants/animations";
 
 interface Light {
@@ -20,7 +22,7 @@ interface Device {
   name: string;
   batteryLevel: number;
   isCharging: boolean;
-  icon?: 'smartphone' | 'headphones';
+  icon?: 'smartphone' | 'headphones' | 'keyboard' | 'mouse';
 }
 
 interface RoomInfoPanelProps {
@@ -109,7 +111,13 @@ export const RoomInfoPanel = ({
         <div className="hidden md:block rounded-2xl py-6 px-6">
           <div className="flex flex-row gap-10">
             {devices.map((device, index) => {
-              const DeviceIcon = device.icon === 'headphones' ? AirPodsMaxIcon : IPhoneIcon;
+              const DeviceIcon = device.icon === 'headphones' 
+                ? AirPodsMaxIcon 
+                : device.icon === 'keyboard'
+                ? MagicKeyboardIcon
+                : device.icon === 'mouse'
+                ? MagicMouseIcon
+                : IPhoneIcon;
               
               return (
                 <motion.div 
