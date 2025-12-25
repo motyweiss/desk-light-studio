@@ -144,11 +144,7 @@ export const ClimateIndicators = () => {
           value={humidityDisplay.get()}
           unit="%"
           trendData={humidityTrend}
-          color={
-            (climate.humidity >= 40 && climate.humidity <= 60) ? "hsl(var(--status-optimal))" :
-            ((climate.humidity >= 30 && climate.humidity < 40) || (climate.humidity > 60 && climate.humidity <= 70)) ? "hsl(var(--status-caution))" :
-            "hsl(var(--status-danger))"
-          }
+          color="rgba(255, 255, 255, 0.7)"
           onToggle={() => {}}
           progressValue={climate.humidity}
           progressMax={100}
@@ -169,7 +165,7 @@ export const ClimateIndicators = () => {
           value={getAirQualityStatus(climate.airQuality)}
           unit=""
           trendData={airQualityTrend}
-          color={getAirQualityColor(climate.airQuality)}
+          color="rgba(255, 255, 255, 0.7)"
           onToggle={() => {}}
           progressValue={climate.airQuality}
           progressMax={100}

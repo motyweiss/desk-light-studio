@@ -143,7 +143,7 @@ export const RoomInfoPanel = ({
                     colorType="battery"
                     delay={PAGE_LOAD.effects.progressRings.delay + (index * 0.06)}
                   >
-                    <DeviceIcon className="w-4.5 h-4.5 text-white/60" strokeWidth={1.5} />
+                    <DeviceIcon className="w-3.5 h-3.5 text-white/60" strokeWidth={1.5} />
                   </CircularProgress>
                   
                   <div className="flex flex-col gap-0.5">

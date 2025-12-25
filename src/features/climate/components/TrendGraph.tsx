@@ -20,7 +20,7 @@ export const TrendGraph = ({
 }: TrendGraphProps) => {
   
   const getColorForValue = (value: number, type?: string): string => {
-    if (!type) return color;
+    if (!type) return 'rgba(255, 255, 255, 0.6)';
     
     switch (type) {
       case 'temperature':
@@ -34,19 +34,12 @@ export const TrendGraph = ({
         return 'hsl(0 80% 55%)'; // hot - red
         
       case 'humidity':
-        if (value >= 40 && value <= 60) return 'hsl(142 70% 45%)';
-        if ((value >= 30 && value < 40) || (value > 60 && value <= 70)) 
-          return 'hsl(44 85% 58%)';
-        return 'hsl(0 75% 55%)';
-        
       case 'airQuality':
-        if (value <= 12) return 'hsl(142 70% 45%)';
-        if (value <= 35) return 'hsl(44 85% 58%)';
-        if (value <= 55) return 'hsl(35 90% 55%)';
-        return 'hsl(0 75% 55%)';
+        // All non-temperature use white
+        return 'rgba(255, 255, 255, 0.6)';
         
       default:
-        return color;
+        return 'rgba(255, 255, 255, 0.6)';
     }
   };
 
