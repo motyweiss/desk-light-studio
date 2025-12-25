@@ -1,3 +1,5 @@
+import { haProxyClient } from './haProxyClient';
+
 export interface HomeAssistantConfig {
   baseUrl: string;
   accessToken: string;
@@ -61,26 +63,25 @@ export interface HAArea {
   icon?: string;
 }
 
+/**
+ * Home Assistant Service - Uses Edge Function proxy to avoid CORS issues
+ * All requests go through the ha-proxy edge function which has access to user's HA config
+ */
 class HomeAssistantService {
   private config: HomeAssistantConfig | null = null;
   private retryCount = 0;
-  private maxRetries = 5;
-  private baseRetryDelay = 1000; // Start with 1 second
+  private maxRetries = 3;
+  private baseRetryDelay = 1000;
 
   setConfig(config: HomeAssistantConfig) {
-    // Remove trailing slash from baseUrl to prevent double slashes
     this.config = {
       ...config,
       baseUrl: config.baseUrl.replace(/\/+$/, '')
     };
   }
 
-  private getHeaders() {
-    if (!this.config) throw new Error("Home Assistant not configured");
-    return {
-      "Authorization": `Bearer ${this.config.accessToken}`,
-      "Content-Type": "application/json",
-    };
+  getConfig(): HomeAssistantConfig | null {
+    return this.config;
   }
 
   private async retryWithBackoff<T>(
@@ -92,7 +93,6 @@ class HomeAssistantService {
     for (let attempt = 0; attempt <= this.maxRetries; attempt++) {
       try {
         const result = await operation();
-        // Reset retry count on success
         if (this.retryCount > 0) {
           console.log(`✅ ${operationName} succeeded after ${this.retryCount} retries`);
           this.retryCount = 0;
@@ -103,10 +103,8 @@ class HomeAssistantService {
         this.retryCount = attempt + 1;
         
         if (attempt < this.maxRetries) {
-          // Calculate exponential backoff delay: 1s, 2s, 4s, 8s, 16s
           const delay = this.baseRetryDelay * Math.pow(2, attempt);
-          console.warn(`⚠️  ${operationName} failed (attempt ${attempt + 1}/${this.maxRetries + 1}), retrying in ${delay}ms...`);
-          console.warn(`   Error: ${lastError.message}`);
+          console.warn(`⚠️ ${operationName} failed (attempt ${attempt + 1}/${this.maxRetries + 1}), retrying in ${delay}ms...`);
           await new Promise(resolve => setTimeout(resolve, delay));
         }
       }
@@ -126,35 +124,27 @@ class HomeAssistantService {
 
   async testConnection(): Promise<{ success: boolean; version?: string; error?: string }> {
     try {
-      if (!this.config) {
-        return { success: false, error: "No configuration provided" };
+      const { data, error } = await haProxyClient.get<{ version: string }>('/api/');
+      
+      if (error) {
+        console.error('❌ HA connection failed', error);
+        return { success: false, error };
       }
-
-      const response = await fetch(`${this.config.baseUrl}/api/`, {
-        headers: this.getHeaders(),
-      });
-
-      if (!response.ok) {
-        return { success: false, error: `HTTP ${response.status}` };
-      }
-
-      const data = await response.json();
-      return { success: true, version: data.version };
+      
+      console.log('✅ HA connection successful', { version: data?.version });
+      return { success: true, version: data?.version };
     } catch (error) {
-      return { success: false, error: (error as Error).message };
+      const message = (error as Error).message;
+      console.error('❌ HA connection failed', message);
+      return { success: false, error: message };
     }
   }
 
   async getLights(): Promise<HAEntity[]> {
     try {
-      const response = await fetch(`${this.config?.baseUrl}/api/states`, {
-        headers: this.getHeaders(),
-      });
-
-      if (!response.ok) throw new Error(`HTTP ${response.status}`);
-
-      const entities: HAEntity[] = await response.json();
-      return entities.filter(e => e.entity_id.startsWith("light."));
+      const { data, error } = await haProxyClient.get<HAEntity[]>('/api/states');
+      if (error || !data) return [];
+      return data.filter(e => e.entity_id.startsWith("light."));
     } catch (error) {
       console.error("Failed to get lights:", error);
       return [];
@@ -163,14 +153,9 @@ class HomeAssistantService {
 
   async getSensors(): Promise<HAEntity[]> {
     try {
-      const response = await fetch(`${this.config?.baseUrl}/api/states`, {
-        headers: this.getHeaders(),
-      });
-
-      if (!response.ok) throw new Error(`HTTP ${response.status}`);
-
-      const entities: HAEntity[] = await response.json();
-      return entities.filter(e => e.entity_id.startsWith("sensor."));
+      const { data, error } = await haProxyClient.get<HAEntity[]>('/api/states');
+      if (error || !data) return [];
+      return data.filter(e => e.entity_id.startsWith("sensor."));
     } catch (error) {
       console.error("Failed to get sensors:", error);
       return [];
@@ -179,14 +164,9 @@ class HomeAssistantService {
 
   async getAreas(): Promise<HAArea[]> {
     try {
-      const response = await fetch(`${this.config?.baseUrl}/api/config/area_registry/list`, {
-        headers: this.getHeaders(),
-      });
-
-      if (!response.ok) throw new Error(`HTTP ${response.status}`);
-
-      const areas: HAArea[] = await response.json();
-      return areas;
+      const { data, error } = await haProxyClient.get<HAArea[]>('/api/config/area_registry/list');
+      if (error || !data) return [];
+      return data;
     } catch (error) {
       console.error("Failed to get areas:", error);
       return [];
@@ -195,19 +175,18 @@ class HomeAssistantService {
 
   async getEntitiesWithContext(): Promise<HAEntity[]> {
     try {
-      const [states, areasResponse, devicesResponse, entityRegistryResponse] = await Promise.all([
-        fetch(`${this.config?.baseUrl}/api/states`, { headers: this.getHeaders() }).then(r => r.json()),
-        fetch(`${this.config?.baseUrl}/api/config/area_registry/list`, { headers: this.getHeaders() }).then(r => r.json()).catch(() => []),
-        fetch(`${this.config?.baseUrl}/api/config/device_registry/list`, { headers: this.getHeaders() }).then(r => r.json()).catch(() => []),
-        fetch(`${this.config?.baseUrl}/api/config/entity_registry/list`, { headers: this.getHeaders() }).then(r => r.json()).catch(() => [])
+      const [statesRes, areasRes, devicesRes, entityRegistryRes] = await Promise.all([
+        haProxyClient.get<HAEntity[]>('/api/states'),
+        haProxyClient.get<any[]>('/api/config/area_registry/list'),
+        haProxyClient.get<any[]>('/api/config/device_registry/list'),
+        haProxyClient.get<any[]>('/api/config/entity_registry/list')
       ]);
 
-      // Ensure arrays - handle both array and object responses
-      const areas = Array.isArray(areasResponse) ? areasResponse : [];
-      const devices = Array.isArray(devicesResponse) ? devicesResponse : [];
-      const entityRegistry = Array.isArray(entityRegistryResponse) ? entityRegistryResponse : [];
+      const states = statesRes.data || [];
+      const areas = areasRes.data || [];
+      const devices = devicesRes.data || [];
+      const entityRegistry = entityRegistryRes.data || [];
 
-      // Create lookup maps with proper typing
       const areaMap = new Map<string, string>(areas.map((a: any) => [a.area_id, a.name]));
       const deviceMap = new Map<string, { name: string; area_id?: string }>(
         devices.map((d: any) => [d.id, { name: d.name_by_user || d.name, area_id: d.area_id }])
@@ -216,11 +195,7 @@ class HomeAssistantService {
         entityRegistry.map((e: any) => [e.entity_id, { device_id: e.device_id, area_id: e.area_id }])
       );
 
-      // Ensure states is an array
-      const statesArray = Array.isArray(states) ? states : [];
-
-      // Enrich states with context
-      return statesArray.map((entity: HAEntity) => {
+      return states.map((entity: HAEntity) => {
         const entityInfo = entityMap.get(entity.entity_id);
         const deviceInfo = entityInfo?.device_id ? deviceMap.get(entityInfo.device_id) : null;
         const areaId = entityInfo?.area_id || deviceInfo?.area_id;
@@ -241,12 +216,9 @@ class HomeAssistantService {
 
   async getEntityState(entityId: string): Promise<HAEntity | null> {
     try {
-      const response = await fetch(`${this.config?.baseUrl}/api/states/${entityId}`, {
-        headers: this.getHeaders(),
-      });
-
-      if (!response.ok) return null;
-      return await response.json();
+      const { data, error } = await haProxyClient.get<HAEntity>(`/api/states/${entityId}`);
+      if (error || !data) return null;
+      return data;
     } catch (error) {
       console.error("Failed to get entity state:", error);
       return null;
@@ -262,14 +234,10 @@ class HomeAssistantService {
         body.brightness_pct = brightnessPct;
       }
 
-      const response = await fetch(`${this.config?.baseUrl}/api/services/light/${service}`, {
-        method: "POST",
-        headers: this.getHeaders(),
-        body: JSON.stringify(body),
-      });
-
-      if (!response.ok) {
-        throw new Error(`Failed to set brightness: ${response.statusText}`);
+      const { error } = await haProxyClient.post(`/api/services/light/${service}`, body);
+      
+      if (error) {
+        throw new Error(`Failed to set brightness: ${error}`);
       }
       
       return true;
@@ -295,7 +263,6 @@ class HomeAssistantService {
         })
       );
 
-      // If no states were returned, throw error to trigger retry
       if (stateMap.size === 0) {
         throw new Error("No entity states returned from Home Assistant");
       }
@@ -307,15 +274,10 @@ class HomeAssistantService {
   // Media Player Functions
   async getMediaPlayers(): Promise<MediaPlayerEntity[]> {
     try {
-      const response = await fetch(`${this.config?.baseUrl}/api/states`, {
-        headers: this.getHeaders(),
-      });
-
-      if (!response.ok) throw new Error(`HTTP ${response.status}`);
-
-      const entities: MediaPlayerEntity[] = await response.json();
-      const mediaPlayers = entities.filter(e => e.entity_id.startsWith("media_player."));
+      const { data, error } = await haProxyClient.get<MediaPlayerEntity[]>('/api/states');
+      if (error || !data) return [];
       
+      const mediaPlayers = data.filter(e => e.entity_id.startsWith("media_player."));
       console.log('Found media players in HA:', mediaPlayers.map(e => e.entity_id));
       return mediaPlayers;
     } catch (error) {
@@ -326,12 +288,9 @@ class HomeAssistantService {
 
   async getMediaPlayerState(entityId: string): Promise<MediaPlayerEntity | null> {
     try {
-      const response = await fetch(`${this.config?.baseUrl}/api/states/${entityId}`, {
-        headers: this.getHeaders(),
-      });
-
-      if (!response.ok) return null;
-      return await response.json();
+      const { data, error } = await haProxyClient.get<MediaPlayerEntity>(`/api/states/${entityId}`);
+      if (error || !data) return null;
+      return data;
     } catch (error) {
       console.error("Failed to get media player state:", error);
       return null;
@@ -340,16 +299,10 @@ class HomeAssistantService {
 
   async mediaPlayPause(entityId: string): Promise<boolean> {
     return this.retryWithBackoff(async () => {
-      const response = await fetch(`${this.config?.baseUrl}/api/services/media_player/media_play_pause`, {
-        method: "POST",
-        headers: this.getHeaders(),
-        body: JSON.stringify({ entity_id: entityId }),
+      const { error } = await haProxyClient.post('/api/services/media_player/media_play_pause', { 
+        entity_id: entityId 
       });
-
-      if (!response.ok) {
-        throw new Error(`Failed to play/pause: ${response.statusText}`);
-      }
-      
+      if (error) throw new Error(`Failed to play/pause: ${error}`);
       return true;
     }, `mediaPlayPause(${entityId})`).catch(error => {
       console.error("Failed to play/pause media player:", error);
@@ -359,16 +312,10 @@ class HomeAssistantService {
 
   async mediaNextTrack(entityId: string): Promise<boolean> {
     return this.retryWithBackoff(async () => {
-      const response = await fetch(`${this.config?.baseUrl}/api/services/media_player/media_next_track`, {
-        method: "POST",
-        headers: this.getHeaders(),
-        body: JSON.stringify({ entity_id: entityId }),
+      const { error } = await haProxyClient.post('/api/services/media_player/media_next_track', { 
+        entity_id: entityId 
       });
-
-      if (!response.ok) {
-        throw new Error(`Failed to skip to next track: ${response.statusText}`);
-      }
-      
+      if (error) throw new Error(`Failed to skip to next track: ${error}`);
       return true;
     }, `mediaNextTrack(${entityId})`).catch(error => {
       console.error("Failed to skip to next track:", error);
@@ -378,16 +325,10 @@ class HomeAssistantService {
 
   async mediaPreviousTrack(entityId: string): Promise<boolean> {
     return this.retryWithBackoff(async () => {
-      const response = await fetch(`${this.config?.baseUrl}/api/services/media_player/media_previous_track`, {
-        method: "POST",
-        headers: this.getHeaders(),
-        body: JSON.stringify({ entity_id: entityId }),
+      const { error } = await haProxyClient.post('/api/services/media_player/media_previous_track', { 
+        entity_id: entityId 
       });
-
-      if (!response.ok) {
-        throw new Error(`Failed to skip to previous track: ${response.statusText}`);
-      }
-      
+      if (error) throw new Error(`Failed to skip to previous track: ${error}`);
       return true;
     }, `mediaPreviousTrack(${entityId})`).catch(error => {
       console.error("Failed to skip to previous track:", error);
@@ -397,19 +338,11 @@ class HomeAssistantService {
 
   async setMediaVolume(entityId: string, volumeLevel: number): Promise<boolean> {
     return this.retryWithBackoff(async () => {
-      const response = await fetch(`${this.config?.baseUrl}/api/services/media_player/volume_set`, {
-        method: "POST",
-        headers: this.getHeaders(),
-        body: JSON.stringify({ 
-          entity_id: entityId,
-          volume_level: volumeLevel 
-        }),
+      const { error } = await haProxyClient.post('/api/services/media_player/volume_set', { 
+        entity_id: entityId,
+        volume_level: volumeLevel 
       });
-
-      if (!response.ok) {
-        throw new Error(`Failed to set volume: ${response.statusText}`);
-      }
-      
+      if (error) throw new Error(`Failed to set volume: ${error}`);
       return true;
     }, `setMediaVolume(${entityId}, ${volumeLevel})`).catch(error => {
       console.error("Failed to set media volume:", error);
@@ -419,19 +352,11 @@ class HomeAssistantService {
 
   async toggleMediaMute(entityId: string, currentMuteState: boolean): Promise<boolean> {
     return this.retryWithBackoff(async () => {
-      const response = await fetch(`${this.config?.baseUrl}/api/services/media_player/volume_mute`, {
-        method: "POST",
-        headers: this.getHeaders(),
-        body: JSON.stringify({ 
-          entity_id: entityId,
-          is_volume_muted: !currentMuteState
-        }),
+      const { error } = await haProxyClient.post('/api/services/media_player/volume_mute', { 
+        entity_id: entityId,
+        is_volume_muted: !currentMuteState
       });
-
-      if (!response.ok) {
-        throw new Error(`Failed to toggle mute: ${response.statusText}`);
-      }
-      
+      if (error) throw new Error(`Failed to toggle mute: ${error}`);
       return true;
     }, `toggleMediaMute(${entityId})`).catch(error => {
       console.error("Failed to toggle mute:", error);
@@ -441,19 +366,11 @@ class HomeAssistantService {
 
   async mediaSeek(entityId: string, position: number): Promise<boolean> {
     return this.retryWithBackoff(async () => {
-      const response = await fetch(`${this.config?.baseUrl}/api/services/media_player/media_seek`, {
-        method: "POST",
-        headers: this.getHeaders(),
-        body: JSON.stringify({
-          entity_id: entityId,
-          seek_position: position
-        }),
+      const { error } = await haProxyClient.post('/api/services/media_player/media_seek', {
+        entity_id: entityId,
+        seek_position: position
       });
-
-      if (!response.ok) {
-        throw new Error(`Failed to seek: ${response.statusText}`);
-      }
-
+      if (error) throw new Error(`Failed to seek: ${error}`);
       return true;
     }, `mediaSeek(${entityId}, ${position})`).catch(error => {
       console.error("Failed to seek:", error);
@@ -461,6 +378,56 @@ class HomeAssistantService {
     });
   }
 
+  async setShuffle(entityId: string, shuffle: boolean): Promise<boolean> {
+    return this.retryWithBackoff(async () => {
+      const { error } = await haProxyClient.post('/api/services/media_player/shuffle_set', {
+        entity_id: entityId,
+        shuffle: shuffle
+      });
+      if (error) throw new Error(`Failed to set shuffle: ${error}`);
+      return true;
+    }, `setShuffle(${entityId}, ${shuffle})`).catch(error => {
+      console.error("Failed to set shuffle:", error);
+      return false;
+    });
+  }
+
+  async setRepeat(entityId: string, repeat: 'off' | 'one' | 'all'): Promise<boolean> {
+    return this.retryWithBackoff(async () => {
+      const { error } = await haProxyClient.post('/api/services/media_player/repeat_set', {
+        entity_id: entityId,
+        repeat: repeat
+      });
+      if (error) throw new Error(`Failed to set repeat: ${error}`);
+      return true;
+    }, `setRepeat(${entityId}, ${repeat})`).catch(error => {
+      console.error("Failed to set repeat:", error);
+      return false;
+    });
+  }
+
+  async selectSource(entityId: string, source: string): Promise<boolean> {
+    return this.retryWithBackoff(async () => {
+      const { error } = await haProxyClient.post('/api/services/media_player/select_source', {
+        entity_id: entityId,
+        source: source
+      });
+      if (error) throw new Error(`Failed to select source: ${error}`);
+      return true;
+    }, `selectSource(${entityId}, ${source})`).catch(error => {
+      console.error("Failed to select source:", error);
+      return false;
+    });
+  }
+
+  // Image cache for album art
+  private imageCache = new Map<string, string>();
+
+  clearImageCache() {
+    this.imageCache.clear();
+  }
+
+  // Image handling - proxy through edge function
   getFullImageUrl(relativePath: string | null): string | null {
     if (!relativePath) return null;
     if (relativePath.startsWith('http://') || relativePath.startsWith('https://')) {
@@ -470,10 +437,8 @@ class HomeAssistantService {
     return `${this.config.baseUrl}${relativePath}`;
   }
 
-  private imageCache = new Map<string, string>();
-
   async fetchImageAsDataUrl(relativePath: string | null): Promise<string | null> {
-    if (!relativePath || !this.config) return null;
+    if (!relativePath) return null;
 
     // Check cache first
     if (this.imageCache.has(relativePath)) {
@@ -481,300 +446,56 @@ class HomeAssistantService {
     }
 
     try {
-      const fullUrl = relativePath.startsWith('http') 
-        ? relativePath 
-        : `${this.config.baseUrl}${relativePath}`;
-
-      const response = await fetch(fullUrl, {
-        headers: {
-          'Authorization': `Bearer ${this.config.accessToken}`,
-        },
+      // Use proxy to fetch image
+      const { data, error } = await haProxyClient.request<ArrayBuffer>({
+        path: relativePath.startsWith('/') ? relativePath : `/${relativePath}`,
+        method: 'GET'
       });
 
-      if (!response.ok) return null;
+      if (error || !data) return null;
 
-      const blob = await response.blob();
-      return new Promise((resolve) => {
-        const reader = new FileReader();
-        reader.onloadend = () => {
-          const dataUrl = reader.result as string;
-          this.imageCache.set(relativePath, dataUrl);
-          resolve(dataUrl);
-        };
-        reader.onerror = () => resolve(null);
-        reader.readAsDataURL(blob);
-      });
+      // If the response is already a data URL or string, return it
+      if (typeof data === 'string') {
+        this.imageCache.set(relativePath, data);
+        return data;
+      }
+
+      // The proxy returns the data as-is, we need to handle the blob conversion
+      // For now, use the direct URL approach with the config
+      if (this.config) {
+        const fullUrl = `${this.config.baseUrl}${relativePath}`;
+        const response = await fetch(fullUrl, {
+          headers: {
+            'Authorization': `Bearer ${this.config.accessToken}`,
+          },
+        });
+
+        if (!response.ok) return null;
+
+        const blob = await response.blob();
+        return new Promise((resolve) => {
+          const reader = new FileReader();
+          reader.onloadend = () => {
+            const dataUrl = reader.result as string;
+            this.imageCache.set(relativePath, dataUrl);
+            resolve(dataUrl);
+          };
+          reader.onerror = () => resolve(null);
+          reader.readAsDataURL(blob);
+        });
+      }
+
+      return null;
     } catch (error) {
-      console.error('Failed to fetch image:', error);
+      console.error('[HA] Failed to fetch image:', error);
       return null;
     }
   }
 
-  clearImageCache() {
-    this.imageCache.clear();
-  }
-
-  async setMediaShuffle(entityId: string, shuffle: boolean): Promise<boolean> {
-    return this.retryWithBackoff(async () => {
-      const response = await fetch(`${this.config?.baseUrl}/api/services/media_player/shuffle_set`, {
-        method: "POST",
-        headers: this.getHeaders(),
-        body: JSON.stringify({ 
-          entity_id: entityId,
-          shuffle 
-        }),
-      });
-
-      if (!response.ok) {
-        throw new Error(`Failed to set shuffle: ${response.statusText}`);
-      }
-      
-      return true;
-    }, `setMediaShuffle(${entityId}, ${shuffle})`).catch(error => {
-      console.error("Failed to set shuffle:", error);
-      return false;
-    });
-  }
-
-  async setMediaRepeat(entityId: string, repeat: 'off' | 'one' | 'all'): Promise<boolean> {
-    return this.retryWithBackoff(async () => {
-      const response = await fetch(`${this.config?.baseUrl}/api/services/media_player/repeat_set`, {
-        method: "POST",
-        headers: this.getHeaders(),
-        body: JSON.stringify({ 
-          entity_id: entityId,
-          repeat 
-        }),
-      });
-
-      if (!response.ok) {
-        throw new Error(`Failed to set repeat: ${response.statusText}`);
-      }
-      
-      return true;
-    }, `setMediaRepeat(${entityId}, ${repeat})`).catch(error => {
-      console.error("Failed to set repeat:", error);
-      return false;
-    });
-  }
-
-  async setMediaSource(entityId: string, source: string): Promise<boolean> {
-    return this.retryWithBackoff(async () => {
-      const response = await fetch(`${this.config?.baseUrl}/api/services/media_player/select_source`, {
-        method: "POST",
-        headers: this.getHeaders(),
-        body: JSON.stringify({ 
-          entity_id: entityId,
-          source 
-        }),
-      });
-
-      if (!response.ok) {
-        throw new Error(`Failed to set source: ${response.statusText}`);
-      }
-      
-      return true;
-    }, `setMediaSource(${entityId}, ${source})`).catch(error => {
-      console.error("Failed to set source:", error);
-      return false;
-    });
-  }
-
-  async joinMediaPlayers(masterEntityId: string, groupMembers: string[]): Promise<boolean> {
-    return this.retryWithBackoff(async () => {
-      const response = await fetch(`${this.config?.baseUrl}/api/services/media_player/join`, {
-        method: "POST",
-        headers: this.getHeaders(),
-        body: JSON.stringify({ 
-          entity_id: masterEntityId,
-          group_members: groupMembers
-        }),
-      });
-
-      if (!response.ok) {
-        throw new Error(`Failed to join speakers: ${response.statusText}`);
-      }
-      
-      return true;
-    }, `joinMediaPlayers(${masterEntityId})`).catch(error => {
-      console.error("Failed to join speakers:", error);
-      return false;
-    });
-  }
-
-  async unjoinMediaPlayer(entityId: string): Promise<boolean> {
-    return this.retryWithBackoff(async () => {
-      const response = await fetch(`${this.config?.baseUrl}/api/services/media_player/unjoin`, {
-        method: "POST",
-        headers: this.getHeaders(),
-        body: JSON.stringify({ entity_id: entityId }),
-      });
-
-      if (!response.ok) {
-        throw new Error(`Failed to unjoin speaker: ${response.statusText}`);
-      }
-      
-      return true;
-    }, `unjoinMediaPlayer(${entityId})`).catch(error => {
-      console.error("Failed to unjoin speaker:", error);
-      return false;
-    });
-  }
-
-  async getAvailableSpeakers(): Promise<MediaPlayerEntity[]> {
-    const allPlayers = await this.getMediaPlayers();
-    
-    // Filter to only real speakers (Sonos, speakers, etc.) - exclude TV, Spotify entity, unavailable
-    const speakers = allPlayers.filter(player => {
-      const id = player.entity_id.toLowerCase();
-      const name = (player.attributes.friendly_name || '').toLowerCase();
-      
-      // Include: Sonos, speakers, room names
-      const isSpeaker = 
-        id.includes('sonos') || 
-        id.includes('speaker') ||
-        id.includes('play') ||
-        name.includes('sonos') ||
-        name.includes('speaker') ||
-        name.includes('play');
-      
-      // Exclude: Spotify entity, TV, unavailable states
-      const isExcluded = 
-        id.includes('spotify') || 
-        id.includes('tv') ||
-        player.state === 'unavailable';
-      
-      return isSpeaker && !isExcluded;
-    });
-
-    console.log('📻 Available speakers:', speakers.map(s => ({
-      id: s.entity_id,
-      name: s.attributes.friendly_name,
-      state: s.state
-    })));
-
-    return speakers;
-  }
-
-  // Transfer Spotify playback to a specific Sonos speaker
-  async transferPlaybackToSonos(spotifyEntityId: string, sonosEntityId: string, sonosName: string): Promise<boolean> {
-    try {
-      console.log(`🔄 Transferring playback to ${sonosName} (${sonosEntityId})`);
-      
-      // For Sonos + Spotify, we select the Sonos speaker in Spotify's source list
-      // The speaker name should match what appears in Spotify's source_list
-      const success = await this.setMediaSource(spotifyEntityId, sonosName);
-      
-      if (success) {
-        console.log(`✅ Playback transferred to ${sonosName}`);
-      }
-      
-      return success;
-    } catch (error) {
-      console.error(`Failed to transfer playback to ${sonosName}:`, error);
-      return false;
-    }
-  }
-
-  // Play on a speaker group
-  async playOnSpeakerGroup(masterEntityId: string, memberEntityIds: string[], groupName: string): Promise<boolean> {
-    try {
-      console.log(`🔊 Creating speaker group: ${groupName}`, memberEntityIds);
-      
-      // Join all speakers to the master
-      const success = await this.joinMediaPlayers(masterEntityId, memberEntityIds);
-      
-      if (success) {
-        console.log(`✅ Speaker group created: ${groupName}`);
-      }
-      
-      return success;
-    } catch (error) {
-      console.error(`Failed to create speaker group ${groupName}:`, error);
-      return false;
-    }
-  }
-
-  // Get actively playing speakers (those in a group)
-  async getActiveSpeakers(entityId: string): Promise<string[]> {
-    try {
-      const state = await this.getMediaPlayerState(entityId);
-      return state?.attributes.group_members || [];
-    } catch (error) {
-      console.error('Failed to get active speakers:', error);
-      return [];
-    }
-  }
-
-  // Generic Entity Controls
-  async callService(domain: string, service: string, entityId: string, data?: any): Promise<boolean> {
-    return this.retryWithBackoff(async () => {
-      const response = await fetch(`${this.config?.baseUrl}/api/services/${domain}/${service}`, {
-        method: "POST",
-        headers: this.getHeaders(),
-        body: JSON.stringify({ entity_id: entityId, ...data }),
-      });
-
-      if (!response.ok) {
-        throw new Error(`Failed to call ${domain}.${service}: ${response.statusText}`);
-      }
-      
-      return true;
-    }, `callService(${domain}.${service}, ${entityId})`).catch(error => {
-      console.error(`Failed to call ${domain}.${service}:`, error);
-      return false;
-    });
-  }
-
-  // Switch Controls
-  async toggleSwitch(entityId: string, turnOn: boolean): Promise<boolean> {
-    const service = turnOn ? "turn_on" : "turn_off";
-    return this.callService("switch", service, entityId);
-  }
-
-  // Fan Controls
-  async toggleFan(entityId: string, turnOn: boolean): Promise<boolean> {
-    const service = turnOn ? "turn_on" : "turn_off";
-    return this.callService("fan", service, entityId);
-  }
-
-  async setFanSpeed(entityId: string, percentage: number): Promise<boolean> {
-    return this.callService("fan", "set_percentage", entityId, { percentage });
-  }
-
-  // Cover Controls
-  async setCoverPosition(entityId: string, position: number): Promise<boolean> {
-    return this.callService("cover", "set_cover_position", entityId, { position });
-  }
-
-  async openCover(entityId: string): Promise<boolean> {
-    return this.callService("cover", "open_cover", entityId);
-  }
-
-  async closeCover(entityId: string): Promise<boolean> {
-    return this.callService("cover", "close_cover", entityId);
-  }
-
-  async stopCover(entityId: string): Promise<boolean> {
-    return this.callService("cover", "stop_cover", entityId);
-  }
-
-  // Lock Controls
-  async lockDoor(entityId: string): Promise<boolean> {
-    return this.callService("lock", "lock", entityId);
-  }
-
-  async unlockDoor(entityId: string): Promise<boolean> {
-    return this.callService("lock", "unlock", entityId);
-  }
-
-  // Climate Controls
-  async setClimateTemperature(entityId: string, temperature: number): Promise<boolean> {
-    return this.callService("climate", "set_temperature", entityId, { temperature });
-  }
-
-  async setClimateMode(entityId: string, hvac_mode: string): Promise<boolean> {
-    return this.callService("climate", "set_hvac_mode", entityId, { hvac_mode });
+  // For album art - return the relative path for the proxy to handle
+  getProxyImagePath(relativePath: string | null): string | null {
+    if (!relativePath) return null;
+    return relativePath;
   }
 }
 
