@@ -129,26 +129,29 @@ export const DeskDisplay = ({
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
     >
-      <div 
-        className="relative w-full h-full overflow-hidden rounded-[2rem]"
-      >
-        {/* Gradient mask overlay */}
+      <div className="relative w-full h-full overflow-hidden rounded-[2rem]">
+        {/* Soft edge vignette - transparent fade to background */}
         <div 
           className="absolute inset-0 z-20 pointer-events-none"
           style={{
-            maskImage: `radial-gradient(ellipse 92% 92% at 50% 50%, black 60%, transparent 100%)`,
-            WebkitMaskImage: `radial-gradient(ellipse 92% 92% at 50% 50%, black 60%, transparent 100%)`,
+            background: `
+              radial-gradient(
+                ellipse 100% 100% at 50% 50%,
+                transparent 55%,
+                hsl(35 16% 51% / 0.3) 70%,
+                hsl(35 16% 51% / 0.7) 85%,
+                hsl(35 16% 51% / 1) 100%
+              )
+            `,
           }}
         />
         
-        {/* Image stack */}
+        {/* Image stack with soft edge mask */}
         <div 
           className="absolute inset-0"
           style={{
-            maskImage: `linear-gradient(to right, transparent 0%, black 8%, black 92%, transparent 100%), linear-gradient(to bottom, transparent 0%, black 8%, black 92%, transparent 100%)`,
-            WebkitMaskImage: `linear-gradient(to right, transparent 0%, black 8%, black 92%, transparent 100%), linear-gradient(to bottom, transparent 0%, black 8%, black 92%, transparent 100%)`,
-            maskComposite: 'intersect',
-            WebkitMaskComposite: 'source-in',
+            maskImage: `radial-gradient(ellipse 95% 95% at 50% 50%, black 50%, transparent 85%)`,
+            WebkitMaskImage: `radial-gradient(ellipse 95% 95% at 50% 50%, black 50%, transparent 85%)`,
           }}
         >
           {Object.entries(lightingStates).map(([state, image]) => {
