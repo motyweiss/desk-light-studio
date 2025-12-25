@@ -110,7 +110,8 @@ export const SpeakerPopover = ({
               {/* Speaker Groups - Always at top */}
                 {hasGroups && (
                   <div className="space-y-2">
-                    <h4 className="text-white/40 text-[10px] font-light uppercase tracking-wider px-1">
+                    <h4 className="text-white/40 text-[10px] font-light uppercase tracking-wider px-1 flex items-center gap-1.5">
+                      <Users className="w-3 h-3" />
                       Groups
                     </h4>
                     <div className="space-y-1">
@@ -218,8 +219,9 @@ export const SpeakerPopover = ({
                 {/* Individual Speakers */}
                 {hasSpeakers && (
                   <div className="space-y-2">
-                    <h4 className="text-white/40 text-[10px] font-light uppercase tracking-wider px-1">
-                      Speakers
+                    <h4 className="text-white/40 text-[10px] font-light uppercase tracking-wider px-1 flex items-center gap-1.5">
+                      <Speaker className="w-3 h-3" />
+                      Individual Speakers
                     </h4>
                     <div className="space-y-1">
                       {availableSpeakers
