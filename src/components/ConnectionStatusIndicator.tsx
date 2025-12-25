@@ -50,10 +50,10 @@ export const ConnectionStatusIndicator = ({
   };
 
   const getTooltipText = () => {
-    if (isConnecting) return "Connecting to Home Assistant...";
-    if (isReconnecting) return "Reconnecting to Home Assistant...";
-    if (!isConnected) return "Disconnected - Click to reconnect";
-    return "Connected to Home Assistant";
+    if (isConnecting) return "מתחבר...";
+    if (isReconnecting) return "מתחבר מחדש...";
+    if (!isConnected) return "מנותק";
+    return "מחובר";
   };
 
   const handleClick = () => {
