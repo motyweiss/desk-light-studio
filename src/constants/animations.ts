@@ -231,3 +231,36 @@ export const HEADER_ANIMATIONS = {
   },
   indicatorStagger: 0.06,
 } as const;
+
+// ============================================================
+// BACKGROUND ANIMATION TIMING
+// Synchronized with light animations for seamless transitions
+// ============================================================
+export const BACKGROUND_ANIMATION = {
+  // Warmth layer transitions (synced with light on/off)
+  warmth: {
+    on: {
+      duration: LIGHT_ANIMATION.turnOn.duration, // 1.2s
+      ease: LIGHT_ANIMATION.turnOn.ease,
+    },
+    off: {
+      duration: LIGHT_ANIMATION.turnOff.duration, // 1.4s
+      ease: LIGHT_ANIMATION.turnOff.ease,
+    },
+  },
+  // Initial page load transition
+  initial: {
+    duration: DURATION.background, // 0.8s
+    ease: EASING.smooth,
+  },
+  // Glass shimmer effect
+  shimmer: {
+    duration: 8,
+    ease: "easeInOut" as const,
+  },
+  // Mesh gradient subtle movement
+  mesh: {
+    duration: 20,
+    ease: "linear" as const,
+  },
+} as const;
