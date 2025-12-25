@@ -5,6 +5,7 @@ import { AirPodsMaxIcon } from "./icons/AirPodsMaxIcon";
 import { IPhoneIcon } from "./icons/IPhoneIcon";
 import { MagicKeyboardIcon } from "./icons/MagicKeyboardIcon";
 import { MagicMouseIcon } from "./icons/MagicMouseIcon";
+import { AnimatedCounter } from "./AnimatedCounter";
 import { PAGE_LOAD, DATA_TRANSITION, EASING } from "@/constants/animations";
 
 interface Light {
@@ -160,7 +161,13 @@ export const RoomInfoPanel = ({
                         }}
                       >
                         <DeviceIcon className="w-5 h-5 text-white/50" strokeWidth={1.5} />
-                        <span className="text-xl font-light text-white tabular-nums">{device.batteryLevel}%</span>
+                        <AnimatedCounter 
+                          value={device.batteryLevel} 
+                          suffix="%" 
+                          isActive={dataReady && !showSkeleton}
+                          delay={0.3 + (index * 0.1)}
+                          className="text-xl font-light text-white tabular-nums"
+                        />
                         {device.isCharging && (
                           <Zap className="w-3.5 h-3.5 text-status-caution" fill="currentColor" />
                         )}
