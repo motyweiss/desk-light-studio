@@ -9,7 +9,7 @@ export interface SpeakerGroup {
 export const PREDEFINED_GROUPS: SpeakerGroup[] = [
   {
     id: 'arc_sofa',
-    name: 'TV + Sofa Speakers',
+    name: 'Sonos',
     entityIds: ['media_player.sonos_arc', 'media_player.sofa_speaker'],
     masterEntityId: 'media_player.sonos_arc',
     isDefault: true,

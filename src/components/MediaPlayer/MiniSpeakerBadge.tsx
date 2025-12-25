@@ -29,9 +29,10 @@ export const MiniSpeakerBadge = forwardRef<HTMLButtonElement, MiniSpeakerBadgePr
     const Icon = useMemo(() => {
       if (!playbackTarget) return Speaker;
       if (playbackTarget.type === 'group') {
-        // Use TV icon if group name contains TV
+        // Use Speaker icon for Sonos, TV icon if group name contains TV
+        const isSonos = playbackTarget.name.toLowerCase().includes('sonos');
         const isTV = playbackTarget.name.toLowerCase().includes('tv');
-        return isTV ? Tv : Users;
+        return isSonos ? Speaker : isTV ? Tv : Users;
       }
       if (playbackTarget.type === 'speaker') return Speaker;
       return Smartphone; // Spotify Connect
