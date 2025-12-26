@@ -425,6 +425,30 @@ export const HAConnectionProvider: React.FC<{ children: React.ReactNode }> = ({ 
     }
   }, [loadConfig]);
 
+  // ============= Auto-reconnect on network recovery =============
+  useEffect(() => {
+    const handleOnline = () => {
+      logger.connection('Network recovered, attempting reconnection...');
+      if (config && connectionStatus !== 'connected') {
+        reconnect();
+      }
+    };
+
+    const handleOffline = () => {
+      logger.connection('Network lost');
+      setConnectionStatus('disconnected');
+      setError('Network connection lost');
+    };
+
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
+
+    return () => {
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
+    };
+  }, [config, connectionStatus, reconnect]);
+
   // ============= Context Value =============
   const value: HAConnectionContextValue = {
     config,
