@@ -6,20 +6,18 @@ import { ClimateIndicatorTooltip } from './ClimateIndicatorTooltip';
 import { useHistoryData } from '../hooks/useHistoryData';
 import { useHAConnection } from '@/contexts/HAConnectionContext';
 
-// Stagger animation variants for each indicator
+// Stagger animation variants for each indicator - scale up with fade
 const indicatorVariants = {
   hidden: { 
     opacity: 0, 
-    scale: 0.8,
-    y: 8
+    scale: 0.85
   },
   visible: (i: number) => ({
     opacity: 1,
     scale: 1,
-    y: 0,
     transition: {
-      delay: 0.1 + i * 0.12,
-      duration: 0.5,
+      delay: 0.2 + i * 0.1,
+      duration: 0.4,
       ease: [0.22, 0.03, 0.26, 1] as const
     }
   }),
@@ -135,12 +133,7 @@ export const ClimateIndicators = () => {
   }
 
   return (
-    <motion.div 
-      className="flex items-center gap-2 md:gap-4"
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      transition={{ duration: 0.3 }}
-    >
+    <div className="flex items-center gap-2 md:gap-4">
       <motion.div
         custom={0}
         variants={indicatorVariants}
@@ -223,6 +216,6 @@ export const ClimateIndicators = () => {
           isLoading={false}
         />
       </motion.div>
-    </motion.div>
+    </div>
   );
 };
