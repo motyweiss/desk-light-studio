@@ -165,8 +165,9 @@ export const RoomInfoPanel = ({
                           value={device.batteryLevel} 
                           suffix="%" 
                           isActive={dataReady && !showSkeleton}
-                          delay={0.3 + (index * 0.1)}
-                          className="text-xl font-epunda font-normal text-white tabular-nums"
+                          delay={0.4 + (index * 0.15)}
+                          className="text-xl font-epunda font-normal text-white tabular-nums tracking-tight"
+                          suffixClassName="text-sm text-white/40 ml-0.5 font-light"
                         />
                         {device.isCharging && (
                           <Zap className="w-3.5 h-3.5 text-status-caution" fill="currentColor" />
