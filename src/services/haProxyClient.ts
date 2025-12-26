@@ -123,12 +123,55 @@ class HAProxyClient {
     return this.request<T>({ path, method: 'POST', data });
   }
 
+  // Direct image fetch from Home Assistant (bypasses proxy)
+  private async directImageRequest(path: string): Promise<{ data: string | null; error: string | null }> {
+    if (!this.directConfig) {
+      console.log('[HA Proxy] No direct config for image fetch');
+      return { data: null, error: 'No direct config available' };
+    }
+
+    const url = `${this.directConfig.baseUrl}${path}`;
+    console.log('[HA Proxy] Direct image fetch:', url);
+
+    try {
+      const response = await fetch(url, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${this.directConfig.accessToken}`,
+        },
+      });
+
+      if (!response.ok) {
+        console.warn('[HA Proxy] Direct image fetch failed:', response.status);
+        return { data: null, error: `HTTP ${response.status}` };
+      }
+
+      const blob = await response.blob();
+      
+      return new Promise((resolve) => {
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          console.log('[HA Proxy] Direct image fetch success');
+          resolve({ data: reader.result as string, error: null });
+        };
+        reader.onerror = () => resolve({ data: null, error: 'Failed to read image' });
+        reader.readAsDataURL(blob);
+      });
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Unknown error';
+      console.error('[HA Proxy] Direct image fetch error:', message);
+      return { data: null, error: message };
+    }
+  }
+
   // Fetch image and return as data URL
   async getImage(path: string): Promise<{ data: string | null; error: string | null }> {
     const token = await this.getAuthToken();
     
+    // If no Supabase session, use direct fetch
     if (!token) {
-      return { data: null, error: 'No authentication for image fetch' };
+      console.log('[HA Proxy] No Supabase session, using direct image fetch');
+      return this.directImageRequest(path);
     }
 
     try {
@@ -138,7 +181,8 @@ class HAProxyClient {
         `https://${import.meta.env.VITE_SUPABASE_PROJECT_ID}.supabase.co` : null;
       
       if (!supabaseUrl) {
-        return { data: null, error: 'No Supabase URL available' };
+        console.log('[HA Proxy] No Supabase URL, falling back to direct');
+        return this.directImageRequest(path);
       }
 
       const response = await fetch(`${supabaseUrl}/functions/v1/ha-proxy`, {
@@ -151,7 +195,8 @@ class HAProxyClient {
       });
 
       if (!response.ok) {
-        return { data: null, error: `HTTP ${response.status}` };
+        console.warn('[HA Proxy] Proxy image fetch failed, trying direct:', response.status);
+        return this.directImageRequest(path);
       }
 
       const contentType = response.headers.get('content-type') || '';
@@ -171,7 +216,8 @@ class HAProxyClient {
       if (contentType.includes('application/json')) {
         const json = await response.json();
         if (json.error) {
-          return { data: null, error: json.error };
+          console.warn('[HA Proxy] Proxy returned error, trying direct:', json.error);
+          return this.directImageRequest(path);
         }
         // If the proxy returned a data URL in JSON
         if (typeof json === 'string' && json.startsWith('data:')) {
@@ -179,11 +225,13 @@ class HAProxyClient {
         }
       }
 
-      return { data: null, error: 'Response is not an image' };
+      // Fallback to direct if proxy response is unexpected
+      console.warn('[HA Proxy] Unexpected proxy response, trying direct');
+      return this.directImageRequest(path);
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Unknown error';
-      console.error('[HA Proxy] Image fetch error:', message);
-      return { data: null, error: message };
+      console.error('[HA Proxy] Image fetch error, trying direct:', message);
+      return this.directImageRequest(path);
     }
   }
 
