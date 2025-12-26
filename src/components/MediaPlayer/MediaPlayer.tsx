@@ -251,7 +251,7 @@ export const MediaPlayer = () => {
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}
                   transition={{ duration: 0.35, ease: EASING.smooth }}
-                  className="hidden sm:flex items-center justify-center gap-3 lg:gap-6"
+                  className="hidden sm:flex items-center justify-center"
                 >
                   <div onClick={(e) => e.stopPropagation()}>
                     <PlaybackControls
@@ -266,7 +266,18 @@ export const MediaPlayer = () => {
                       compact={true}
                     />
                   </div>
+                </motion.div>
+              )}
 
+              {/* Right Section: Volume + Speaker Badge + Spotify Logo */}
+              {isMinimized && (
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 0.35, ease: EASING.smooth }}
+                  className="flex items-center gap-4 justify-end"
+                >
                   <div className="hidden lg:block" onClick={(e) => e.stopPropagation()}>
                     <VolumeControl
                       volume={playerState.volume}
@@ -276,18 +287,7 @@ export const MediaPlayer = () => {
                       compact={true}
                     />
                   </div>
-                </motion.div>
-              )}
 
-              {/* Right Section: Speaker Badge + Spotify Logo */}
-              {isMinimized && (
-                <motion.div
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                  transition={{ duration: 0.35, ease: EASING.smooth }}
-                  className="flex items-center gap-3 justify-end"
-                >
                   <div onClick={(e) => e.stopPropagation()}>
                     <MiniSpeakerBadge
                       ref={speakerBadgeRef}
