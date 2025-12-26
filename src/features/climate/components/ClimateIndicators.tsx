@@ -1,15 +1,42 @@
 import { useEffect, useState } from 'react';
-import { motion, useMotionValue, useTransform, animate } from 'framer-motion';
+import { motion, useMotionValue, useTransform, animate, AnimatePresence } from 'framer-motion';
 import { Thermometer, Droplets, Wind } from 'lucide-react';
 import { useClimate } from '../context/ClimateContext';
 import { ClimateIndicatorTooltip } from './ClimateIndicatorTooltip';
 import { useHistoryData } from '../hooks/useHistoryData';
 import { useHAConnection } from '@/contexts/HAConnectionContext';
 
+// Stagger animation variants for each indicator
+const indicatorVariants = {
+  hidden: { 
+    opacity: 0, 
+    scale: 0.8,
+    y: 8
+  },
+  visible: (i: number) => ({
+    opacity: 1,
+    scale: 1,
+    y: 0,
+    transition: {
+      delay: 0.1 + i * 0.12,
+      duration: 0.5,
+      ease: [0.22, 0.03, 0.26, 1] as const
+    }
+  }),
+  exit: {
+    opacity: 0,
+    scale: 0.9,
+    transition: {
+      duration: 0.2
+    }
+  }
+};
+
 export const ClimateIndicators = () => {
   const climate = useClimate();
   const { isConnected, entityMapping } = useHAConnection();
   const [hoveredIndicator, setHoveredIndicator] = useState<string | null>(null);
+  const [hasAnimated, setHasAnimated] = useState(false);
   
   // Animated counters - start from 0 for smooth initial animation
   const tempCount = useMotionValue(0);
@@ -42,22 +69,34 @@ export const ClimateIndicators = () => {
     'airQuality'
   );
   
+  // Animate counters only after data is loaded
   useEffect(() => {
-    // Faster animation for initial defaults, slower for real data
-    const duration = climate.isLoaded ? 1.5 : 0.8;
+    if (!climate.isLoaded) return;
+    
+    // Mark as animated to trigger the reveal
+    if (!hasAnimated) {
+      setHasAnimated(true);
+    }
+    
+    // Smooth count-up animation
+    const duration = 1.2;
+    const delay = hasAnimated ? 0 : 0.3; // Initial delay for first animation
     
     const tempControls = animate(tempCount, climate.temperature, {
       duration,
+      delay,
       ease: [0.22, 0.03, 0.26, 1]
     });
     
     const humidityControls = animate(humidityCount, climate.humidity, {
       duration,
+      delay: delay + 0.1,
       ease: [0.22, 0.03, 0.26, 1]
     });
     
     const airQualityControls = animate(airQualityCount, climate.airQuality, {
       duration,
+      delay: delay + 0.2,
       ease: [0.22, 0.03, 0.26, 1]
     });
     
@@ -66,7 +105,7 @@ export const ClimateIndicators = () => {
       humidityControls.stop();
       airQualityControls.stop();
     };
-  }, [climate.temperature, climate.humidity, climate.airQuality, climate.isLoaded, tempCount, humidityCount, airQualityCount]);
+  }, [climate.temperature, climate.humidity, climate.airQuality, climate.isLoaded, tempCount, humidityCount, airQualityCount, hasAnimated]);
 
   const getAirQualityStatus = (value: number): string => {
     if (value <= 12) return 'Good';
@@ -90,21 +129,23 @@ export const ClimateIndicators = () => {
     setHoveredIndicator(null);
   };
 
+  // Only render when data is loaded
+  if (!climate.isLoaded) {
+    return null;
+  }
+
   return (
     <motion.div 
       className="flex items-center gap-2 md:gap-4"
-      initial={{ opacity: 0, y: 10 }}
-      animate={{ 
-        opacity: 1,
-        y: 0
-      }}
-      transition={{ 
-        duration: 0.6,
-        delay: 0.2,
-        ease: [0.22, 0.03, 0.26, 1]
-      }}
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.3 }}
     >
-      <div
+      <motion.div
+        custom={0}
+        variants={indicatorVariants}
+        initial="hidden"
+        animate="visible"
         onMouseEnter={() => handleMouseEnter('temperature')}
         onMouseLeave={handleMouseLeave}
       >
@@ -129,11 +170,15 @@ export const ClimateIndicators = () => {
           progressMax={35}
           progressMin={15}
           colorType="temperature"
-          isLoading={!climate.isLoaded}
+          isLoading={false}
         />
-      </div>
+      </motion.div>
       
-      <div
+      <motion.div
+        custom={1}
+        variants={indicatorVariants}
+        initial="hidden"
+        animate="visible"
         onMouseEnter={() => handleMouseEnter('humidity')}
         onMouseLeave={handleMouseLeave}
       >
@@ -150,11 +195,15 @@ export const ClimateIndicators = () => {
           progressMax={100}
           progressMin={0}
           colorType="humidity"
-          isLoading={!climate.isLoaded}
+          isLoading={false}
         />
-      </div>
+      </motion.div>
       
-      <div
+      <motion.div
+        custom={2}
+        variants={indicatorVariants}
+        initial="hidden"
+        animate="visible"
         onMouseEnter={() => handleMouseEnter('airQuality')}
         onMouseLeave={handleMouseLeave}
       >
@@ -171,9 +220,9 @@ export const ClimateIndicators = () => {
           progressMax={100}
           progressMin={0}
           colorType="airQuality"
-          isLoading={!climate.isLoaded}
+          isLoading={false}
         />
-      </div>
+      </motion.div>
     </motion.div>
   );
 };

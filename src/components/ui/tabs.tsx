@@ -67,18 +67,25 @@ const TabsTrigger = React.forwardRef<
       {...props}
     >
       {/* Sliding Background Indicator */}
-      {isActive && (
-        <motion.div
-          layoutId="activeTabIndicator"
-          className="absolute inset-0 rounded-xl bg-white/[0.08] border border-white/[0.12] shadow-lg shadow-black/10"
-          initial={false}
-          transition={{
-            type: "spring",
-            stiffness: 500,
-            damping: 35,
-          }}
-        />
-      )}
+      <AnimatePresence initial={false}>
+        {isActive && (
+          <motion.div
+            layoutId="activeTabIndicator"
+            className="absolute inset-0 rounded-xl bg-white/[0.08] border border-white/[0.12] shadow-lg shadow-black/10"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{
+              layout: {
+                type: "spring",
+                stiffness: 400,
+                damping: 30,
+              },
+              opacity: { duration: 0.15 }
+            }}
+          />
+        )}
+      </AnimatePresence>
       <span className="relative z-10">{children}</span>
     </TabsPrimitive.Trigger>
   )
