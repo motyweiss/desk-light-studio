@@ -2,7 +2,7 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Loader2, CheckCircle2, XCircle, Link2, Eye, EyeOff, HelpCircle, RefreshCw } from "lucide-react";
+import { Loader2, CheckCircle2, XCircle, Eye, EyeOff, HelpCircle, RefreshCw, Home } from "lucide-react";
 import { SettingsSection } from "./SettingsSection";
 import { SettingsField } from "./SettingsField";
 import { QuickConnectSuggestions } from "./QuickConnectSuggestions";
@@ -106,7 +106,7 @@ const ConnectionTab = ({
       transition={{ duration: 0.3 }}
       className="space-y-8"
     >
-      <SettingsSection icon={Link2} title="Home Assistant Connection">
+      <SettingsSection icon={Home} iconClassName="w-5 h-5 text-yellow-400" title="Home Assistant Connection">
         {/* Quick Connect Suggestions */}
         <QuickConnectSuggestions
           currentUrl={baseUrl}
