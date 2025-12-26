@@ -39,6 +39,14 @@ export const MediaPlayer = () => {
     handleSeek,
   } = useMediaPlayer();
 
+  // Debug: Log player state and album art
+  console.log('[MediaPlayer] playerState:', {
+    hasPlayerState: !!playerState,
+    isLoading,
+    currentTrack: playerState?.currentTrack,
+    albumArt: playerState?.currentTrack?.albumArt,
+  });
+
   // Fetch album art with authentication
   const { 
     imageUrl: albumArtUrl, 
@@ -48,6 +56,14 @@ export const MediaPlayer = () => {
   } = useAuthenticatedImage(
     playerState?.currentTrack?.albumArt || null
   );
+
+  // Debug: Log album art loading state
+  console.log('[MediaPlayer] Album art state:', {
+    albumArtPath: playerState?.currentTrack?.albumArt,
+    albumArtUrl: albumArtUrl ? 'loaded' : 'null',
+    isAlbumArtLoading,
+    albumArtError,
+  });
 
   // Hide player only during loading or if no player state
   if (isLoading || !playerState) {

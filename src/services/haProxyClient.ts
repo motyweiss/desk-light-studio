@@ -166,7 +166,11 @@ class HAProxyClient {
 
   // Fetch image and return as data URL
   async getImage(path: string): Promise<{ data: string | null; error: string | null }> {
+    console.log('[HA Proxy] getImage called with path:', path);
+    console.log('[HA Proxy] directConfig available:', !!this.directConfig);
+    
     const token = await this.getAuthToken();
+    console.log('[HA Proxy] Supabase token available:', !!token);
     
     // If no Supabase session, use direct fetch
     if (!token) {

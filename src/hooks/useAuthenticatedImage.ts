@@ -1,6 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { homeAssistant } from '@/services/homeAssistant';
-import { useHAConnection } from '@/contexts/HAConnectionContext';
 
 export const useAuthenticatedImage = (relativePath: string | null) => {
   const [imageUrl, setImageUrl] = useState<string | null>(null);
@@ -13,11 +12,11 @@ export const useAuthenticatedImage = (relativePath: string | null) => {
   const abortControllerRef = useRef<AbortController | null>(null);
   const maxRetries = 3;
 
-  const { config, isConnected } = useHAConnection();
-
   const fetchImage = useCallback(async (path: string, signal?: AbortSignal): Promise<string | null> => {
-    if (!config) {
-      console.log('[useAuthenticatedImage] No config available');
+    // Check if HA service has config set
+    const haConfig = homeAssistant.getConfig();
+    if (!haConfig) {
+      console.warn('[useAuthenticatedImage] No HA config available');
       return null;
     }
 
@@ -25,16 +24,15 @@ export const useAuthenticatedImage = (relativePath: string | null) => {
       console.log('[useAuthenticatedImage] Fetching image:', path);
       const dataUrl = await homeAssistant.fetchImageAsDataUrl(path);
       
-      // Check if aborted during fetch
       if (signal?.aborted) {
         console.log('[useAuthenticatedImage] Fetch aborted');
         return null;
       }
       
       if (dataUrl) {
-        console.log('[useAuthenticatedImage] Image loaded successfully');
+        console.log('[useAuthenticatedImage] ✅ Image loaded, length:', dataUrl.length);
       } else {
-        console.log('[useAuthenticatedImage] No data URL returned');
+        console.warn('[useAuthenticatedImage] ❌ No data URL returned');
       }
       
       return dataUrl;
@@ -45,7 +43,7 @@ export const useAuthenticatedImage = (relativePath: string | null) => {
       console.error('[useAuthenticatedImage] Fetch error:', err);
       return null;
     }
-  }, [config]);
+  }, []);
 
   useEffect(() => {
     // Abort any previous fetch
@@ -54,8 +52,9 @@ export const useAuthenticatedImage = (relativePath: string | null) => {
       abortControllerRef.current = null;
     }
 
-    // Reset when path is null
+    // Reset when path is null or empty
     if (!relativePath) {
+      console.log('[useAuthenticatedImage] No path provided');
       setImageUrl(null);
       setIsLoading(false);
       setError(false);
@@ -64,23 +63,26 @@ export const useAuthenticatedImage = (relativePath: string | null) => {
       return;
     }
 
-    // Don't fetch if not connected
-    if (!isConnected || !config) {
-      console.log('[useAuthenticatedImage] Not connected, skipping fetch');
-      setIsLoading(false);
+    // Check if HA config is available
+    const haConfig = homeAssistant.getConfig();
+    if (!haConfig) {
+      console.warn('[useAuthenticatedImage] HA not configured, waiting...');
+      // Don't set loading to false - wait for config
       return;
     }
+
+    console.log('[useAuthenticatedImage] Effect running for:', relativePath);
 
     // Extract base path without cache busting for comparison
     const getBasePath = (path: string) => path.split('?')[0];
     const currentBasePath = getBasePath(relativePath);
     const lastBasePath = lastPathRef.current ? getBasePath(lastPathRef.current) : null;
     
-    // Check if the actual image path changed (not just cache param)
+    // Check if the actual image path changed
     const pathChanged = currentBasePath !== lastBasePath;
     
     if (!pathChanged && imageUrl) {
-      console.log('[useAuthenticatedImage] Same path, using cached image');
+      console.log('[useAuthenticatedImage] Same path, using cached');
       return;
     }
 
@@ -91,7 +93,7 @@ export const useAuthenticatedImage = (relativePath: string | null) => {
     // Track if this is a transition (changing images vs initial load)
     const isInitialLoad = !lastPathRef.current;
     
-    // Mark as transitioning for track changes (keep old image visible)
+    // Mark as transitioning for track changes
     if (!isInitialLoad && pathChanged) {
       setIsTransitioning(true);
     }
@@ -105,7 +107,7 @@ export const useAuthenticatedImage = (relativePath: string | null) => {
     // Clear image cache for fresh fetch
     homeAssistant.clearImageCache();
 
-    console.log('[useAuthenticatedImage] Starting fetch for:', relativePath);
+    console.log('[useAuthenticatedImage] 🚀 Starting fetch for:', relativePath);
 
     const attemptFetch = async () => {
       if (abortController.signal.aborted) {
@@ -116,11 +118,12 @@ export const useAuthenticatedImage = (relativePath: string | null) => {
       
       // Verify still valid request
       if (abortController.signal.aborted || relativePath !== lastPathRef.current) {
-        console.log('[useAuthenticatedImage] Request outdated, ignoring result');
+        console.log('[useAuthenticatedImage] Request outdated');
         return;
       }
       
       if (dataUrl) {
+        console.log('[useAuthenticatedImage] ✅ Setting image URL');
         setImageUrl(dataUrl);
         setError(false);
         setIsLoading(false);
@@ -136,12 +139,10 @@ export const useAuthenticatedImage = (relativePath: string | null) => {
           }
         }, delay);
       } else {
-        console.warn('[useAuthenticatedImage] All retries failed');
+        console.warn('[useAuthenticatedImage] ❌ All retries failed');
         setError(true);
         setIsLoading(false);
         setIsTransitioning(false);
-        // Clear stale image on error
-        setImageUrl(null);
       }
     };
 
@@ -151,7 +152,7 @@ export const useAuthenticatedImage = (relativePath: string | null) => {
     return () => {
       abortController.abort();
     };
-  }, [relativePath, isConnected, config, fetchImage, imageUrl]);
+  }, [relativePath, fetchImage]);
 
   return { imageUrl, isLoading, error, isTransitioning };
 };
