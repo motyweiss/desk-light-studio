@@ -119,42 +119,42 @@ export const ClimateIndicatorTooltip = ({
               zIndex: 9999
             }}
           >
-            <div className="bg-white/8 backdrop-blur-[24px] rounded-2xl px-5 py-4 shadow-[0_4px_24px_rgba(0,0,0,0.15)] border border-white/20 min-w-[280px]">
+            <div className="bg-white/8 backdrop-blur-[20px] rounded-xl px-3.5 py-3 shadow-[0_4px_16px_rgba(0,0,0,0.12)] border border-white/15 min-w-[200px]">
               {/* Header with icon and value */}
-              <div className="flex items-center gap-4 mb-3">
+              <div className="flex items-center gap-3 mb-2">
                 <motion.div
-                  className="w-12 h-12 rounded-full flex items-center justify-center backdrop-blur-xl bg-white/10"
-                  initial={{ scale: 0.7, opacity: 0 }}
+                  className="w-9 h-9 rounded-full flex items-center justify-center backdrop-blur-lg bg-white/10"
+                  initial={{ scale: 0.8, opacity: 0 }}
                   animate={{ scale: 1, opacity: 1 }}
                   transition={{
-                    delay: 0.1,
-                    duration: 0.4,
+                    delay: 0.05,
+                    duration: 0.3,
                     ease: [0.34, 1.56, 0.64, 1]
                   }}
                 >
-                  <Icon className="w-6 h-6 text-white" strokeWidth={1.5} />
+                  <Icon className="w-4 h-4 text-white/90" strokeWidth={1.5} />
                 </motion.div>
                 
                 <div className="flex-1">
                   <motion.div
-                    className="text-3xl font-extralight text-white tabular-nums tracking-tight"
-                    initial={{ opacity: 0, x: -8 }}
+                    className="text-xl font-extralight text-white tabular-nums tracking-tight"
+                    initial={{ opacity: 0, x: -6 }}
                     animate={{ opacity: 1, x: 0 }}
                     transition={{
-                      delay: 0.15,
-                      duration: 0.35
+                      delay: 0.08,
+                      duration: 0.25
                     }}
                   >
                     {value}
-                    <span className="text-base text-white/30 ml-1.5 font-light">{unit}</span>
+                    <span className="text-xs text-white/30 ml-1 font-light">{unit}</span>
                   </motion.div>
                   <motion.div
-                    className="text-[10px] text-white/40 font-medium tracking-[0.15em] uppercase"
-                    initial={{ opacity: 0, x: -8 }}
+                    className="text-[9px] text-white/40 font-medium tracking-[0.12em] uppercase"
+                    initial={{ opacity: 0, x: -6 }}
                     animate={{ opacity: 1, x: 0 }}
                     transition={{
-                      delay: 0.2,
-                      duration: 0.35
+                      delay: 0.12,
+                      duration: 0.25
                     }}
                   >
                     {label}
@@ -164,18 +164,18 @@ export const ClimateIndicatorTooltip = ({
 
               {/* Trend Graph */}
               <motion.div
-                initial={{ opacity: 0, y: 10 }}
+                initial={{ opacity: 0, y: 6 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{
-                  delay: 0.25,
-                  duration: 0.4,
+                  delay: 0.15,
+                  duration: 0.3,
                   ease: [0.25, 0.46, 0.45, 0.94]
                 }}
               >
                 <TrendGraph 
                   data={trendData}
-                  width={240}
-                  height={50}
+                  width={180}
+                  height={36}
                   color={color}
                   animate={isOpen}
                   colorType={colorType}
