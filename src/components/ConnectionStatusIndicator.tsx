@@ -23,26 +23,28 @@ export const ConnectionStatusIndicator = ({
 }: ConnectionStatusIndicatorProps) => {
 
   const getStatusColor = () => {
-    if (isConnecting) return "text-yellow-500";
-    if (isReconnecting) return "text-yellow-500 animate-pulse";
+    if (isConnecting || isReconnecting) return "text-yellow-400";
     if (!isConnected) return "text-foreground/30";
-    return "text-white";
+    return "text-yellow-400"; // Changed from white to yellow for connected state
   };
 
   const getTooltipText = () => {
     if (isConnecting) return "Connecting...";
     if (isReconnecting) return "Reconnecting...";
     if (!isConnected) return "Disconnected - Click to reconnect";
-    return "Connected - Click to refresh";
+    return "Connected";
   };
 
   const handleClick = () => {
-    if (!isReconnecting && !isConnecting && onReconnectClick) {
+    // Only allow reconnect when disconnected
+    if (!isConnected && !isReconnecting && !isConnecting && onReconnectClick) {
       onReconnectClick();
     }
   };
 
-  const isClickable = !isReconnecting && !isConnecting;
+  // Only clickable when disconnected
+  const isClickable = !isConnected && !isReconnecting && !isConnecting;
+  const showSpinner = isConnecting || isReconnecting;
 
   return (
     <Tooltip>
@@ -58,8 +60,8 @@ export const ConnectionStatusIndicator = ({
           transition={inline ? undefined : { duration: 0.3, delay: 0.6 }}
           aria-label={getTooltipText()}
         >
-          {isConnecting ? (
-            <Loader2 className="w-5 h-5 animate-spin" strokeWidth={1.5} />
+          {showSpinner ? (
+            <Loader2 className="w-5 h-5 animate-spin text-yellow-400" strokeWidth={1.5} />
           ) : (
             <Zap className="w-5 h-5" strokeWidth={1.5} />
           )}
