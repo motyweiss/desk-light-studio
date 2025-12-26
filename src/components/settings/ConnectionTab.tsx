@@ -160,6 +160,17 @@ const ConnectionTab = ({
               )}
             </button>
           </div>
+          <p className="text-xs text-white/50 mt-2">
+            To create a token: Go to your Home Assistant → Profile → Long-Lived Access Tokens → Create Token.{" "}
+            <a 
+              href="https://www.home-assistant.io/docs/authentication/#your-account-profile" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="text-yellow-400 hover:text-yellow-300 underline transition-colors"
+            >
+              Learn more
+            </a>
+          </p>
         </SettingsField>
 
         <div className="flex flex-col gap-3 pt-2">
