@@ -219,7 +219,7 @@ export const RoomInfoPanel = ({
             
             {/* Separator line - show between items only */}
             {index < lights.length - 1 && (
-              <div className="mx-4 md:mx-8 h-px bg-white/8" />
+              <div className="mx-4 md:mx-8 h-px bg-white/10" />
             )}
           </motion.div>
         ))}
