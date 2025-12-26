@@ -29,12 +29,12 @@ export const TopNavigationBar = ({
   const navigate = useNavigate();
   return (
     <motion.header
-      initial={{ y: -80, opacity: 0 }}
-      animate={{ y: 0, opacity: 1 }}
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
       transition={{
-        duration: 0.6,
+        duration: 0.4,
         delay: 0.1,
-        ease: [0.16, 1, 0.3, 1],
+        ease: [0.22, 0.03, 0.26, 1],
       }}
       className="fixed top-0 inset-x-0 z-40 h-[56px] md:h-[68px]"
     >
@@ -43,30 +43,25 @@ export const TopNavigationBar = ({
           {/* Left: Home Branding */}
           <motion.div 
             className="flex items-center gap-2 md:gap-3"
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.5, delay: 0.2 }}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.4, delay: 0.15, ease: [0.22, 0.03, 0.26, 1] }}
           >
             <HomeAssistantIcon className="w-5 h-5 md:w-6 md:h-6 text-white/90" />
             <span className="text-sm md:text-lg font-light text-white/90">Home Assistant</span>
           </motion.div>
 
           {/* Center: Climate Indicators - Hidden on mobile */}
-          <motion.div
-            className="hidden md:block"
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.3 }}
-          >
+          <div className="hidden md:block">
             <ClimateIndicators />
-          </motion.div>
+          </div>
 
           {/* Right: Connection Status + Settings + Logout */}
           <motion.div 
             className="flex items-center gap-1 md:gap-2 overflow-visible"
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.5, delay: 0.2 }}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.4, delay: 0.2, ease: [0.22, 0.03, 0.26, 1] }}
           >
             <div className="hidden md:flex items-center gap-1">
               <ConnectionStatusIndicator
