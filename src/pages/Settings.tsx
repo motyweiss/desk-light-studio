@@ -246,6 +246,7 @@ const Settings = () => {
             <TabsList className="w-full mb-6">
               <TabsTrigger value="connection" className="flex-1">Connection</TabsTrigger>
               <TabsTrigger value="devices" className="flex-1">Devices</TabsTrigger>
+              <TabsTrigger value="rooms" className="flex-1" disabled>Rooms</TabsTrigger>
             </TabsList>
             
             <TabsContent value="connection">
