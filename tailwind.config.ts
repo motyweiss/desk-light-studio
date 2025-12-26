@@ -17,6 +17,7 @@ export default {
         sans: ['-apple-system', 'BlinkMacSystemFont', 'SF Pro Text', 'SF Compact Text', 'system-ui', 'Segoe UI', 'Roboto', 'sans-serif'],
         display: ['Cormorant Garamond', 'serif'],
         slab: ['Arvo', 'serif'],
+        'epunda': ['Epunda Slab', 'serif'],
       },
       letterSpacing: {
         tighter: '-0.02em',
