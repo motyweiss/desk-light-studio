@@ -137,7 +137,7 @@ export const ClimateIndicatorTooltip = ({
                 
                 <div className="flex-1">
                   <motion.div
-                    className="text-2xl font-light text-white tabular-nums"
+                    className="text-3xl font-extralight text-white tabular-nums tracking-tight"
                     initial={{ opacity: 0, x: -8 }}
                     animate={{ opacity: 1, x: 0 }}
                     transition={{
@@ -146,10 +146,10 @@ export const ClimateIndicatorTooltip = ({
                     }}
                   >
                     {value}
-                    <span className="text-sm text-white/40 ml-1">{unit}</span>
+                    <span className="text-base text-white/30 ml-1.5 font-light">{unit}</span>
                   </motion.div>
                   <motion.div
-                    className="text-xs text-white/50 font-light"
+                    className="text-[10px] text-white/40 font-medium tracking-[0.15em] uppercase"
                     initial={{ opacity: 0, x: -8 }}
                     animate={{ opacity: 1, x: 0 }}
                     transition={{
