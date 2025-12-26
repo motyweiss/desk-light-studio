@@ -23,7 +23,7 @@ const RoomSection = ({
   return (
     <div className="space-y-6 p-6 rounded-xl bg-white/5 border border-white/10">
       <div className="flex items-center justify-between">
-        <h3 className="text-lg font-light text-white">{room.name}</h3>
+        <h3 className="text-lg font-slab font-normal tracking-tight text-white">{room.name}</h3>
       </div>
 
       <div className="space-y-6">

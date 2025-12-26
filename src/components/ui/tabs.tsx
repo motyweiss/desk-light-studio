@@ -101,24 +101,13 @@ const TabsContent = React.forwardRef<
     value={value}
     className={cn(
       "mt-6 ring-offset-transparent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/20 focus-visible:ring-offset-0",
+      "data-[state=active]:animate-in data-[state=active]:fade-in-0 data-[state=active]:duration-300",
+      "data-[state=inactive]:animate-out data-[state=inactive]:fade-out-0 data-[state=inactive]:duration-200",
       className
     )}
     {...props}
   >
-    <AnimatePresence mode="wait">
-      <motion.div
-        key={value}
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
-        transition={{ 
-          duration: 0.2, 
-          ease: [0.22, 0.03, 0.26, 1]
-        }}
-      >
-        {children}
-      </motion.div>
-    </AnimatePresence>
+    {children}
   </TabsPrimitive.Content>
 ))
 TabsContent.displayName = TabsPrimitive.Content.displayName
