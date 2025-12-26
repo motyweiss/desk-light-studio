@@ -8,6 +8,7 @@ interface AnimatedCounterProps {
   isActive?: boolean;
   suffix?: string;
   className?: string;
+  suffixClassName?: string;
 }
 
 export const AnimatedCounter = ({
@@ -17,12 +18,13 @@ export const AnimatedCounter = ({
   isActive = true,
   suffix = "",
   className = "",
+  suffixClassName = "",
 }: AnimatedCounterProps) => {
   const [hasAnimated, setHasAnimated] = useState(false);
   const springValue = useSpring(0, {
-    stiffness: 120,
-    damping: 14,
-    mass: 0.8,
+    stiffness: 80,
+    damping: 18,
+    mass: 1,
   });
   
   const displayValue = useTransform(springValue, (latest) => Math.round(latest));
@@ -50,7 +52,8 @@ export const AnimatedCounter = ({
 
   return (
     <motion.span className={className}>
-      {display}{suffix}
+      {display}
+      {suffix && <span className={suffixClassName}>{suffix}</span>}
     </motion.span>
   );
 };
