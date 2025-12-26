@@ -227,7 +227,7 @@ const Settings = () => {
           >
             <ArrowLeft className="w-4 h-4" strokeWidth={2} />
           </motion.button>
-          <h1 className="text-3xl font-sans font-light text-white">
+          <h1 className="text-xl font-sans font-medium text-white">
             Settings
           </h1>
           <SettingsConnectionBadge />

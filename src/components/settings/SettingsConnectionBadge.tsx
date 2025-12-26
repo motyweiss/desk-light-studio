@@ -7,9 +7,9 @@ const SettingsConnectionBadge = () => {
 
   const stateConfig = {
     connected: {
-      color: "text-emerald-400",
-      bgColor: "bg-emerald-400/10",
-      borderColor: "border-emerald-400/30",
+      color: "text-yellow-400",
+      bgColor: "bg-yellow-400/10",
+      borderColor: "border-yellow-400/30",
       label: haVersion ? `v${haVersion}` : "Connected",
       showSpinner: false,
     },
