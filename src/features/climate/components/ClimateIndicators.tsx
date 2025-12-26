@@ -127,10 +127,9 @@ export const ClimateIndicators = () => {
     setHoveredIndicator(null);
   };
 
-  // Only render when data is loaded
-  if (!climate.isLoaded) {
-    return null;
-  }
+  // Show loading skeleton while waiting for data
+  // Changed: Show indicators even during loading to prevent layout shift
+  const showLoadingState = !climate.isLoaded;
 
   return (
     <div className="flex items-center gap-2 md:gap-4">
