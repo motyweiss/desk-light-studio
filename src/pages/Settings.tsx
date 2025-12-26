@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { ArrowLeft, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
@@ -273,37 +273,45 @@ const Settings = () => {
         </div>
       </motion.div>
 
-      {/* Fixed Footer */}
-      <motion.div 
-        initial={{ y: 80, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        transition={{ duration: 0.5, delay: 0.2, ease: [0.22, 0.03, 0.26, 1] }}
-        className="flex-shrink-0 bg-background/80 backdrop-blur-xl border-t border-white/10"
-      >
-        <div className="max-w-2xl mx-auto px-6 py-4 flex justify-between gap-4">
-          <Button
-            variant="outline"
-            onClick={handleCancel}
-            className="flex-1"
+      {/* Fixed Footer - Only shown when there are changes */}
+      <AnimatePresence>
+        {isDirty && (
+          <motion.div 
+            initial={{ y: 20, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            exit={{ y: 20, opacity: 0 }}
+            transition={{ 
+              duration: 0.35, 
+              ease: [0.22, 0.03, 0.26, 1] 
+            }}
+            className="flex-shrink-0 bg-background/80 backdrop-blur-xl border-t border-white/10"
           >
-            Discard
-          </Button>
-          <Button
-            onClick={handleSave}
-            disabled={!isFormValid || isSaving}
-            className="flex-1 bg-[hsl(28_18%_12%)] hover:bg-[hsl(28_18%_16%)] text-white border-white/10 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
-          >
-            {isSaving ? (
-              <>
-                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                Saving...
-              </>
-            ) : (
-              "Save & Apply"
-            )}
-          </Button>
-        </div>
-      </motion.div>
+            <div className="max-w-2xl mx-auto px-6 py-4 flex justify-between gap-4">
+              <Button
+                variant="outline"
+                onClick={handleCancel}
+                className="flex-1"
+              >
+                Discard
+              </Button>
+              <Button
+                onClick={handleSave}
+                disabled={!isFormValid || isSaving}
+                className="flex-1 bg-[hsl(28_18%_12%)] hover:bg-[hsl(28_18%_16%)] text-white border-white/10 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
+              >
+                {isSaving ? (
+                  <>
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    Saving...
+                  </>
+                ) : (
+                  "Save Changes"
+                )}
+              </Button>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };
