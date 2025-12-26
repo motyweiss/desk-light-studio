@@ -1,5 +1,6 @@
 import { useEffect, useCallback, useRef, useState } from 'react';
 import { homeAssistant } from '@/services/homeAssistant';
+import { connectionManager } from '@/services/ConnectionManager';
 import { logger } from '@/shared/utils/logger';
 import { POLL_INTERVAL, BLOCKING_WINDOW } from '@/constants/animations';
 import { useToast } from '@/hooks/use-toast';
@@ -50,20 +51,23 @@ export const useHomeAssistantSync = (config: UseHomeAssistantSyncConfig) => {
 
   const { toast } = useToast();
   const lastManualChangeRef = useRef<number>(0);
-  const reconnectAttemptRef = useRef(0);
   const [isReconnecting, setIsReconnecting] = useState(false);
   const pollIntervalRef = useRef<NodeJS.Timeout>();
 
-  // Update parent reconnecting state
+  // Subscribe to ConnectionManager state changes
   useEffect(() => {
-    onReconnectingChange(isReconnecting);
-  }, [isReconnecting, onReconnectingChange]);
+    const unsubscribe = connectionManager.subscribe((state) => {
+      const reconnecting = state === 'reconnecting' || state === 'connecting';
+      setIsReconnecting(reconnecting);
+      onReconnectingChange(reconnecting);
+    });
+
+    return () => unsubscribe();
+  }, [onReconnectingChange]);
 
   // Helper to update a single light
   const updateLight = useCallback((
-    entityId: string,
     lightId: string,
-    currentIntensity: number,
     brightness: number | undefined,
     state: string
   ): number | null => {
@@ -79,12 +83,7 @@ export const useHomeAssistantSync = (config: UseHomeAssistantSyncConfig) => {
     }
 
     const newIntensity = state === 'on' ? Math.round((brightness || 255) / 255 * 100) : 0;
-
-    if (currentIntensity !== newIntensity) {
-      return newIntensity;
-    }
-
-    return null;
+    return newIntensity;
   }, [pendingLights]);
 
   // Force sync function - immediate sync without conditions
@@ -180,40 +179,31 @@ export const useHomeAssistantSync = (config: UseHomeAssistantSyncConfig) => {
 
       onLightsUpdate(lightUpdates);
       onSensorsUpdate(sensorUpdates);
+      
+      // Mark successful sync
+      connectionManager.markSuccessfulSync();
     } catch (error) {
-      console.error('❌ Force sync failed:', error);
-      if (!isReconnecting) {
-        setIsReconnecting(true);
-      }
+      logger.error('Force sync failed:', error);
     }
-  }, [isConnected, entityMapping, isReconnecting, onLightsUpdate, onSensorsUpdate]);
+  }, [isConnected, entityMapping, onLightsUpdate, onSensorsUpdate]);
 
   // Track last manual change timestamp
   const markManualChange = useCallback(() => {
     lastManualChangeRef.current = Date.now();
   }, []);
 
-  // Manual reconnect attempt
+  // Manual reconnect attempt - delegates to ConnectionManager
   const attemptReconnect = useCallback(async () => {
     if (isReconnecting) return;
     
-    setIsReconnecting(true);
-    homeAssistant.resetRetryCount();
-    
     try {
-      const result = await homeAssistant.testConnection();
-      if (result.success) {
-        setIsReconnecting(false);
-        await forceSyncStates();
-        toast({ 
-          title: 'Connected', 
-          description: 'Home Assistant reconnected successfully' 
-        });
-      } else {
-        throw new Error(result.error);
-      }
+      await connectionManager.reconnect();
+      await forceSyncStates();
+      toast({ 
+        title: 'Connected', 
+        description: 'Home Assistant reconnected successfully' 
+      });
     } catch (error) {
-      setIsReconnecting(false);
       toast({ 
         title: 'Connection Failed', 
         description: 'Could not connect to Home Assistant',
@@ -244,40 +234,16 @@ export const useHomeAssistantSync = (config: UseHomeAssistantSyncConfig) => {
     if (allEntityIds.length === 0) return;
 
     const syncStates = async () => {
-      const syncStartTime = Date.now();
       try {
         const states = await homeAssistant.getAllEntityStates(allEntityIds);
-        const fetchDuration = Date.now() - syncStartTime;
-
-        // Only log if sync is very slow (>2000ms)
-        if (fetchDuration > 2000) {
-          logger.warn(`Slow sync: ${fetchDuration}ms`);
-        }
-
-        // Connection successful - reset reconnection state
-        if (isReconnecting) {
-          logger.connection('Connection restored!');
-          setIsReconnecting(false);
-          reconnectAttemptRef.current = 0;
-          toast({
-            title: 'Reconnected',
-            description: 'Successfully reconnected to Home Assistant',
-          });
-        }
 
         const lightUpdates: Partial<LightStates> = {};
         const sensorUpdates: Partial<SensorStates> = {};
 
-        // Update lights - using helper function
+        // Update lights
         if (entityMapping.spotlight && states.has(entityMapping.spotlight)) {
           const state = states.get(entityMapping.spotlight)!;
-          const newIntensity = updateLight(
-            entityMapping.spotlight,
-            'spotlight',
-            0, // We don't have current value here, will be handled by parent
-            state.brightness,
-            state.state
-          );
+          const newIntensity = updateLight('spotlight', state.brightness, state.state);
           if (newIntensity !== null) {
             lightUpdates.spotlight = newIntensity;
           }
@@ -285,13 +251,7 @@ export const useHomeAssistantSync = (config: UseHomeAssistantSyncConfig) => {
 
         if (entityMapping.deskLamp && states.has(entityMapping.deskLamp)) {
           const state = states.get(entityMapping.deskLamp)!;
-          const newIntensity = updateLight(
-            entityMapping.deskLamp,
-            'deskLamp',
-            0,
-            state.brightness,
-            state.state
-          );
+          const newIntensity = updateLight('deskLamp', state.brightness, state.state);
           if (newIntensity !== null) {
             lightUpdates.deskLamp = newIntensity;
           }
@@ -299,19 +259,13 @@ export const useHomeAssistantSync = (config: UseHomeAssistantSyncConfig) => {
 
         if (entityMapping.monitorLight && states.has(entityMapping.monitorLight)) {
           const state = states.get(entityMapping.monitorLight)!;
-          const newIntensity = updateLight(
-            entityMapping.monitorLight,
-            'monitorLight',
-            0,
-            state.brightness,
-            state.state
-          );
+          const newIntensity = updateLight('monitorLight', state.brightness, state.state);
           if (newIntensity !== null) {
             lightUpdates.monitorLight = newIntensity;
           }
         }
 
-        // Update sensors (unchanged logic, just condensed)
+        // Update sensors
         if (entityMapping.temperatureSensor && states.has(entityMapping.temperatureSensor)) {
           const state = states.get(entityMapping.temperatureSensor)!;
           const tempValue = parseFloat(state.state);
@@ -357,31 +311,16 @@ export const useHomeAssistantSync = (config: UseHomeAssistantSyncConfig) => {
         if (Object.keys(sensorUpdates).length > 0) {
           onSensorsUpdate(sensorUpdates);
         }
+
+        // Mark successful sync
+        connectionManager.markSuccessfulSync();
       } catch (error) {
-        console.error('❌ Failed to sync with Home Assistant:', error);
-
-        // Mark as reconnecting if not already
-        if (!isReconnecting) {
-          setIsReconnecting(true);
-          toast({
-            title: 'Connection Lost',
-            description: 'Attempting to reconnect to Home Assistant...',
-            variant: 'destructive',
-          });
-        }
-
-        reconnectAttemptRef.current += 1;
-        const retryCount = homeAssistant.getRetryCount();
-
-        if (reconnectAttemptRef.current % 5 === 0) {
-          console.warn(`🔄 Reconnection attempt ${reconnectAttemptRef.current} (retry count: ${retryCount})`);
-        }
+        logger.error('Sync failed:', error);
+        // ConnectionManager handles reconnection automatically
       }
     };
 
     syncStates();
-
-    // Poll every 1000ms
     pollIntervalRef.current = setInterval(syncStates, POLL_INTERVAL.lights);
 
     return () => {
@@ -389,7 +328,7 @@ export const useHomeAssistantSync = (config: UseHomeAssistantSyncConfig) => {
         clearInterval(pollIntervalRef.current);
       }
     };
-  }, [isConnected, entityMapping, isReconnecting, pendingLights, toast, onLightsUpdate, onSensorsUpdate, updateLight]);
+  }, [isConnected, entityMapping, pendingLights, onLightsUpdate, onSensorsUpdate, updateLight]);
 
   return {
     forceSyncStates,

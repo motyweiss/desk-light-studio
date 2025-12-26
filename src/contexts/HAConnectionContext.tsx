@@ -3,7 +3,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { homeAssistant, type EntityMapping } from '@/services/homeAssistant';
 import { haClient } from '@/api/homeAssistant/client';
-import { websocketService } from '@/api/homeAssistant';
+import { connectionManager, type ConnectionState, type ConnectionMode } from '@/services/ConnectionManager';
 import { DevicesMapping, DeviceConfig, RoomConfig } from '@/types/settings';
 import { logger } from '@/shared/utils/logger';
 
@@ -27,6 +27,7 @@ interface HAConnectionContextValue {
   isConnected: boolean;
   isLoading: boolean;
   connectionStatus: 'connected' | 'disconnected' | 'connecting' | 'error';
+  connectionMode: ConnectionMode;
   haVersion: string | null;
   error: string | null;
 
@@ -35,6 +36,7 @@ interface HAConnectionContextValue {
   saveDevicesMapping: (mapping: DevicesMapping) => Promise<{ success: boolean; error?: string }>;
   testConnection: (baseUrl: string, accessToken: string) => Promise<ConnectionResult>;
   reconnect: () => Promise<void>;
+  markSuccessfulSync: () => void;
 }
 
 // ============= Default Entity Mapping =============
@@ -115,12 +117,14 @@ export const useHAConnection = () => {
       isConnected: false,
       isLoading: true,
       connectionStatus: 'disconnected' as const,
+      connectionMode: 'none' as ConnectionMode,
       haVersion: null,
       error: null,
       saveConfig: async () => ({ success: false, error: 'Provider not ready' }),
       saveDevicesMapping: async () => ({ success: false, error: 'Provider not ready' }),
       testConnection: async () => ({ success: false, error: 'Provider not ready' }),
       reconnect: async () => {},
+      markSuccessfulSync: () => {},
     };
   }
   return context;
@@ -136,11 +140,34 @@ export const HAConnectionProvider: React.FC<{ children: React.ReactNode }> = ({ 
   const [entityMapping, setEntityMapping] = useState<EntityMapping>(DEFAULT_ENTITY_MAPPING);
   const [isLoading, setIsLoading] = useState(true);
   const [connectionStatus, setConnectionStatus] = useState<'connected' | 'disconnected' | 'connecting' | 'error'>('disconnected');
+  const [connectionMode, setConnectionMode] = useState<ConnectionMode>('none');
   const [haVersion, setHaVersion] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   const isConnected = connectionStatus === 'connected';
   const configuredRef = useRef(false);
+
+  // ============= Subscribe to ConnectionManager =============
+  useEffect(() => {
+    const unsubscribe = connectionManager.subscribe((state: ConnectionState, mode: ConnectionMode) => {
+      // Map ConnectionManager state to context state
+      if (state === 'reconnecting') {
+        setConnectionStatus('connecting');
+      } else if (state === 'connected') {
+        setConnectionStatus('connected');
+        setError(null);
+      } else if (state === 'connecting') {
+        setConnectionStatus('connecting');
+      } else {
+        setConnectionStatus('disconnected');
+      }
+      setConnectionMode(mode);
+    });
+
+    return () => {
+      unsubscribe();
+    };
+  }, []);
 
   // ============= Configure HA Clients =============
   const configureClients = useCallback((haConfig: HAConfig) => {
@@ -177,7 +204,7 @@ export const HAConnectionProvider: React.FC<{ children: React.ReactNode }> = ({ 
     }
   }, []);
 
-  // ============= Load Config (from DB if user exists, or localStorage for dev) =============
+  // ============= Load Config =============
   const loadConfig = useCallback(async () => {
     setIsLoading(true);
     logger.connection('Loading HA config...');
@@ -259,29 +286,17 @@ export const HAConnectionProvider: React.FC<{ children: React.ReactNode }> = ({ 
         setConfig(haConfig);
         configureClients(haConfig);
 
-        setConnectionStatus('connecting');
+        // Use ConnectionManager for connection
+        const success = await connectionManager.connect(haConfig);
         
-        // Try direct connection first (more reliable), then proxy
-        const directResult = await homeAssistant.testDirectConnection(haConfig.baseUrl, haConfig.accessToken);
-        
-        if (directResult.success) {
-          setConnectionStatus('connected');
-          setHaVersion(directResult.version || null);
-          setError(null);
-          logger.connection('Connected to Home Assistant (direct)', { version: directResult.version });
+        if (success) {
+          // Get version from direct test
+          const result = await homeAssistant.testConnection();
+          setHaVersion(result.version || null);
+          logger.connection('Connected to Home Assistant', { version: result.version });
         } else {
-          // Try through proxy as fallback
-          const proxyResult = await homeAssistant.testConnection();
-          if (proxyResult.success) {
-            setConnectionStatus('connected');
-            setHaVersion(proxyResult.version || null);
-            setError(null);
-            logger.connection('Connected to Home Assistant (proxy)', { version: proxyResult.version });
-          } else {
-            setConnectionStatus('error');
-            setError(directResult.error || 'Connection failed');
-            logger.error('HA connection failed', directResult.error);
-          }
+          setError('Connection failed');
+          logger.error('HA connection failed');
         }
       } else {
         setConnectionStatus('disconnected');
@@ -329,16 +344,13 @@ export const HAConnectionProvider: React.FC<{ children: React.ReactNode }> = ({ 
       setConfig(newConfig);
       configureClients(newConfig);
 
-      // Test connection
-      setConnectionStatus('connecting');
-      const result = await homeAssistant.testConnection();
+      // Connect using ConnectionManager
+      const success = await connectionManager.connect(newConfig);
       
-      if (result.success) {
-        setConnectionStatus('connected');
+      if (success) {
+        const result = await homeAssistant.testConnection();
         setHaVersion(result.version || null);
         logger.connection('Saved config and connected', { version: result.version });
-      } else {
-        setConnectionStatus('error');
       }
 
       return { success: true };
@@ -388,34 +400,16 @@ export const HAConnectionProvider: React.FC<{ children: React.ReactNode }> = ({ 
   const reconnect = useCallback(async () => {
     if (!config) return;
 
-    setConnectionStatus('connecting');
-    logger.connection('Attempting reconnection...');
-
-    try {
-      configureClients(config);
-      
-      // Try WebSocket first
-      try {
-        await websocketService.connect(config);
-        setConnectionStatus('connected');
-        logger.connection('Reconnected via WebSocket');
-      } catch {
-        // Fallback to HTTP
-        const result = await homeAssistant.testConnection();
-        if (result.success) {
-          setConnectionStatus('connected');
-          setHaVersion(result.version || null);
-          logger.connection('Reconnected via HTTP');
-        } else {
-          setConnectionStatus('error');
-          setError(result.error || 'Reconnection failed');
-        }
-      }
-    } catch (err) {
-      logger.error('Reconnection failed', err);
-      setConnectionStatus('error');
-    }
+    logger.connection('Attempting reconnection via ConnectionManager...');
+    
+    configureClients(config);
+    await connectionManager.reconnect();
   }, [config, configureClients]);
+
+  // ============= Mark Successful Sync =============
+  const markSuccessfulSync = useCallback(() => {
+    connectionManager.markSuccessfulSync();
+  }, []);
 
   // ============= Initial Load =============
   useEffect(() => {
@@ -425,30 +419,6 @@ export const HAConnectionProvider: React.FC<{ children: React.ReactNode }> = ({ 
     }
   }, [loadConfig]);
 
-  // ============= Auto-reconnect on network recovery =============
-  useEffect(() => {
-    const handleOnline = () => {
-      logger.connection('Network recovered, attempting reconnection...');
-      if (config && connectionStatus !== 'connected') {
-        reconnect();
-      }
-    };
-
-    const handleOffline = () => {
-      logger.connection('Network lost');
-      setConnectionStatus('disconnected');
-      setError('Network connection lost');
-    };
-
-    window.addEventListener('online', handleOnline);
-    window.addEventListener('offline', handleOffline);
-
-    return () => {
-      window.removeEventListener('online', handleOnline);
-      window.removeEventListener('offline', handleOffline);
-    };
-  }, [config, connectionStatus, reconnect]);
-
   // ============= Context Value =============
   const value: HAConnectionContextValue = {
     config,
@@ -457,12 +427,14 @@ export const HAConnectionProvider: React.FC<{ children: React.ReactNode }> = ({ 
     isConnected,
     isLoading,
     connectionStatus,
+    connectionMode,
     haVersion,
     error,
     saveConfig,
     saveDevicesMapping,
     testConnection,
     reconnect,
+    markSuccessfulSync,
   };
 
   return (
