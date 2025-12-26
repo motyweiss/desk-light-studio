@@ -32,17 +32,17 @@ export const ConnectionStatusIndicator = ({
   const getTooltipText = () => {
     if (isConnecting) return "Connecting...";
     if (isReconnecting) return "Reconnecting...";
-    if (!isConnected) return "Disconnected";
-    return "Connected";
+    if (!isConnected) return "Disconnected - Click to reconnect";
+    return "Connected - Click to refresh";
   };
 
   const handleClick = () => {
-    if (!isConnected && !isReconnecting && !isConnecting && onReconnectClick) {
+    if (!isReconnecting && !isConnecting && onReconnectClick) {
       onReconnectClick();
     }
   };
 
-  const isClickable = !isConnected && !isReconnecting && !isConnecting;
+  const isClickable = !isReconnecting && !isConnecting;
 
   return (
     <Tooltip>
