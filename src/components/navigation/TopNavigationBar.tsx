@@ -1,6 +1,6 @@
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
-import { Settings as SettingsIcon } from 'lucide-react';
+import { Settings as SettingsIcon, RefreshCw } from 'lucide-react';
 import { ClimateIndicators } from '@/features/climate/components/ClimateIndicators';
 import { ConnectionStatusIndicator } from '@/components/ConnectionStatusIndicator';
 import { LogoutButton } from '@/components/LogoutButton';
@@ -68,7 +68,7 @@ export const TopNavigationBar = ({
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.5, delay: 0.2 }}
           >
-            <div className="hidden md:block">
+            <div className="hidden md:flex items-center gap-1">
               <ConnectionStatusIndicator
                 isConnected={isConnected}
                 isConnecting={isConnecting}
@@ -76,6 +76,26 @@ export const TopNavigationBar = ({
                 onReconnectClick={onReconnectClick}
                 inline={true}
               />
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <motion.button
+                    onClick={onReconnectClick}
+                    disabled={isConnecting || isReconnecting}
+                    className="w-8 h-8 rounded-lg flex items-center justify-center text-white/70 hover:text-white transition-colors hover:bg-white/5 disabled:opacity-50 disabled:cursor-not-allowed"
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    aria-label="Refresh connection"
+                  >
+                    <RefreshCw 
+                      className={`w-4 h-4 ${isConnecting || isReconnecting ? 'animate-spin' : ''}`} 
+                      strokeWidth={1.5} 
+                    />
+                  </motion.button>
+                </TooltipTrigger>
+                <TooltipContent side="bottom">
+                  <p>רענון חיבור</p>
+                </TooltipContent>
+              </Tooltip>
             </div>
             
             <Tooltip>
