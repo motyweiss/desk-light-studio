@@ -140,7 +140,7 @@ const Index = () => {
       <Toaster />
 
       <motion.div 
-        className="h-full min-h-0 flex items-center justify-center p-3 md:p-8 relative overflow-hidden"
+        className="h-full min-h-0 flex items-center justify-center p-3 md:p-8 relative"
         initial={{ opacity: 0 }}
         animate={{ opacity: showContent ? 1 : 0 }}
         transition={{ 
@@ -190,32 +190,34 @@ const Index = () => {
         {/* Main content area */}
         <div className="w-full h-full max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-center md:justify-between gap-4 md:gap-8 lg:gap-10 relative z-10">
           {/* Desk Display + Climate Indicators */}
-          <motion.div
-            className="w-full md:w-[45%] lg:w-[43%] flex-shrink-0 md:order-1 order-2 max-w-[320px] md:max-w-none flex flex-col items-center"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: showContent ? 1 : 0 }}
-            transition={{ 
-              duration: PAGE_LOAD.elements.deskImage.duration, 
-              delay: PAGE_LOAD.elements.deskImage.delay, 
-              ease: EASING.entrance
-            }}
-            style={{ willChange: 'opacity' }}
-          >
-            <DeskDisplay
-              spotlightIntensity={lights.spotlight.targetValue}
-              deskLampIntensity={lights.deskLamp.targetValue}
-              monitorLightIntensity={lights.monitorLight.targetValue}
-              onSpotlightChange={createLightChangeHandler('spotlight')}
-              onDeskLampChange={createLightChangeHandler('deskLamp')}
-              onMonitorLightChange={createLightChangeHandler('monitorLight')}
-              hoveredLightId={hoveredLight}
-              isLoaded={showContent}
-              dataReady={showData}
-            />
+          <div className="w-full md:w-[45%] lg:w-[43%] flex-shrink-0 md:order-1 order-2 max-w-[320px] md:max-w-none flex flex-col items-center">
+            <motion.div
+              className="w-full"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: showContent ? 1 : 0 }}
+              transition={{ 
+                duration: PAGE_LOAD.elements.deskImage.duration, 
+                delay: PAGE_LOAD.elements.deskImage.delay, 
+                ease: EASING.entrance
+              }}
+              style={{ willChange: 'opacity' }}
+            >
+              <DeskDisplay
+                spotlightIntensity={lights.spotlight.targetValue}
+                deskLampIntensity={lights.deskLamp.targetValue}
+                monitorLightIntensity={lights.monitorLight.targetValue}
+                onSpotlightChange={createLightChangeHandler('spotlight')}
+                onDeskLampChange={createLightChangeHandler('deskLamp')}
+                onMonitorLightChange={createLightChangeHandler('monitorLight')}
+                hoveredLightId={hoveredLight}
+                isLoaded={showContent}
+                dataReady={showData}
+              />
+            </motion.div>
             
             {/* Climate Indicators - centered below desk, reveals only when data is ready */}
             <motion.div
-              className="mt-6 flex justify-center"
+              className="mt-4 md:mt-6 flex justify-center w-full min-h-[48px]"
               initial={{ opacity: 0, y: 12 }}
               animate={{ 
                 opacity: climate.isLoaded && showData ? 1 : 0,
@@ -226,10 +228,11 @@ const Index = () => {
                 delay: climate.isLoaded && showData ? 0.15 : 0,
                 ease: [0.22, 0.03, 0.26, 1]
               }}
+              style={{ visibility: climate.isLoaded && showData ? 'visible' : 'hidden' }}
             >
               <ClimateIndicators />
             </motion.div>
-          </motion.div>
+          </div>
 
           {/* Room Info Panel */}
           <div className="w-full md:w-[52%] flex-shrink-0 md:order-2 order-1">
