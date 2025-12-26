@@ -74,7 +74,7 @@ export const RoomInfoPanel = ({
         }}
         style={{ willChange: 'opacity' }}
       >
-        <h1 className="text-2xl md:text-4xl font-display font-light tracking-tight text-foreground leading-tight">
+        <h1 className="text-2xl md:text-4xl font-epunda font-light tracking-tight text-foreground leading-tight">
           {roomName}
         </h1>
         
