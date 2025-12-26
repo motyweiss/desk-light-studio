@@ -62,9 +62,9 @@ const DevicesTab = ({
   };
   return (
     <motion.div 
-      initial={{ opacity: 0, y: 10 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.3 }}
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.25, ease: [0.22, 0.03, 0.26, 1] }}
       className="space-y-8"
     >
       {/* Auto Discovery Section */}
