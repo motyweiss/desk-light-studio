@@ -212,9 +212,9 @@ const Settings = () => {
     <div className="h-full flex flex-col">
       {/* Fixed Header */}
       <motion.div 
-        initial={{ y: -80, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        transition={{ duration: 0.5, ease: [0.22, 0.03, 0.26, 1] }}
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.3, ease: [0.22, 0.03, 0.26, 1] }}
         className="flex-shrink-0 bg-background/80 backdrop-blur-xl border-b border-white/10"
       >
         <div className="max-w-2xl mx-auto px-6 py-4 flex items-center justify-between">
@@ -277,11 +277,11 @@ const Settings = () => {
       <AnimatePresence>
         {isDirty && (
           <motion.div 
-            initial={{ y: 20, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            exit={{ y: 20, opacity: 0 }}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
             transition={{ 
-              duration: 0.35, 
+              duration: 0.25, 
               ease: [0.22, 0.03, 0.26, 1] 
             }}
             className="flex-shrink-0 bg-background/80 backdrop-blur-xl border-t border-white/10"
