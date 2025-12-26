@@ -34,14 +34,20 @@ export const sensors = {
   },
 
   /**
-   * Get multiple sensor states at once
+   * Get multiple sensor states at once - resilient to individual failures
    */
   async getMultipleStates(entityIds: string[]): Promise<Record<string, HASensorEntity | null>> {
     const result: Record<string, HASensorEntity | null> = {};
 
     await Promise.all(
       entityIds.map(async (entityId) => {
-        result[entityId] = await this.getState(entityId);
+        try {
+          result[entityId] = await this.getState(entityId);
+        } catch (error) {
+          // Log but don't fail the entire batch
+          logger.warn(`Failed to fetch sensor ${entityId}:`, error);
+          result[entityId] = null;
+        }
       })
     );
 
