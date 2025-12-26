@@ -125,21 +125,22 @@ export const LightControlCard = ({
       animate={{
         backgroundColor: isLoading 
           ? 'rgba(255, 255, 255, 0.06)' 
-          : isOn 
-            ? 'rgba(255, 255, 255, 0.18)' 
-            : 'rgba(255, 255, 255, 0.08)',
+          : 'rgba(0, 0, 0, 0)',
         borderColor: isLoading
           ? 'rgba(255, 255, 255, 0.1)'
-          : isOn 
-            ? 'rgba(255, 255, 255, 0.25)' 
-            : 'rgba(255, 255, 255, 0.15)',
+          : 'rgba(0, 0, 0, 0)',
       }}
       transition={smoothTransition}
       whileHover={!isLoading ? {
-        backgroundColor: isOn ? 'rgba(255, 255, 255, 0.22)' : 'rgba(255, 255, 255, 0.12)',
-        scale: 1.005,
+        backgroundColor: isOn ? 'rgba(255, 255, 255, 0.12)' : 'rgba(255, 255, 255, 0.08)',
+        borderColor: isOn ? 'rgba(255, 255, 255, 0.20)' : 'rgba(255, 255, 255, 0.12)',
+        transition: { duration: 0.3, ease: [0.22, 0.03, 0.26, 1] }
       } : undefined}
-      whileTap={!isLoading ? { scale: 0.985 } : undefined}
+      whileTap={!isLoading ? { 
+        scale: 0.98,
+        backgroundColor: isOn ? 'rgba(255, 255, 255, 0.16)' : 'rgba(255, 255, 255, 0.10)',
+        transition: { duration: 0.15 }
+      } : undefined}
       style={{ pointerEvents: isLoading ? 'none' : 'auto' }}
     >
       {/* Shimmer overlay - only visible during loading */}

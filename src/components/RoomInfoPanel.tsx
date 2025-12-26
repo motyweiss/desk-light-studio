@@ -192,7 +192,7 @@ export const RoomInfoPanel = ({
       )}
 
       {/* Light Controls Section */}
-      <div className="space-y-2 md:mt-6">
+      <div className="md:mt-6">
         {lights.map((light, index) => (
           <motion.div 
             key={light.id}
@@ -205,15 +205,22 @@ export const RoomInfoPanel = ({
             }}
             style={{ willChange: 'opacity' }}
           >
-            <LightControlCard
-              id={light.id}
-              label={light.label}
-              intensity={light.intensity}
-              isPending={light.isPending}
-              isLoading={showSkeleton || light.isLoading}
-              onChange={light.onChange}
-              onHover={(isHovered) => onLightHover(isHovered ? light.id : null)}
-            />
+            <div className="py-2 md:py-3">
+              <LightControlCard
+                id={light.id}
+                label={light.label}
+                intensity={light.intensity}
+                isPending={light.isPending}
+                isLoading={showSkeleton || light.isLoading}
+                onChange={light.onChange}
+                onHover={(isHovered) => onLightHover(isHovered ? light.id : null)}
+              />
+            </div>
+            
+            {/* Separator line - show between items only */}
+            {index < lights.length - 1 && (
+              <div className="mx-4 md:mx-8 h-px bg-white/8" />
+            )}
           </motion.div>
         ))}
       </div>
