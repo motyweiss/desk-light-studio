@@ -121,7 +121,7 @@ export const ClimateIndicatorTooltip = ({
           >
             <div className="bg-white/8 backdrop-blur-[20px] rounded-xl px-3.5 py-3 shadow-[0_4px_16px_rgba(0,0,0,0.12)] border border-white/15 min-w-[200px]">
               {/* Header with icon and value */}
-              <div className="flex items-center gap-3 mb-2">
+              <div className="flex items-center gap-3 mb-3.5">
                 <motion.div
                   className="w-9 h-9 rounded-full flex items-center justify-center backdrop-blur-lg bg-white/10"
                   initial={{ scale: 0.8, opacity: 0 }}
