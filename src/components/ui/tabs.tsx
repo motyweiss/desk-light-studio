@@ -108,11 +108,11 @@ const TabsContent = React.forwardRef<
     <AnimatePresence mode="wait">
       <motion.div
         key={value}
-        initial={{ opacity: 0, y: 8 }}
-        animate={{ opacity: 1, y: 0 }}
-        exit={{ opacity: 0, y: -8 }}
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
         transition={{ 
-          duration: 0.25, 
+          duration: 0.2, 
           ease: [0.22, 0.03, 0.26, 1]
         }}
       >
