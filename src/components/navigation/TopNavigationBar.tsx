@@ -1,7 +1,6 @@
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { Settings as SettingsIcon } from 'lucide-react';
-import { ClimateIndicators } from '@/features/climate/components/ClimateIndicators';
 import { ConnectionStatusIndicator } from '@/components/ConnectionStatusIndicator';
 import { LogoutButton } from '@/components/LogoutButton';
 import { HomeAssistantIcon } from '@/components/icons/HomeAssistantIcon';
@@ -50,11 +49,6 @@ export const TopNavigationBar = ({
             <HomeAssistantIcon className="w-5 h-5 md:w-6 md:h-6 text-white/90" />
             <span className="text-sm md:text-lg font-light text-white/90">Home Assistant</span>
           </motion.div>
-
-          {/* Center: Climate Indicators - Hidden on mobile */}
-          <div className="hidden md:block">
-            <ClimateIndicators />
-          </div>
 
           {/* Right: Connection Status + Settings + Logout */}
           <motion.div 
