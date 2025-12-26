@@ -454,46 +454,17 @@ class HomeAssistantService {
     }
 
     try {
-      // Use proxy to fetch image
-      const { data, error } = await haProxyClient.request<ArrayBuffer>({
-        path: relativePath.startsWith('/') ? relativePath : `/${relativePath}`,
-        method: 'GET'
-      });
+      const path = relativePath.startsWith('/') ? relativePath : `/${relativePath}`;
+      const { data, error } = await haProxyClient.getImage(path);
 
-      if (error || !data) return null;
-
-      // If the response is already a data URL or string, return it
-      if (typeof data === 'string') {
-        this.imageCache.set(relativePath, data);
-        return data;
+      if (error || !data) {
+        console.warn('[HA] Failed to fetch image via proxy:', error);
+        return null;
       }
 
-      // The proxy returns the data as-is, we need to handle the blob conversion
-      // For now, use the direct URL approach with the config
-      if (this.config) {
-        const fullUrl = `${this.config.baseUrl}${relativePath}`;
-        const response = await fetch(fullUrl, {
-          headers: {
-            'Authorization': `Bearer ${this.config.accessToken}`,
-          },
-        });
-
-        if (!response.ok) return null;
-
-        const blob = await response.blob();
-        return new Promise((resolve) => {
-          const reader = new FileReader();
-          reader.onloadend = () => {
-            const dataUrl = reader.result as string;
-            this.imageCache.set(relativePath, dataUrl);
-            resolve(dataUrl);
-          };
-          reader.onerror = () => resolve(null);
-          reader.readAsDataURL(blob);
-        });
-      }
-
-      return null;
+      // Cache the result
+      this.imageCache.set(relativePath, data);
+      return data;
     } catch (error) {
       console.error('[HA] Failed to fetch image:', error);
       return null;

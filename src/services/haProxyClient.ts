@@ -123,6 +123,70 @@ class HAProxyClient {
     return this.request<T>({ path, method: 'POST', data });
   }
 
+  // Fetch image and return as data URL
+  async getImage(path: string): Promise<{ data: string | null; error: string | null }> {
+    const token = await this.getAuthToken();
+    
+    if (!token) {
+      return { data: null, error: 'No authentication for image fetch' };
+    }
+
+    try {
+      // Call the edge function directly to get the image
+      const { data: sessionData } = await supabase.auth.getSession();
+      const supabaseUrl = sessionData?.session ? 
+        `https://${import.meta.env.VITE_SUPABASE_PROJECT_ID}.supabase.co` : null;
+      
+      if (!supabaseUrl) {
+        return { data: null, error: 'No Supabase URL available' };
+      }
+
+      const response = await fetch(`${supabaseUrl}/functions/v1/ha-proxy`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ path, method: 'GET' }),
+      });
+
+      if (!response.ok) {
+        return { data: null, error: `HTTP ${response.status}` };
+      }
+
+      const contentType = response.headers.get('content-type') || '';
+      
+      // Check if response is an image
+      if (contentType.startsWith('image/')) {
+        const blob = await response.blob();
+        return new Promise((resolve) => {
+          const reader = new FileReader();
+          reader.onloadend = () => resolve({ data: reader.result as string, error: null });
+          reader.onerror = () => resolve({ data: null, error: 'Failed to read image' });
+          reader.readAsDataURL(blob);
+        });
+      }
+
+      // If it's JSON, the proxy might have returned an error or data URL
+      if (contentType.includes('application/json')) {
+        const json = await response.json();
+        if (json.error) {
+          return { data: null, error: json.error };
+        }
+        // If the proxy returned a data URL in JSON
+        if (typeof json === 'string' && json.startsWith('data:')) {
+          return { data: json, error: null };
+        }
+      }
+
+      return { data: null, error: 'Response is not an image' };
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Unknown error';
+      console.error('[HA Proxy] Image fetch error:', message);
+      return { data: null, error: message };
+    }
+  }
+
   // Test connection - tries proxy first, then direct
   async testConnection(): Promise<{ success: boolean; version?: string; error?: string }> {
     const { data, error } = await this.get<{ version: string }>('/api/');
