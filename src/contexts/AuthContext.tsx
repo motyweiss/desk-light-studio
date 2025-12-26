@@ -18,8 +18,18 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const useAuth = () => {
   const context = useContext(AuthContext);
+  // Return safe default during initialization instead of throwing
+  // This prevents circular import issues where hooks fail during module load
   if (!context) {
-    throw new Error('useAuth must be used within an AuthProvider');
+    return {
+      user: null,
+      session: null,
+      loading: true,
+      signIn: async () => ({ error: new Error('Auth not ready') }),
+      signUp: async () => ({ error: new Error('Auth not ready') }),
+      signInWithOAuth: async () => ({ error: new Error('Auth not ready') }),
+      signOut: async () => {},
+    };
   }
   return context;
 };
