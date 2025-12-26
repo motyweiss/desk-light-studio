@@ -217,7 +217,7 @@ const Index = () => {
             
             {/* Climate Indicators - centered below desk, reveals only when data is ready */}
             <motion.div
-              className="mt-4 md:mt-6 flex justify-center w-full min-h-[48px]"
+              className="mt-2 md:mt-3 flex justify-center w-full min-h-[40px]"
               initial={{ opacity: 0, y: 12 }}
               animate={{ 
                 opacity: climate.isLoaded && showData ? 1 : 0,
