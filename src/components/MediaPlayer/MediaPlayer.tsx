@@ -40,7 +40,12 @@ export const MediaPlayer = () => {
   } = useMediaPlayer();
 
   // Fetch album art with authentication
-  const { imageUrl: albumArtUrl, isLoading: isAlbumArtLoading, error: albumArtError } = useAuthenticatedImage(
+  const { 
+    imageUrl: albumArtUrl, 
+    isLoading: isAlbumArtLoading, 
+    error: albumArtError,
+    isTransitioning: isAlbumArtTransitioning 
+  } = useAuthenticatedImage(
     playerState?.currentTrack?.albumArt || null
   );
 
@@ -136,16 +141,22 @@ export const MediaPlayer = () => {
                       }}
                       className="absolute inset-0"
                     >
-                      {/* Skeleton loader */}
-                      {isAlbumArtLoading && (
-                        <div className="absolute inset-0 bg-white/5 animate-pulse">
-                          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent animate-[shimmer_1.5s_infinite]" 
+                      {/* Skeleton loader - show during loading or transition */}
+                      {(isAlbumArtLoading || isAlbumArtTransitioning) && !albumArtUrl && (
+                        <motion.div 
+                          className="absolute inset-0 bg-white/5"
+                          initial={{ opacity: 0 }}
+                          animate={{ opacity: 1 }}
+                          exit={{ opacity: 0 }}
+                        >
+                          <div 
+                            className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent"
                             style={{
                               backgroundSize: '200% 100%',
-                              animation: 'shimmer 1.5s infinite',
+                              animation: 'shimmer 1.5s infinite linear',
                             }}
                           />
-                        </div>
+                        </motion.div>
                       )}
                       
                       <AnimatePresence mode="popLayout">
