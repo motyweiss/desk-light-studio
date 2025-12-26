@@ -1,10 +1,10 @@
 /**
  * ConnectionManager - Unified connection management for Home Assistant
  * Single source of truth for connection state, heartbeat, and auto-reconnection
+ * 
+ * Uses lazy loading to avoid circular import issues with React
  */
 
-import { websocketService } from '@/api/homeAssistant';
-import { homeAssistant } from '@/services/homeAssistant';
 import { logger } from '@/shared/utils/logger';
 
 export type ConnectionState = 'connected' | 'disconnected' | 'connecting' | 'reconnecting';
@@ -29,6 +29,26 @@ const HEALTH_CHECK_INTERVAL = 60000; // 60 seconds idle check
 const MAX_RECONNECT_ATTEMPTS = 5;
 const VISIBILITY_SYNC_THRESHOLD = 30000; // 30 seconds hidden before force sync
 
+// Lazy-loaded services to avoid circular imports
+let _websocketService: any = null;
+let _homeAssistant: any = null;
+
+const getWebsocketService = async () => {
+  if (!_websocketService) {
+    const module = await import('@/api/homeAssistant');
+    _websocketService = module.websocketService;
+  }
+  return _websocketService;
+};
+
+const getHomeAssistant = async () => {
+  if (!_homeAssistant) {
+    const module = await import('@/services/homeAssistant');
+    _homeAssistant = module.homeAssistant;
+  }
+  return _homeAssistant;
+};
+
 class ConnectionManager {
   private config: HAConfig | null = null;
   private internalState: ConnectionManagerState = {
@@ -44,14 +64,15 @@ class ConnectionManager {
   private listeners: Set<ConnectionChangeCallback> = new Set();
   private visibilityHiddenAt: number = 0;
   private isDestroyed = false;
+  private initialized = false;
 
-  constructor() {
-    // Setup global event listeners
-    if (typeof window !== 'undefined') {
-      window.addEventListener('online', this.handleOnline);
-      window.addEventListener('offline', this.handleOffline);
-      document.addEventListener('visibilitychange', this.handleVisibilityChange);
-    }
+  private init(): void {
+    if (this.initialized || typeof window === 'undefined') return;
+    this.initialized = true;
+    
+    window.addEventListener('online', this.handleOnline);
+    window.addEventListener('offline', this.handleOffline);
+    document.addEventListener('visibilitychange', this.handleVisibilityChange);
   }
 
   // ============= Public API =============
@@ -60,6 +81,7 @@ class ConnectionManager {
    * Initialize connection with HA config
    */
   async connect(config: HAConfig): Promise<boolean> {
+    this.init();
     if (this.isDestroyed) return false;
     
     this.config = config;
@@ -117,7 +139,7 @@ class ConnectionManager {
   /**
    * Disconnect and cleanup
    */
-  disconnect(): void {
+  async disconnect(): Promise<void> {
     logger.connection('ConnectionManager: Disconnecting...');
     
     this.stopHeartbeat();
@@ -125,7 +147,12 @@ class ConnectionManager {
     this.cancelReconnect();
     
     if (this.internalState.mode === 'websocket') {
-      websocketService.disconnect();
+      try {
+        const ws = await getWebsocketService();
+        ws.disconnect();
+      } catch (e) {
+        // Ignore errors during disconnect
+      }
     }
     
     this.updateState('disconnected', 'none');
@@ -175,9 +202,9 @@ class ConnectionManager {
   /**
    * Destroy manager (cleanup on unmount)
    */
-  destroy(): void {
+  async destroy(): Promise<void> {
     this.isDestroyed = true;
-    this.disconnect();
+    await this.disconnect();
     this.listeners.clear();
     
     if (typeof window !== 'undefined') {
@@ -193,8 +220,9 @@ class ConnectionManager {
     if (!this.config) return false;
     
     try {
-      await websocketService.connect(this.config);
-      return websocketService.isConnected();
+      const ws = await getWebsocketService();
+      await ws.connect(this.config);
+      return ws.isConnected();
     } catch (error) {
       logger.warn('ConnectionManager: WebSocket connection failed', error);
       return false;
@@ -205,8 +233,9 @@ class ConnectionManager {
     if (!this.config) return false;
     
     try {
-      homeAssistant.setConfig(this.config);
-      const result = await homeAssistant.testDirectConnection(
+      const ha = await getHomeAssistant();
+      ha.setConfig(this.config);
+      const result = await ha.testDirectConnection(
         this.config.baseUrl, 
         this.config.accessToken
       );
@@ -264,13 +293,15 @@ class ConnectionManager {
     try {
       if (this.internalState.mode === 'websocket') {
         // Check WebSocket health
-        if (!websocketService.isConnected()) {
+        const ws = await getWebsocketService();
+        if (!ws.isConnected()) {
           logger.warn('ConnectionManager: WebSocket disconnected, reconnecting...');
           this.scheduleReconnect();
         }
       } else {
         // HTTP health check
-        const result = await homeAssistant.testConnection();
+        const ha = await getHomeAssistant();
+        const result = await ha.testConnection();
         if (!result.success) {
           logger.warn('ConnectionManager: HTTP health check failed, reconnecting...');
           this.scheduleReconnect();
