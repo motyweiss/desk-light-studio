@@ -60,8 +60,8 @@ const TabsTrigger = React.forwardRef<
       value={value}
       className={cn(
         "relative z-10 inline-flex items-center justify-center whitespace-nowrap rounded-xl px-8 py-3 text-sm font-light tracking-wide transition-colors duration-200 ease-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/20 focus-visible:ring-offset-0 disabled:pointer-events-none disabled:opacity-50",
-        "text-white/40 hover:text-white/60",
-        isActive && "text-white",
+        "text-white/60 hover:text-white/75",
+        isActive && "text-white/90",
         className
       )}
       {...props}
