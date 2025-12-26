@@ -132,14 +132,14 @@ export const LightControlCard = ({
       }}
       transition={smoothTransition}
       whileHover={!isLoading ? {
-        backgroundColor: isOn ? 'rgba(255, 255, 255, 0.12)' : 'rgba(255, 255, 255, 0.08)',
-        borderColor: isOn ? 'rgba(255, 255, 255, 0.20)' : 'rgba(255, 255, 255, 0.12)',
-        transition: { duration: 0.3, ease: [0.22, 0.03, 0.26, 1] }
+        backgroundColor: isOn ? 'rgba(255, 255, 255, 0.06)' : 'rgba(255, 255, 255, 0.04)',
+        borderColor: isOn ? 'rgba(255, 255, 255, 0.12)' : 'rgba(255, 255, 255, 0.08)',
+        transition: { duration: 0.4, ease: [0.25, 0.1, 0.25, 1] }
       } : undefined}
       whileTap={!isLoading ? { 
-        scale: 0.98,
-        backgroundColor: isOn ? 'rgba(255, 255, 255, 0.16)' : 'rgba(255, 255, 255, 0.10)',
-        transition: { duration: 0.15 }
+        scale: 0.99,
+        backgroundColor: isOn ? 'rgba(255, 255, 255, 0.08)' : 'rgba(255, 255, 255, 0.05)',
+        transition: { duration: 0.2, ease: [0.25, 0.1, 0.25, 1] }
       } : undefined}
       style={{ pointerEvents: isLoading ? 'none' : 'auto' }}
     >
