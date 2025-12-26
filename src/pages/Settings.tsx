@@ -285,7 +285,7 @@ const Settings = () => {
             onClick={handleCancel}
             className="flex-1"
           >
-            Cancel
+            Discard
           </Button>
           <Button
             onClick={handleSave}
