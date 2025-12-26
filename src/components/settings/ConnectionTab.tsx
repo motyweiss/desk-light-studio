@@ -2,7 +2,7 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Loader2, CheckCircle2, XCircle, Link2, Eye, EyeOff } from "lucide-react";
+import { Loader2, CheckCircle2, XCircle, Link2, Eye, EyeOff, HelpCircle } from "lucide-react";
 import { SettingsSection } from "./SettingsSection";
 import { SettingsField } from "./SettingsField";
 import { QuickConnectSuggestions } from "./QuickConnectSuggestions";
@@ -160,7 +160,12 @@ const ConnectionTab = ({
               )}
             </button>
           </div>
-          <p className="text-xs text-white/50 mt-2">
+        </SettingsField>
+
+        {/* Token Help Box */}
+        <div className="flex items-start gap-3 p-3 rounded-lg bg-white/5 border border-white/10">
+          <HelpCircle className="w-4 h-4 text-white/40 flex-shrink-0 mt-0.5" />
+          <p className="text-xs text-white/50 leading-relaxed">
             To create a token: Go to your Home Assistant → Profile → Long-Lived Access Tokens → Create Token.{" "}
             <a 
               href="https://www.home-assistant.io/docs/authentication/#your-account-profile" 
@@ -171,7 +176,7 @@ const ConnectionTab = ({
               Learn more
             </a>
           </p>
-        </SettingsField>
+        </div>
 
         <div className="flex flex-col gap-3 pt-2">
           <Button
