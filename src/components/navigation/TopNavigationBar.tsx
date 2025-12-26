@@ -93,7 +93,7 @@ export const TopNavigationBar = ({
                   </motion.button>
                 </TooltipTrigger>
                 <TooltipContent side="bottom">
-                  <p>רענון חיבור</p>
+                  <p>Refresh connection</p>
                 </TooltipContent>
               </Tooltip>
             </div>
