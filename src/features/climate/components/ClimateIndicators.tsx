@@ -1,10 +1,11 @@
 import { useEffect, useState } from 'react';
-import { motion, useMotionValue, useTransform, animate, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Thermometer, Droplets, Wind } from 'lucide-react';
 import { useClimate } from '../context/ClimateContext';
 import { ClimateIndicatorTooltip } from './ClimateIndicatorTooltip';
 import { useHistoryData } from '../hooks/useHistoryData';
 import { useHAConnection } from '@/contexts/HAConnectionContext';
+import { AnimatedCounter } from '@/components/AnimatedCounter';
 
 // Stagger animation variants for each indicator - scale up with fade
 const indicatorVariants = {
@@ -34,16 +35,6 @@ export const ClimateIndicators = () => {
   const climate = useClimate();
   const { isConnected, entityMapping } = useHAConnection();
   const [hoveredIndicator, setHoveredIndicator] = useState<string | null>(null);
-  const [hasAnimated, setHasAnimated] = useState(false);
-  
-  // Animated counters - start from 0 for smooth initial animation
-  const tempCount = useMotionValue(0);
-  const tempDisplay = useTransform(tempCount, (latest) => Math.round(latest).toString());
-  
-  const humidityCount = useMotionValue(0);
-  const humidityDisplay = useTransform(humidityCount, (latest) => Math.round(latest).toString());
-  
-  const airQualityCount = useMotionValue(0);
   
   // Fetch historical data for each sensor
   const temperatureTrend = useHistoryData(
@@ -66,44 +57,6 @@ export const ClimateIndicators = () => {
     climate.airQuality,
     'airQuality'
   );
-  
-  // Animate counters only after data is loaded
-  useEffect(() => {
-    if (!climate.isLoaded) return;
-    
-    // Mark as animated to trigger the reveal
-    if (!hasAnimated) {
-      setHasAnimated(true);
-    }
-    
-    // Smooth count-up animation
-    const duration = 1.2;
-    const delay = hasAnimated ? 0 : 0.3; // Initial delay for first animation
-    
-    const tempControls = animate(tempCount, climate.temperature, {
-      duration,
-      delay,
-      ease: [0.22, 0.03, 0.26, 1]
-    });
-    
-    const humidityControls = animate(humidityCount, climate.humidity, {
-      duration,
-      delay: delay + 0.1,
-      ease: [0.22, 0.03, 0.26, 1]
-    });
-    
-    const airQualityControls = animate(airQualityCount, climate.airQuality, {
-      duration,
-      delay: delay + 0.2,
-      ease: [0.22, 0.03, 0.26, 1]
-    });
-    
-    return () => {
-      tempControls.stop();
-      humidityControls.stop();
-      airQualityControls.stop();
-    };
-  }, [climate.temperature, climate.humidity, climate.airQuality, climate.isLoaded, tempCount, humidityCount, airQualityCount, hasAnimated]);
 
   const getAirQualityStatus = (value: number): string => {
     if (value <= 12) return 'Good';
@@ -131,8 +84,26 @@ export const ClimateIndicators = () => {
   // Changed: Show indicators even during loading to prevent layout shift
   const showLoadingState = !climate.isLoaded;
 
+  // Render temperature value with AnimatedCounter
+  const renderTemperatureValue = () => (
+    <AnimatedCounter 
+      value={Math.round(climate.temperature)} 
+      delay={0.3}
+      isActive={climate.isLoaded}
+    />
+  );
+
+  // Render humidity value with AnimatedCounter
+  const renderHumidityValue = () => (
+    <AnimatedCounter 
+      value={Math.round(climate.humidity)} 
+      delay={0.4}
+      isActive={climate.isLoaded}
+    />
+  );
+
   return (
-    <div className="flex items-center gap-2 md:gap-4">
+    <div className="flex items-center gap-4 md:gap-6">
       <motion.div
         custom={0}
         variants={indicatorVariants}
@@ -145,7 +116,7 @@ export const ClimateIndicators = () => {
           isOpen={hoveredIndicator === 'temperature'}
           icon={Thermometer}
           label="Temperature"
-          value={tempDisplay.get()}
+          value={`${Math.round(climate.temperature)}`}
           unit="°C"
           trendData={temperatureTrend}
           color={
@@ -158,11 +129,9 @@ export const ClimateIndicators = () => {
             "hsl(0 80% 55%)"
           }
           onToggle={() => {}}
-          progressValue={climate.temperature}
-          progressMax={35}
-          progressMin={15}
           colorType="temperature"
-          isLoading={false}
+          isLoading={!climate.isLoaded}
+          renderValue={renderTemperatureValue}
         />
       </motion.div>
       
@@ -178,16 +147,14 @@ export const ClimateIndicators = () => {
           isOpen={hoveredIndicator === 'humidity'}
           icon={Droplets}
           label="Humidity"
-          value={humidityDisplay.get()}
+          value={`${Math.round(climate.humidity)}`}
           unit="%"
           trendData={humidityTrend}
           color="rgba(255, 255, 255, 0.7)"
           onToggle={() => {}}
-          progressValue={climate.humidity}
-          progressMax={100}
-          progressMin={0}
           colorType="humidity"
-          isLoading={false}
+          isLoading={!climate.isLoaded}
+          renderValue={renderHumidityValue}
         />
       </motion.div>
       
@@ -208,11 +175,8 @@ export const ClimateIndicators = () => {
           trendData={airQualityTrend}
           color="rgba(255, 255, 255, 0.7)"
           onToggle={() => {}}
-          progressValue={climate.airQuality}
-          progressMax={100}
-          progressMin={0}
           colorType="airQuality"
-          isLoading={false}
+          isLoading={!climate.isLoaded}
         />
       </motion.div>
     </div>

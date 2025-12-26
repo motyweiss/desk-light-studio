@@ -1,9 +1,19 @@
 import { motion, AnimatePresence } from "framer-motion";
-import { CircularProgress } from "./CircularProgress";
 import { TrendGraph } from "./TrendGraph";
 import { LucideIcon } from "lucide-react";
 import { useRef, useState, useEffect } from "react";
 import { createPortal } from "react-dom";
+
+// Simple semi-transparent circle for the icon
+const IconCircle = ({ children, size = 28 }: { children: React.ReactNode; size?: number }) => (
+  <div 
+    className="rounded-full bg-white/10 flex items-center justify-center"
+    style={{ width: size, height: size }}
+  >
+    {children}
+  </div>
+);
+
 interface ClimateIndicatorTooltipProps {
   isOpen: boolean;
   icon: LucideIcon;
@@ -14,11 +24,9 @@ interface ClimateIndicatorTooltipProps {
   color: string;
   position?: "top" | "bottom";
   onToggle: () => void;
-  progressValue: number;
-  progressMax: number;
-  progressMin?: number;
   colorType: 'temperature' | 'humidity' | 'airQuality';
   isLoading?: boolean;
+  renderValue?: () => React.ReactNode;
 }
 
 export const ClimateIndicatorTooltip = ({
@@ -31,11 +39,9 @@ export const ClimateIndicatorTooltip = ({
   color,
   position = "bottom",
   onToggle,
-  progressValue,
-  progressMax,
-  progressMin = 0,
   colorType,
-  isLoading = false
+  isLoading = false,
+  renderValue
 }: ClimateIndicatorTooltipProps) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const [tooltipPosition, setTooltipPosition] = useState({ top: 0, left: 0 });
@@ -44,8 +50,8 @@ export const ClimateIndicatorTooltip = ({
     if (isOpen && containerRef.current) {
       const rect = containerRef.current.getBoundingClientRect();
       setTooltipPosition({
-        top: rect.bottom + 12, // 12px offset below the trigger
-        left: rect.left + rect.width / 2, // Center horizontally
+        top: rect.bottom + 12,
+        left: rect.left + rect.width / 2,
       });
     }
   }, [isOpen]);
@@ -57,27 +63,18 @@ export const ClimateIndicatorTooltip = ({
       onMouseEnter={onToggle}
       onMouseLeave={onToggle}
     >
-      {/* Compact indicator with hover trigger - minimalist display */}
+      {/* Compact indicator - simple circle with icon */}
       <motion.div
         className="cursor-default"
         whileHover={{ scale: 1.02 }}
       >
         <div className="flex items-center gap-1.5 md:gap-2">
-          <CircularProgress 
-            value={progressValue}
-            min={progressMin}
-            max={progressMax}
-            size={28}
-            strokeWidth={2}
-            isLoaded={!isLoading}
-            colorType={colorType}
-            delay={0.1}
-          >
+          <IconCircle size={28}>
             <Icon 
               className="w-3 h-3 md:w-4 md:h-4 text-white" 
               strokeWidth={1.5}
             />
-          </CircularProgress>
+          </IconCircle>
           <motion.div 
             className="text-xs md:text-sm font-light text-white tabular-nums"
             animate={{
@@ -85,7 +82,7 @@ export const ClimateIndicatorTooltip = ({
             }}
             transition={{ duration: 0.3 }}
           >
-            {isLoading && value === '0' ? '--' : value}
+            {isLoading && value === '0' ? '--' : (renderValue ? renderValue() : value)}
             {!isLoading && <span className="text-[10px] md:text-xs text-white/40 ml-0.5">{unit}</span>}
           </motion.div>
         </div>
