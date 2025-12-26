@@ -108,26 +108,36 @@ export const useClimateSync = (config: UseClimateSyncConfig): ClimateData => {
 
       setClimateData(prev => {
         const newData = { ...prev };
+        let hasAnyClimateData = false;
 
         // Temperature
         if (entityMapping.temperatureSensor && states[entityMapping.temperatureSensor]) {
           const temp = parseFloat(states[entityMapping.temperatureSensor]!.state);
-          if (!isNaN(temp)) newData.temperature = temp;
+          if (!isNaN(temp)) {
+            newData.temperature = temp;
+            hasAnyClimateData = true;
+          }
         }
 
         // Humidity
         if (entityMapping.humiditySensor && states[entityMapping.humiditySensor]) {
           const humidity = parseFloat(states[entityMapping.humiditySensor]!.state);
-          if (!isNaN(humidity)) newData.humidity = humidity;
+          if (!isNaN(humidity)) {
+            newData.humidity = humidity;
+            hasAnyClimateData = true;
+          }
         }
 
         // Air Quality
         if (entityMapping.airQualitySensor && states[entityMapping.airQualitySensor]) {
           const airQuality = parseFloat(states[entityMapping.airQualitySensor]!.state);
-          if (!isNaN(airQuality)) newData.airQuality = airQuality;
+          if (!isNaN(airQuality)) {
+            newData.airQuality = airQuality;
+            hasAnyClimateData = true;
+          }
         }
 
-        // iPhone Battery
+        // iPhone Battery (optional - doesn't affect isLoaded for climate)
         if (entityMapping.iphoneBattery && states[entityMapping.iphoneBattery]) {
           const battery = parseFloat(states[entityMapping.iphoneBattery]!.state);
           if (!isNaN(battery)) newData.iphoneBatteryLevel = battery;
@@ -137,7 +147,7 @@ export const useClimateSync = (config: UseClimateSyncConfig): ClimateData => {
           newData.iphoneBatteryCharging = state.includes('charging') && !state.includes('not');
         }
 
-        // AirPods Battery
+        // AirPods Battery (optional - doesn't affect isLoaded for climate)
         if (entityMapping.airpodsMaxBattery && states[entityMapping.airpodsMaxBattery]) {
           const battery = parseFloat(states[entityMapping.airpodsMaxBattery]!.state);
           if (!isNaN(battery)) newData.airpodsMaxBatteryLevel = battery;
@@ -147,14 +157,19 @@ export const useClimateSync = (config: UseClimateSyncConfig): ClimateData => {
           newData.airpodsMaxBatteryCharging = state.includes('charging') && !state.includes('not');
         }
 
-        newData.isLoaded = true;
+        // Mark as loaded if we have ANY climate data (temp, humidity, or air quality)
+        // Don't wait for battery sensors which might be offline
+        if (hasAnyClimateData) {
+          newData.isLoaded = true;
+        }
         
         // Debug: Log final parsed values
         console.log('🔋 [ClimateSync] Final parsed values:', {
-          iphoneBatteryLevel: newData.iphoneBatteryLevel,
-          iphoneBatteryCharging: newData.iphoneBatteryCharging,
-          airpodsMaxBatteryLevel: newData.airpodsMaxBatteryLevel,
-          airpodsMaxBatteryCharging: newData.airpodsMaxBatteryCharging,
+          temperature: newData.temperature,
+          humidity: newData.humidity,
+          airQuality: newData.airQuality,
+          hasAnyClimateData,
+          isLoaded: newData.isLoaded,
         });
         
         logger.info('Climate data synced successfully');
