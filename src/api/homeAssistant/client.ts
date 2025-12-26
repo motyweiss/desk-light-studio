@@ -213,9 +213,23 @@ class HomeAssistantClient {
 
     for (let attempt = 0; attempt <= this.retryConfig.maxRetries; attempt++) {
       try {
-        const response = await fetch(url, { ...options, headers });
+        // Add timeout to prevent hanging requests
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 8000); // 8 second timeout
+        
+        const response = await fetch(url, { 
+          ...options, 
+          headers,
+          signal: controller.signal 
+        });
+        
+        clearTimeout(timeoutId);
 
         if (!response.ok) {
+          // Don't retry on 503 (service unavailable) - entity is offline
+          if (response.status === 503) {
+            throw new Error(`HTTP 503: Service Unavailable (entity offline)`);
+          }
           throw new Error(`HTTP ${response.status}: ${response.statusText}`);
         }
 
@@ -224,14 +238,20 @@ class HomeAssistantClient {
       } catch (error) {
         lastError = error as Error;
 
-        // Don't retry on client errors (4xx)
-        if (error instanceof Error && error.message.includes('HTTP 4')) {
+        // Don't retry on client errors (4xx) or 503 (offline entities)
+        if (error instanceof Error && 
+            (error.message.includes('HTTP 4') || error.message.includes('HTTP 503'))) {
           throw error;
         }
 
-        // Retry with exponential backoff
+        // Don't retry on abort (timeout)
+        if (error instanceof Error && error.name === 'AbortError') {
+          throw new Error(`Request timeout for ${endpoint}`);
+        }
+
+        // Retry with exponential backoff (reduced delay)
         if (attempt < this.retryConfig.maxRetries) {
-          const delay = this.retryConfig.baseDelay * Math.pow(2, attempt);
+          const delay = Math.min(this.retryConfig.baseDelay * Math.pow(1.5, attempt), 4000);
           logger.warn(`Request failed, retrying in ${delay}ms...`, {
             attempt: attempt + 1,
             maxRetries: this.retryConfig.maxRetries,
