@@ -108,10 +108,10 @@ export const MediaPlayer = () => {
 
   const currentTrack = playerState.currentTrack;
 
-  // Calculate album art sizes - smaller on mobile
+  // Calculate album art sizes
   const albumArtSize = {
-    width: isMinimized ? 48 : 56,
-    height: isMinimized ? 48 : 56,
+    width: isMinimized ? 48 : 64,
+    height: isMinimized ? 48 : 64,
   };
 
   // Unified transition config
@@ -138,11 +138,11 @@ export const MediaPlayer = () => {
       >
         <motion.div 
           onClick={handleToggleMinimized}
-          className="w-full max-w-3xl bg-white/12 backdrop-blur-xl border border-white/15 shadow-[0_4px_24px_rgba(0,0,0,0.15)] relative cursor-pointer overflow-hidden"
+          className="w-full max-w-2xl bg-white/12 backdrop-blur-xl border border-white/15 shadow-[0_4px_24px_rgba(0,0,0,0.15)] relative cursor-pointer overflow-hidden"
           initial={false}
           animate={{ 
-            height: isMinimized ? 72 : 'auto',
-            borderRadius: isMinimized ? 36 : 20,
+            height: isMinimized ? 64 : 'auto',
+            borderRadius: isMinimized ? 32 : 24,
           }}
           transition={smoothTransition}
           whileHover={{ 
@@ -151,15 +151,15 @@ export const MediaPlayer = () => {
         >
 
           {/* Content Container */}
-          <div className="px-3 md:px-6 py-2 md:py-3 max-w-7xl mx-auto">
+          <div className={`${isMinimized ? 'px-2 py-2' : 'px-5 py-4'} transition-all duration-300`}>
             {/* Grid layout: 3 columns in mini mode, single column in full mode */}
             <div className={`${isMinimized 
-              ? 'grid grid-cols-[auto_1fr_auto] items-center gap-2 sm:gap-4 lg:gap-6'
-              : 'flex flex-col'
+              ? 'grid grid-cols-[auto_1fr_auto] items-center gap-3'
+              : 'flex flex-col gap-4'
             }`}>
               
               {/* Left Section: Album Art + Track Info */}
-              <div className="flex items-center gap-2 sm:gap-4 min-w-0">
+              <div className="flex items-center gap-3 min-w-0">
                 {/* Album Art - Shared Element */}
                 <motion.div
                   layoutId="player-album-art"
@@ -331,7 +331,7 @@ export const MediaPlayer = () => {
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}
                   transition={{ duration: 0.35, ease: EASING.smooth }}
-                  className="flex items-center gap-4 justify-end"
+                  className="flex items-center gap-3 justify-end pr-1"
                 >
                   <div className="hidden lg:block" onClick={(e) => e.stopPropagation()}>
                     <VolumeControl
@@ -380,7 +380,7 @@ export const MediaPlayer = () => {
                     duration: 0.35,
                     ease: EASING.mediaPlayer,
                   }}
-                  className="space-y-4 mt-4 overflow-hidden"
+                  className="space-y-5 pt-2 overflow-hidden"
                 >
                   {/* Source Indicator */}
                   <div className="flex justify-end">
