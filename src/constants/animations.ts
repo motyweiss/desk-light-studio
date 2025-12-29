@@ -197,95 +197,76 @@ export const SPEAKER_SHEET_TRANSITIONS = {
 // MEDIA PLAYER ANIMATIONS - Unified system
 // ============================================================
 export const MEDIA_PLAYER = {
-  // Unified easing - soft, natural feel
-  easing: {
-    standard: [0.4, 0, 0.2, 1] as const,    // Material Design standard
-    decelerate: [0, 0, 0.2, 1] as const,     // Smooth stop
-    accelerate: [0.4, 0, 1, 1] as const,     // Quick start
-    soft: [0.25, 0.1, 0.25, 1] as const,     // Very gentle
-  },
-  
-  // Duration tokens
-  duration: {
-    instant: 0.15,
-    fast: 0.2,
-    normal: 0.3,
-    mode: 0.4,          // Minimized/expanded transition
-    entry: 0.5,         // Initial page entry
-    content: 0.35,      // Content fade in/out
-    stagger: 0.04,      // Delay between elements
-  },
-  
-  // Container transitions (minimized/expanded) - Spring for smooth layout
-  container: {
-    duration: 0.4,
-    ease: [0.4, 0, 0.2, 1] as const,
-  },
-  
-  // Layout spring - for height/size animations (avoids 'auto' jank)
-  layoutSpring: {
+  // ─────────────────────────────────────────────────────────
+  // LAYOUT SPRING - For size/position changes (smooth, no jank)
+  // ─────────────────────────────────────────────────────────
+  layout: {
     type: 'spring' as const,
-    stiffness: 400,
-    damping: 40,
-    mass: 1,
+    stiffness: 280,
+    damping: 28,
+    mass: 0.9,
   },
   
-  // Content element transitions
-  content: {
-    duration: 0.3,
+  // ─────────────────────────────────────────────────────────
+  // FADE - For opacity transitions (content, crossfades)
+  // ─────────────────────────────────────────────────────────
+  fade: {
+    duration: 0.25,
     ease: [0.25, 0.1, 0.25, 1] as const,
   },
   
-  // Entry animation (page load)
-  entry: {
-    delay: 0.35,
-    duration: 0.5,
+  // ─────────────────────────────────────────────────────────
+  // STAGGER - For sequential element animations
+  // ─────────────────────────────────────────────────────────
+  stagger: {
+    duration: 0.28,
+    delay: 0.035,
+    y: 6,
     ease: [0.22, 0.03, 0.26, 1] as const,
-    y: 12,              // Subtle vertical offset
   },
   
-  // Track change crossfade
-  trackChange: {
-    duration: 0.4,
-    ease: [0.25, 0.1, 0.25, 1] as const,
+  // ─────────────────────────────────────────────────────────
+  // ENTRY - Initial page load appearance
+  // ─────────────────────────────────────────────────────────
+  entry: {
+    delay: 0.2,
+    duration: 0.5,
+    y: 16,
+    ease: [0.22, 0.03, 0.26, 1] as const,
   },
   
-  // Hover/tap interactions - subtle!
+  // ─────────────────────────────────────────────────────────
+  // MODE - Minimized/Expanded state switch
+  // ─────────────────────────────────────────────────────────
+  mode: {
+    duration: 0.32,
+    ease: [0.32, 0.72, 0, 1] as const,
+  },
+  
+  // ─────────────────────────────────────────────────────────
+  // INTERACTION - Hover/tap micro-interactions
+  // ─────────────────────────────────────────────────────────
   interaction: {
     hoverScale: 1.04,
     tapScale: 0.97,
     duration: 0.15,
   },
   
-  // Popover animations
+  // ─────────────────────────────────────────────────────────
+  // POPOVER - Speaker/menu popover animations
+  // ─────────────────────────────────────────────────────────
   popover: {
     duration: 0.25,
-    ease: [0.4, 0, 0.2, 1] as const,
     y: 8,
+    ease: [0.4, 0, 0.2, 1] as const,
   },
   
-  // Progress/volume slider
+  // ─────────────────────────────────────────────────────────
+  // SLIDER - Progress/volume slider feedback
+  // ─────────────────────────────────────────────────────────
   slider: {
     duration: 0.1,
     ease: [0.4, 0, 0.2, 1] as const,
-  },
-} as const;
-
-// Legacy alias for backwards compatibility
-export const MEDIA_PLAYER_ANIMATIONS = {
-  entry: {
-    duration: MEDIA_PLAYER.entry.duration,
-    delay: MEDIA_PLAYER.entry.delay,
-    ease: MEDIA_PLAYER.entry.ease,
-  },
-  trackChange: MEDIA_PLAYER.trackChange,
-  modeChange: {
-    duration: MEDIA_PLAYER.container.duration,
-    ease: MEDIA_PLAYER.container.ease,
-  },
-  textFade: {
-    duration: MEDIA_PLAYER.content.duration,
-    ease: MEDIA_PLAYER.content.ease,
   },
 } as const;
 

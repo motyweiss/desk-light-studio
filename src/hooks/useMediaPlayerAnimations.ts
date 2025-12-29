@@ -9,16 +9,26 @@ interface UseMediaPlayerAnimationsOptions {
 }
 
 interface MediaPlayerAnimations {
-  // Transitions
-  containerTransition: Transition;
-  contentTransition: Transition;
+  // Core transitions
+  layoutTransition: Transition;
+  fadeTransition: Transition;
   entryTransition: Transition;
-  interactionTransition: Transition;
+  modeTransition: Transition;
   
-  // Variants
-  containerVariants: Variants;
-  contentVariants: Variants;
-  elementVariants: Variants;
+  // Stagger utility
+  staggerProps: (index: number) => {
+    initial: { opacity: number; y: number };
+    animate: { opacity: number; y: number };
+    exit: { opacity: number; y: number };
+    transition: Transition;
+  };
+  
+  // Entry animation props
+  entryProps: {
+    initial: { opacity: number; y: number };
+    animate: { opacity: number; y: number };
+    transition: Transition;
+  };
   
   // Hover/tap props
   hoverProps: {
@@ -27,16 +37,6 @@ interface MediaPlayerAnimations {
   };
   tapProps: {
     scale: number;
-  };
-  
-  // Stagger utility
-  getStaggerDelay: (index: number) => number;
-  
-  // Entry animation props
-  entryProps: {
-    initial: { opacity: number; y: number };
-    animate: { opacity: number; y: number };
-    exit: { opacity: number; y: number };
   };
 }
 
@@ -47,102 +47,61 @@ export const useMediaPlayerAnimations = ({
 }: UseMediaPlayerAnimationsOptions): MediaPlayerAnimations => {
   
   const animations = useMemo(() => {
-    // If reduced motion, use instant transitions
     const durationMultiplier = reducedMotion ? 0 : 1;
     
-    // Container transition (mode change)
-    const containerTransition: Transition = {
-      duration: MEDIA_PLAYER.container.duration * durationMultiplier,
-      ease: MEDIA_PLAYER.container.ease,
+    // Layout spring - for size/position changes
+    const layoutTransition: Transition = {
+      type: MEDIA_PLAYER.layout.type,
+      stiffness: MEDIA_PLAYER.layout.stiffness,
+      damping: MEDIA_PLAYER.layout.damping,
+      mass: MEDIA_PLAYER.layout.mass,
     };
     
-    // Content element transition
-    const contentTransition: Transition = {
-      duration: MEDIA_PLAYER.content.duration * durationMultiplier,
-      ease: MEDIA_PLAYER.content.ease,
+    // Fade transition - for opacity changes
+    const fadeTransition: Transition = {
+      duration: MEDIA_PLAYER.fade.duration * durationMultiplier,
+      ease: MEDIA_PLAYER.fade.ease,
     };
     
-    // Entry transition
+    // Entry transition - initial page load
     const entryTransition: Transition = {
       duration: MEDIA_PLAYER.entry.duration * durationMultiplier,
       delay: MEDIA_PLAYER.entry.delay,
       ease: MEDIA_PLAYER.entry.ease,
     };
     
-    // Interaction transition (hover/tap)
-    const interactionTransition: Transition = {
-      duration: MEDIA_PLAYER.interaction.duration * durationMultiplier,
-      ease: MEDIA_PLAYER.easing.standard,
+    // Mode transition - minimized/expanded switch
+    const modeTransition: Transition = {
+      duration: MEDIA_PLAYER.mode.duration * durationMultiplier,
+      ease: MEDIA_PLAYER.mode.ease,
     };
     
-    // Container variants
-    const containerVariants: Variants = {
-      hidden: {
-        opacity: 0,
-        y: MEDIA_PLAYER.entry.y,
+    // Stagger props generator
+    const staggerProps = (index: number) => ({
+      initial: { opacity: 0, y: MEDIA_PLAYER.stagger.y },
+      animate: { opacity: 1, y: 0 },
+      exit: { opacity: 0, y: -4 },
+      transition: {
+        duration: MEDIA_PLAYER.stagger.duration * durationMultiplier,
+        delay: index * MEDIA_PLAYER.stagger.delay,
+        ease: MEDIA_PLAYER.stagger.ease,
       },
-      visible: {
-        opacity: 1,
-        y: 0,
-        transition: entryTransition,
-      },
-      exit: {
-        opacity: 0,
-        y: MEDIA_PLAYER.entry.y / 2,
-        transition: {
-          duration: MEDIA_PLAYER.duration.normal * durationMultiplier,
-          ease: MEDIA_PLAYER.easing.accelerate,
-        },
-      },
-    };
+    });
     
-    // Content variants (for AnimatePresence children)
-    const contentVariants: Variants = {
-      hidden: {
-        opacity: 0,
-      },
-      visible: {
-        opacity: 1,
-        transition: contentTransition,
-      },
-      exit: {
-        opacity: 0,
-        transition: {
-          duration: MEDIA_PLAYER.duration.fast * durationMultiplier,
-          ease: MEDIA_PLAYER.easing.accelerate,
-        },
-      },
-    };
-    
-    // Individual element variants (with stagger support)
-    const elementVariants: Variants = {
-      hidden: {
-        opacity: 0,
-        scale: 0.96,
-      },
-      visible: (custom: number = 0) => ({
-        opacity: 1,
-        scale: 1,
-        transition: {
-          duration: MEDIA_PLAYER.content.duration * durationMultiplier,
-          delay: custom * MEDIA_PLAYER.duration.stagger,
-          ease: MEDIA_PLAYER.content.ease,
-        },
-      }),
-      exit: {
-        opacity: 0,
-        scale: 0.98,
-        transition: {
-          duration: MEDIA_PLAYER.duration.fast * durationMultiplier,
-          ease: MEDIA_PLAYER.easing.accelerate,
-        },
-      },
+    // Entry props - for initial appearance
+    const entryProps = {
+      initial: { opacity: 0, y: MEDIA_PLAYER.entry.y },
+      animate: { opacity: 1, y: 0 },
+      transition: entryTransition,
     };
     
     // Hover props
     const hoverProps = {
       scale: MEDIA_PLAYER.interaction.hoverScale,
-      transition: interactionTransition,
+      transition: {
+        duration: MEDIA_PLAYER.interaction.duration * durationMultiplier,
+        ease: MEDIA_PLAYER.fade.ease,
+      },
     };
     
     // Tap props
@@ -150,30 +109,15 @@ export const useMediaPlayerAnimations = ({
       scale: MEDIA_PLAYER.interaction.tapScale,
     };
     
-    // Stagger delay utility
-    const getStaggerDelay = (index: number): number => {
-      return index * MEDIA_PLAYER.duration.stagger;
-    };
-    
-    // Entry animation props
-    const entryProps = {
-      initial: { opacity: 0, y: MEDIA_PLAYER.entry.y },
-      animate: { opacity: 1, y: 0 },
-      exit: { opacity: 0, y: MEDIA_PLAYER.entry.y / 2 },
-    };
-    
     return {
-      containerTransition,
-      contentTransition,
+      layoutTransition,
+      fadeTransition,
       entryTransition,
-      interactionTransition,
-      containerVariants,
-      contentVariants,
-      elementVariants,
+      modeTransition,
+      staggerProps,
+      entryProps,
       hoverProps,
       tapProps,
-      getStaggerDelay,
-      entryProps,
     };
   }, [reducedMotion]);
   
@@ -182,23 +126,11 @@ export const useMediaPlayerAnimations = ({
 
 // Export static values for use outside of React components
 export const PLAYER_TRANSITIONS = {
-  container: {
-    duration: MEDIA_PLAYER.container.duration,
-    ease: MEDIA_PLAYER.container.ease,
-  },
-  content: {
-    duration: MEDIA_PLAYER.content.duration,
-    ease: MEDIA_PLAYER.content.ease,
-  },
-  entry: {
-    duration: MEDIA_PLAYER.entry.duration,
-    delay: MEDIA_PLAYER.entry.delay,
-    ease: MEDIA_PLAYER.entry.ease,
-  },
-  interaction: {
-    hoverScale: MEDIA_PLAYER.interaction.hoverScale,
-    tapScale: MEDIA_PLAYER.interaction.tapScale,
-    duration: MEDIA_PLAYER.interaction.duration,
-  },
+  layout: MEDIA_PLAYER.layout,
+  fade: MEDIA_PLAYER.fade,
+  entry: MEDIA_PLAYER.entry,
+  mode: MEDIA_PLAYER.mode,
+  stagger: MEDIA_PLAYER.stagger,
+  interaction: MEDIA_PLAYER.interaction,
   popover: MEDIA_PLAYER.popover,
 } as const;

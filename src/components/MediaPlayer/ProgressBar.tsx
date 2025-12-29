@@ -20,13 +20,13 @@ const formatTime = (seconds: number): string => {
 
 // Unified transitions
 const overlayTransition = {
-  duration: MEDIA_PLAYER.content.duration,
-  ease: MEDIA_PLAYER.content.ease,
+  duration: MEDIA_PLAYER.fade.duration,
+  ease: MEDIA_PLAYER.fade.ease,
 };
 
 const contentTransition = {
-  duration: MEDIA_PLAYER.duration.normal,
-  ease: MEDIA_PLAYER.easing.standard,
+  duration: MEDIA_PLAYER.mode.duration,
+  ease: MEDIA_PLAYER.mode.ease,
 };
 
 export const ProgressBar = ({ position, duration, isLoading, isTransitioning, onSeek }: ProgressBarProps) => {
