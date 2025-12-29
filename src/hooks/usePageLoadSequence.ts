@@ -1,211 +1,96 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { TIMING, STAGGER, SEQUENCES } from '@/lib/animations';
+import { TIMING, EASE } from '@/lib/animations';
 
 /**
- * Unified Load Stages:
- * 1. 'loading'   - Overlay visible, preloading images
- * 2. 'exiting'   - Overlay fading out (user can't interact yet)
- * 3. 'entering'  - Content containers fading in (skeleton visible)
- * 4. 'hydrating' - Data arrived, crossfading skeleton to real data
- * 5. 'complete'  - All animations done
+ * Simplified Load Stages:
+ * 1. 'loading'  - Initial state, showing overlay
+ * 2. 'entering' - Overlay exiting, content fading in
+ * 3. 'ready'    - Content visible, data loaded
  */
-export type LoadStage = 
-  | 'loading'
-  | 'exiting'
-  | 'entering'
-  | 'hydrating'
-  | 'complete';
+export type LoadStage = 'loading' | 'entering' | 'ready';
 
-// ============================================================
-// CENTRALIZED TIMING CONSTANTS (in milliseconds)
-// Uses tokens from lib/animations for consistency
-// ============================================================
+// Timing constants (in seconds for framer-motion)
 export const LOAD_TIMING = {
-  // Overlay phase
-  minPreloadTime: 400,
-  overlayExitDuration: TIMING.slow * 1000,
-  
-  // Content entry phase (after overlay gone)
-  contentEntryDelay: 50,
-  contentEntryDuration: TIMING.slow * 1000,
-  
-  // Element stagger timing
-  stagger: {
-    base: STAGGER.normal * 1000,
-    header: 0,
-    devices: STAGGER.relaxed * 1000,
-    lightCards: STAGGER.wide * 1000,
-    deskImage: STAGGER.relaxed * 1000,
-  },
-  
-  // Data hydration phase
-  minSkeletonTime: TIMING.slow * 1000,
-  crossfadeDuration: TIMING.slow * 1000,
-  crossfadeBlur: 4,
-  
-  // Post-hydration effects
-  progressRingDelay: TIMING.fast * 1000,
-  glowLayerDelay: TIMING.medium * 1000,
+  overlayExit: 0.5,
+  contentEntry: 0.6,
+  contentDelay: 0.1,
+  crossfade: 0.4,
+  minSkeleton: 0.3,
 } as const;
 
-// Convert to seconds for framer-motion
-export const LOAD_TIMING_SECONDS = {
-  overlayExitDuration: LOAD_TIMING.overlayExitDuration / 1000,
-  contentEntryDelay: LOAD_TIMING.contentEntryDelay / 1000,
-  contentEntryDuration: LOAD_TIMING.contentEntryDuration / 1000,
-  crossfadeDuration: LOAD_TIMING.crossfadeDuration / 1000,
-  stagger: {
-    base: LOAD_TIMING.stagger.base / 1000,
-    header: LOAD_TIMING.stagger.header / 1000,
-    devices: LOAD_TIMING.stagger.devices / 1000,
-    lightCards: LOAD_TIMING.stagger.lightCards / 1000,
-    deskImage: LOAD_TIMING.stagger.deskImage / 1000,
-  },
-  progressRingDelay: LOAD_TIMING.progressRingDelay / 1000,
-  glowLayerDelay: LOAD_TIMING.glowLayerDelay / 1000,
+// Easing curves
+export const LOAD_EASE = {
+  overlay: EASE.gentle,
+  content: [0.22, 0.68, 0.35, 1.0] as const, // Smooth organic
 } as const;
 
 interface UsePageLoadSequenceOptions {
-  /** Whether the overlay has finished (images preloaded) */
   overlayComplete: boolean;
-  /** Whether HA connection is established */
   isConnected: boolean;
-  /** Whether climate/sensor data has been loaded */
   isDataLoaded: boolean;
 }
 
 interface UsePageLoadSequenceResult {
-  /** Current load stage */
   stage: LoadStage;
-  /** Whether content container should be visible */
   showContent: boolean;
-  /** Whether to show skeleton loading states */
   showSkeleton: boolean;
-  /** Whether real data should be displayed */
   showData: boolean;
-  /** Get stagger delay for element at index (in seconds) */
-  getStaggerDelay: (index: number, baseDelayMs?: number) => number;
-  /** Whether initial page load is complete */
   isComplete: boolean;
-  /** Mark that overlay has finished exiting */
   onOverlayExitComplete: () => void;
 }
 
-export const usePageLoadSequence = (
-  options: UsePageLoadSequenceOptions
-): UsePageLoadSequenceResult => {
-  const { overlayComplete, isConnected, isDataLoaded } = options;
-  
+export const usePageLoadSequence = ({
+  overlayComplete,
+  isConnected,
+  isDataLoaded,
+}: UsePageLoadSequenceOptions): UsePageLoadSequenceResult => {
   const [stage, setStage] = useState<LoadStage>('loading');
-  const skeletonStartRef = useRef<number>(Date.now());
-  const hasTransitionedToData = useRef(false);
-  const timeoutRefs = useRef<ReturnType<typeof setTimeout>[]>([]);
+  const hasShownData = useRef(false);
+  const enteredAtRef = useRef<number | null>(null);
 
-  // Clear all pending timeouts
-  const clearTimeouts = useCallback(() => {
-    timeoutRefs.current.forEach(clearTimeout);
-    timeoutRefs.current = [];
-  }, []);
-
-  // Add a timeout and track it
-  const addTimeout = useCallback((callback: () => void, delay: number) => {
-    const id = setTimeout(callback, delay);
-    timeoutRefs.current.push(id);
-    return id;
-  }, []);
-
-  // Called when overlay animation finishes
-  const onOverlayExitComplete = useCallback(() => {
-    if (stage !== 'exiting') return;
-    
-    // Move to entering phase
-    setStage('entering');
-    
-    // After content has entered, check if we should hydrate
-    addTimeout(() => {
-      // If we already have data, go straight to hydrating
-      if (isConnected && isDataLoaded && !hasTransitionedToData.current) {
-        const skeletonShown = Date.now() - skeletonStartRef.current;
-        const remaining = Math.max(0, LOAD_TIMING.minSkeletonTime - skeletonShown);
-        
-        addTimeout(() => {
-          hasTransitionedToData.current = true;
-          setStage('hydrating');
-          
-          addTimeout(() => {
-            setStage('complete');
-          }, LOAD_TIMING.crossfadeDuration);
-        }, remaining);
-      }
-    }, LOAD_TIMING.contentEntryDuration);
-  }, [stage, isConnected, isDataLoaded, addTimeout]);
-
-  // Handle overlay becoming complete (images loaded)
+  // When overlay finishes loading, start exit
   useEffect(() => {
     if (overlayComplete && stage === 'loading') {
-      setStage('exiting');
+      setStage('entering');
+      enteredAtRef.current = Date.now();
     }
   }, [overlayComplete, stage]);
 
-  // Handle data becoming ready OR timeout to proceed without HA connection
+  // Handle transition to ready state
   useEffect(() => {
-    if (hasTransitionedToData.current || stage !== 'entering') {
-      return;
-    }
+    if (stage !== 'entering' || hasShownData.current) return;
 
-    // If connected and data loaded, proceed immediately
-    // Otherwise, use a short timeout to show content anyway
-    const shouldProceed = isConnected && isDataLoaded;
-    const timeoutDelay = shouldProceed ? 0 : 300;
+    const dataReady = isConnected && isDataLoaded;
+    
+    // Calculate minimum skeleton time
+    const enteredAt = enteredAtRef.current || Date.now();
+    const elapsed = (Date.now() - enteredAt) / 1000;
+    const remaining = Math.max(0, LOAD_TIMING.minSkeleton - elapsed);
 
-    const skeletonShown = Date.now() - skeletonStartRef.current;
-    const remaining = Math.max(timeoutDelay, LOAD_TIMING.minSkeletonTime - skeletonShown);
+    // Transition to ready after minimum skeleton time
+    const timer = setTimeout(() => {
+      hasShownData.current = true;
+      setStage('ready');
+    }, dataReady ? remaining * 1000 : LOAD_TIMING.minSkeleton * 1000 + 200);
 
-    addTimeout(() => {
-      hasTransitionedToData.current = true;
-      setStage('hydrating');
-      
-      addTimeout(() => {
-        setStage('complete');
-      }, LOAD_TIMING.crossfadeDuration);
-    }, remaining);
+    return () => clearTimeout(timer);
+  }, [stage, isConnected, isDataLoaded]);
 
-    return clearTimeouts;
-  }, [isConnected, isDataLoaded, stage, addTimeout, clearTimeouts]);
-
-  // Reset skeleton timer when connection drops
-  useEffect(() => {
-    if (!isConnected && hasTransitionedToData.current) {
-      // Connection lost after having data - keep showing data
-      return;
-    }
-    if (!isConnected && stage !== 'loading' && stage !== 'exiting') {
-      skeletonStartRef.current = Date.now();
-    }
-  }, [isConnected, stage]);
-
-  // Cleanup on unmount
-  useEffect(() => {
-    return clearTimeouts;
-  }, [clearTimeouts]);
-
-  // Calculate stagger delay for indexed elements
-  const getStaggerDelay = useCallback((index: number, baseDelayMs: number = 0) => {
-    return (baseDelayMs + (index * LOAD_TIMING.stagger.base)) / 1000;
+  const onOverlayExitComplete = useCallback(() => {
+    // No-op, transitions handled by useEffect
   }, []);
 
-  // Derived state - mutually exclusive skeleton/data states
-  const showContent = stage === 'entering' || stage === 'hydrating' || stage === 'complete';
-  const showSkeleton = stage === 'entering' && !hasTransitionedToData.current;
-  const showData = hasTransitionedToData.current || stage === 'hydrating' || stage === 'complete';
+  // Derived states
+  const showContent = stage === 'entering' || stage === 'ready';
+  const showSkeleton = stage === 'entering' && !hasShownData.current;
+  const showData = hasShownData.current || stage === 'ready';
 
   return {
     stage,
     showContent,
     showSkeleton,
     showData,
-    getStaggerDelay,
-    isComplete: stage === 'complete',
+    isComplete: stage === 'ready',
     onOverlayExitComplete,
   };
 };
