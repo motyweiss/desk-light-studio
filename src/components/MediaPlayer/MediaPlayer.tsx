@@ -318,7 +318,7 @@ export const MediaPlayer = () => {
                 opacity: getContentTransition(isExpanded),
                 filter: getContentTransition(isExpanded),
               }}
-              style={{ overflow: 'hidden' }}
+              style={{ overflow: isExpanded ? 'visible' : 'hidden' }}
             >
               <div className="space-y-4">
                 {/* Progress Bar */}
