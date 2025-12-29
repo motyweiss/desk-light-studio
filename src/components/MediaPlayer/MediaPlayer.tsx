@@ -279,18 +279,15 @@ export const MediaPlayer = () => {
               <motion.div
                 initial={false}
                 animate={{
-                  width: isMinimized ? 'auto' : 0,
                   opacity: isMinimized ? 1 : 0,
                   scale: isMinimized ? 1 : 0.9,
-                  filter: isMinimized ? 'blur(0px)' : 'blur(6px)',
+                  x: isMinimized ? 0 : 20,
                 }}
-                transition={{
-                  width: transitions.layoutDelayed,
-                  opacity: createTransitions(isMinimized).content,
-                  scale: createTransitions(isMinimized).content,
-                  filter: createTransitions(isMinimized).content,
+                transition={transitions.content}
+                style={{ 
+                  flexShrink: 0,
+                  pointerEvents: isMinimized ? 'auto' : 'none',
                 }}
-                style={{ overflow: 'hidden', flexShrink: 0 }}
               >
                 <div onClick={(e) => e.stopPropagation()}>
                   <PlaybackControls
@@ -312,22 +309,15 @@ export const MediaPlayer = () => {
             <motion.div
               initial={false}
               animate={{
-                height: isExpanded ? 'auto' : 0,
                 opacity: isExpanded ? 1 : 0,
-                marginTop: isExpanded ? 16 : 0,
-                scale: isExpanded ? 1 : 0.95,
-                filter: isExpanded ? 'blur(0px)' : 'blur(6px)',
+                scale: isExpanded ? 1 : 0.96,
+                y: isExpanded ? 0 : -10,
               }}
-              transition={{
-                height: transitions.layoutDelayed,
-                marginTop: transitions.layoutDelayed,
-                opacity: transitions.content,
-                scale: transitions.content,
-                filter: transitions.content,
-              }}
+              transition={transitions.content}
               style={{ 
-                overflow: isExpanded ? 'visible' : 'hidden',
+                pointerEvents: isExpanded ? 'auto' : 'none',
                 transformOrigin: 'top center',
+                marginTop: isExpanded ? 16 : 0,
               }}
             >
               <div className="space-y-4">
