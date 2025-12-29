@@ -133,8 +133,14 @@ export const DeskDisplay = ({
       <div 
         className="relative w-full h-full overflow-hidden rounded-[2rem]"
       >
-        {/* Image stack */}
-        <div className="absolute inset-0">
+        {/* Image stack with edge fade */}
+        <div 
+          className="absolute inset-0"
+          style={{
+            maskImage: `radial-gradient(ellipse 92% 92% at 50% 50%, black 60%, transparent 100%)`,
+            WebkitMaskImage: `radial-gradient(ellipse 92% 92% at 50% 50%, black 60%, transparent 100%)`,
+          }}
+        >
           {Object.entries(lightingStates).map(([state, image]) => {
             const isActive = state === currentState;
             const wasPrevious = state === previousState;
