@@ -157,11 +157,30 @@ export const DeskDisplay = ({
             const wasPrevious = state === previousState;
             const showAsPrevious = isTransitioning && wasPrevious && !isActive;
             
+            // Calculate z-index and opacity based on transition direction
             let targetOpacity = 0;
+            let targetZIndex = 1;
+            
             if (isActive && isLoaded) {
-              targetOpacity = 1;
+              if (isTurningOn) {
+                // Turning ON: new image (more lights) fades in on top
+                targetOpacity = 1;
+                targetZIndex = 10;
+              } else {
+                // Turning OFF: new image (fewer lights) is already visible underneath
+                targetOpacity = 1;
+                targetZIndex = 5;
+              }
             } else if (showAsPrevious) {
-              targetOpacity = 0;
+              if (isTurningOn) {
+                // Turning ON: previous image stays visible underneath
+                targetOpacity = 1;
+                targetZIndex = 5;
+              } else {
+                // Turning OFF: previous image fades out on top
+                targetOpacity = 0;
+                targetZIndex = 10;
+              }
             }
             
             // Only animate if ready, otherwise snap
@@ -177,7 +196,7 @@ export const DeskDisplay = ({
                 initial={false}
                 animate={{ 
                   opacity: targetOpacity,
-                  zIndex: isActive ? 10 : showAsPrevious ? 5 : 1,
+                  zIndex: targetZIndex,
                 }}
                 transition={{ 
                   opacity: {
