@@ -36,7 +36,7 @@ export const TopNavigationBar = ({
         delay: 0.1,
         ease: [0.22, 0.03, 0.26, 1],
       }}
-      className="fixed top-0 inset-x-0 z-40 h-[56px] md:h-[68px]"
+      className="fixed top-0 inset-x-0 z-30 h-[56px] md:h-[68px]"
     >
       <div className="bg-white/8 backdrop-blur-[24px] border-b border-white/15 h-full">
         <div className="max-w-7xl mx-auto px-3 md:px-6 h-full flex items-center justify-between">
