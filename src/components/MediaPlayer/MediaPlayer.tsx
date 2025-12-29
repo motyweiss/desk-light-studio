@@ -18,39 +18,40 @@ import { MusicParticles } from './MusicParticles';
 // ============================================
 
 const DURATION = {
-  layout: 0.4,      // Container morphing
-  content: 0.25,    // Content fade/blur
+  layout: 0.5,      // Container morphing - slightly longer for smoothness
+  content: 0.3,     // Content fade/blur
 } as const;
 
 const EASE = {
-  // Smooth deceleration for layout
-  layout: [0.4, 0, 0.2, 1] as const,
-  // Quick snap for content
-  content: [0.4, 0, 0.6, 1] as const,
+  // Smooth ease-out with gentle landing
+  layout: [0.32, 0.72, 0, 1] as const,
+  // Very smooth content transition
+  content: [0.25, 0.1, 0.25, 1] as const,
+  // Gentle deceleration for exit
+  exit: [0.4, 0, 1, 1] as const,
 } as const;
 
 // Orchestrated animation phases:
 // EXPAND: Layout starts → Content fades in (staggered)
-// COLLAPSE: Content fades out → Layout shrinks
+// COLLAPSE: Content fades out smoothly → Layout shrinks
 
 const createTransitions = (isExpanding: boolean) => ({
-  // Layout always uses the same timing
+  // Layout with smooth easing
   layout: {
     duration: DURATION.layout,
     ease: EASE.layout,
   },
-  // Content timing depends on direction
+  // Content with appropriate timing per direction
   content: {
-    duration: DURATION.content,
-    ease: EASE.content,
-    // Expanding: wait for layout to start. Collapsing: immediate
-    delay: isExpanding ? DURATION.layout * 0.4 : 0,
+    duration: isExpanding ? DURATION.content : DURATION.content * 0.8,
+    ease: isExpanding ? EASE.content : EASE.exit,
+    delay: isExpanding ? DURATION.layout * 0.3 : 0,
   },
-  // Layout delay for collapse (wait for content to hide first)
+  // Layout delay for collapse
   layoutDelayed: {
     duration: DURATION.layout,
     ease: EASE.layout,
-    delay: isExpanding ? 0 : DURATION.content * 0.5,
+    delay: isExpanding ? 0 : DURATION.content * 0.4,
   },
 });
 
