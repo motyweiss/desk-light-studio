@@ -168,7 +168,6 @@ export const MediaPlayer = () => {
             animate={{ padding: isMinimized ? '8px' : '20px 16px' }}
             transition={contentTransition}
           >
-            {/* Grid layout: 3 columns in mini mode, single column in full mode */}
             <div className={`${isMinimized 
               ? 'grid grid-cols-[auto_1fr_auto] items-center gap-3'
               : 'flex flex-col gap-4'
@@ -296,7 +295,7 @@ export const MediaPlayer = () => {
                 </motion.div>
               </div>
 
-              {/* Center Section: Mini Controls (desktop/tablet only) */}
+              {/* Right Section: Mini Controls */}
               <AnimatePresence mode="popLayout">
                 {isMinimized && (
                   <motion.div
@@ -305,7 +304,7 @@ export const MediaPlayer = () => {
                     animate={{ opacity: 1 }}
                     exit={{ opacity: 0 }}
                     transition={{ ...elementTransition, delay: stagger }}
-                    className="hidden sm:flex items-center justify-center"
+                    className="flex items-center justify-end"
                   >
                     <div onClick={(e) => e.stopPropagation()}>
                       <PlaybackControls
@@ -317,42 +316,6 @@ export const MediaPlayer = () => {
                         onNext={handleNext}
                         onShuffleToggle={handleShuffleToggle}
                         onRepeatToggle={handleRepeatToggle}
-                        compact={true}
-                      />
-                    </div>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-
-              {/* Right Section: Volume + Speaker Badge */}
-              <AnimatePresence mode="popLayout">
-                {isMinimized && (
-                  <motion.div
-                    key="mini-right"
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
-                    transition={{ ...elementTransition, delay: stagger * 2 }}
-                    className="flex items-center gap-3 justify-end pr-1"
-                  >
-                    <div className="hidden lg:block" onClick={(e) => e.stopPropagation()}>
-                      <VolumeControl
-                        volume={playerState.volume}
-                        isMuted={playerState.isMuted}
-                        onVolumeChange={handleVolumeChange}
-                        onMuteToggle={handleMuteToggle}
-                        compact={true}
-                      />
-                    </div>
-
-                    <div onClick={(e) => e.stopPropagation()}>
-                      <MiniSpeakerBadge
-                        ref={speakerBadgeRef}
-                        playbackTarget={currentPlaybackTarget}
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setSpeakerPopoverOpen(true);
-                        }}
                         compact={true}
                       />
                     </div>
