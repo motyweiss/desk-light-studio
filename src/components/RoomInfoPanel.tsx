@@ -131,7 +131,7 @@ export const RoomInfoPanel = ({
       {/* Devices Battery Section - Desktop only */}
       {devices && devices.length > 0 && (
         <div className="hidden md:block">
-          <div className="flex flex-row items-start justify-start gap-5">
+          <div className="flex flex-row items-start justify-start gap-3">
             {devices.map((device, index) => {
               const DeviceIcon = device.icon === 'headphones' 
                 ? AirPodsMaxIcon 
@@ -142,7 +142,7 @@ export const RoomInfoPanel = ({
                 : IPhoneIcon;
               
               return (
-                <div key={device.id} className="flex items-center gap-4">
+                <div key={device.id} className="flex items-center gap-3">
                   <motion.div 
                     className="flex flex-col gap-1.5"
                     initial={{ opacity: 0 }}
@@ -155,10 +155,10 @@ export const RoomInfoPanel = ({
                     style={{ willChange: 'opacity' }}
                   >
                     {/* Row 1: Icon + Battery % */}
-                    <div className="relative h-7">
+                    <div className="relative h-6">
                       {/* Skeleton layer */}
                       <motion.div
-                        className="absolute inset-0 h-7 w-16 bg-white/10 rounded"
+                        className="absolute inset-0 h-6 w-14 bg-white/10 rounded"
                         initial={false}
                         animate={{ 
                           opacity: showSkeleton ? [0.3, 0.5, 0.3] : 0,
@@ -182,14 +182,14 @@ export const RoomInfoPanel = ({
                           delay: showSkeleton ? 0 : DELAY.minimal,
                         }}
                       >
-                        <DeviceIcon className="w-4 h-4 text-white/50" />
+                        <DeviceIcon className="w-3.5 h-3.5 text-white/50" />
                         <AnimatedCounter 
                           value={device.batteryLevel} 
                           suffix="%" 
                           isActive={dataReady && !showSkeleton}
                           delay={0.4 + (index * 0.15)}
-                          className="text-lg font-epunda font-normal text-white tabular-nums tracking-tight"
-                          suffixClassName="text-xs text-white/40 ml-0.5 font-light"
+                          className="text-base font-epunda font-normal text-white tabular-nums tracking-tight"
+                          suffixClassName="text-[10px] text-white/40 ml-0.5 font-light"
                         />
                         {device.isCharging && (
                           <Zap className="w-3.5 h-3.5 text-status-caution" fill="currentColor" />
@@ -198,14 +198,14 @@ export const RoomInfoPanel = ({
                     </div>
                     
                     {/* Row 2: Device Name */}
-                    <span className="text-[10px] text-white/40 font-light tracking-[0.15em] uppercase whitespace-nowrap">
+                    <span className="text-[9px] text-white/40 font-light tracking-[0.12em] uppercase whitespace-nowrap">
                       {device.name}
                     </span>
                   </motion.div>
                   
                   {/* Separator line */}
                   {index < devices.length - 1 && (
-                    <div className="h-7 w-px bg-white/10 ml-4" />
+                    <div className="h-6 w-px bg-white/10 ml-3" />
                   )}
                 </div>
               );
