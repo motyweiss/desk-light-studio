@@ -403,20 +403,12 @@ export const LightControlCard = ({
           </div>
         </div>
 
-        {/* Slider - Very soft fade in/out */}
-        <motion.div 
+        {/* Slider area - always present, content animates */}
+        <div 
           className="mt-6 h-6 relative"
           data-slider
           onClick={(e) => e.stopPropagation()}
           onPointerDown={(e) => e.stopPropagation()}
-          initial={false}
-          animate={{ 
-            opacity: showSlider ? 1 : 0,
-            y: showSlider ? 0 : 4,
-            scale: showSlider ? 1 : 0.98,
-          }}
-          transition={sliderEntranceTransition}
-          style={{ pointerEvents: showSlider ? 'auto' : 'none' }}
         >
           {/* Skeleton slider */}
           <motion.div 
@@ -437,15 +429,16 @@ export const LightControlCard = ({
             />
           </motion.div>
           
-          {/* Real slider */}
+          {/* Real slider - visible when on */}
           <motion.div 
             className="absolute inset-0 flex items-center"
             initial={false}
             animate={{ 
-              opacity: !isLoading ? 1 : 0,
-              filter: isLoading ? 'blur(4px)' : 'blur(0px)',
+              opacity: isOn && !isLoading ? 1 : 0,
+              y: isOn && !isLoading ? 0 : 3,
             }}
-            transition={contentTransition}
+            transition={sliderEntranceTransition}
+            style={{ pointerEvents: isOn ? 'auto' : 'none' }}
           >
             <Slider
               value={[displayNumber]}
@@ -455,7 +448,19 @@ export const LightControlCard = ({
               className="w-full"
             />
           </motion.div>
-        </motion.div>
+
+          {/* Inactive line - visible when off */}
+          <motion.div 
+            className="absolute inset-0 flex items-center"
+            initial={false}
+            animate={{ 
+              opacity: !isOn && !isLoading ? 0.2 : 0,
+            }}
+            transition={sliderEntranceTransition}
+          >
+            <div className="w-full h-1.5 bg-white/30 rounded-full" />
+          </motion.div>
+        </div>
       </div>
     </motion.button>
   );
