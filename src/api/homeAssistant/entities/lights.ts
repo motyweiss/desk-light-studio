@@ -1,11 +1,16 @@
 import { haProxyClient } from '@/services/haProxyClient';
-import type { HALightEntity } from '../types';
+import type { HALightEntity, HAEntity } from '../types';
 import { logger } from '@/shared/utils/logger';
 
 /**
  * Light entity operations
  * Uses haProxyClient for consistent connection handling
  */
+
+// Cache for batch fetched states
+let allStatesCache: HAEntity[] | null = null;
+let allStatesCacheTime = 0;
+const CACHE_TTL = 2000; // 2 second cache
 
 const ensureConfigured = (): boolean => {
   const config = haProxyClient.getDirectConfig();
@@ -103,19 +108,73 @@ export const lights = {
   },
 
   /**
-   * Get light state
+   * Get all light states at once (batch fetch)
+   */
+  async getAllStates(): Promise<HAEntity[]> {
+    if (!ensureConfigured()) {
+      return [];
+    }
+
+    // Return cached data if still valid
+    if (allStatesCache && Date.now() - allStatesCacheTime < CACHE_TTL) {
+      return allStatesCache;
+    }
+
+    const { data, error } = await haProxyClient.get<HAEntity[]>('/api/states');
+    if (error || !data) {
+      return allStatesCache || [];
+    }
+
+    allStatesCache = data;
+    allStatesCacheTime = Date.now();
+    return data;
+  },
+
+  /**
+   * Get light state - uses batch fetch for efficiency
    */
   async getState(entityId: string): Promise<HALightEntity | null> {
     if (!ensureConfigured()) {
-      logger.warn(`Cannot get state for ${entityId} - not configured`);
       return null;
     }
 
-    const { data, error } = await haProxyClient.get<HALightEntity>(`/api/states/${entityId}`);
-    if (error || !data) {
-      logger.error(`Failed to get state for ${entityId}`, error);
+    // Use batch fetch and filter locally
+    const allStates = await this.getAllStates();
+    const entity = allStates.find(e => e.entity_id === entityId);
+    
+    if (!entity) {
+      // Entity not found - don't log as error, it might just not be configured
       return null;
     }
-    return data;
+    
+    return entity as HALightEntity;
+  },
+
+  /**
+   * Get multiple light states efficiently
+   */
+  async getMultipleStates(entityIds: string[]): Promise<Record<string, HALightEntity | null>> {
+    if (!ensureConfigured() || entityIds.length === 0) {
+      return {};
+    }
+
+    const allStates = await this.getAllStates();
+    const entitySet = new Set(entityIds);
+    const result: Record<string, HALightEntity | null> = {};
+
+    for (const entity of allStates) {
+      if (entitySet.has(entity.entity_id)) {
+        result[entity.entity_id] = entity as HALightEntity;
+      }
+    }
+
+    // Fill in nulls for missing entities
+    for (const entityId of entityIds) {
+      if (!(entityId in result)) {
+        result[entityId] = null;
+      }
+    }
+
+    return result;
   },
 };
