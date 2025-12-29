@@ -142,7 +142,7 @@ export const RoomInfoPanel = ({
                 : IPhoneIcon;
               
               return (
-                <div key={device.id} className="flex items-center gap-3">
+                <div key={device.id} className="flex items-stretch gap-3">
                   <motion.div 
                     className="flex flex-col gap-1.5"
                     initial={{ opacity: 0 }}
@@ -205,7 +205,7 @@ export const RoomInfoPanel = ({
                   
                   {/* Separator line */}
                   {index < devices.length - 1 && (
-                    <div className="h-6 w-px bg-white/10 ml-3" />
+                    <div className="self-stretch w-px bg-white/10 ml-3" />
                   )}
                 </div>
               );
