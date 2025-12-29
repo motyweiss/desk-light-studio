@@ -1,6 +1,6 @@
 import { motion, AnimatePresence } from "framer-motion";
 import officeChairIcon from "@/assets/office-chair.svg";
-import { TIMING, EASE, PAGE_TRANSITIONS } from "@/lib/animations/tokens";
+import { LOAD_TIMING, LOAD_EASE } from "@/hooks/usePageLoadSequence";
 
 interface LoadingOverlayProps {
   isLoading: boolean;
@@ -12,39 +12,23 @@ export const LoadingOverlay = ({ isLoading, onExitComplete }: LoadingOverlayProp
     <AnimatePresence onExitComplete={onExitComplete}>
       {isLoading && (
         <motion.div
-          className="fixed inset-0 z-50 flex items-center justify-center"
-          initial={{ opacity: 1, scale: 1 }}
-          animate={{ opacity: 1, scale: 1 }}
-          exit={{ opacity: 0, scale: PAGE_TRANSITIONS.overlay.scale }}
+          className="fixed inset-0 z-50 flex items-center justify-center bg-[#96856e]"
+          initial={{ opacity: 1 }}
+          exit={{ opacity: 0, scale: 1.02 }}
           transition={{ 
-            duration: PAGE_TRANSITIONS.overlay.duration,
-            ease: PAGE_TRANSITIONS.overlay.ease
-          }}
-          style={{
-            backgroundColor: "#96856e",
-            willChange: 'opacity, transform',
-            transformOrigin: 'center center',
+            duration: LOAD_TIMING.overlayExit,
+            ease: LOAD_EASE.overlay,
           }}
         >
-          {/* Minimalist spinner */}
-          <motion.div 
-            className="relative w-32 h-32"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ 
-              duration: TIMING.fast,
-              ease: EASE.entrance
-            }}
-          >
-            {/* Rotating circle with gap */}
+          {/* Spinner container */}
+          <div className="relative w-28 h-28">
+            {/* Rotating ring */}
             <motion.div
               className="absolute inset-0 rounded-full"
               style={{
-                border: '3px solid transparent',
-                borderTopColor: 'rgba(255, 255, 255, 0.8)',
-                borderRightColor: 'rgba(255, 255, 255, 0.5)',
-                willChange: 'transform',
+                border: '2px solid transparent',
+                borderTopColor: 'rgba(255, 255, 255, 0.7)',
+                borderRightColor: 'rgba(255, 255, 255, 0.3)',
               }}
               animate={{ rotate: 360 }}
               transition={{
@@ -54,39 +38,33 @@ export const LoadingOverlay = ({ isLoading, onExitComplete }: LoadingOverlayProp
               }}
             />
             
-            {/* Inner subtle glow */}
+            {/* Center glow */}
             <motion.div
               className="absolute inset-0 rounded-full"
               style={{
-                background: 'radial-gradient(circle, rgba(255, 255, 255, 0.15) 0%, transparent 70%)',
+                background: 'radial-gradient(circle, rgba(255,255,255,0.12) 0%, transparent 70%)',
               }}
-              animate={{ opacity: [0.4, 0.7, 0.4] }}
+              animate={{ opacity: [0.5, 0.8, 0.5] }}
               transition={{
                 duration: 1.5,
                 repeat: Infinity,
-                ease: EASE.smooth,
+                ease: "easeInOut",
               }}
             />
 
-            {/* Office Chair Icon in center */}
-            <motion.div
-              className="absolute inset-0 flex items-center justify-center"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 0.85 }}
-              transition={{
-                duration: TIMING.fast,
-                delay: 0.1,
-                ease: EASE.entrance
-              }}
-            >
-              <img 
+            {/* Icon */}
+            <div className="absolute inset-0 flex items-center justify-center">
+              <motion.img 
                 src={officeChairIcon}
-                alt="Office Chair"
-                className="w-14 h-14"
+                alt=""
+                className="w-12 h-12"
                 style={{ filter: 'brightness(0) invert(1)' }}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 0.8 }}
+                transition={{ duration: 0.2, delay: 0.1 }}
               />
-            </motion.div>
-          </motion.div>
+            </div>
+          </div>
         </motion.div>
       )}
     </AnimatePresence>
