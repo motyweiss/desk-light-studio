@@ -66,8 +66,8 @@ export const LightControlCard = ({
   const debounceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const userInteractingRef = useRef(false);
   
-  // Show slider when light is on or manually expanded
-  const showSlider = isOn || isExpanded;
+  // Show slider only when light is on
+  const showSlider = isOn;
   
   useMotionValueEvent(displayValue, "change", (latest) => {
     setDisplayNumber(Math.round(latest));
@@ -275,10 +275,10 @@ export const LightControlCard = ({
         />
       )}
 
-      {/* Top section: Icon + Spinner */}
+      {/* Top section: Icon */}
       <div className="flex items-start justify-between relative z-10">
         {/* Icon */}
-        <div className="relative w-7 h-7 md:w-8 md:h-8">
+        <div className="relative w-8 h-8 md:w-9 md:h-9">
           {/* Skeleton circle */}
           <motion.div
             className="absolute inset-0 rounded-full bg-white/10"
@@ -306,7 +306,7 @@ export const LightControlCard = ({
               filter: { duration: TIMING.medium, ease: EASE.smooth }
             }}
           >
-            <IconComponent className="w-7 h-7 md:w-8 md:h-8" />
+            <IconComponent className="w-8 h-8 md:w-9 md:h-9" />
           </motion.div>
         </div>
 
@@ -331,9 +331,9 @@ export const LightControlCard = ({
       </div>
 
       {/* Bottom section: Label + Status + Slider */}
-      <div className="relative z-10 mt-auto">
+      <div className="relative z-10">
         {/* Label & Status */}
-        <div className="space-y-0.5">
+        <div className="space-y-1">
           {/* Label */}
           <div className="relative">
             <motion.div 
@@ -349,7 +349,7 @@ export const LightControlCard = ({
               } : crossfadeTransition}
             />
             <motion.div 
-              className="font-light text-xs md:text-sm text-white tracking-wide"
+              className="font-medium text-sm md:text-base text-white tracking-wide"
               initial={false}
               animate={{ 
                 opacity: isLoading ? 0 : 1,
@@ -397,12 +397,22 @@ export const LightControlCard = ({
           </div>
         </div>
 
-        {/* Slider - Fixed position at bottom, opacity animation only */}
-        <div 
-          className="mt-4 h-6 relative"
+        {/* Slider - Smooth fade in/out */}
+        <motion.div 
+          className="mt-5 h-6 relative"
           data-slider
           onClick={(e) => e.stopPropagation()}
           onPointerDown={(e) => e.stopPropagation()}
+          initial={false}
+          animate={{ 
+            opacity: showSlider ? 1 : 0,
+            y: showSlider ? 0 : 8,
+          }}
+          transition={{
+            duration: TIMING.medium,
+            ease: EASE.gentle,
+          }}
+          style={{ pointerEvents: showSlider ? 'auto' : 'none' }}
         >
           {/* Skeleton slider */}
           <motion.div 
@@ -423,17 +433,15 @@ export const LightControlCard = ({
             />
           </motion.div>
           
-          {/* Real slider - opacity and scale animation */}
+          {/* Real slider */}
           <motion.div 
             className="absolute inset-0 flex items-center"
             initial={false}
             animate={{ 
-              opacity: showSlider && !isLoading ? 1 : 0,
-              scale: showSlider && !isLoading ? 1 : 0.95,
+              opacity: !isLoading ? 1 : 0,
               filter: isLoading ? 'blur(4px)' : 'blur(0px)',
             }}
             transition={contentTransition}
-            style={{ pointerEvents: showSlider ? 'auto' : 'none' }}
           >
             <Slider
               value={[displayNumber]}
@@ -443,19 +451,7 @@ export const LightControlCard = ({
               className="w-full"
             />
           </motion.div>
-
-          {/* Placeholder line when slider hidden */}
-          <motion.div 
-            className="absolute inset-0 flex items-center"
-            initial={false}
-            animate={{ 
-              opacity: !showSlider && !isLoading ? 0.15 : 0,
-            }}
-            transition={contentTransition}
-          >
-            <div className="w-full h-1.5 bg-white/20 rounded-full" />
-          </motion.div>
-        </div>
+        </motion.div>
       </div>
     </motion.button>
   );
