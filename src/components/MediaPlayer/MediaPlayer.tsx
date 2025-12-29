@@ -117,14 +117,16 @@ export const MediaPlayer = () => {
       >
         <LayoutGroup>
           <motion.div 
-            layout
             layoutId="media-player-container"
             onClick={handleToggleMinimized}
             className="relative cursor-pointer overflow-hidden"
-            style={{
+            initial={false}
+            animate={{
               borderRadius: isMinimized ? 32 : 24,
-              backgroundColor: isMinimized ? 'rgba(255, 255, 255, 0.12)' : 'rgba(255, 255, 255, 0.18)',
               maxWidth: isMinimized ? 420 : 672,
+            }}
+            style={{
+              backgroundColor: isMinimized ? 'rgba(255, 255, 255, 0.12)' : 'rgba(255, 255, 255, 0.18)',
               width: '100%',
               backdropFilter: 'blur(40px)',
               WebkitBackdropFilter: 'blur(40px)',
@@ -140,8 +142,14 @@ export const MediaPlayer = () => {
           >
             {/* Content Container */}
             <motion.div 
-              layout
               className={isMinimized ? 'px-2 py-2' : 'px-5 py-4'}
+              initial={false}
+              animate={{ 
+                paddingLeft: isMinimized ? 8 : 20,
+                paddingRight: isMinimized ? 8 : 20,
+                paddingTop: isMinimized ? 8 : 16,
+                paddingBottom: isMinimized ? 8 : 16,
+              }}
               transition={layoutTransition}
             >
             <div className={`${isMinimized 
