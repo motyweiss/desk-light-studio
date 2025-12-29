@@ -227,8 +227,8 @@ export const SEQUENCES = {
   
   /** Light control sequence */
   lightControl: {
-    turnOnDuration: TIMING.dramatic,
-    turnOffDuration: TIMING.slow,
+    turnOnDuration: 0.9,      // Slower, more dramatic turn on
+    turnOffDuration: 0.65,    // Gentle fade out
     sliderDuration: TIMING.fast,
     externalSyncDuration: TIMING.medium,
   },

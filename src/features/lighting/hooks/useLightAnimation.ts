@@ -1,6 +1,6 @@
 import { useCallback, useRef, useState } from 'react';
 import { useMotionValue, animate, type Easing } from 'framer-motion';
-import { TIMING, EASE, SEQUENCES } from '@/lib/animations';
+import { EASE, SEQUENCES } from '@/lib/animations';
 
 export type AnimationSource = 'initial' | 'user' | 'external';
 
@@ -72,9 +72,12 @@ export const useLightAnimation = (
       const wasOn = currentValue > 0;
       
       if (isOn !== wasOn) {
-        // Toggle on/off - full dramatic animation
+        // Toggle on/off - smooth dramatic animation with gentle easing
         duration = isOn ? SEQUENCES.lightControl.turnOnDuration : SEQUENCES.lightControl.turnOffDuration;
-        ease = EASE.entrance as Easing;
+        // Use gentle easing for smoother, more organic feel
+        ease = isOn 
+          ? [0.22, 0.68, 0.35, 1.0] as Easing  // Smooth accelerate then ease out for turn on
+          : [0.32, 0.0, 0.67, 0.0] as Easing;  // Gentle deceleration for turn off
       } else {
         // Slider adjustment - responsive animation
         duration = SEQUENCES.lightControl.sliderDuration;

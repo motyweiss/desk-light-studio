@@ -18,15 +18,15 @@ interface LightControlCardProps {
   onRetry?: () => void;
 }
 
-// Smooth transition config using centralized tokens
+// Smooth transition config - extra gentle for on/off states
 const smoothTransition = {
-  duration: TIMING.slow,
-  ease: EASE.smooth,
+  duration: 0.65,
+  ease: [0.22, 0.68, 0.35, 1.0] as const, // Smooth organic easing
 };
 
 const crossfadeTransition = {
-  duration: TIMING.fast,
-  ease: EASE.smooth,
+  duration: TIMING.medium,
+  ease: EASE.gentle,
 };
 
 const contentTransition = {
@@ -36,8 +36,14 @@ const contentTransition = {
 
 // Slider entrance - very soft and gentle
 const sliderEntranceTransition = {
-  duration: 0.6,
+  duration: 0.7,
   ease: [0.16, 0.1, 0.3, 1] as const, // Very gentle ease
+};
+
+// Icon glow transition - extra smooth
+const iconTransition = {
+  duration: 0.75,
+  ease: [0.25, 0.1, 0.25, 1.0] as const,
 };
 
 const LONG_PRESS_DURATION = 350; // ms
@@ -305,12 +311,10 @@ export const LightControlCard = ({
             animate={{
               opacity: isLoading ? 0 : 1,
               filter: isLoading ? 'blur(4px)' : 'blur(0px)',
-              color: isOn ? 'hsl(44 92% 62%)' : 'rgba(255, 255, 255, 0.35)'
+              color: isOn ? 'hsl(44 92% 62%)' : 'rgba(255, 255, 255, 0.35)',
+              scale: isOn ? 1.05 : 1,
             }}
-            transition={{
-              ...crossfadeTransition,
-              filter: { duration: TIMING.medium, ease: EASE.smooth }
-            }}
+            transition={iconTransition}
           >
             <IconComponent className="w-6 h-6 md:w-7 md:h-7" />
           </motion.div>
