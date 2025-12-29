@@ -160,7 +160,7 @@ export const RoomInfoPanel = ({
                           delay: showSkeleton ? 0 : DATA_TRANSITION.dataEnter.delay,
                         }}
                       >
-                        <DeviceIcon className="w-5 h-5 text-white/50" strokeWidth={1.5} />
+                        <DeviceIcon className="w-5 h-5 text-white/50" />
                         <AnimatedCounter 
                           value={device.batteryLevel} 
                           suffix="%" 
