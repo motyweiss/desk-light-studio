@@ -116,7 +116,7 @@ export const MediaPlayer = () => {
 
   // Memoized styles
   const containerStyles = useMemo(() => ({
-    borderRadius: isMinimized ? 32 : 24,
+    borderRadius: isMinimized ? 9999 : 24,
     maxWidth: isMinimized ? 420 : 672,
     backgroundColor: isMinimized ? 'rgba(255, 255, 255, 0.12)' : 'rgba(255, 255, 255, 0.18)',
   }), [isMinimized]);
@@ -302,20 +302,17 @@ export const MediaPlayer = () => {
             </motion.div>
 
             {/* Expanded Controls */}
-            <motion.div
-              initial={false}
-              animate={{
-                opacity: isExpanded ? 1 : 0,
-                scale: isExpanded ? 1 : 0.96,
-                y: isExpanded ? 0 : -10,
-              }}
-              transition={transitions.content}
-              style={{ 
-                pointerEvents: isExpanded ? 'auto' : 'none',
-                transformOrigin: 'top center',
-                marginTop: isExpanded ? 16 : 0,
-              }}
-            >
+            {isExpanded && (
+              <motion.div
+                initial={{ opacity: 0, scale: 0.96, y: -10 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.96, y: -10 }}
+                transition={transitions.content}
+                style={{ 
+                  transformOrigin: 'top center',
+                  marginTop: 16,
+                }}
+              >
               <div className="space-y-4">
                 {/* Progress Bar */}
                 {currentTrack && (
@@ -365,6 +362,7 @@ export const MediaPlayer = () => {
                 </div>
               </div>
             </motion.div>
+            )}
           </motion.div>
         </motion.div>
       </motion.div>
