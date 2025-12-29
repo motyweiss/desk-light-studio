@@ -216,10 +216,18 @@ export const MEDIA_PLAYER = {
     stagger: 0.04,      // Delay between elements
   },
   
-  // Container transitions (minimized/expanded)
+  // Container transitions (minimized/expanded) - Spring for smooth layout
   container: {
     duration: 0.4,
     ease: [0.4, 0, 0.2, 1] as const,
+  },
+  
+  // Layout spring - for height/size animations (avoids 'auto' jank)
+  layoutSpring: {
+    type: 'spring' as const,
+    stiffness: 400,
+    damping: 40,
+    mass: 1,
   },
   
   // Content element transitions
