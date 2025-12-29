@@ -120,11 +120,10 @@ export const ClimateIndicatorTooltip = ({
               }}
             >
               <div 
-                className="backdrop-blur-[32px] rounded-2xl px-5 py-4 min-w-[220px] overflow-hidden"
+                className="bg-white/8 backdrop-blur-[24px] rounded-2xl px-5 py-4 min-w-[220px] overflow-hidden"
                 style={{
-                  backgroundColor: 'hsl(220 18% 13% / 0.92)',
-                  boxShadow: '0 8px 32px rgba(0,0,0,0.25), 0 2px 8px rgba(0,0,0,0.15), inset 0 1px 1px rgba(255,255,255,0.08)',
-                  border: '1px solid rgba(255, 255, 255, 0.12)',
+                  boxShadow: '0 4px 24px rgba(0,0,0,0.15), 0 1px 4px rgba(0,0,0,0.1), inset 0 1px 1px rgba(255,255,255,0.1)',
+                  border: '1px solid rgba(255, 255, 255, 0.2)',
                 }}
               >
                 {/* Header with icon and value */}
