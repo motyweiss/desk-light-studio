@@ -163,7 +163,7 @@ export const MediaPlayer = () => {
                 {/* Album Art - Shared Element */}
                 <motion.div
                   layoutId="player-album-art"
-                  className="relative flex-shrink-0 rounded-xl overflow-hidden bg-white/5"
+                  className="relative flex-shrink-0 rounded-full overflow-hidden bg-white/8"
                   initial={false}
                   animate={albumArtSize}
                   transition={smoothTransition}
@@ -209,7 +209,7 @@ export const MediaPlayer = () => {
                             key={albumArtUrl}
                             src={albumArtUrl} 
                             alt="Album art" 
-                            className="absolute inset-0 w-full h-full object-cover"
+                            className="absolute inset-0 w-full h-full object-cover rounded-full"
                             initial={{ filter: 'blur(20px)', opacity: 0, scale: 1.1 }}
                             animate={{ filter: 'blur(0px)', opacity: 1, scale: 1 }}
                             exit={{ filter: 'blur(10px)', opacity: 0, scale: 0.95 }}
@@ -222,13 +222,13 @@ export const MediaPlayer = () => {
                         ) : !isAlbumArtLoading && (
                           <motion.div 
                             key="placeholder"
-                            className="absolute inset-0 w-full h-full flex items-center justify-center"
+                            className="absolute inset-0 w-full h-full flex items-center justify-center bg-white/5 rounded-full"
                             initial={{ opacity: 0 }}
                             animate={{ opacity: 1 }}
                             exit={{ opacity: 0 }}
                             transition={{ duration: 0.3 }}
                           >
-                            <Music className="w-8 h-8 text-white/20" />
+                            <div className="w-5 h-5 rounded-full bg-white/20" />
                           </motion.div>
                         )}
                       </AnimatePresence>
