@@ -148,10 +148,10 @@ export const MediaPlayer = () => {
             width: '100%',
             backdropFilter: 'blur(40px)',
             WebkitBackdropFilter: 'blur(40px)',
-            border: '1px solid rgba(255, 255, 255, 0.15)',
+            border: '1px solid rgba(255, 255, 255, 0.12)',
             boxShadow: isMinimized 
-              ? '0 4px 24px rgba(0,0,0,0.15)' 
-              : '0 8px 40px rgba(0,0,0,0.25), inset 0 1px 0 rgba(255,255,255,0.1)',
+              ? '0 8px 32px rgba(0,0,0,0.08), 0 2px 8px rgba(0,0,0,0.04)' 
+              : '0 12px 48px rgba(0,0,0,0.12), 0 4px 16px rgba(0,0,0,0.06)',
           }}
           transition={PLAYER_LAYOUT_TRANSITION}
           whileHover={{ 
