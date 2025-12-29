@@ -1,11 +1,12 @@
 import { motion } from "framer-motion";
-import { Power, Zap, Thermometer, Droplets, Wind } from "lucide-react";
+import { Power, Zap } from "lucide-react";
 import { LightControlCard } from "@/features/lighting/components/LightControlCard";
 import { AirPodsMaxIcon } from "./icons/AirPodsMaxIcon";
 import { IPhoneIcon } from "./icons/IPhoneIcon";
 import { MagicKeyboardIcon } from "./icons/MagicKeyboardIcon";
 import { MagicMouseIcon } from "./icons/MagicMouseIcon";
 import { AnimatedCounter } from "./AnimatedCounter";
+import { ClimateIndicators } from "@/features/climate/components/ClimateIndicators";
 import { PAGE_LOAD, DATA_TRANSITION, EASING } from "@/constants/animations";
 
 interface Light {
@@ -56,12 +57,6 @@ const crossfadeTransition = {
   ease: EASING.smooth,
 };
 
-const getAirQualityStatus = (value: number): string => {
-  if (value <= 12) return 'Good';
-  if (value <= 35) return 'Moderate';
-  if (value <= 55) return 'Sensitive';
-  return 'Unhealthy';
-};
 
 export const RoomInfoPanel = ({ 
   roomName, 
@@ -77,7 +72,7 @@ export const RoomInfoPanel = ({
 }: RoomInfoPanelProps) => {
 
   return (
-    <div className="space-y-5 md:space-y-6">
+    <div className="space-y-3 md:space-y-4">
       {/* Room Title with Master Switch */}
       <motion.div 
         className="flex items-center justify-between gap-4 md:gap-6"
@@ -122,62 +117,8 @@ export const RoomInfoPanel = ({
         </motion.button>
       </motion.div>
 
-      {/* Climate Indicators - Below header */}
-      {climateData && (
-        <motion.div
-          className="flex items-center gap-6"
-          initial={{ opacity: 0, y: 8 }}
-          animate={{ 
-            opacity: climateData.isLoaded ? 1 : 0,
-            y: climateData.isLoaded ? 0 : 8
-          }}
-          transition={{ 
-            duration: 0.5, 
-            delay: climateData.isLoaded ? 0.1 : 0,
-            ease: EASING.entrance
-          }}
-        >
-          {/* Temperature */}
-          <div className="flex items-center gap-1.5">
-            <div className="w-7 h-7 rounded-full bg-white/8 flex items-center justify-center">
-              <Thermometer className="w-3.5 h-3.5 text-white/50" strokeWidth={1.5} fill="none" />
-            </div>
-            <div className="text-sm font-light text-white/90 tabular-nums tracking-tight">
-              <AnimatedCounter 
-                value={Math.round(climateData.temperature)} 
-                isActive={climateData.isLoaded}
-                delay={0.2}
-              />
-              <span className="text-xs text-white/40 ml-0.5">°C</span>
-            </div>
-          </div>
-
-          {/* Humidity */}
-          <div className="flex items-center gap-1.5">
-            <div className="w-7 h-7 rounded-full bg-white/8 flex items-center justify-center">
-              <Droplets className="w-3.5 h-3.5 text-white/50" strokeWidth={1.5} fill="none" />
-            </div>
-            <div className="text-sm font-light text-white/90 tabular-nums tracking-tight">
-              <AnimatedCounter 
-                value={Math.round(climateData.humidity)} 
-                isActive={climateData.isLoaded}
-                delay={0.3}
-              />
-              <span className="text-xs text-white/40 ml-0.5">%</span>
-            </div>
-          </div>
-
-          {/* Air Quality */}
-          <div className="flex items-center gap-1.5">
-            <div className="w-7 h-7 rounded-full bg-white/8 flex items-center justify-center">
-              <Wind className="w-3.5 h-3.5 text-white/50" strokeWidth={1.5} fill="none" />
-            </div>
-            <span className="text-sm font-light text-white/90 tracking-tight">
-              {getAirQualityStatus(climateData.airQuality)}
-            </span>
-          </div>
-        </motion.div>
-      )}
+      {/* Climate Indicators - Below header with hover tooltips */}
+      {climateData && <ClimateIndicators />}
 
       {/* Devices Battery Section - Desktop only */}
       {devices && devices.length > 0 && (
