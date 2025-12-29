@@ -410,13 +410,12 @@ export const HAConnectionProvider: React.FC<{ children: React.ReactNode }> = ({ 
 
   // ============= Load config when user changes =============
   useEffect(() => {
-    // Reset configured ref when user changes
     if (user) {
       logger.connection('User authenticated, loading HA config...');
       loadConfig();
     } else {
-      // User logged out - clear config
-      logger.connection('User logged out, clearing HA config');
+      // User logged out or not yet authenticated - clear config
+      logger.connection('No user, clearing HA config');
       setConfig(null);
       setDevicesMapping(DEFAULT_DEVICES_MAPPING);
       setEntityMapping(DEFAULT_ENTITY_MAPPING);
@@ -426,7 +425,8 @@ export const HAConnectionProvider: React.FC<{ children: React.ReactNode }> = ({ 
       connectionManager.disconnect();
       setIsLoading(false);
     }
-  }, [user, loadConfig]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user]);
 
   // ============= Context Value =============
   const value: HAConnectionContextValue = {
