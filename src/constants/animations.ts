@@ -169,7 +169,7 @@ export const DATA_TRANSITION = {
 export const POLL_INTERVAL = {
   lights: 1500,
   sensors: 5000,
-  mediaPlayer: 600,
+  mediaPlayer: 400,
 } as const;
 
 // ============================================================

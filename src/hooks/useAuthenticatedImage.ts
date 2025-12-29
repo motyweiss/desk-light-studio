@@ -68,28 +68,19 @@ export const useAuthenticatedImage = (relativePath: string | null) => {
       return;
     }
 
-    // Extract cache param for comparison - this changes when the track changes
-    const getCacheParam = (path: string) => {
-      const match = path.match(/[?&]cache=([^&]+)/);
-      return match ? match[1] : null;
-    };
+    // Compare full path including query params - any change should trigger a new fetch
+    const pathChanged = relativePath !== currentPathRef.current;
     
-    const newCacheParam = getCacheParam(relativePath);
-    const currentCacheParam = currentPathRef.current ? getCacheParam(currentPathRef.current) : null;
-    
-    // Check if the actual image changed (different cache param means different image)
-    const imageChanged = newCacheParam !== currentCacheParam;
-    
-    // Skip if same image and we already have a loaded image
-    if (!imageChanged && imageUrl) {
-      console.log('[useAuthenticatedImage] Same image (cache match), using cached');
+    // Skip if exact same path and we already have an image
+    if (!pathChanged && imageUrl) {
+      console.log('[useAuthenticatedImage] Same path, using cached');
       return;
     }
 
-    console.log('[useAuthenticatedImage] Image changed:', { 
-      from: currentCacheParam, 
-      to: newCacheParam, 
-      imageChanged 
+    console.log('[useAuthenticatedImage] Path changed:', { 
+      from: currentPathRef.current, 
+      to: relativePath, 
+      pathChanged 
     });
 
     // Create new abort controller
@@ -97,7 +88,7 @@ export const useAuthenticatedImage = (relativePath: string | null) => {
     abortControllerRef.current = abortController;
 
     // Mark as transitioning if we're changing from one image to another
-    const isImageTransition = currentPathRef.current !== null && imageChanged;
+    const isImageTransition = currentPathRef.current !== null && pathChanged;
     if (isImageTransition) {
       setIsTransitioning(true);
     }
@@ -105,8 +96,8 @@ export const useAuthenticatedImage = (relativePath: string | null) => {
     // Update current path ref immediately
     currentPathRef.current = relativePath;
     
-    // Clear cache for fresh fetch on image change
-    if (imageChanged) {
+    // Clear cache for fresh fetch on path change
+    if (pathChanged) {
       homeAssistant.clearImageCache();
     }
 
