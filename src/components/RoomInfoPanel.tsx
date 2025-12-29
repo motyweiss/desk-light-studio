@@ -84,7 +84,7 @@ export const RoomInfoPanel = ({
         }}
         style={{ willChange: 'opacity' }}
       >
-        <h1 className="text-xl md:text-3xl font-epunda font-light tracking-tight text-foreground leading-tight">
+        <h1 className="text-xl md:text-3xl font-sans font-light tracking-tight text-foreground leading-tight">
           {roomName}
         </h1>
         
@@ -188,7 +188,7 @@ export const RoomInfoPanel = ({
                           suffix="%" 
                           isActive={dataReady && !showSkeleton}
                           delay={0.4 + (index * 0.15)}
-                          className="text-base font-epunda font-normal text-white tabular-nums tracking-tight"
+                          className="text-base font-sans font-normal text-white tabular-nums tracking-tight"
                           suffixClassName="text-[10px] text-white/40 ml-0.5 font-light"
                         />
                         {device.isCharging && (
