@@ -140,12 +140,14 @@ export const MediaPlayer = () => {
       >
         <motion.div 
           onClick={handleToggleMinimized}
-          className="w-full max-w-2xl relative cursor-pointer overflow-hidden"
+          className="relative cursor-pointer overflow-hidden"
           initial={false}
           animate={{ 
             height: isMinimized ? 64 : 'auto',
             borderRadius: isMinimized ? 32 : 24,
             backgroundColor: isMinimized ? 'rgba(255, 255, 255, 0.12)' : 'rgba(255, 255, 255, 0.18)',
+            maxWidth: isMinimized ? 420 : 672,
+            width: '100%',
           }}
           transition={containerTransition}
           whileHover={{ 
