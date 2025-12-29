@@ -1,9 +1,9 @@
-import { useMotionValueEvent, AnimatePresence, motion, useMotionValue, animate } from "framer-motion";
+import { useMotionValueEvent, AnimatePresence, motion } from "framer-motion";
 import { Slider } from "@/components/ui/slider";
 import { useState, useRef, useCallback, useEffect } from "react";
 import { getIconForLight } from "@/components/icons/LightIcons";
 import { Loader2 } from "lucide-react";
-import { TIMING, EASE, SEQUENCES, SPRINGS } from "@/lib/animations";
+import { TIMING, EASE, SEQUENCES } from "@/lib/animations";
 import { useLightAnimation } from "../hooks/useLightAnimation";
 
 interface LightControlCardProps {
@@ -29,8 +29,13 @@ const crossfadeTransition = {
   ease: EASE.smooth,
 };
 
+const sliderTransition = {
+  duration: TIMING.medium,
+  ease: EASE.entrance,
+};
+
 const LONG_PRESS_DURATION = 350; // ms
-const AUTO_COLLAPSE_DELAY = 3000; // ms
+const AUTO_COLLAPSE_DELAY = 4000; // ms
 
 export const LightControlCard = ({ 
   id, 
@@ -46,15 +51,11 @@ export const LightControlCard = ({
   const IconComponent = getIconForLight(id);
   const isOn = intensity > 0;
   
-  // Expansion state
+  // Expansion state - slider visible when expanded OR when light is on
   const [isExpanded, setIsExpanded] = useState(false);
   const longPressTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const autoCollapseTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const wasLongPressRef = useRef(false);
-  
-  // Slider animation value (for entry animation)
-  const sliderAnimatedValue = useMotionValue(0);
-  const [sliderDisplayValue, setSliderDisplayValue] = useState(0);
   
   // Use unified animation hook
   const { displayValue, animateTo } = useLightAnimation(id, { 
@@ -65,12 +66,11 @@ export const LightControlCard = ({
   const debounceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const userInteractingRef = useRef(false);
   
+  // Show slider when light is on or manually expanded
+  const showSlider = isOn || isExpanded;
+  
   useMotionValueEvent(displayValue, "change", (latest) => {
     setDisplayNumber(Math.round(latest));
-  });
-  
-  useMotionValueEvent(sliderAnimatedValue, "change", (latest) => {
-    setSliderDisplayValue(Math.round(latest));
   });
   
   // Sync with external intensity changes
@@ -80,21 +80,9 @@ export const LightControlCard = ({
     }
   }, [intensity, displayValue, animateTo]);
   
-  // Animate slider on expand
+  // Auto-collapse after inactivity (only for manual expansion when light is off)
   useEffect(() => {
-    if (isExpanded) {
-      // Start from 0 and animate to current intensity
-      sliderAnimatedValue.set(0);
-      animate(sliderAnimatedValue, intensity, {
-        ...SPRINGS.responsive,
-        duration: TIMING.medium,
-      });
-    }
-  }, [isExpanded, intensity, sliderAnimatedValue]);
-  
-  // Auto-collapse after inactivity
-  useEffect(() => {
-    if (isExpanded) {
+    if (isExpanded && !isOn) {
       if (autoCollapseTimerRef.current) {
         clearTimeout(autoCollapseTimerRef.current);
       }
@@ -108,20 +96,14 @@ export const LightControlCard = ({
         clearTimeout(autoCollapseTimerRef.current);
       }
     };
-  }, [isExpanded, displayNumber]);
+  }, [isExpanded, isOn, displayNumber]);
   
   // Cleanup timers on unmount
   useEffect(() => {
     return () => {
-      if (debounceTimerRef.current) {
-        clearTimeout(debounceTimerRef.current);
-      }
-      if (longPressTimerRef.current) {
-        clearTimeout(longPressTimerRef.current);
-      }
-      if (autoCollapseTimerRef.current) {
-        clearTimeout(autoCollapseTimerRef.current);
-      }
+      if (debounceTimerRef.current) clearTimeout(debounceTimerRef.current);
+      if (longPressTimerRef.current) clearTimeout(longPressTimerRef.current);
+      if (autoCollapseTimerRef.current) clearTimeout(autoCollapseTimerRef.current);
     };
   }, []);
   
@@ -197,13 +179,14 @@ export const LightControlCard = ({
     if (autoCollapseTimerRef.current) {
       clearTimeout(autoCollapseTimerRef.current);
     }
-    autoCollapseTimerRef.current = setTimeout(() => {
-      setIsExpanded(false);
-    }, AUTO_COLLAPSE_DELAY);
+    if (!isOn) {
+      autoCollapseTimerRef.current = setTimeout(() => {
+        setIsExpanded(false);
+      }, AUTO_COLLAPSE_DELAY);
+    }
     
     userInteractingRef.current = true;
     animateTo(newValue, 'user', { immediate: true });
-    setSliderDisplayValue(newValue);
     
     if (debounceTimerRef.current) {
       clearTimeout(debounceTimerRef.current);
@@ -213,7 +196,7 @@ export const LightControlCard = ({
       onChange(newValue);
       userInteractingRef.current = false;
     }, 300);
-  }, [displayNumber, onChange, animateTo]);
+  }, [displayNumber, onChange, animateTo, isOn]);
 
   return (
     <motion.button
@@ -224,8 +207,7 @@ export const LightControlCard = ({
       onPointerCancel={handlePointerUp}
       onMouseEnter={() => onHover(id)}
       onMouseLeave={() => onHover(null)}
-      className="w-full aspect-square rounded-2xl p-4 md:p-5 cursor-pointer text-left border backdrop-blur-xl relative overflow-hidden flex flex-col"
-      layout
+      className="w-full rounded-2xl p-4 md:p-5 cursor-pointer text-left border backdrop-blur-xl relative overflow-hidden flex flex-col"
       initial={false}
       animate={{
         backgroundColor: isLoading 
@@ -294,7 +276,7 @@ export const LightControlCard = ({
       )}
 
       {/* Top section: Icon + Spinner */}
-      <div className="flex items-start justify-between relative z-10">
+      <div className="flex items-start justify-between relative z-10 mb-auto">
         {/* Icon */}
         <div className="relative w-7 h-7 md:w-8 md:h-8">
           {/* Skeleton circle */}
@@ -348,13 +330,13 @@ export const LightControlCard = ({
         </div>
       </div>
 
-      {/* Spacer to push content to bottom */}
-      <div className="flex-1" />
+      {/* Spacer */}
+      <div className="min-h-8 md:min-h-12" />
 
       {/* Bottom section: Label + Status + Slider */}
-      <div className="relative z-10 space-y-5">
+      <div className="relative z-10">
         {/* Label & Status */}
-        <div className="space-y-0.5">
+        <div className="space-y-0.5 mb-4">
           {/* Label */}
           <div className="relative">
             <motion.div 
@@ -418,74 +400,65 @@ export const LightControlCard = ({
           </div>
         </div>
 
-        {/* Slider - Expandable */}
-        <AnimatePresence>
-          {(isExpanded || isOn) && (
+        {/* Slider - Animated height */}
+        <motion.div 
+          className="w-full"
+          data-slider
+          onClick={(e) => e.stopPropagation()}
+          onPointerDown={(e) => e.stopPropagation()}
+          initial={false}
+          animate={{ 
+            height: showSlider ? 'auto' : 0,
+            opacity: showSlider ? 1 : 0,
+            marginTop: showSlider ? 0 : 0,
+          }}
+          transition={sliderTransition}
+          style={{ overflow: 'hidden' }}
+        >
+          {/* Slider container */}
+          <div className="relative w-full flex items-center py-1">
+            {/* Skeleton slider */}
             <motion.div 
-              className="w-full overflow-hidden"
-              data-slider
-              onClick={(e) => e.stopPropagation()}
-              onPointerDown={(e) => e.stopPropagation()}
-              initial={{ height: 0, opacity: 0 }}
+              className="absolute inset-0 flex items-center"
+              initial={false}
+              animate={{ opacity: isLoading ? 1 : 0 }}
+              transition={crossfadeTransition}
+            >
+              <motion.div 
+                className="w-full h-2 bg-white/10 rounded-full"
+                animate={{ opacity: [0.3, 0.5, 0.3] }}
+                transition={{ 
+                  duration: 1.5, 
+                  repeat: Infinity,
+                  ease: "easeInOut",
+                  delay: 0.2
+                }}
+              />
+            </motion.div>
+            
+            {/* Real slider */}
+            <motion.div 
+              className="w-full"
+              initial={false}
               animate={{ 
-                height: 'auto', 
-                opacity: 1,
-              }}
-              exit={{ 
-                height: 0, 
-                opacity: 0,
+                opacity: isLoading ? 0 : 1,
+                filter: isLoading ? 'blur(4px)' : 'blur(0px)',
               }}
               transition={{
-                height: { duration: TIMING.medium, ease: EASE.entrance },
-                opacity: { duration: TIMING.fast, ease: EASE.smooth }
+                ...crossfadeTransition,
+                filter: { duration: TIMING.medium, ease: EASE.smooth }
               }}
             >
-              {/* Slider container */}
-              <div className="relative w-full flex items-center pt-1">
-                {/* Skeleton slider */}
-                <motion.div 
-                  className="absolute inset-0 flex items-center"
-                  initial={false}
-                  animate={{ opacity: isLoading ? 1 : 0 }}
-                  transition={crossfadeTransition}
-                >
-                  <motion.div 
-                    className="w-full h-2 bg-white/10 rounded-full"
-                    animate={{ opacity: [0.3, 0.5, 0.3] }}
-                    transition={{ 
-                      duration: 1.5, 
-                      repeat: Infinity,
-                      ease: "easeInOut",
-                      delay: 0.2
-                    }}
-                  />
-                </motion.div>
-                
-                {/* Real slider */}
-                <motion.div 
-                  className="w-full"
-                  initial={false}
-                  animate={{ 
-                    opacity: isLoading ? 0 : 1,
-                    filter: isLoading ? 'blur(4px)' : 'blur(0px)',
-                  }}
-                  transition={{
-                    ...crossfadeTransition,
-                    filter: { duration: TIMING.medium, ease: EASE.smooth }
-                  }}
-                >
-                  <Slider
-                    value={[isExpanded && sliderDisplayValue < displayNumber ? sliderDisplayValue : displayNumber]}
-                    onValueChange={handleSliderChange}
-                    max={100}
-                    step={1}
-                    className="w-full"
-                  />
-                </motion.div>
-              </div>
+              <Slider
+                value={[displayNumber]}
+                onValueChange={handleSliderChange}
+                max={100}
+                step={1}
+                className="w-full"
+              />
             </motion.div>
-          )}
-        </AnimatePresence>
+          </div>
+        </motion.div>
       </div>
     </motion.button>
   );
