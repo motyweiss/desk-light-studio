@@ -198,13 +198,11 @@ export const SPEAKER_SHEET_TRANSITIONS = {
 // ============================================================
 export const MEDIA_PLAYER = {
   // ─────────────────────────────────────────────────────────
-  // LAYOUT SPRING - For size/position changes (smooth, no jank)
+  // LAYOUT - Smooth tween for size/position changes (no bounce)
   // ─────────────────────────────────────────────────────────
   layout: {
-    type: 'spring' as const,
-    stiffness: 280,
-    damping: 28,
-    mass: 0.9,
+    duration: 0.35,
+    ease: [0.32, 0.72, 0, 1] as const,
   },
   
   // ─────────────────────────────────────────────────────────
