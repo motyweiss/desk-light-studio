@@ -111,8 +111,8 @@ export const MediaPlayer = () => {
   }), [isMinimized]);
 
   const albumArtSize = useMemo(() => ({
-    width: isMinimized ? 48 : 64,
-    height: isMinimized ? 48 : 64,
+    width: isMinimized ? 48 : 80,
+    height: isMinimized ? 48 : 80,
   }), [isMinimized]);
 
   // Hide player only during loading or if no player state
@@ -178,7 +178,7 @@ export const MediaPlayer = () => {
               style={{ display: 'flex' }}
             >
               {/* Left Section: Album Art + Track Info */}
-              <div className="flex items-center gap-3 min-w-0 flex-1">
+              <div className="flex items-center gap-4 min-w-0 flex-1">
                 {/* Album Art */}
                 <motion.div
                   className="relative flex-shrink-0 rounded-full overflow-hidden bg-white/8"
@@ -231,16 +231,16 @@ export const MediaPlayer = () => {
                   className="flex-1 min-w-0"
                   initial={false}
                   animate={{ 
-                    scale: isMinimized ? 1 : 1.05,
+                    scale: 1,
                     originX: 0,
                   }}
                   transition={PLAYER_LAYOUT_TRANSITION}
                 >
-                  <h3 className={`text-white font-light truncate ${isMinimized ? 'text-[13px]' : 'text-sm sm:text-base'}`}>
+                  <h3 className={`text-white font-medium truncate ${isMinimized ? 'text-[13px]' : 'text-lg'}`}>
                     {currentTrack?.title || 'No media playing'}
                   </h3>
                   <div className="flex items-center gap-2">
-                    <p className="text-white/40 truncate text-xs">
+                    <p className={`text-white/50 truncate ${isMinimized ? 'text-xs' : 'text-sm'}`}>
                       {currentTrack?.artist || 'Unknown Artist'}
                     </p>
                     {isMinimized && playerState.isPlaying && (
@@ -260,7 +260,7 @@ export const MediaPlayer = () => {
                     style={{ overflow: 'hidden' }}
                   >
                     {currentTrack?.album && (
-                      <p className="text-white/30 text-xs truncate">
+                      <p className="text-white/35 text-sm truncate">
                         {currentTrack.album}
                       </p>
                     )}
