@@ -213,7 +213,7 @@ export const LightControlCard = ({
       onPointerCancel={handlePointerUp}
       onMouseEnter={() => onHover(id)}
       onMouseLeave={() => onHover(null)}
-      className="w-full aspect-square rounded-2xl p-4 md:p-5 cursor-pointer text-left border backdrop-blur-xl relative overflow-hidden flex flex-col justify-between"
+      className="w-full aspect-square rounded-2xl p-4 pb-5 md:p-5 md:pb-6 cursor-pointer text-left border backdrop-blur-xl relative overflow-hidden flex flex-col"
       initial={false}
       animate={{
         backgroundColor: isLoading 
@@ -282,7 +282,7 @@ export const LightControlCard = ({
       )}
 
       {/* Top section: Icon */}
-      <div className="flex items-start justify-between relative z-10 mb-6">
+      <div className="flex items-start justify-between relative z-10">
         {/* Icon */}
         <div className="relative w-9 h-9 md:w-10 md:h-10">
           {/* Skeleton circle */}
@@ -337,7 +337,7 @@ export const LightControlCard = ({
       </div>
 
       {/* Bottom section: Label + Status + Slider */}
-      <div className="relative z-10">
+      <div className="relative z-10 mt-auto">
         {/* Label & Status */}
         <div className="space-y-1">
           {/* Label */}
@@ -405,7 +405,7 @@ export const LightControlCard = ({
 
         {/* Slider area - always present, content animates */}
         <div 
-          className="mt-6 h-6 relative"
+          className="mt-4 h-5 relative"
           data-slider
           onClick={(e) => e.stopPropagation()}
           onPointerDown={(e) => e.stopPropagation()}
