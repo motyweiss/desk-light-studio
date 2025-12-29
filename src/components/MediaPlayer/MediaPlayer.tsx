@@ -109,11 +109,23 @@ export const MediaPlayer = () => {
     height: isMinimized ? 48 : 64,
   };
 
-  // Element transition with stagger support
+  // Element transition with stagger support - clean fade + subtle movement
   const elementTransition = {
     duration: MEDIA_PLAYER.content.duration,
     ease: MEDIA_PLAYER.content.ease,
   };
+
+  // Staggered element animation for expanded mode
+  const staggeredElement = (index: number) => ({
+    initial: { opacity: 0, y: 6 },
+    animate: { opacity: 1, y: 0 },
+    exit: { opacity: 0, y: -4 },
+    transition: { 
+      duration: MEDIA_PLAYER.content.duration,
+      delay: getStaggerDelay(index),
+      ease: MEDIA_PLAYER.easing.soft,
+    },
+  });
 
   return (
     <>
@@ -296,14 +308,17 @@ export const MediaPlayer = () => {
               </div>
 
               {/* Right Section: Mini Controls */}
-              <AnimatePresence mode="popLayout">
+              <AnimatePresence mode="sync">
                 {isMinimized && (
                   <motion.div
                     key="mini-controls"
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
-                    transition={{ ...elementTransition, delay: getStaggerDelay(1) }}
+                    initial={{ opacity: 0, x: 8 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: 8 }}
+                    transition={{ 
+                      duration: MEDIA_PLAYER.content.duration,
+                      ease: MEDIA_PLAYER.easing.soft,
+                    }}
                     className="flex items-center justify-end"
                   >
                     <div onClick={(e) => e.stopPropagation()}>
@@ -325,22 +340,20 @@ export const MediaPlayer = () => {
             </div>
 
             {/* Full Player Controls */}
-            <AnimatePresence mode="popLayout">
+            <AnimatePresence mode="sync">
               {!isMinimized && (
                 <motion.div
                   key="full-controls"
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}
-                  transition={elementTransition}
+                  transition={{ duration: MEDIA_PLAYER.content.duration, ease: MEDIA_PLAYER.easing.soft }}
                   className="space-y-4 pt-4 overflow-hidden"
                 >
                   {/* Source Indicator */}
                   <motion.div 
                     className="flex justify-end"
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ ...elementTransition, delay: getStaggerDelay(1) }}
+                    {...staggeredElement(0)}
                   >
                     <SourceIndicator appName={playerState.appName} />
                   </motion.div>
@@ -350,9 +363,7 @@ export const MediaPlayer = () => {
                     <motion.div 
                       className="pt-1" 
                       onClick={(e) => e.stopPropagation()}
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      transition={{ ...elementTransition, delay: getStaggerDelay(2) }}
+                      {...staggeredElement(1)}
                     >
                       <ProgressBar
                         position={currentTrack.position}
@@ -367,9 +378,7 @@ export const MediaPlayer = () => {
                    {/* Bottom Row: Playback Controls + Volume + Speaker Selector */}
                   <motion.div 
                     className="flex items-center justify-between gap-4"
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ ...elementTransition, delay: getStaggerDelay(3) }}
+                    {...staggeredElement(2)}
                   >
                     <div className="flex-1 flex justify-center" onClick={(e) => e.stopPropagation()}>
                       <PlaybackControls
