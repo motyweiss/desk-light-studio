@@ -106,8 +106,8 @@ export const MediaPlayer = () => {
   const paddingStyles = useMemo(() => ({
     paddingLeft: isMinimized ? 8 : 20,
     paddingRight: isMinimized ? 16 : 20,
-    paddingTop: isMinimized ? 8 : 16,
-    paddingBottom: isMinimized ? 8 : 16,
+    paddingTop: isMinimized ? 8 : 14,
+    paddingBottom: isMinimized ? 8 : 14,
   }), [isMinimized]);
 
   const albumArtSize = useMemo(() => ({
@@ -301,7 +301,7 @@ export const MediaPlayer = () => {
               animate={{
                 height: isMinimized ? 0 : 'auto',
                 opacity: isMinimized ? 0 : 1,
-                marginTop: isMinimized ? 0 : 16,
+                marginTop: isMinimized ? 0 : 12,
               }}
               transition={{
                 height: PLAYER_LAYOUT_TRANSITION,
@@ -310,7 +310,7 @@ export const MediaPlayer = () => {
               }}
               style={{ overflow: 'hidden' }}
             >
-              <div className="space-y-4">
+              <div className="space-y-3">
                 {/* Source Indicator */}
                 <div className="flex justify-end">
                   <SourceIndicator appName={playerState.appName} />
@@ -318,7 +318,7 @@ export const MediaPlayer = () => {
 
                 {/* Progress Bar */}
                 {currentTrack && (
-                  <div className="pt-1" onClick={(e) => e.stopPropagation()}>
+                  <div onClick={(e) => e.stopPropagation()}>
                     <ProgressBar
                       position={currentTrack.position}
                       duration={currentTrack.duration}
