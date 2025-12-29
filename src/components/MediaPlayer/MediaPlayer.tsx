@@ -17,35 +17,32 @@ import { MusicParticles } from './MusicParticles';
 // Perfect synchronization between all elements
 // ============================================
 
-const DURATION = {
-  layout: 0.45,
-  content: 0.28,
+// Spring-based animation for smooth, natural motion
+const SPRING = {
+  // Soft spring for container morphing
+  layout: { type: 'spring', stiffness: 280, damping: 30, mass: 1 },
+  // Slightly stiffer for content
+  content: { type: 'spring', stiffness: 350, damping: 35, mass: 0.8 },
 } as const;
 
-// All curves end with smooth deceleration (0, 1) for clean finish
+const DURATION = {
+  content: 0.3,
+} as const;
+
 const EASE = {
-  // Standard smooth ease-out
-  layout: [0.22, 1, 0.36, 1] as const,
-  // Slightly faster start, smooth end
-  content: [0.33, 1, 0.68, 1] as const,
+  content: [0.4, 0, 0.2, 1] as const,
 } as const;
 
 const createTransitions = (isExpanding: boolean) => ({
-  layout: {
-    duration: DURATION.layout,
-    ease: EASE.layout,
-  },
+  // Spring for smooth container morphing
+  layout: SPRING.layout,
+  // Content with small delay when expanding
   content: {
     duration: DURATION.content,
     ease: EASE.content,
-    // Small delay when expanding to let layout start first
-    delay: isExpanding ? 0.08 : 0,
+    delay: isExpanding ? 0.12 : 0,
   },
-  // No delay on layoutDelayed - runs in parallel for smooth finish
-  layoutDelayed: {
-    duration: DURATION.layout,
-    ease: EASE.layout,
-  },
+  layoutDelayed: SPRING.layout,
 });
 
 export const MediaPlayer = () => {
