@@ -252,25 +252,10 @@ export const HAConnectionProvider: React.FC<{ children: React.ReactNode }> = ({ 
           loadedDevicesMapping = devicesData.devices_mapping as unknown as DevicesMapping;
         }
       } else {
-        // DEV MODE: Load from localStorage when no user
-        const storedConfig = localStorage.getItem('ha_config_dev');
-        if (storedConfig) {
-          try {
-            haConfig = JSON.parse(storedConfig);
-            logger.connection('Loaded HA config from localStorage (dev mode)');
-          } catch (e) {
-            logger.error('Failed to parse stored config', e);
-          }
-        }
-
-        const storedDevices = localStorage.getItem('ha_devices_dev');
-        if (storedDevices) {
-          try {
-            loadedDevicesMapping = JSON.parse(storedDevices);
-          } catch (e) {
-            logger.error('Failed to parse stored devices', e);
-          }
-        }
+        // No user - config will be loaded when user authenticates
+        logger.connection('No authenticated user, skipping HA config load');
+        setIsLoading(false);
+        return;
       }
 
       // Apply devices mapping
@@ -347,9 +332,9 @@ export const HAConnectionProvider: React.FC<{ children: React.ReactNode }> = ({ 
           return { success: false, error: upsertError.message };
         }
       } else {
-        // DEV MODE: Save to localStorage
-        localStorage.setItem('ha_config_dev', JSON.stringify(newConfig));
-        logger.connection('Saved HA config to localStorage (dev mode)');
+        // No user - cannot save config
+        logger.error('Cannot save HA config: no authenticated user');
+        return { success: false, error: 'Please sign in to save settings' };
       }
 
       // Update local state
@@ -391,9 +376,9 @@ export const HAConnectionProvider: React.FC<{ children: React.ReactNode }> = ({ 
           return { success: false, error: upsertError.message };
         }
       } else {
-        // DEV MODE: Save to localStorage
-        localStorage.setItem('ha_devices_dev', JSON.stringify(mapping));
-        logger.connection('Saved devices mapping to localStorage (dev mode)');
+        // No user - cannot save devices
+        logger.error('Cannot save devices: no authenticated user');
+        return { success: false, error: 'Please sign in to save settings' };
       }
 
       // Update local state
@@ -423,13 +408,25 @@ export const HAConnectionProvider: React.FC<{ children: React.ReactNode }> = ({ 
     connectionManager.markSuccessfulSync();
   }, []);
 
-  // ============= Initial Load =============
+  // ============= Load config when user changes =============
   useEffect(() => {
-    if (!configuredRef.current) {
-      configuredRef.current = true;
+    // Reset configured ref when user changes
+    if (user) {
+      logger.connection('User authenticated, loading HA config...');
       loadConfig();
+    } else {
+      // User logged out - clear config
+      logger.connection('User logged out, clearing HA config');
+      setConfig(null);
+      setDevicesMapping(DEFAULT_DEVICES_MAPPING);
+      setEntityMapping(DEFAULT_ENTITY_MAPPING);
+      setConnectionStatus('disconnected');
+      setHaVersion(null);
+      haProxyClient.setDirectConfig(null);
+      connectionManager.disconnect();
+      setIsLoading(false);
     }
-  }, [loadConfig]);
+  }, [user, loadConfig]);
 
   // ============= Context Value =============
   const value: HAConnectionContextValue = {
