@@ -118,7 +118,7 @@ export const RoomInfoPanel = ({
 
       {/* Climate Indicators - Below header with hover tooltips */}
       {climateData && (
-        <div className="space-y-5">
+        <div className="space-y-4 -mt-1">
           <ClimateIndicators />
         </div>
       )}

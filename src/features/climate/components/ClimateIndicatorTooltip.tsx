@@ -65,7 +65,7 @@ export const ClimateIndicatorTooltip = ({
     >
       {/* Compact indicator - simple circle with icon */}
       <div className="cursor-default">
-        <div className="flex items-center gap-1 md:gap-1.5">
+        <div className="flex items-center gap-1.5 md:gap-2">
           <IconCircle size={32}>
             <Icon 
               className="w-4 h-4 text-white/60" 
