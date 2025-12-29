@@ -166,9 +166,20 @@ export const MediaPlayer = () => {
               opacity: isMinimized ? 0 : 1,
               scale: isMinimized ? 0.8 : 1,
             }}
-            transition={CONTENT_FADE_TRANSITION}
+            transition={{
+              opacity: { 
+                duration: 0.3, 
+                ease: [0.25, 0.1, 0.25, 1],
+                delay: isMinimized ? 0 : 0.25 
+              },
+              scale: { 
+                duration: 0.3, 
+                ease: [0.25, 0.1, 0.25, 1],
+                delay: isMinimized ? 0 : 0.25 
+              },
+            }}
             className="absolute z-10"
-            style={{ 
+            style={{
               top: 16, 
               right: 20, 
               pointerEvents: isMinimized ? 'none' : 'auto' 
