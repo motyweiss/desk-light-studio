@@ -11,19 +11,35 @@ import { MiniSpeakerBadge } from './MiniSpeakerBadge';
 import { SpeakerPopover } from './SpeakerPopover';
 import { AudioVisualizer } from './AudioVisualizer';
 import { MusicParticles } from './MusicParticles';
-import { TIMING, EASE } from '@/lib/animations';
 
-// Unified transition for all layout properties - must be identical across all elements
-const PLAYER_LAYOUT_TRANSITION = {
-  duration: 0.4,
-  ease: [0.32, 0.72, 0, 1] as const, // Snappy ease-out
+// ============================================
+// UNIFIED TIMING CONSTANTS
+// All animations use these for perfect sync
+// ============================================
+const TIMING = {
+  layout: 0.4,        // Container size/shape changes
+  contentFade: 0.2,   // Content opacity changes
+  staggerIn: 0.08,    // Delay between elements appearing
+  staggerOut: 0,      // No stagger on collapse (instant fade)
+} as const;
+
+const EASE = {
+  layout: [0.32, 0.72, 0, 1] as const,     // Snappy for layout
+  fade: [0.4, 0, 0.2, 1] as const,          // Smooth for opacity
+} as const;
+
+// Shared layout transition
+const layoutTransition = {
+  duration: TIMING.layout,
+  ease: EASE.layout,
 };
 
-// Faster transition for content opacity
-const CONTENT_FADE_TRANSITION = {
-  duration: 0.25,
-  ease: [0.25, 0.1, 0.25, 1] as const,
-};
+// Content fade - synced to layout
+const contentTransition = (isExpanding: boolean, delay = 0) => ({
+  duration: TIMING.contentFade,
+  ease: EASE.fade,
+  delay: isExpanding ? TIMING.layout * 0.5 + delay : 0, // Fade in after layout starts, fade out immediately
+});
 
 export const MediaPlayer = () => {
   const [isMinimized, setIsMinimizedLocal] = useState(true);
@@ -31,7 +47,6 @@ export const MediaPlayer = () => {
   const speakerBadgeRef = useRef<HTMLButtonElement>(null);
   const playerRef = useRef<HTMLDivElement>(null);
 
-  // UI Context for communicating with RootLayout
   const { setIsMinimized, setIsVisible, setPlayerHeight } = useMediaPlayerUI();
 
   const {
@@ -40,8 +55,6 @@ export const MediaPlayer = () => {
     availableSpeakers,
     predefinedGroups,
     currentPlaybackTarget,
-    entityId,
-    isConnected,
     handlePlayPause,
     handleNext,
     handlePrevious,
@@ -55,16 +68,11 @@ export const MediaPlayer = () => {
     handleSeek,
   } = useMediaPlayer();
 
-  // Get unified animation system
-  const { 
-    entryProps,
-    staggerProps,
-  } = useMediaPlayerAnimations({
+  const { entryProps } = useMediaPlayerAnimations({
     isMinimized,
     isVisible: true,
   });
 
-  // Fetch album art with authentication
   const { 
     imageUrl: albumArtUrl, 
     isLoading: isAlbumArtLoading, 
@@ -74,7 +82,6 @@ export const MediaPlayer = () => {
     playerState?.currentTrack?.albumArt || null
   );
 
-  // Sync visibility with UI context
   const isPlayerVisible = !isLoading && playerState && 
     !(playerState.isOff && !playerState.currentTrack) &&
     !(playerState.queueEnded && !playerState.isPlaying);
@@ -86,17 +93,18 @@ export const MediaPlayer = () => {
     }
   }, [isPlayerVisible, isMinimized, setIsVisible, setPlayerHeight]);
 
-  // Sync minimized state with UI context
   useEffect(() => {
     setIsMinimized(isMinimized);
   }, [isMinimized, setIsMinimized]);
 
-  // Toggle handler
   const handleToggleMinimized = () => {
     setIsMinimizedLocal(prev => !prev);
   };
 
-  // Memoize animated values to prevent recalculation
+  // Derived state
+  const isExpanded = !isMinimized;
+
+  // Memoized styles
   const containerStyles = useMemo(() => ({
     borderRadius: isMinimized ? 32 : 24,
     maxWidth: isMinimized ? 420 : 672,
@@ -115,20 +123,9 @@ export const MediaPlayer = () => {
     height: isMinimized ? 48 : 80,
   }), [isMinimized]);
 
-  // Hide player only during loading or if no player state
-  if (isLoading || !playerState) {
-    return null;
-  }
-
-  // Hide player only if truly off/idle with no track
-  if (playerState.isOff && !playerState.currentTrack) {
-    return null;
-  }
-
-  // Hide player when queue ended (idle state after playback)
-  if (playerState.queueEnded && !playerState.isPlaying) {
-    return null;
-  }
+  if (isLoading || !playerState) return null;
+  if (playerState.isOff && !playerState.currentTrack) return null;
+  if (playerState.queueEnded && !playerState.isPlaying) return null;
 
   const currentTrack = playerState.currentTrack;
 
@@ -144,6 +141,7 @@ export const MediaPlayer = () => {
           className="relative cursor-pointer"
           initial={false}
           animate={containerStyles}
+          transition={layoutTransition}
           style={{
             width: '100%',
             backdropFilter: 'blur(40px)',
@@ -153,69 +151,51 @@ export const MediaPlayer = () => {
               ? '0 8px 32px rgba(0,0,0,0.08), 0 2px 8px rgba(0,0,0,0.04)' 
               : '0 12px 48px rgba(0,0,0,0.12), 0 4px 16px rgba(0,0,0,0.06)',
           }}
-          transition={PLAYER_LAYOUT_TRANSITION}
           whileHover={{ 
             backgroundColor: isMinimized ? 'rgba(255, 255, 255, 0.15)' : 'rgba(255, 255, 255, 0.22)',
-            transition: { duration: 0.2 }
+            transition: { duration: 0.15 }
           }}
         >
-          {/* Source Indicator - positioned in top right corner in expanded mode */}
+          {/* Source Indicator - top right in expanded */}
           <motion.div
             initial={false}
             animate={{
-              opacity: isMinimized ? 0 : 1,
-              scale: isMinimized ? 0.8 : 1,
+              opacity: isExpanded ? 1 : 0,
+              scale: isExpanded ? 1 : 0.9,
             }}
-            transition={{
-              opacity: { 
-                duration: 0.3, 
-                ease: [0.25, 0.1, 0.25, 1],
-                delay: isMinimized ? 0 : 0.25 
-              },
-              scale: { 
-                duration: 0.3, 
-                ease: [0.25, 0.1, 0.25, 1],
-                delay: isMinimized ? 0 : 0.25 
-              },
-            }}
+            transition={contentTransition(isExpanded, TIMING.staggerIn)}
             className="absolute z-10"
-            style={{
-              top: 16, 
-              right: 20, 
-              pointerEvents: isMinimized ? 'none' : 'auto' 
-            }}
+            style={{ top: 16, right: 20, pointerEvents: isExpanded ? 'auto' : 'none' }}
           >
             <SourceIndicator appName={playerState.appName} />
           </motion.div>
 
-          {/* Content Container - animate padding */}
+          {/* Content Container */}
           <motion.div 
             initial={false}
             animate={paddingStyles}
-            transition={PLAYER_LAYOUT_TRANSITION}
+            transition={layoutTransition}
             className="relative"
           >
-
-            {/* Inner content wrapper - always flex, gap changes */}
+            {/* Main content row */}
             <motion.div 
               className="flex items-center"
               initial={false}
               animate={{
-                gap: isMinimized ? 12 : 12,
+                gap: 12,
                 flexDirection: isMinimized ? 'row' : 'column',
                 alignItems: isMinimized ? 'center' : 'stretch',
               }}
-              transition={PLAYER_LAYOUT_TRANSITION}
-              style={{ display: 'flex' }}
+              transition={layoutTransition}
             >
-              {/* Left Section: Album Art + Track Info */}
+              {/* Album Art + Track Info */}
               <div className="flex items-center gap-4 min-w-0 flex-1">
                 {/* Album Art */}
                 <motion.div
                   className="relative flex-shrink-0 rounded-full overflow-hidden bg-white/8"
                   initial={false}
                   animate={albumArtSize}
-                  transition={PLAYER_LAYOUT_TRANSITION}
+                  transition={layoutTransition}
                 >
                   <AnimatePresence mode="sync">
                     <motion.div
@@ -223,50 +203,31 @@ export const MediaPlayer = () => {
                       initial={{ opacity: 0 }}
                       animate={{ opacity: 1 }}
                       exit={{ opacity: 0 }}
-                      transition={CONTENT_FADE_TRANSITION}
+                      transition={{ duration: 0.2, ease: EASE.fade }}
                       className="absolute inset-0"
                     >
-                      {/* Skeleton loader */}
                       {(isAlbumArtLoading || isAlbumArtTransitioning) && !albumArtUrl && (
                         <div className="absolute inset-0 bg-white/5">
                           <div 
                             className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent"
-                            style={{
-                              backgroundSize: '200% 100%',
-                              animation: 'shimmer 1.5s infinite linear',
-                            }}
+                            style={{ backgroundSize: '200% 100%', animation: 'shimmer 1.5s infinite linear' }}
                           />
                         </div>
                       )}
                       
                       {albumArtUrl && !albumArtError ? (
-                        <img 
-                          src={albumArtUrl} 
-                          alt="Album art" 
-                          className="absolute inset-0 w-full h-full object-cover rounded-full"
-                        />
+                        <img src={albumArtUrl} alt="Album art" className="absolute inset-0 w-full h-full object-cover rounded-full" />
                       ) : !isAlbumArtLoading && (
                         <div className="absolute inset-0 w-full h-full flex items-center justify-center bg-white/5 rounded-full" />
                       )}
                     </motion.div>
                   </AnimatePresence>
                   
-                  <MusicParticles 
-                    isPlaying={playerState.isPlaying} 
-                    containerSize={albumArtSize}
-                  />
+                  <MusicParticles isPlaying={playerState.isPlaying} containerSize={albumArtSize} />
                 </motion.div>
 
                 {/* Track Info */}
-                <motion.div
-                  className="flex-1 min-w-0"
-                  initial={false}
-                  animate={{ 
-                    scale: 1,
-                    originX: 0,
-                  }}
-                  transition={PLAYER_LAYOUT_TRANSITION}
-                >
+                <div className="flex-1 min-w-0">
                   <h3 className={`text-white font-medium truncate ${isMinimized ? 'text-[13px]' : 'text-lg'}`}>
                     {currentTrack?.title || 'No media playing'}
                   </h3>
@@ -279,35 +240,43 @@ export const MediaPlayer = () => {
                     )}
                   </div>
                   
-                  {/* Album name - Only in full mode */}
+                  {/* Album name - expanded only */}
                   <motion.div
                     initial={false}
                     animate={{ 
-                      height: isMinimized ? 0 : 'auto',
-                      opacity: isMinimized ? 0 : 1,
-                      marginTop: isMinimized ? 0 : 2,
+                      height: isExpanded ? 'auto' : 0,
+                      opacity: isExpanded ? 1 : 0,
+                      marginTop: isExpanded ? 2 : 0,
                     }}
-                    transition={CONTENT_FADE_TRANSITION}
+                    transition={{
+                      height: layoutTransition,
+                      opacity: contentTransition(isExpanded),
+                      marginTop: layoutTransition,
+                    }}
                     style={{ overflow: 'hidden' }}
                   >
                     {currentTrack?.album && (
-                      <p className="text-white/35 text-sm truncate">
-                        {currentTrack.album}
-                      </p>
+                      <p className="text-white/35 text-sm truncate">{currentTrack.album}</p>
                     )}
                   </motion.div>
-                </motion.div>
+                </div>
               </div>
 
-              {/* Mini Controls - slide in/out */}
+              {/* Mini Controls - minimized only */}
               <motion.div
                 initial={false}
                 animate={{
                   width: isMinimized ? 'auto' : 0,
                   opacity: isMinimized ? 1 : 0,
-                  x: isMinimized ? 0 : 20,
                 }}
-                transition={CONTENT_FADE_TRANSITION}
+                transition={{
+                  width: layoutTransition,
+                  opacity: { 
+                    duration: TIMING.contentFade, 
+                    ease: EASE.fade,
+                    delay: isMinimized ? TIMING.layout * 0.6 : 0, // Appear after layout, disappear immediately
+                  },
+                }}
                 style={{ overflow: 'hidden', flexShrink: 0 }}
               >
                 <div onClick={(e) => e.stopPropagation()}>
@@ -326,20 +295,24 @@ export const MediaPlayer = () => {
               </motion.div>
             </motion.div>
 
-            {/* Full Player Controls - height animation */}
+            {/* Expanded Controls */}
             <motion.div
               initial={false}
               animate={{
-                height: isMinimized ? 0 : 'auto',
-                opacity: isMinimized ? 0 : 1,
-                marginTop: isMinimized ? 0 : 16,
+                height: isExpanded ? 'auto' : 0,
+                opacity: isExpanded ? 1 : 0,
+                marginTop: isExpanded ? 16 : 0,
               }}
               transition={{
-                height: PLAYER_LAYOUT_TRANSITION,
-                opacity: { ...CONTENT_FADE_TRANSITION, delay: isMinimized ? 0 : 0.1 },
-                marginTop: PLAYER_LAYOUT_TRANSITION,
+                height: layoutTransition,
+                marginTop: layoutTransition,
+                opacity: {
+                  duration: TIMING.contentFade,
+                  ease: EASE.fade,
+                  delay: isExpanded ? TIMING.layout * 0.5 : 0, // Fade in after layout starts, fade out immediately
+                },
               }}
-              style={{ overflow: 'visible' }}
+              style={{ overflow: 'hidden' }}
             >
               <div className="space-y-4">
                 {/* Progress Bar */}
@@ -394,7 +367,6 @@ export const MediaPlayer = () => {
         </motion.div>
       </motion.div>
 
-      {/* Speaker Popover */}
       <SpeakerPopover
         isOpen={speakerPopoverOpen}
         onClose={() => setSpeakerPopoverOpen(false)}
