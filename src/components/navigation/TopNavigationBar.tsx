@@ -4,6 +4,7 @@ import { Settings as SettingsIcon } from 'lucide-react';
 import { ConnectionStatusIndicator } from '@/components/ConnectionStatusIndicator';
 import { LogoutButton } from '@/components/LogoutButton';
 import { HomeAssistantIcon } from '@/components/icons/HomeAssistantIcon';
+import { ClimateIndicators } from '@/features/climate/components/ClimateIndicators';
 import {
   Tooltip,
   TooltipContent,
@@ -47,7 +48,17 @@ export const TopNavigationBar = ({
             transition={{ duration: 0.4, delay: 0.15, ease: [0.22, 0.03, 0.26, 1] }}
           >
             <HomeAssistantIcon className="w-5 h-5 md:w-6 md:h-6 text-white/90" />
-            <span className="text-sm md:text-lg font-light text-white/90">Home Assistant</span>
+            <span className="text-sm md:text-lg font-light text-white/90 hidden sm:inline">Home Assistant</span>
+          </motion.div>
+
+          {/* Center: Climate Indicators */}
+          <motion.div
+            className="flex-1 flex justify-center"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.4, delay: 0.18, ease: [0.22, 0.03, 0.26, 1] }}
+          >
+            <ClimateIndicators />
           </motion.div>
 
           {/* Right: Connection Status + Settings + Logout */}
