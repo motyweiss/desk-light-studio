@@ -120,25 +120,29 @@ export const LightControlCard = ({
       onClick={handleCardClick}
       onMouseEnter={() => onHover(id)}
       onMouseLeave={() => onHover(null)}
-      className="w-full rounded-2xl md:rounded-3xl px-4 md:px-8 py-3 md:py-4 cursor-pointer text-left border backdrop-blur-xl relative overflow-hidden"
+      className="w-full aspect-square rounded-2xl p-4 md:p-5 cursor-pointer text-left border backdrop-blur-xl relative overflow-hidden flex flex-col"
       initial={false}
       animate={{
         backgroundColor: isLoading 
-          ? 'rgba(255, 255, 255, 0.06)' 
-          : 'rgba(0, 0, 0, 0)',
+          ? 'rgba(255, 255, 255, 0.04)' 
+          : isOn 
+            ? 'rgba(255, 255, 255, 0.06)'
+            : 'rgba(255, 255, 255, 0.03)',
         borderColor: isLoading
-          ? 'rgba(255, 255, 255, 0.1)'
-          : 'rgba(0, 0, 0, 0)',
+          ? 'rgba(255, 255, 255, 0.08)'
+          : isOn
+            ? 'rgba(255, 255, 255, 0.12)'
+            : 'rgba(255, 255, 255, 0.06)',
       }}
       transition={smoothTransition}
       whileHover={!isLoading ? {
-        backgroundColor: isOn ? 'rgba(255, 255, 255, 0.06)' : 'rgba(255, 255, 255, 0.04)',
-        borderColor: isOn ? 'rgba(255, 255, 255, 0.12)' : 'rgba(255, 255, 255, 0.08)',
+        backgroundColor: isOn ? 'rgba(255, 255, 255, 0.08)' : 'rgba(255, 255, 255, 0.05)',
+        borderColor: isOn ? 'rgba(255, 255, 255, 0.16)' : 'rgba(255, 255, 255, 0.1)',
         transition: { duration: 0.4, ease: [0.25, 0.1, 0.25, 1] }
       } : undefined}
       whileTap={!isLoading ? { 
-        scale: 0.99,
-        backgroundColor: isOn ? 'rgba(255, 255, 255, 0.08)' : 'rgba(255, 255, 255, 0.05)',
+        scale: 0.98,
+        backgroundColor: isOn ? 'rgba(255, 255, 255, 0.1)' : 'rgba(255, 255, 255, 0.06)',
         transition: { duration: 0.2, ease: [0.25, 0.1, 0.25, 1] }
       } : undefined}
       style={{ pointerEvents: isLoading ? 'none' : 'auto' }}
@@ -174,7 +178,7 @@ export const LightControlCard = ({
       {/* Error State Overlay */}
       {hasError && (
         <motion.div
-          className="absolute inset-0 bg-red-500/10 border-2 border-red-500/30 rounded-3xl"
+          className="absolute inset-0 bg-red-500/10 border-2 border-red-500/30 rounded-2xl"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           onClick={(e) => {
@@ -184,9 +188,10 @@ export const LightControlCard = ({
         />
       )}
 
-      <div className="flex items-center gap-3 md:gap-6 relative z-10">
-        {/* Icon - crossfade between skeleton and real */}
-        <div className="relative flex-shrink-0 w-5 h-5 md:w-7 md:h-7">
+      {/* Top section: Icon + Spinner */}
+      <div className="flex items-start justify-between relative z-10">
+        {/* Icon */}
+        <div className="relative w-7 h-7 md:w-8 md:h-8">
           {/* Skeleton circle */}
           <motion.div
             className="absolute inset-0 rounded-full bg-white/10"
@@ -207,23 +212,48 @@ export const LightControlCard = ({
             animate={{
               opacity: isLoading ? 0 : 1,
               filter: isLoading ? `blur(${DATA_TRANSITION.dataEnter.blur}px)` : 'blur(0px)',
-              color: isOn ? 'hsl(44 92% 62%)' : 'rgba(255, 255, 255, 0.3)'
+              color: isOn ? 'hsl(44 92% 62%)' : 'rgba(255, 255, 255, 0.35)'
             }}
             transition={{
               ...crossfadeTransition,
               filter: { duration: 0.35, ease: EASING.smooth }
             }}
           >
-            <IconComponent className="w-5 h-5 md:w-7 md:h-7" />
+            <IconComponent className="w-7 h-7 md:w-8 md:h-8" />
           </motion.div>
         </div>
 
-        {/* Text Info */}
-        <div className="flex-1 text-left min-w-0">
+        {/* Spinner */}
+        <div className="w-4 h-4 flex items-center justify-center flex-shrink-0">
+          <AnimatePresence>
+            {isPending && !isLoading && (
+              <motion.div
+                initial={{ opacity: 0, scale: 0.7 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.7 }}
+                transition={{ duration: 0.2 }}
+              >
+                <Loader2 
+                  className="w-4 h-4 text-white/40 animate-spin" 
+                  strokeWidth={2}
+                />
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
+      </div>
+
+      {/* Spacer to push content to bottom */}
+      <div className="flex-1" />
+
+      {/* Bottom section: Label + Status + Slider */}
+      <div className="relative z-10 space-y-3">
+        {/* Label & Status */}
+        <div className="space-y-0.5">
           {/* Label */}
           <div className="relative">
             <motion.div 
-              className="absolute top-0 left-0 h-4 w-20 md:w-24 bg-white/10 rounded"
+              className="absolute top-0 left-0 h-5 w-20 bg-white/10 rounded"
               initial={false}
               animate={{ 
                 opacity: isLoading ? [0.3, 0.5, 0.3] : 0 
@@ -235,7 +265,7 @@ export const LightControlCard = ({
               } : crossfadeTransition}
             />
             <motion.div 
-              className="font-light text-sm md:text-base text-white tracking-wide leading-tight"
+              className="font-light text-sm md:text-base text-white tracking-wide"
               initial={false}
               animate={{ 
                 opacity: isLoading ? 0 : 1,
@@ -251,9 +281,9 @@ export const LightControlCard = ({
           </div>
           
           {/* Status */}
-          <div className="relative mt-0.5">
+          <div className="relative">
             <motion.div 
-              className="absolute top-0 left-0 h-3 w-10 bg-white/10 rounded"
+              className="absolute top-0 left-0 h-4 w-10 bg-white/10 rounded"
               initial={false}
               animate={{ 
                 opacity: isLoading ? [0.3, 0.5, 0.3] : 0 
@@ -266,12 +296,12 @@ export const LightControlCard = ({
               } : crossfadeTransition}
             />
             <motion.div 
-              className="text-[10px] md:text-xs font-light tracking-wide tabular-nums leading-tight"
+              className="text-xs font-light tracking-wide tabular-nums"
               initial={false}
               animate={{
                 opacity: isLoading ? 0 : 1,
                 filter: isLoading ? `blur(${DATA_TRANSITION.dataEnter.blur}px)` : 'blur(0px)',
-                color: isOn ? 'rgba(255, 255, 255, 0.65)' : 'rgba(255, 255, 255, 0.5)'
+                color: isOn ? 'rgba(255, 255, 255, 0.6)' : 'rgba(255, 255, 255, 0.4)'
               }}
               transition={{
                 ...crossfadeTransition,
@@ -283,34 +313,15 @@ export const LightControlCard = ({
           </div>
         </div>
 
-        {/* Slider area */}
+        {/* Slider */}
         <div 
-          className="flex-shrink-0 flex items-center gap-2 md:gap-3 self-center"
+          className="w-full"
           data-slider
           onClick={(e) => e.stopPropagation()}
           onPointerDown={(e) => e.stopPropagation()}
         >
-          {/* Spinner placeholder */}
-          <div className="w-3 h-3 md:w-4 md:h-4 flex items-center justify-center flex-shrink-0">
-            <AnimatePresence>
-              {isPending && !isLoading && (
-                <motion.div
-                  initial={{ opacity: 0, scale: 0.7 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  exit={{ opacity: 0, scale: 0.7 }}
-                  transition={{ duration: 0.2 }}
-                >
-                  <Loader2 
-                    className="w-3 h-3 md:w-4 md:h-4 text-white/40 animate-spin" 
-                    strokeWidth={2}
-                  />
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </div>
-          
           {/* Slider container */}
-          <div className="relative w-20 md:w-32 flex items-center">
+          <div className="relative w-full flex items-center">
             {/* Skeleton slider */}
             <motion.div 
               className="absolute inset-0 flex items-center"
@@ -348,7 +359,7 @@ export const LightControlCard = ({
                 onValueChange={handleSliderChange}
                 max={100}
                 step={1}
-                className="w-20 md:w-32"
+                className="w-full"
               />
             </motion.div>
           </div>

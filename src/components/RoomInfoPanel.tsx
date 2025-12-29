@@ -72,7 +72,7 @@ export const RoomInfoPanel = ({
 }: RoomInfoPanelProps) => {
 
   return (
-    <div className="space-y-3 md:space-y-4">
+    <div className="space-y-6 md:space-y-8">
       {/* Room Title with Master Switch */}
       <motion.div 
         className="flex items-center justify-between gap-4 md:gap-6"
@@ -119,16 +119,16 @@ export const RoomInfoPanel = ({
 
       {/* Climate Indicators - Below header with hover tooltips */}
       {climateData && (
-        <>
+        <div className="space-y-6">
           <ClimateIndicators />
-          <div className="h-px bg-white/10 mx-0" />
-        </>
+          <div className="h-px bg-white/8" />
+        </div>
       )}
 
       {/* Devices Battery Section - Desktop only */}
       {devices && devices.length > 0 && (
-        <div className="hidden md:block py-2">
-          <div className="flex flex-row items-start justify-between px-4">
+        <div className="hidden md:block">
+          <div className="flex flex-row items-start justify-between">
             {devices.map((device, index) => {
               const DeviceIcon = device.icon === 'headphones' 
                 ? AirPodsMaxIcon 
@@ -202,7 +202,7 @@ export const RoomInfoPanel = ({
                   
                   {/* Separator line - show for all except last item */}
                   {index < devices.length - 1 && (
-                    <div className="h-10 w-px bg-white/10 ml-8" />
+                    <div className="h-10 w-px bg-white/8 ml-8" />
                   )}
                 </div>
               );
@@ -211,21 +211,21 @@ export const RoomInfoPanel = ({
         </div>
       )}
 
-      {/* Light Controls Section */}
-      <div className="md:mt-6">
-        {lights.map((light, index) => (
-          <motion.div 
-            key={light.id}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: isLoaded ? 1 : 0 }}
-            transition={{
-              duration: PAGE_LOAD.elements.lightCards.duration,
-              ease: EASING.entrance,
-              delay: PAGE_LOAD.elements.lightCards.delay + (index * PAGE_LOAD.elements.lightCards.stagger),
-            }}
-            style={{ willChange: 'opacity' }}
-          >
-            <div className="py-2 md:py-3">
+      {/* Light Controls Section - 3 Column Grid */}
+      <div className="pt-2">
+        <div className="grid grid-cols-3 gap-3 md:gap-4">
+          {lights.map((light, index) => (
+            <motion.div 
+              key={light.id}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: isLoaded ? 1 : 0 }}
+              transition={{
+                duration: PAGE_LOAD.elements.lightCards.duration,
+                ease: EASING.entrance,
+                delay: PAGE_LOAD.elements.lightCards.delay + (index * PAGE_LOAD.elements.lightCards.stagger),
+              }}
+              style={{ willChange: 'opacity' }}
+            >
               <LightControlCard
                 id={light.id}
                 label={light.label}
@@ -235,14 +235,9 @@ export const RoomInfoPanel = ({
                 onChange={light.onChange}
                 onHover={(isHovered) => onLightHover(isHovered ? light.id : null)}
               />
-            </div>
-            
-            {/* Separator line - show between items only */}
-            {index < lights.length - 1 && (
-              <div className="mx-4 md:mx-8 h-px bg-white/10" />
-            )}
-          </motion.div>
-        ))}
+            </motion.div>
+          ))}
+        </div>
       </div>
     </div>
   );
