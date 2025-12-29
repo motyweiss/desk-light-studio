@@ -134,11 +134,11 @@ export const MediaPlayer = () => {
           ease: EASING.entrance,
           delay: MEDIA_PLAYER_ANIMATIONS.entry.delay,
         }}
-        className="fixed bottom-4 left-1/2 -translate-x-1/2 z-50 w-[calc(100%-32px)] max-w-3xl"
+        className="fixed bottom-4 left-0 right-0 z-50 flex justify-center px-4"
       >
         <motion.div 
           onClick={handleToggleMinimized}
-          className="bg-white/12 backdrop-blur-xl border border-white/15 shadow-[0_4px_24px_rgba(0,0,0,0.15)] relative cursor-pointer overflow-hidden"
+          className="w-full max-w-3xl bg-white/12 backdrop-blur-xl border border-white/15 shadow-[0_4px_24px_rgba(0,0,0,0.15)] relative cursor-pointer overflow-hidden"
           initial={false}
           animate={{ 
             height: isMinimized ? 72 : 'auto',
