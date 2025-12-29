@@ -1,5 +1,5 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Outlet } from "react-router-dom";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 
@@ -30,16 +30,20 @@ const App = () => (
               <AppLoadProvider>
                 <LightingProvider>
                   <ClimateProvider>
-                    <RootLayout>
-                      <Routes>
-                        <Route path="/auth" element={<Auth />} />
+                    <Routes>
+                      {/* Auth page outside RootLayout for clean UI */}
+                      <Route path="/auth" element={<Auth />} />
+                      
+                      {/* All other pages inside RootLayout */}
+                      <Route element={<RootLayout><Outlet /></RootLayout>}>
                         <Route path="/" element={<ProtectedRoute><Index /></ProtectedRoute>} />
                         <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
                         <Route path="/design-system" element={<ProtectedRoute><DesignSystem /></ProtectedRoute>} />
-                        {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-                        <Route path="*" element={<NotFound />} />
-                      </Routes>
-                    </RootLayout>
+                      </Route>
+                      
+                      {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+                      <Route path="*" element={<NotFound />} />
+                    </Routes>
                     <OfflineIndicator />
                   </ClimateProvider>
                 </LightingProvider>
