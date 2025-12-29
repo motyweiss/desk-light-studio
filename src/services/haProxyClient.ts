@@ -30,6 +30,8 @@ interface DirectConfig {
  */
 class HAProxyClient {
   private directConfig: DirectConfig | null = null;
+  private requestCache: Map<string, { data: unknown; timestamp: number }> = new Map();
+  private readonly CACHE_TTL = 1000; // 1 second cache
 
   // Set direct config for fallback when no Supabase session
   setDirectConfig(config: DirectConfig | null) {
@@ -106,12 +108,47 @@ class HAProxyClient {
     }
   }
 
+  private getCacheKey(params: ProxyRequest): string {
+    return `${params.method || 'GET'}:${params.path}`;
+  }
+
+  private getCachedResponse<T>(key: string): T | null {
+    const cached = this.requestCache.get(key);
+    if (cached && Date.now() - cached.timestamp < this.CACHE_TTL) {
+      return cached.data as T;
+    }
+    this.requestCache.delete(key);
+    return null;
+  }
+
+  private setCachedResponse(key: string, data: unknown): void {
+    this.requestCache.set(key, { data, timestamp: Date.now() });
+    
+    // Cleanup old entries periodically
+    if (this.requestCache.size > 50) {
+      const now = Date.now();
+      for (const [k, v] of this.requestCache.entries()) {
+        if (now - v.timestamp > this.CACHE_TTL) {
+          this.requestCache.delete(k);
+        }
+      }
+    }
+  }
+
   async request<T = unknown>(params: ProxyRequest): Promise<ProxyResponse<T>> {
+    // Check cache for GET requests
+    if (params.method === 'GET' || !params.method) {
+      const cacheKey = this.getCacheKey(params);
+      const cached = this.getCachedResponse<T>(cacheKey);
+      if (cached) {
+        return { data: cached, error: null };
+      }
+    }
+
     const token = await this.getAuthToken();
     
     // If no Supabase session, try direct connection
     if (!token) {
-      console.log('[HA Proxy] No Supabase session, using direct connection');
       return this.directRequest<T>(params);
     }
 
@@ -122,7 +159,6 @@ class HAProxyClient {
       });
 
       if (error) {
-        console.error('[HA Proxy Client] Proxy error, falling back to direct:', error);
         // Fallback to direct connection
         return this.directRequest<T>(params);
       }
@@ -131,16 +167,19 @@ class HAProxyClient {
       if (data?.error) {
         // If it's an auth error, try direct connection
         if (data.error.includes('Not authenticated') || data.error.includes('auth')) {
-          console.log('[HA Proxy] Auth error from proxy, trying direct connection');
           return this.directRequest<T>(params);
         }
         return { data: null, error: data.error };
       }
 
+      // Cache successful GET responses
+      if (params.method === 'GET' || !params.method) {
+        this.setCachedResponse(this.getCacheKey(params), data);
+      }
+
       return { data: data as T, error: null };
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Unknown error';
-      console.error('[HA Proxy Client] Exception, trying direct:', message);
       // Fallback to direct connection
       return this.directRequest<T>(params);
     }

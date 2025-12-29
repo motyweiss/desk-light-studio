@@ -54,23 +54,14 @@ export const useClimateSync = (config: UseClimateSyncConfig): ClimateData => {
   const syncClimateData = useCallback(async () => {
     // Check if haProxyClient is configured
     if (!haProxyClient.getDirectConfig()) {
-      logger.warn('HA client not configured, skipping climate sync');
       return;
     }
     
     if (!isConnected) {
-      logger.warn('Not connected to HA, skipping climate sync');
       return;
     }
 
-    // Debug: Log the entity mapping received
-    console.log('🔋 [ClimateSync] Entity mapping received:', {
-      iphoneBattery: entityMapping.iphoneBattery,
-      iphoneBatteryState: entityMapping.iphoneBatteryState,
-      airpodsMaxBattery: entityMapping.airpodsMaxBattery,
-      airpodsMaxBatteryState: entityMapping.airpodsMaxBatteryState,
-    });
-
+    // Only query entities that are actually configured (not undefined/empty)
     const entityIds = [
       entityMapping.temperatureSensor,
       entityMapping.humiditySensor,
@@ -79,33 +70,16 @@ export const useClimateSync = (config: UseClimateSyncConfig): ClimateData => {
       entityMapping.iphoneBatteryState,
       entityMapping.airpodsMaxBattery,
       entityMapping.airpodsMaxBatteryState,
-    ].filter(Boolean) as string[];
-
-    console.log('🔋 [ClimateSync] Querying entity IDs:', entityIds);
+    ].filter((id): id is string => Boolean(id) && id.length > 0);
 
     // If no entities configured, mark as loaded with defaults
     if (entityIds.length === 0) {
-      logger.warn('No climate entities configured');
       setClimateData(prev => ({ ...prev, isLoaded: true }));
       return;
     }
 
     try {
-      logger.info('Syncing climate data...');
       const states = await sensors.getMultipleStates(entityIds);
-      
-      // Debug: Log raw states received
-      console.log('🔋 [ClimateSync] Raw states received:', states);
-      
-      // Debug: Log iPhone battery specifically
-      if (entityMapping.iphoneBattery) {
-        const batteryState = states[entityMapping.iphoneBattery];
-        console.log('🔋 [ClimateSync] iPhone battery entity:', entityMapping.iphoneBattery, '→', batteryState);
-      }
-      if (entityMapping.iphoneBatteryState) {
-        const chargingState = states[entityMapping.iphoneBatteryState];
-        console.log('🔋 [ClimateSync] iPhone charging entity:', entityMapping.iphoneBatteryState, '→', chargingState);
-      }
 
       setClimateData(prev => {
         const newData = { ...prev };
@@ -164,21 +138,9 @@ export const useClimateSync = (config: UseClimateSyncConfig): ClimateData => {
           newData.isLoaded = true;
         }
         
-        // Debug: Log final parsed values
-        console.log('🔋 [ClimateSync] Final parsed values:', {
-          temperature: newData.temperature,
-          humidity: newData.humidity,
-          airQuality: newData.airQuality,
-          hasAnyClimateData,
-          isLoaded: newData.isLoaded,
-        });
-        
-        logger.info('Climate data synced successfully');
         return newData;
       });
     } catch (error) {
-      logger.error('Failed to sync climate data', error);
-      console.error('🔋 [ClimateSync] Error syncing:', error);
       // Still mark as loaded on error to prevent infinite loading
       setClimateData(prev => ({ ...prev, isLoaded: true }));
     }
