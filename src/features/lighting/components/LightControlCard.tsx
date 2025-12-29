@@ -213,7 +213,7 @@ export const LightControlCard = ({
       onPointerCancel={handlePointerUp}
       onMouseEnter={() => onHover(id)}
       onMouseLeave={() => onHover(null)}
-      className="w-full aspect-square rounded-2xl p-4 pb-5 md:p-5 md:pb-6 cursor-pointer text-left border backdrop-blur-xl relative overflow-hidden flex flex-col"
+      className="w-full aspect-[1/1.15] rounded-2xl p-4 pb-5 md:p-5 md:pb-6 cursor-pointer text-left border backdrop-blur-xl relative overflow-hidden flex flex-col"
       initial={false}
       animate={{
         backgroundColor: isLoading 
@@ -282,9 +282,9 @@ export const LightControlCard = ({
       )}
 
       {/* Top section: Icon */}
-      <div className="flex items-start justify-between relative z-10">
+      <div className="flex items-start justify-between relative z-10 mb-8 md:mb-10">
         {/* Icon */}
-        <div className="relative w-9 h-9 md:w-10 md:h-10">
+        <div className="relative w-8 h-8 md:w-9 md:h-9">
           {/* Skeleton circle */}
           <motion.div
             className="absolute inset-0 rounded-full bg-white/10"
@@ -312,7 +312,7 @@ export const LightControlCard = ({
               filter: { duration: TIMING.medium, ease: EASE.smooth }
             }}
           >
-            <IconComponent className="w-9 h-9 md:w-10 md:h-10" />
+            <IconComponent className="w-8 h-8 md:w-9 md:h-9" />
           </motion.div>
         </div>
 
@@ -355,7 +355,7 @@ export const LightControlCard = ({
               } : crossfadeTransition}
             />
             <motion.div 
-              className="font-medium text-sm md:text-base text-white tracking-wide"
+              className="font-normal text-xs md:text-sm text-white tracking-wide"
               initial={false}
               animate={{ 
                 opacity: isLoading ? 0 : 1,
