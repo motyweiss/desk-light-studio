@@ -1,9 +1,8 @@
 import React, { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
-import { homeAssistant, type EntityMapping } from '@/services/homeAssistant';
-import { haProxyClient } from '@/services/haProxyClient';
-import { connectionManager, type ConnectionState, type ConnectionMode } from '@/services/ConnectionManager';
+import type { EntityMapping } from '@/services/homeAssistant';
+import type { ConnectionState, ConnectionMode } from '@/services/ConnectionManager';
 import { DevicesMapping, DeviceConfig, RoomConfig } from '@/types/settings';
 import { logger } from '@/shared/utils/logger';
 
@@ -77,7 +76,6 @@ const convertToLegacyFormat = (devicesMapping: DevicesMapping): EntityMapping =>
   const office = devicesMapping.rooms[0];
   if (!office) return DEFAULT_ENTITY_MAPPING;
   
-  // Find battery sensors from devices mapping
   const batterySensors = office.sensors.filter(s => s.type === 'battery');
   const iphoneBatterySensor = batterySensors.find(s => 
     s.entity_id.toLowerCase().includes('iphone') || 
@@ -109,7 +107,6 @@ const HAConnectionContext = createContext<HAConnectionContextValue | null>(null)
 export const useHAConnection = () => {
   const context = useContext(HAConnectionContext);
   if (!context) {
-    // Return a safe default instead of throwing - allows components to render during initialization
     return {
       config: null,
       entityMapping: DEFAULT_ENTITY_MAPPING,
@@ -143,60 +140,99 @@ export const HAConnectionProvider: React.FC<{ children: React.ReactNode }> = ({ 
   const [connectionMode, setConnectionMode] = useState<ConnectionMode>('none');
   const [haVersion, setHaVersion] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [servicesReady, setServicesReady] = useState(false);
 
   const isConnected = connectionStatus === 'connected';
-  const configuredRef = useRef(false);
+  
+  // Refs for lazy-loaded services
+  const servicesRef = useRef<{
+    homeAssistant: any;
+    haProxyClient: any;
+    connectionManager: any;
+  } | null>(null);
 
-  // ============= Subscribe to ConnectionManager =============
+  // ============= Load Services Lazily =============
   useEffect(() => {
-    const unsubscribe = connectionManager.subscribe((state: ConnectionState, mode: ConnectionMode) => {
-      // Map ConnectionManager state to context state
-      if (state === 'reconnecting') {
-        setConnectionStatus('connecting');
-      } else if (state === 'connected') {
-        setConnectionStatus('connected');
-        setError(null);
-      } else if (state === 'connecting') {
-        setConnectionStatus('connecting');
-      } else {
-        setConnectionStatus('disconnected');
+    const loadServices = async () => {
+      try {
+        const [haModule, proxyModule, connModule] = await Promise.all([
+          import('@/services/homeAssistant'),
+          import('@/services/haProxyClient'),
+          import('@/services/ConnectionManager'),
+        ]);
+        
+        servicesRef.current = {
+          homeAssistant: haModule.homeAssistant,
+          haProxyClient: proxyModule.haProxyClient,
+          connectionManager: connModule.connectionManager,
+        };
+        
+        // Subscribe to connection manager
+        const unsubscribe = servicesRef.current.connectionManager.subscribe(
+          (state: ConnectionState, mode: ConnectionMode) => {
+            if (state === 'reconnecting') {
+              setConnectionStatus('connecting');
+            } else if (state === 'connected') {
+              setConnectionStatus('connected');
+              setError(null);
+            } else if (state === 'connecting') {
+              setConnectionStatus('connecting');
+            } else {
+              setConnectionStatus('disconnected');
+            }
+            setConnectionMode(mode);
+          }
+        );
+        
+        setServicesReady(true);
+        logger.connection('HA services loaded');
+        
+        return unsubscribe;
+      } catch (err) {
+        logger.error('Failed to load HA services', err);
+        setIsLoading(false);
       }
-      setConnectionMode(mode);
+    };
+    
+    let unsubscribe: (() => void) | undefined;
+    loadServices().then(unsub => {
+      unsubscribe = unsub;
     });
-
+    
     return () => {
-      unsubscribe();
+      if (unsubscribe) unsubscribe();
     };
   }, []);
 
   // ============= Configure HA Clients =============
   const configureClients = useCallback((haConfig: HAConfig) => {
+    if (!servicesRef.current) return;
+    
     const configObj = {
       baseUrl: haConfig.baseUrl.replace(/\/+$/, ''),
       accessToken: haConfig.accessToken,
     };
     
-    // Configure homeAssistant service (which internally sets haProxyClient.setDirectConfig)
-    homeAssistant.setConfig(configObj);
-    // Also set haProxyClient directly for redundancy
-    haProxyClient.setDirectConfig(configObj);
+    servicesRef.current.homeAssistant.setConfig(configObj);
+    servicesRef.current.haProxyClient.setDirectConfig(configObj);
     
     logger.connection('All HA clients configured', { baseUrl: configObj.baseUrl });
   }, []);
 
   // ============= Test Connection =============
   const testConnection = useCallback(async (baseUrl: string, accessToken: string): Promise<ConnectionResult> => {
+    if (!servicesRef.current) {
+      return { success: false, error: 'Services not ready' };
+    }
+    
     try {
       const cleanUrl = baseUrl.replace(/\/+$/, '');
-      
-      // Use direct connection test first (more reliable for testing)
-      const directResult = await homeAssistant.testDirectConnection(cleanUrl, accessToken);
+      const directResult = await servicesRef.current.homeAssistant.testDirectConnection(cleanUrl, accessToken);
       
       if (directResult.success) {
-        // If direct connection works, configure the clients
         const tempConfig = { baseUrl: cleanUrl, accessToken };
-        homeAssistant.setConfig(tempConfig);
-        haProxyClient.setDirectConfig(tempConfig);
+        servicesRef.current.homeAssistant.setConfig(tempConfig);
+        servicesRef.current.haProxyClient.setDirectConfig(tempConfig);
       }
       
       return directResult;
@@ -208,87 +244,66 @@ export const HAConnectionProvider: React.FC<{ children: React.ReactNode }> = ({ 
 
   // ============= Load Config =============
   const loadConfig = useCallback(async () => {
+    if (!servicesRef.current || !user) {
+      setIsLoading(false);
+      return;
+    }
+    
     setIsLoading(true);
     logger.connection('Loading HA config...');
 
     try {
-      let haConfig: HAConfig | null = null;
-      let loadedDevicesMapping: DevicesMapping | null = null;
+      // Load from database
+      const { data: configData, error: configError } = await supabase
+        .from('user_ha_configs')
+        .select('base_url, access_token')
+        .eq('user_id', user.id)
+        .maybeSingle();
 
-      if (user) {
-        // Load from database when authenticated
-        const { data: configData, error: configError } = await supabase
-          .from('user_ha_configs')
-          .select('base_url, access_token')
-          .eq('user_id', user.id)
-          .maybeSingle();
-
-        if (configError) {
-          logger.error('Error loading HA config', configError);
-          setError(configError.message);
-          setIsLoading(false);
-          return;
-        }
-
-        if (configData) {
-          haConfig = {
-            baseUrl: configData.base_url,
-            accessToken: configData.access_token,
-          };
-        }
-
-        // Load devices mapping from database
-        const { data: devicesData, error: devicesError } = await supabase
-          .from('user_ha_devices')
-          .select('devices_mapping')
-          .eq('user_id', user.id)
-          .maybeSingle();
-
-        if (devicesError && devicesError.code !== 'PGRST116') {
-          logger.error('Error loading devices mapping', devicesError);
-        }
-
-        if (devicesData?.devices_mapping) {
-          loadedDevicesMapping = devicesData.devices_mapping as unknown as DevicesMapping;
-        }
-      } else {
-        // No user - config will be loaded when user authenticates
-        logger.connection('No authenticated user, skipping HA config load');
+      if (configError) {
+        logger.error('Error loading HA config', configError);
+        setError(configError.message);
         setIsLoading(false);
         return;
       }
 
-      // Apply devices mapping
-      if (loadedDevicesMapping) {
+      let haConfig: HAConfig | null = null;
+      if (configData) {
+        haConfig = {
+          baseUrl: configData.base_url,
+          accessToken: configData.access_token,
+        };
+      }
+
+      // Load devices mapping
+      const { data: devicesData, error: devicesError } = await supabase
+        .from('user_ha_devices')
+        .select('devices_mapping')
+        .eq('user_id', user.id)
+        .maybeSingle();
+
+      if (devicesError && devicesError.code !== 'PGRST116') {
+        logger.error('Error loading devices mapping', devicesError);
+      }
+
+      if (devicesData?.devices_mapping) {
+        const loadedDevicesMapping = devicesData.devices_mapping as unknown as DevicesMapping;
         setDevicesMapping(loadedDevicesMapping);
         setEntityMapping(convertToLegacyFormat(loadedDevicesMapping));
-        logger.connection('Loaded devices mapping');
       } else {
         setDevicesMapping(DEFAULT_DEVICES_MAPPING);
         setEntityMapping(DEFAULT_ENTITY_MAPPING);
       }
 
-      // Configure and connect if we have config
+      // Configure and connect
       if (haConfig) {
         setConfig(haConfig);
-        
-        // CRITICAL: Configure clients FIRST before any connection attempts
-        logger.connection('Configuring HA clients before connection...');
         configureClients(haConfig);
         
-        // Verify config was set
-        const configCheck = haProxyClient.getDirectConfig();
-        logger.connection('haProxyClient config verification:', { 
-          hasConfig: !!configCheck,
-          baseUrl: configCheck?.baseUrl 
-        });
-
-        // Use ConnectionManager for connection
-        const success = await connectionManager.connect(haConfig);
+        const success = await servicesRef.current.connectionManager.connect(haConfig);
         
         if (success) {
-          // Get version from direct test
-          const result = await homeAssistant.testConnection();
+          const result = await servicesRef.current.homeAssistant.testConnection();
           setHaVersion(result.version || null);
           logger.connection('Connected to Home Assistant', { version: result.version });
         } else {
@@ -311,41 +326,40 @@ export const HAConnectionProvider: React.FC<{ children: React.ReactNode }> = ({ 
 
   // ============= Save Config =============
   const saveConfig = useCallback(async (baseUrl: string, accessToken: string): Promise<{ success: boolean; error?: string }> => {
+    if (!servicesRef.current) {
+      return { success: false, error: 'Services not ready' };
+    }
+    
+    if (!user) {
+      return { success: false, error: 'Please sign in to save settings' };
+    }
+    
     try {
       const cleanBaseUrl = baseUrl.replace(/\/+$/, '');
       const newConfig: HAConfig = { baseUrl: cleanBaseUrl, accessToken };
 
-      if (user) {
-        // Save to database when authenticated
-        const { error: upsertError } = await supabase
-          .from('user_ha_configs')
-          .upsert({
-            user_id: user.id,
-            base_url: cleanBaseUrl,
-            access_token: accessToken,
-          }, {
-            onConflict: 'user_id',
-          });
+      const { error: upsertError } = await supabase
+        .from('user_ha_configs')
+        .upsert({
+          user_id: user.id,
+          base_url: cleanBaseUrl,
+          access_token: accessToken,
+        }, {
+          onConflict: 'user_id',
+        });
 
-        if (upsertError) {
-          logger.error('Error saving HA config', upsertError);
-          return { success: false, error: upsertError.message };
-        }
-      } else {
-        // No user - cannot save config
-        logger.error('Cannot save HA config: no authenticated user');
-        return { success: false, error: 'Please sign in to save settings' };
+      if (upsertError) {
+        logger.error('Error saving HA config', upsertError);
+        return { success: false, error: upsertError.message };
       }
 
-      // Update local state
       setConfig(newConfig);
       configureClients(newConfig);
 
-      // Connect using ConnectionManager
-      const success = await connectionManager.connect(newConfig);
+      const success = await servicesRef.current.connectionManager.connect(newConfig);
       
       if (success) {
-        const result = await homeAssistant.testConnection();
+        const result = await servicesRef.current.homeAssistant.testConnection();
         setHaVersion(result.version || null);
         logger.connection('Saved config and connected', { version: result.version });
       }
@@ -359,29 +373,25 @@ export const HAConnectionProvider: React.FC<{ children: React.ReactNode }> = ({ 
 
   // ============= Save Devices Mapping =============
   const saveDevicesMapping = useCallback(async (mapping: DevicesMapping): Promise<{ success: boolean; error?: string }> => {
+    if (!user) {
+      return { success: false, error: 'Please sign in to save settings' };
+    }
+    
     try {
-      if (user) {
-        // Save to database when authenticated
-        const { error: upsertError } = await supabase
-          .from('user_ha_devices')
-          .upsert({
-            user_id: user.id,
-            devices_mapping: mapping as any,
-          }, {
-            onConflict: 'user_id',
-          });
+      const { error: upsertError } = await supabase
+        .from('user_ha_devices')
+        .upsert({
+          user_id: user.id,
+          devices_mapping: mapping as any,
+        }, {
+          onConflict: 'user_id',
+        });
 
-        if (upsertError) {
-          logger.error('Error saving devices mapping', upsertError);
-          return { success: false, error: upsertError.message };
-        }
-      } else {
-        // No user - cannot save devices
-        logger.error('Cannot save devices: no authenticated user');
-        return { success: false, error: 'Please sign in to save settings' };
+      if (upsertError) {
+        logger.error('Error saving devices mapping', upsertError);
+        return { success: false, error: upsertError.message };
       }
 
-      // Update local state
       setDevicesMapping(mapping);
       setEntityMapping(convertToLegacyFormat(mapping));
       
@@ -395,38 +405,41 @@ export const HAConnectionProvider: React.FC<{ children: React.ReactNode }> = ({ 
 
   // ============= Reconnect =============
   const reconnect = useCallback(async () => {
-    if (!config) return;
+    if (!config || !servicesRef.current) return;
 
-    logger.connection('Attempting reconnection via ConnectionManager...');
-    
+    logger.connection('Attempting reconnection...');
     configureClients(config);
-    await connectionManager.reconnect();
+    await servicesRef.current.connectionManager.reconnect();
   }, [config, configureClients]);
 
   // ============= Mark Successful Sync =============
   const markSuccessfulSync = useCallback(() => {
-    connectionManager.markSuccessfulSync();
+    if (servicesRef.current) {
+      servicesRef.current.connectionManager.markSuccessfulSync();
+    }
   }, []);
 
-  // ============= Load config when user changes =============
+  // ============= Load config when user changes or services ready =============
   useEffect(() => {
+    if (!servicesReady) return;
+    
     if (user) {
       logger.connection('User authenticated, loading HA config...');
       loadConfig();
     } else {
-      // User logged out or not yet authenticated - clear config
       logger.connection('No user, clearing HA config');
       setConfig(null);
       setDevicesMapping(DEFAULT_DEVICES_MAPPING);
       setEntityMapping(DEFAULT_ENTITY_MAPPING);
       setConnectionStatus('disconnected');
       setHaVersion(null);
-      haProxyClient.setDirectConfig(null);
-      connectionManager.disconnect();
+      if (servicesRef.current) {
+        servicesRef.current.haProxyClient.setDirectConfig(null);
+        servicesRef.current.connectionManager.disconnect();
+      }
       setIsLoading(false);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [user]);
+  }, [user, servicesReady, loadConfig]);
 
   // ============= Context Value =============
   const value: HAConnectionContextValue = {
