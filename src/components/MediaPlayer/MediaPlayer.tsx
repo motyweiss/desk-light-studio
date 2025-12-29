@@ -13,39 +13,45 @@ import { AudioVisualizer } from './AudioVisualizer';
 import { MusicParticles } from './MusicParticles';
 
 // ============================================
-// UNIFIED TIMING CONSTANTS
-// All animations use these for perfect sync
+// UNIFIED ANIMATION SYSTEM
+// Perfect synchronization between all elements
 // ============================================
-const TIMING = {
-  layout: 0.35,       // Container size/shape changes
-  contentFade: 0.15,  // Content opacity changes - faster for clean transitions
+
+const DURATION = {
+  layout: 0.4,      // Container morphing
+  content: 0.25,    // Content fade/blur
 } as const;
 
 const EASE = {
-  layout: [0.32, 0.72, 0, 1] as const,     // Snappy for layout
-  fade: [0.4, 0, 0.2, 1] as const,          // Smooth for opacity
+  // Smooth deceleration for layout
+  layout: [0.4, 0, 0.2, 1] as const,
+  // Quick snap for content
+  content: [0.4, 0, 0.6, 1] as const,
 } as const;
 
-// Shared layout transition
-const layoutTransition = {
-  duration: TIMING.layout,
-  ease: EASE.layout,
-};
+// Orchestrated animation phases:
+// EXPAND: Layout starts → Content fades in (staggered)
+// COLLAPSE: Content fades out → Layout shrinks
 
-// Content transitions based on direction
-// On collapse: content fades out FIRST, then layout shrinks
-// On expand: layout expands FIRST, then content fades in
-const getContentTransition = (isExpanding: boolean) => ({
-  duration: TIMING.contentFade,
-  ease: EASE.fade,
-  delay: isExpanding ? TIMING.layout * 0.7 : 0, // Expanding: wait for layout. Collapsing: immediate
-});
-
-// Layout transition with delay for collapsing (wait for content to fade)
-const getLayoutTransition = (isCollapsing: boolean) => ({
-  duration: TIMING.layout,
-  ease: EASE.layout,
-  delay: isCollapsing ? TIMING.contentFade : 0, // Collapsing: wait for fade. Expanding: immediate
+const createTransitions = (isExpanding: boolean) => ({
+  // Layout always uses the same timing
+  layout: {
+    duration: DURATION.layout,
+    ease: EASE.layout,
+  },
+  // Content timing depends on direction
+  content: {
+    duration: DURATION.content,
+    ease: EASE.content,
+    // Expanding: wait for layout to start. Collapsing: immediate
+    delay: isExpanding ? DURATION.layout * 0.4 : 0,
+  },
+  // Layout delay for collapse (wait for content to hide first)
+  layoutDelayed: {
+    duration: DURATION.layout,
+    ease: EASE.layout,
+    delay: isExpanding ? 0 : DURATION.content * 0.5,
+  },
 });
 
 export const MediaPlayer = () => {
@@ -110,6 +116,9 @@ export const MediaPlayer = () => {
 
   // Derived state
   const isExpanded = !isMinimized;
+  
+  // Get transitions for current direction
+  const transitions = useMemo(() => createTransitions(isExpanded), [isExpanded]);
 
   // Memoized styles
   const containerStyles = useMemo(() => ({
@@ -148,7 +157,7 @@ export const MediaPlayer = () => {
           className="relative cursor-pointer"
           initial={false}
           animate={containerStyles}
-          transition={layoutTransition}
+          transition={transitions.layout}
           style={{
             width: '100%',
             backdropFilter: 'blur(40px)',
@@ -163,15 +172,15 @@ export const MediaPlayer = () => {
             transition: { duration: 0.15 }
           }}
         >
-          {/* Source Indicator - top right in expanded */}
+          {/* Source Indicator - expanded only */}
           <motion.div
             initial={false}
             animate={{
               opacity: isExpanded ? 1 : 0,
-              scale: isExpanded ? 1 : 0.9,
-              filter: isExpanded ? 'blur(0px)' : 'blur(4px)',
+              scale: isExpanded ? 1 : 0.85,
+              filter: isExpanded ? 'blur(0px)' : 'blur(6px)',
             }}
-            transition={getContentTransition(isExpanded)}
+            transition={transitions.content}
             className="absolute z-10"
             style={{ top: 16, right: 20, pointerEvents: isExpanded ? 'auto' : 'none' }}
           >
@@ -182,7 +191,7 @@ export const MediaPlayer = () => {
           <motion.div 
             initial={false}
             animate={paddingStyles}
-            transition={layoutTransition}
+            transition={transitions.layout}
             className="relative"
           >
             {/* Main content row */}
@@ -194,7 +203,7 @@ export const MediaPlayer = () => {
                 flexDirection: isMinimized ? 'row' : 'column',
                 alignItems: isMinimized ? 'center' : 'stretch',
               }}
-              transition={layoutTransition}
+              transition={transitions.layout}
             >
               {/* Album Art + Track Info */}
               <div className="flex items-center gap-4 min-w-0 flex-1">
@@ -203,7 +212,7 @@ export const MediaPlayer = () => {
                   className="relative flex-shrink-0 rounded-full overflow-hidden bg-white/8"
                   initial={false}
                   animate={albumArtSize}
-                  transition={layoutTransition}
+                  transition={transitions.layout}
                 >
                   <AnimatePresence mode="sync">
                     <motion.div
@@ -211,7 +220,7 @@ export const MediaPlayer = () => {
                       initial={{ opacity: 0 }}
                       animate={{ opacity: 1 }}
                       exit={{ opacity: 0 }}
-                      transition={{ duration: 0.2, ease: EASE.fade }}
+                      transition={{ duration: 0.25, ease: EASE.content }}
                       className="absolute inset-0"
                     >
                       {(isAlbumArtLoading || isAlbumArtTransitioning) && !albumArtUrl && (
@@ -236,11 +245,11 @@ export const MediaPlayer = () => {
 
                 {/* Track Info */}
                 <div className="flex-1 min-w-0">
-                  <h3 className={`text-white font-medium truncate ${isMinimized ? 'text-[13px]' : 'text-lg'}`}>
+                  <h3 className={`text-white font-medium truncate transition-all duration-300 ${isMinimized ? 'text-[13px]' : 'text-lg'}`}>
                     {currentTrack?.title || 'No media playing'}
                   </h3>
                   <div className="flex items-center gap-2">
-                    <p className={`text-white/50 truncate ${isMinimized ? 'text-xs' : 'text-sm'}`}>
+                    <p className={`text-white/50 truncate transition-all duration-300 ${isMinimized ? 'text-xs' : 'text-sm'}`}>
                       {currentTrack?.artist || 'Unknown Artist'}
                     </p>
                     {isMinimized && playerState.isPlaying && (
@@ -255,13 +264,13 @@ export const MediaPlayer = () => {
                       height: isExpanded ? 'auto' : 0,
                       opacity: isExpanded ? 1 : 0,
                       marginTop: isExpanded ? 2 : 0,
-                      filter: isExpanded ? 'blur(0px)' : 'blur(3px)',
+                      filter: isExpanded ? 'blur(0px)' : 'blur(4px)',
                     }}
                     transition={{
-                      height: layoutTransition,
-                      opacity: getContentTransition(isExpanded),
-                      marginTop: layoutTransition,
-                      filter: getContentTransition(isExpanded),
+                      height: transitions.layoutDelayed,
+                      marginTop: transitions.layoutDelayed,
+                      opacity: transitions.content,
+                      filter: transitions.content,
                     }}
                     style={{ overflow: 'hidden' }}
                   >
@@ -278,12 +287,14 @@ export const MediaPlayer = () => {
                 animate={{
                   width: isMinimized ? 'auto' : 0,
                   opacity: isMinimized ? 1 : 0,
-                  filter: isMinimized ? 'blur(0px)' : 'blur(4px)',
+                  scale: isMinimized ? 1 : 0.9,
+                  filter: isMinimized ? 'blur(0px)' : 'blur(6px)',
                 }}
                 transition={{
-                  width: layoutTransition,
-                  opacity: getContentTransition(isMinimized),
-                  filter: getContentTransition(isMinimized),
+                  width: transitions.layoutDelayed,
+                  opacity: createTransitions(isMinimized).content,
+                  scale: createTransitions(isMinimized).content,
+                  filter: createTransitions(isMinimized).content,
                 }}
                 style={{ overflow: 'hidden', flexShrink: 0 }}
               >
@@ -310,15 +321,20 @@ export const MediaPlayer = () => {
                 height: isExpanded ? 'auto' : 0,
                 opacity: isExpanded ? 1 : 0,
                 marginTop: isExpanded ? 16 : 0,
-                filter: isExpanded ? 'blur(0px)' : 'blur(4px)',
+                scale: isExpanded ? 1 : 0.95,
+                filter: isExpanded ? 'blur(0px)' : 'blur(6px)',
               }}
               transition={{
-                height: getLayoutTransition(!isExpanded),
-                marginTop: getLayoutTransition(!isExpanded),
-                opacity: getContentTransition(isExpanded),
-                filter: getContentTransition(isExpanded),
+                height: transitions.layoutDelayed,
+                marginTop: transitions.layoutDelayed,
+                opacity: transitions.content,
+                scale: transitions.content,
+                filter: transitions.content,
               }}
-              style={{ overflow: isExpanded ? 'visible' : 'hidden' }}
+              style={{ 
+                overflow: isExpanded ? 'visible' : 'hidden',
+                transformOrigin: 'top center',
+              }}
             >
               <div className="space-y-4">
                 {/* Progress Bar */}
