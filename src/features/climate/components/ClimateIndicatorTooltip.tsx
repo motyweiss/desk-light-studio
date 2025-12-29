@@ -5,9 +5,9 @@ import { useRef, useState, useEffect } from "react";
 import { createPortal } from "react-dom";
 
 // Simple semi-transparent circle for the icon
-const IconCircle = ({ children, size = 28 }: { children: React.ReactNode; size?: number }) => (
+const IconCircle = ({ children, size = 36 }: { children: React.ReactNode; size?: number }) => (
   <div 
-    className="rounded-full bg-white/10 flex items-center justify-center"
+    className="rounded-full bg-white/8 flex items-center justify-center"
     style={{ width: size, height: size }}
   >
     {children}
@@ -68,22 +68,23 @@ export const ClimateIndicatorTooltip = ({
         className="cursor-default"
         whileHover={{ scale: 1.02 }}
       >
-        <div className="flex items-center gap-1.5 md:gap-2">
-          <IconCircle size={24}>
+        <div className="flex items-center gap-2.5 md:gap-3">
+          <IconCircle size={32}>
             <Icon 
-              className="w-3 h-3 text-white/80" 
+              className="w-4 h-4 text-white/60" 
               strokeWidth={1.5}
+              fill="none"
             />
           </IconCircle>
           <motion.div 
-            className="text-xs font-light text-white/90 tabular-nums"
+            className="text-sm font-light text-white/90 tabular-nums tracking-tight"
             animate={{
               opacity: isLoading ? 0.4 : 1
             }}
             transition={{ duration: 0.3 }}
           >
             {isLoading && value === '0' ? '--' : (renderValue ? renderValue() : value)}
-            {!isLoading && <span className="text-[10px] text-white/40 ml-0.5">{unit}</span>}
+            {!isLoading && <span className="text-xs text-white/40 ml-0.5">{unit}</span>}
           </motion.div>
         </div>
       </motion.div>
