@@ -49,12 +49,10 @@ export const useMediaPlayerAnimations = ({
   const animations = useMemo(() => {
     const durationMultiplier = reducedMotion ? 0 : 1;
     
-    // Layout spring - for size/position changes
+    // Layout transition - smooth tween for size/position changes (no bounce)
     const layoutTransition: Transition = {
-      type: MEDIA_PLAYER.layout.type,
-      stiffness: MEDIA_PLAYER.layout.stiffness,
-      damping: MEDIA_PLAYER.layout.damping,
-      mass: MEDIA_PLAYER.layout.mass,
+      duration: 0.35,
+      ease: [0.32, 0.72, 0, 1],
     };
     
     // Fade transition - for opacity changes
