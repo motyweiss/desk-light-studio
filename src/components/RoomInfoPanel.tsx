@@ -121,14 +121,18 @@ export const RoomInfoPanel = ({
       {climateData && (
         <div className="space-y-6">
           <ClimateIndicators />
-          <div className="h-px bg-white/8" />
         </div>
+      )}
+
+      {/* Separator between climate and devices */}
+      {climateData && devices && devices.length > 0 && (
+        <div className="h-px bg-white/8" />
       )}
 
       {/* Devices Battery Section - Desktop only */}
       {devices && devices.length > 0 && (
         <div className="hidden md:block">
-          <div className="flex flex-row items-start justify-between">
+          <div className="flex flex-row items-start justify-between gap-4">
             {devices.map((device, index) => {
               const DeviceIcon = device.icon === 'headphones' 
                 ? AirPodsMaxIcon 
@@ -202,7 +206,7 @@ export const RoomInfoPanel = ({
                   
                   {/* Separator line - show for all except last item */}
                   {index < devices.length - 1 && (
-                    <div className="h-10 w-px bg-white/8 ml-8" />
+                    <div className="h-10 w-px bg-white/8 ml-4" />
                   )}
                 </div>
               );
