@@ -297,7 +297,7 @@ const Settings = () => {
               <Button
                 onClick={handleSave}
                 disabled={!isFormValid || isSaving}
-                className="flex-1 bg-[hsl(28_18%_12%)] hover:bg-[hsl(28_18%_16%)] text-white border-white/10 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
+                className="flex-1 bg-primary hover:bg-primary/90 text-primary-foreground border-border disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
               >
                 {isSaving ? (
                   <>
