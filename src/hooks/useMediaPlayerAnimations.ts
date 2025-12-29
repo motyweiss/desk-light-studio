@@ -1,11 +1,11 @@
 import { useMemo } from 'react';
-import { MEDIA_PLAYER } from '@/constants/animations';
-import type { Transition, Variants } from 'framer-motion';
+import type { Transition } from 'framer-motion';
+import { TIMING, EASE, STAGGER, TRANSITIONS } from '@/lib/animations';
+import { useReducedMotion } from './useReducedMotion';
 
 interface UseMediaPlayerAnimationsOptions {
   isMinimized: boolean;
   isVisible: boolean;
-  reducedMotion?: boolean;
 }
 
 interface MediaPlayerAnimations {
@@ -43,68 +43,68 @@ interface MediaPlayerAnimations {
 export const useMediaPlayerAnimations = ({
   isMinimized,
   isVisible,
-  reducedMotion = false,
 }: UseMediaPlayerAnimationsOptions): MediaPlayerAnimations => {
+  const reducedMotion = useReducedMotion();
   
   const animations = useMemo(() => {
     const durationMultiplier = reducedMotion ? 0 : 1;
     
     // Layout transition - smooth tween for size/position changes (no bounce)
     const layoutTransition: Transition = {
-      duration: 0.35,
-      ease: [0.32, 0.72, 0, 1],
+      duration: TIMING.medium * durationMultiplier,
+      ease: EASE.snappy,
     };
     
     // Fade transition - for opacity changes
     const fadeTransition: Transition = {
-      duration: MEDIA_PLAYER.fade.duration * durationMultiplier,
-      ease: MEDIA_PLAYER.fade.ease,
+      duration: TIMING.fast * durationMultiplier,
+      ease: EASE.smooth,
     };
     
     // Entry transition - initial page load
     const entryTransition: Transition = {
-      duration: MEDIA_PLAYER.entry.duration * durationMultiplier,
-      delay: MEDIA_PLAYER.entry.delay,
-      ease: MEDIA_PLAYER.entry.ease,
+      duration: TIMING.medium * durationMultiplier,
+      delay: 0.2,
+      ease: EASE.entrance,
     };
     
     // Mode transition - minimized/expanded switch
     const modeTransition: Transition = {
-      duration: MEDIA_PLAYER.mode.duration * durationMultiplier,
-      ease: MEDIA_PLAYER.mode.ease,
+      duration: TIMING.medium * durationMultiplier,
+      ease: EASE.snappy,
     };
     
     // Stagger props generator
     const staggerProps = (index: number) => ({
-      initial: { opacity: 0, y: MEDIA_PLAYER.stagger.y },
+      initial: { opacity: 0, y: 8 },
       animate: { opacity: 1, y: 0 },
       exit: { opacity: 0, y: -4 },
       transition: {
-        duration: MEDIA_PLAYER.stagger.duration * durationMultiplier,
-        delay: index * MEDIA_PLAYER.stagger.delay,
-        ease: MEDIA_PLAYER.stagger.ease,
+        duration: TIMING.fast * durationMultiplier,
+        delay: index * STAGGER.tight,
+        ease: EASE.out,
       },
     });
     
     // Entry props - for initial appearance
     const entryProps = {
-      initial: { opacity: 0, y: MEDIA_PLAYER.entry.y },
+      initial: { opacity: 0, y: 16 },
       animate: { opacity: 1, y: 0 },
       transition: entryTransition,
     };
     
     // Hover props
     const hoverProps = {
-      scale: MEDIA_PLAYER.interaction.hoverScale,
+      scale: 1.02,
       transition: {
-        duration: MEDIA_PLAYER.interaction.duration * durationMultiplier,
-        ease: MEDIA_PLAYER.fade.ease,
+        duration: TIMING.micro * durationMultiplier,
+        ease: EASE.smooth,
       },
     };
     
     // Tap props
     const tapProps = {
-      scale: MEDIA_PLAYER.interaction.tapScale,
+      scale: 0.98,
     };
     
     return {
@@ -124,11 +124,16 @@ export const useMediaPlayerAnimations = ({
 
 // Export static values for use outside of React components
 export const PLAYER_TRANSITIONS = {
-  layout: MEDIA_PLAYER.layout,
-  fade: MEDIA_PLAYER.fade,
-  entry: MEDIA_PLAYER.entry,
-  mode: MEDIA_PLAYER.mode,
-  stagger: MEDIA_PLAYER.stagger,
-  interaction: MEDIA_PLAYER.interaction,
-  popover: MEDIA_PLAYER.popover,
+  layout: TRANSITIONS.layout,
+  fade: TRANSITIONS.fade,
+  entry: TRANSITIONS.entrance,
+  mode: TRANSITIONS.standard,
+  stagger: { interval: STAGGER.tight },
+  interaction: { hoverScale: 1.02, tapScale: 0.98, duration: TIMING.micro },
+  popover: {
+    duration: TIMING.fast,
+    ease: EASE.out,
+    y: 8,
+    scale: 0.95,
+  },
 } as const;
