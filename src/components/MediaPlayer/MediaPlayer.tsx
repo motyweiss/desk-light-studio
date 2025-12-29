@@ -266,7 +266,7 @@ export const MediaPlayer = () => {
                         }}
                         transition={contentTransition}
                       >
-                        <h3 className="text-white font-light truncate text-sm sm:text-base">
+                        <h3 className={`text-white font-light truncate ${isMinimized ? 'text-[13px]' : 'text-sm sm:text-base'}`}>
                           {currentTrack?.title || 'No media playing'}
                         </h3>
                         <div className="flex items-center gap-2">
