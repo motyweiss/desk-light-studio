@@ -188,9 +188,9 @@ const Index = () => {
         />
 
         {/* Main content area */}
-        <div className="w-full h-full max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-center md:justify-between gap-4 md:gap-8 lg:gap-10 relative z-10">
+        <div className="w-full h-full max-w-5xl mx-auto flex flex-col md:flex-row items-center justify-center md:justify-between gap-4 md:gap-6 lg:gap-8 relative z-10">
           {/* Desk Display */}
-          <div className="w-full md:w-[45%] lg:w-[43%] flex-shrink-0 md:order-1 order-2 max-w-[320px] md:max-w-none flex flex-col items-center">
+          <div className="w-full md:w-[48%] lg:w-[46%] flex-shrink-0 md:order-1 order-2 max-w-[300px] md:max-w-none flex flex-col items-center">
             <motion.div
               className="w-full"
               initial={{ opacity: 0 }}
@@ -217,7 +217,7 @@ const Index = () => {
           </div>
 
           {/* Room Info Panel */}
-          <div className="w-full md:w-[52%] flex-shrink-0 md:order-2 order-1">
+          <div className="w-full md:w-[48%] flex-shrink-0 md:order-2 order-1">
             <RoomInfoPanel
               roomName="Office Desk"
               climateData={{
