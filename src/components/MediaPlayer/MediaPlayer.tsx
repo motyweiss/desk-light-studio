@@ -104,10 +104,10 @@ export const MediaPlayer = () => {
   }), [isMinimized]);
 
   const paddingStyles = useMemo(() => ({
-    paddingLeft: isMinimized ? 8 : 20,
-    paddingRight: isMinimized ? 16 : 20,
-    paddingTop: isMinimized ? 8 : 14,
-    paddingBottom: isMinimized ? 8 : 14,
+    paddingLeft: isMinimized ? 8 : 24,
+    paddingRight: isMinimized ? 16 : 24,
+    paddingTop: isMinimized ? 8 : 20,
+    paddingBottom: isMinimized ? 8 : 20,
   }), [isMinimized]);
 
   const albumArtSize = useMemo(() => ({
@@ -174,8 +174,12 @@ export const MediaPlayer = () => {
                 scale: isMinimized ? 0.8 : 1,
               }}
               transition={CONTENT_FADE_TRANSITION}
-              className="absolute top-0 right-0 z-10"
-              style={{ pointerEvents: isMinimized ? 'none' : 'auto' }}
+              className="absolute z-10"
+              style={{ 
+                top: 0, 
+                right: 0, 
+                pointerEvents: isMinimized ? 'none' : 'auto' 
+              }}
             >
               <SourceIndicator appName={playerState.appName} />
             </motion.div>
@@ -316,16 +320,16 @@ export const MediaPlayer = () => {
               animate={{
                 height: isMinimized ? 0 : 'auto',
                 opacity: isMinimized ? 0 : 1,
-                marginTop: isMinimized ? 0 : 8,
+                marginTop: isMinimized ? 0 : 16,
               }}
               transition={{
                 height: PLAYER_LAYOUT_TRANSITION,
                 opacity: { ...CONTENT_FADE_TRANSITION, delay: isMinimized ? 0 : 0.1 },
                 marginTop: PLAYER_LAYOUT_TRANSITION,
               }}
-              style={{ overflow: 'hidden' }}
+              style={{ overflow: 'visible' }}
             >
-              <div className="space-y-3">
+              <div className="space-y-4">
                 {/* Progress Bar */}
                 {currentTrack && (
                   <div onClick={(e) => e.stopPropagation()}>
