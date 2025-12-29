@@ -247,7 +247,7 @@ export const LightControlCard = ({
       <div className="flex-1" />
 
       {/* Bottom section: Label + Status + Slider */}
-      <div className="relative z-10 space-y-4">
+      <div className="relative z-10 space-y-5">
         {/* Label & Status */}
         <div className="space-y-0.5">
           {/* Label */}
