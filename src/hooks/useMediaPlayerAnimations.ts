@@ -61,11 +61,11 @@ export const useMediaPlayerAnimations = ({
       ease: EASE.smooth,
     };
     
-    // Entry transition - initial page load
+    // Entry transition - initial page load with slide from bottom
     const entryTransition: Transition = {
-      duration: TIMING.medium * durationMultiplier,
-      delay: 0.2,
-      ease: EASE.entrance,
+      duration: 0.6 * durationMultiplier,
+      delay: 0.3,
+      ease: [0.22, 0.68, 0.35, 1.0], // Smooth organic easing
     };
     
     // Mode transition - minimized/expanded switch
@@ -86,9 +86,9 @@ export const useMediaPlayerAnimations = ({
       },
     });
     
-    // Entry props - for initial appearance
+    // Entry props - slide up from bottom with fade
     const entryProps = {
-      initial: { opacity: 0, y: 16 },
+      initial: { opacity: 0, y: 40 },
       animate: { opacity: 1, y: 0 },
       transition: entryTransition,
     };
