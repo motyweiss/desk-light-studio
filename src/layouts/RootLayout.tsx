@@ -25,7 +25,7 @@ export const RootLayout = ({ children }: RootLayoutProps) => {
         <div 
           className="h-screen w-full relative flex flex-col overflow-hidden"
           style={{
-            backgroundColor: "#B3AC9C",
+            backgroundColor: "#B79978",
           }}
         >
         
