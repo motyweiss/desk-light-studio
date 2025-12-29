@@ -256,27 +256,35 @@ class HomeAssistantService {
   }
 
   async getAllEntityStates(entityIds: string[]): Promise<Map<string, { state: string; brightness?: number }>> {
-    return this.retryWithBackoff(async () => {
-      const stateMap = new Map<string, { state: string; brightness?: number }>();
-      
-      await Promise.all(
-        entityIds.map(async (entityId) => {
-          const entity = await this.getEntityState(entityId);
-          if (entity) {
-            stateMap.set(entityId, {
-              state: entity.state,
-              brightness: entity.attributes.brightness,
-            });
-          }
-        })
-      );
+    const stateMap = new Map<string, { state: string; brightness?: number }>();
+    
+    if (entityIds.length === 0) {
+      return stateMap;
+    }
 
-      if (stateMap.size === 0) {
-        throw new Error("No entity states returned from Home Assistant");
+    try {
+      // Batch fetch - get all states at once
+      const { data, error } = await haProxyClient.get<HAEntity[]>('/api/states');
+      
+      if (error || !data) {
+        return stateMap;
+      }
+
+      // Filter to requested entities
+      const entitySet = new Set(entityIds);
+      for (const entity of data) {
+        if (entitySet.has(entity.entity_id)) {
+          stateMap.set(entity.entity_id, {
+            state: entity.state,
+            brightness: entity.attributes?.brightness,
+          });
+        }
       }
 
       return stateMap;
-    }, "getAllEntityStates");
+    } catch {
+      return stateMap;
+    }
   }
 
   // Media Player Functions

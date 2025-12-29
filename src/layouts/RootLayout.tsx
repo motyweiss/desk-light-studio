@@ -5,7 +5,6 @@ import { MediaPlayerProvider } from '@/features/mediaPlayer';
 import { MediaPlayer } from '@/components/MediaPlayer/MediaPlayer';
 import { TopNavigationBar } from '@/components/navigation/TopNavigationBar';
 import { useHAConnection } from '@/contexts/HAConnectionContext';
-import { useHomeAssistantSync } from '@/hooks/useHomeAssistantSync';
 
 interface RootLayoutProps {
   children: ReactNode;
@@ -13,18 +12,8 @@ interface RootLayoutProps {
 
 export const RootLayout = ({ children }: RootLayoutProps) => {
   const location = useLocation();
-  const { entityMapping, isConnected, isLoading: isConnecting, reconnect } = useHAConnection();
-  const [isReconnecting, setIsReconnecting] = useState(false);
-  const [pendingLights] = useState<Set<string>>(new Set());
-
-  const { attemptReconnect } = useHomeAssistantSync({
-    isConnected,
-    entityMapping,
-    pendingLights,
-    onLightsUpdate: () => {},
-    onSensorsUpdate: () => {},
-    onReconnectingChange: setIsReconnecting,
-  });
+  const { entityMapping, isConnected, isLoading: isConnecting, reconnect, connectionStatus } = useHAConnection();
+  const isReconnecting = connectionStatus === 'connecting';
 
   const isSettingsPage = location.pathname === '/settings';
 
@@ -52,7 +41,7 @@ export const RootLayout = ({ children }: RootLayoutProps) => {
               isConnected={isConnected}
               isConnecting={isConnecting}
               isReconnecting={isReconnecting}
-              onReconnectClick={attemptReconnect}
+              onReconnectClick={reconnect}
             />
           )}
 
