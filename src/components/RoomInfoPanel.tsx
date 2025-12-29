@@ -71,7 +71,7 @@ export const RoomInfoPanel = ({
 }: RoomInfoPanelProps) => {
 
   return (
-    <div className="space-y-5 md:space-y-6">
+    <div className="space-y-3 md:space-y-4">
       {/* Room Title with Master Switch */}
       <motion.div 
         className="flex items-center justify-between gap-3 md:gap-4"
