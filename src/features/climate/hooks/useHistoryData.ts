@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { haClient } from '@/api/homeAssistant/client';
+import { haProxyClient } from '@/services/haProxyClient';
 import { logger } from '@/shared/utils/logger';
 
 /**
@@ -43,16 +43,16 @@ export const useHistoryData = (
       lastFetchRef.current = now;
 
       try {
-        const history = await haClient.getHistory(entityId, 24);
-        
-        if (!history || history.length === 0) {
+        const { data: history } = await haProxyClient.get<Array<Array<{ state: string; last_changed: string }>>>(`/api/history/period?filter_entity_id=${entityId}&minimal_response&significant_changes_only`);
+        const historyData = history?.[0] || [];
+        if (!historyData || historyData.length === 0) {
           const mockData = generateMockData(currentValue, sensorType);
           setHistoryData(mockData);
           return;
         }
 
         // Parse and filter valid numeric values
-        const values = history
+        const values = historyData
           .map(entry => parseFloat(entry.state))
           .filter(val => !isNaN(val) && val !== null);
 

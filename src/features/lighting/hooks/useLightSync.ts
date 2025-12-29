@@ -1,6 +1,6 @@
 import { useState, useCallback, useRef, useEffect } from 'react';
 import { usePolling } from '@/shared/hooks';
-import { lights, haClient } from '@/api/homeAssistant';
+import { lights } from '@/api/homeAssistant';
 import { logger } from '@/shared/utils/logger';
 import type { AnimationSource } from '@/constants/animations';
 
