@@ -215,7 +215,7 @@ export const RoomInfoPanel = ({
       )}
 
       {/* Light Controls Section - 3 Column Grid */}
-      <div className="pt-1">
+      <div className="pt-4 md:pt-6">
         <div className="grid grid-cols-3 gap-2 md:gap-3">
           {lights.map((light, index) => (
             <motion.div 
