@@ -76,22 +76,44 @@ serve(async (req) => {
     const haUrl = `${haConfig.base_url}${path}`;
     console.log(`[HA Proxy] Proxying ${method} request to: ${haUrl}`);
 
-    // Make the request to Home Assistant
-    const haResponse = await fetch(haUrl, {
-      method,
-      headers: {
-        'Authorization': `Bearer ${haConfig.access_token}`,
-        'Content-Type': 'application/json',
-      },
-      body: data ? JSON.stringify(data) : undefined,
-    });
+    // Make the request to Home Assistant with retry logic
+    let haResponse: Response;
+    let lastError: Error | null = null;
+    
+    for (let attempt = 0; attempt < 2; attempt++) {
+      try {
+        haResponse = await fetch(haUrl, {
+          method,
+          headers: {
+            'Authorization': `Bearer ${haConfig.access_token}`,
+            'Content-Type': 'application/json',
+          },
+          body: data ? JSON.stringify(data) : undefined,
+        });
+        lastError = null;
+        break;
+      } catch (fetchError) {
+        lastError = fetchError as Error;
+        console.error(`[HA Proxy] Fetch attempt ${attempt + 1} failed:`, fetchError);
+        if (attempt < 1) {
+          await new Promise(resolve => setTimeout(resolve, 500));
+        }
+      }
+    }
+    
+    if (lastError) {
+      return new Response(
+        JSON.stringify({ error: lastError.message, code: 'HA_CONNECTION_ERROR' }),
+        { status: 503, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
 
     // Handle image responses
-    const contentType = haResponse.headers.get('content-type') || '';
+    const contentType = haResponse!.headers.get('content-type') || '';
     if (contentType.startsWith('image/')) {
-      const imageBuffer = await haResponse.arrayBuffer();
+      const imageBuffer = await haResponse!.arrayBuffer();
       return new Response(imageBuffer, {
-        status: haResponse.status,
+        status: haResponse!.status,
         headers: {
           ...corsHeaders,
           'Content-Type': contentType,
@@ -99,13 +121,31 @@ serve(async (req) => {
       });
     }
 
-    // Handle JSON responses
-    const responseData = await haResponse.json();
+    // Handle empty responses
+    const responseText = await haResponse!.text();
+    if (!responseText || responseText.trim() === '') {
+      return new Response(
+        JSON.stringify({ error: 'Empty response from Home Assistant', code: 'HA_EMPTY_RESPONSE' }),
+        { status: 502, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    // Try to parse JSON response
+    let responseData;
+    try {
+      responseData = JSON.parse(responseText);
+    } catch (parseError) {
+      console.error('[HA Proxy] Failed to parse response:', responseText.substring(0, 200));
+      return new Response(
+        JSON.stringify({ error: 'Invalid JSON response from Home Assistant', raw: responseText.substring(0, 100) }),
+        { status: 502, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
 
     return new Response(
       JSON.stringify(responseData),
       {
-        status: haResponse.status,
+        status: haResponse!.status,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       }
     );
