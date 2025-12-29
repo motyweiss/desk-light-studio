@@ -213,7 +213,7 @@ export const LightControlCard = ({
       onPointerCancel={handlePointerUp}
       onMouseEnter={() => onHover(id)}
       onMouseLeave={() => onHover(null)}
-      className="w-full aspect-[1/1.2] rounded-2xl p-5 pb-8 md:p-6 md:pb-9 cursor-pointer text-left border backdrop-blur-xl relative overflow-hidden flex flex-col"
+      className="w-full aspect-[1/1.25] rounded-2xl p-5 pb-10 md:p-6 md:pb-12 cursor-pointer text-left border backdrop-blur-xl relative overflow-hidden flex flex-col"
       initial={false}
       animate={{
         backgroundColor: isLoading 
