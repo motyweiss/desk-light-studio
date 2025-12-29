@@ -22,15 +22,12 @@ export const RootLayout = ({ children }: RootLayoutProps) => {
       entityId={entityMapping?.mediaPlayer || ''} 
       isConnected={isConnected}
     >
-      <div 
-        className="h-screen w-full relative flex flex-col overflow-hidden"
-        style={{
-          backgroundImage: "url('/bg.png')",
-          backgroundSize: "cover",
-          backgroundPosition: "center",
-          backgroundColor: "#96856e",
-        }}
-      >
+        <div 
+          className="h-screen w-full relative flex flex-col overflow-hidden"
+          style={{
+            backgroundColor: "#E4DED1",
+          }}
+        >
         
         {/* Content */}
         <div className="relative z-10 h-full flex flex-col overflow-hidden">
