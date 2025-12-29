@@ -1,8 +1,8 @@
 import { motion, AnimatePresence } from 'framer-motion';
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { Music } from 'lucide-react';
 import { useAuthenticatedImage } from '@/hooks/useAuthenticatedImage';
-import { useMediaPlayer } from '@/features/mediaPlayer';
+import { useMediaPlayer, useMediaPlayerUI, PLAYER_HEIGHTS } from '@/features/mediaPlayer';
 import { ProgressBar } from './ProgressBar';
 import { PlaybackControls } from './PlaybackControls';
 import { VolumeControl } from './VolumeControl';
@@ -14,9 +14,13 @@ import { MusicParticles } from './MusicParticles';
 import { MEDIA_PLAYER_ANIMATIONS, EASING } from '@/constants/animations';
 
 export const MediaPlayer = () => {
-  const [isMinimized, setIsMinimized] = useState(true);
+  const [isMinimized, setIsMinimizedLocal] = useState(true);
   const [speakerPopoverOpen, setSpeakerPopoverOpen] = useState(false);
   const speakerBadgeRef = useRef<HTMLButtonElement>(null);
+  const playerRef = useRef<HTMLDivElement>(null);
+
+  // UI Context for communicating with RootLayout
+  const { setIsMinimized, setIsVisible, setPlayerHeight } = useMediaPlayerUI();
 
   const {
     playerState,
@@ -65,6 +69,28 @@ export const MediaPlayer = () => {
     albumArtError,
   });
 
+  // Sync visibility with UI context
+  const isPlayerVisible = !isLoading && playerState && 
+    !(playerState.isOff && !playerState.currentTrack) &&
+    !(playerState.queueEnded && !playerState.isPlaying);
+
+  useEffect(() => {
+    setIsVisible(isPlayerVisible);
+    if (isPlayerVisible) {
+      setPlayerHeight(isMinimized ? PLAYER_HEIGHTS.minimized : PLAYER_HEIGHTS.expanded);
+    }
+  }, [isPlayerVisible, isMinimized, setIsVisible, setPlayerHeight]);
+
+  // Sync minimized state with UI context
+  useEffect(() => {
+    setIsMinimized(isMinimized);
+  }, [isMinimized, setIsMinimized]);
+
+  // Toggle handler
+  const handleToggleMinimized = () => {
+    setIsMinimizedLocal(prev => !prev);
+  };
+
   // Hide player only during loading or if no player state
   if (isLoading || !playerState) {
     return null;
@@ -97,6 +123,7 @@ export const MediaPlayer = () => {
   return (
     <>
       <motion.div
+        ref={playerRef}
         initial={{ y: 100, opacity: 0 }}
         animate={{ 
           y: 0, 
@@ -107,18 +134,18 @@ export const MediaPlayer = () => {
           ease: EASING.entrance,
           delay: MEDIA_PLAYER_ANIMATIONS.entry.delay,
         }}
-        className="fixed bottom-0 left-0 right-0 z-50 w-full"
+        className="fixed bottom-4 left-4 right-4 z-50 md:left-6 md:right-6 lg:left-auto lg:right-auto lg:left-1/2 lg:-translate-x-1/2 lg:w-[calc(100%-48px)] lg:max-w-4xl"
       >
         <motion.div 
-          onClick={() => setIsMinimized(!isMinimized)}
-          className="bg-white/8 backdrop-blur-[24px] border-t border-white/20 rounded-t-xl md:rounded-t-2xl shadow-[0_4px_24px_rgba(0,0,0,0.15)] relative cursor-pointer"
+          onClick={handleToggleMinimized}
+          className="bg-[hsl(35_12%_18%/0.85)] backdrop-blur-xl border border-white/12 rounded-2xl shadow-[0_8px_32px_rgba(0,0,0,0.25)] relative cursor-pointer"
           initial={false}
           animate={{ 
             height: isMinimized ? 72 : 'auto',
           }}
           transition={smoothTransition}
           whileHover={{ 
-            backgroundColor: 'rgba(255, 255, 255, 0.09)'
+            backgroundColor: 'hsl(35 12% 20% / 0.9)'
           }}
         >
 
