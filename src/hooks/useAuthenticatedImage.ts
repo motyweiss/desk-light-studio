@@ -68,24 +68,28 @@ export const useAuthenticatedImage = (relativePath: string | null) => {
       return;
     }
 
-    // Extract base path without query params for comparison
-    const getBasePath = (path: string) => path.split('?')[0];
-    const newBasePath = getBasePath(relativePath);
-    const currentBasePath = currentPathRef.current ? getBasePath(currentPathRef.current) : null;
+    // Extract cache param for comparison - this changes when the track changes
+    const getCacheParam = (path: string) => {
+      const match = path.match(/[?&]cache=([^&]+)/);
+      return match ? match[1] : null;
+    };
     
-    // Check if the actual image path changed
-    const pathChanged = newBasePath !== currentBasePath;
+    const newCacheParam = getCacheParam(relativePath);
+    const currentCacheParam = currentPathRef.current ? getCacheParam(currentPathRef.current) : null;
     
-    // Skip if same path and we already have an image
-    if (!pathChanged && imageUrl) {
-      console.log('[useAuthenticatedImage] Same path, using cached image');
+    // Check if the actual image changed (different cache param means different image)
+    const imageChanged = newCacheParam !== currentCacheParam;
+    
+    // Skip if same image and we already have a loaded image
+    if (!imageChanged && imageUrl) {
+      console.log('[useAuthenticatedImage] Same image (cache match), using cached');
       return;
     }
 
-    console.log('[useAuthenticatedImage] Path changed:', { 
-      from: currentBasePath, 
-      to: newBasePath, 
-      pathChanged 
+    console.log('[useAuthenticatedImage] Image changed:', { 
+      from: currentCacheParam, 
+      to: newCacheParam, 
+      imageChanged 
     });
 
     // Create new abort controller
@@ -93,7 +97,7 @@ export const useAuthenticatedImage = (relativePath: string | null) => {
     abortControllerRef.current = abortController;
 
     // Mark as transitioning if we're changing from one image to another
-    const isImageTransition = currentPathRef.current !== null && pathChanged;
+    const isImageTransition = currentPathRef.current !== null && imageChanged;
     if (isImageTransition) {
       setIsTransitioning(true);
     }
@@ -101,8 +105,8 @@ export const useAuthenticatedImage = (relativePath: string | null) => {
     // Update current path ref immediately
     currentPathRef.current = relativePath;
     
-    // Clear cache for fresh fetch on path change
-    if (pathChanged) {
+    // Clear cache for fresh fetch on image change
+    if (imageChanged) {
       homeAssistant.clearImageCache();
     }
 
