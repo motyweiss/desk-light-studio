@@ -15,6 +15,7 @@ interface LightState {
   isAnimating: boolean;
   isPending: boolean;
   source: AnimationSource;
+  lastUserChangeTime: number; // Timestamp of last user change - used to ignore stale external updates
 }
 
 interface LightingContextValue {
@@ -51,10 +52,13 @@ export const LightingProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   const [connectionType, setConnectionType] = useState<'websocket' | 'polling' | 'disconnected'>('disconnected');
   const [pollingEnabled, setPollingEnabled] = useState(false);
   const [lights, setLights] = useState<LightingContextValue['lights']>({
-    spotlight: { targetValue: 0, displayValue: 0, confirmedValue: 0, isAnimating: false, isPending: false, source: 'initial' },
-    deskLamp: { targetValue: 0, displayValue: 0, confirmedValue: 0, isAnimating: false, isPending: false, source: 'initial' },
-    monitorLight: { targetValue: 0, displayValue: 0, confirmedValue: 0, isAnimating: false, isPending: false, source: 'initial' },
+    spotlight: { targetValue: 0, displayValue: 0, confirmedValue: 0, isAnimating: false, isPending: false, source: 'initial', lastUserChangeTime: 0 },
+    deskLamp: { targetValue: 0, displayValue: 0, confirmedValue: 0, isAnimating: false, isPending: false, source: 'initial', lastUserChangeTime: 0 },
+    monitorLight: { targetValue: 0, displayValue: 0, confirmedValue: 0, isAnimating: false, isPending: false, source: 'initial', lastUserChangeTime: 0 },
   });
+  
+  // Grace period to ignore stale external updates after user changes
+  const USER_CHANGE_GRACE_PERIOD = 2000; // 2 seconds
 
   const debounceTimersRef = useRef<Map<string, NodeJS.Timeout>>(new Map());
   const wsSubscriptionsRef = useRef<Array<() => void>>([]);
@@ -99,12 +103,18 @@ export const LightingProvider: React.FC<{ children: React.ReactNode }> = ({ chil
 
           setLights(prev => {
             const light = prev[lightId];
-            // Don't update if pending or same value
-            if (light.isPending || light.confirmedValue === intensity) return prev;
+            const now = Date.now();
+            
+            // Ignore external updates during grace period after user change
+            const isInGracePeriod = (now - light.lastUserChangeTime) < USER_CHANGE_GRACE_PERIOD;
+            
+            // Don't update if pending, in grace period, or same value
+            if (light.isPending || isInGracePeriod || light.confirmedValue === intensity) return prev;
 
             return {
               ...prev,
               [lightId]: {
+                ...light,
                 targetValue: intensity,
                 displayValue: intensity,
                 confirmedValue: intensity,
@@ -174,9 +184,13 @@ export const LightingProvider: React.FC<{ children: React.ReactNode }> = ({ chil
 
           setLights(prev => {
             const light = prev[lightId];
+            const now = Date.now();
             
-            // Don't update if pending or same value
-            if (light.isPending || light.confirmedValue === newIntensity) return prev;
+            // Ignore external updates during grace period after user change
+            const isInGracePeriod = (now - light.lastUserChangeTime) < USER_CHANGE_GRACE_PERIOD;
+            
+            // Don't update if pending, in grace period, or same value
+            if (light.isPending || isInGracePeriod || light.confirmedValue === newIntensity) return prev;
             
             logger.light(lightId, `WebSocket: ${newIntensity}%`);
             
@@ -231,14 +245,17 @@ export const LightingProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       return;
     }
 
-    // Optimistic update
+    // Optimistic update - mark timestamp for user changes
+    const now = Date.now();
     setLights(prev => ({
       ...prev,
       [lightId]: {
         ...prev[lightId],
         targetValue: value,
+        displayValue: value,
         isPending: source === 'user',
         source,
+        lastUserChangeTime: source === 'user' ? now : prev[lightId].lastUserChangeTime,
       }
     }));
 
