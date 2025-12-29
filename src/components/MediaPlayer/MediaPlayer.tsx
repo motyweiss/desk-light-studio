@@ -114,11 +114,22 @@ export const MediaPlayer = () => {
     height: isMinimized ? 48 : 64,
   };
 
-  // Unified transition config
-  const smoothTransition = {
-    duration: MEDIA_PLAYER_ANIMATIONS.modeChange.duration,
-    ease: EASING.smooth,
+  // Unified transition configs
+  const containerTransition = {
+    duration: 0.4,
+    ease: [0.32, 0.72, 0, 1] as const,
   };
+
+  const contentTransition = {
+    duration: 0.35,
+    ease: [0.4, 0, 0.2, 1] as const,
+  };
+
+  const staggeredFade = (delay: number) => ({
+    duration: 0.3,
+    delay,
+    ease: [0.4, 0, 0.2, 1] as const,
+  });
 
   return (
     <>
@@ -144,7 +155,7 @@ export const MediaPlayer = () => {
             height: isMinimized ? 64 : 'auto',
             borderRadius: isMinimized ? 32 : 24,
           }}
-          transition={smoothTransition}
+          transition={containerTransition}
           whileHover={{ 
             backgroundColor: 'rgba(255, 255, 255, 0.15)'
           }}
@@ -166,7 +177,7 @@ export const MediaPlayer = () => {
                   className="relative flex-shrink-0 rounded-full overflow-hidden bg-white/8"
                   initial={false}
                   animate={albumArtSize}
-                  transition={smoothTransition}
+                  transition={contentTransition}
                 >
                   <AnimatePresence mode="wait">
                     <motion.div
@@ -264,7 +275,7 @@ export const MediaPlayer = () => {
                         animate={{ 
                           scale: isMinimized ? 1 : 1.125,
                         }}
-                        transition={smoothTransition}
+                        transition={contentTransition}
                       >
                         <h3 className="text-white font-light truncate text-sm sm:text-base">
                           {currentTrack?.title || 'No media playing'}
@@ -300,85 +311,103 @@ export const MediaPlayer = () => {
               </div>
 
               {/* Center Section: Mini Controls (desktop/tablet only) */}
-              {isMinimized && (
-                <motion.div
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                  transition={{ duration: 0.35, ease: EASING.smooth }}
-                  className="hidden sm:flex items-center justify-center"
-                >
-                  <div onClick={(e) => e.stopPropagation()}>
-                    <PlaybackControls
-                      isPlaying={playerState.isPlaying}
-                      shuffle={playerState.shuffle}
-                      repeat={playerState.repeat}
-                      onPlayPause={handlePlayPause}
-                      onPrevious={handlePrevious}
-                      onNext={handleNext}
-                      onShuffleToggle={handleShuffleToggle}
-                      onRepeatToggle={handleRepeatToggle}
-                      compact={true}
-                    />
-                  </div>
-                </motion.div>
-              )}
+              <AnimatePresence mode="wait">
+                {isMinimized && (
+                  <motion.div
+                    key="mini-controls"
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.95 }}
+                    transition={staggeredFade(0.05)}
+                    className="hidden sm:flex items-center justify-center"
+                  >
+                    <div onClick={(e) => e.stopPropagation()}>
+                      <PlaybackControls
+                        isPlaying={playerState.isPlaying}
+                        shuffle={playerState.shuffle}
+                        repeat={playerState.repeat}
+                        onPlayPause={handlePlayPause}
+                        onPrevious={handlePrevious}
+                        onNext={handleNext}
+                        onShuffleToggle={handleShuffleToggle}
+                        onRepeatToggle={handleRepeatToggle}
+                        compact={true}
+                      />
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
 
-              {/* Right Section: Volume + Speaker Badge + Spotify Logo */}
-              {isMinimized && (
-                <motion.div
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                  transition={{ duration: 0.35, ease: EASING.smooth }}
-                  className="flex items-center gap-3 justify-end pr-1"
-                >
-                  <div className="hidden lg:block" onClick={(e) => e.stopPropagation()}>
-                    <VolumeControl
-                      volume={playerState.volume}
-                      isMuted={playerState.isMuted}
-                      onVolumeChange={handleVolumeChange}
-                      onMuteToggle={handleMuteToggle}
-                      compact={true}
-                    />
-                  </div>
+              {/* Right Section: Volume + Speaker Badge */}
+              <AnimatePresence mode="wait">
+                {isMinimized && (
+                  <motion.div
+                    key="mini-right"
+                    initial={{ opacity: 0, x: 8 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: 4 }}
+                    transition={staggeredFade(0.08)}
+                    className="flex items-center gap-3 justify-end pr-1"
+                  >
+                    <div className="hidden lg:block" onClick={(e) => e.stopPropagation()}>
+                      <VolumeControl
+                        volume={playerState.volume}
+                        isMuted={playerState.isMuted}
+                        onVolumeChange={handleVolumeChange}
+                        onMuteToggle={handleMuteToggle}
+                        compact={true}
+                      />
+                    </div>
 
-                  <div onClick={(e) => e.stopPropagation()}>
-                    <MiniSpeakerBadge
-                      ref={speakerBadgeRef}
-                      playbackTarget={currentPlaybackTarget}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setSpeakerPopoverOpen(true);
-                      }}
-                      compact={true}
-                    />
-                  </div>
-                </motion.div>
-              )}
+                    <div onClick={(e) => e.stopPropagation()}>
+                      <MiniSpeakerBadge
+                        ref={speakerBadgeRef}
+                        playbackTarget={currentPlaybackTarget}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setSpeakerPopoverOpen(true);
+                        }}
+                        compact={true}
+                      />
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </div>
 
             {/* Full Player Controls */}
-            <AnimatePresence>
+            <AnimatePresence mode="wait">
               {!isMinimized && (
                 <motion.div
-                  initial={{ opacity: 0, height: 0 }}
-                  animate={{ opacity: 1, height: 'auto' }}
-                  exit={{ opacity: 0, height: 0 }}
+                  key="full-controls"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
                   transition={{ 
-                    duration: 0.35,
-                    ease: EASING.mediaPlayer,
+                    duration: 0.25,
+                    ease: [0.4, 0, 0.2, 1] as const,
                   }}
-                  className="space-y-5 pt-2 overflow-hidden"
+                  className="space-y-4 pt-4 overflow-hidden"
                 >
                   {/* Source Indicator */}
-                  <div className="flex justify-end">
+                  <motion.div 
+                    className="flex justify-end"
+                    initial={{ opacity: 0, y: 8 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={staggeredFade(0.05)}
+                  >
                     <SourceIndicator appName={playerState.appName} />
-                  </div>
+                  </motion.div>
 
                    {/* Progress Bar */}
                   {currentTrack && (
-                    <div className="pt-1" onClick={(e) => e.stopPropagation()}>
+                    <motion.div 
+                      className="pt-1" 
+                      onClick={(e) => e.stopPropagation()}
+                      initial={{ opacity: 0, y: 8 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={staggeredFade(0.1)}
+                    >
                       <ProgressBar
                         position={currentTrack.position}
                         duration={currentTrack.duration}
@@ -386,11 +415,16 @@ export const MediaPlayer = () => {
                         isTransitioning={playerState.isTrackTransitioning}
                         onSeek={handleSeek}
                       />
-                    </div>
+                    </motion.div>
                   )}
 
                    {/* Bottom Row: Playback Controls + Volume + Speaker Selector */}
-                  <div className="flex items-center justify-between gap-4">
+                  <motion.div 
+                    className="flex items-center justify-between gap-4"
+                    initial={{ opacity: 0, y: 8 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={staggeredFade(0.15)}
+                  >
                     <div className="flex-1 flex justify-center" onClick={(e) => e.stopPropagation()}>
                       <PlaybackControls
                         isPlaying={playerState.isPlaying}
@@ -421,7 +455,7 @@ export const MediaPlayer = () => {
                         }}
                       />
                     </div>
-                  </div>
+                  </motion.div>
                 </motion.div>
               )}
             </AnimatePresence>
