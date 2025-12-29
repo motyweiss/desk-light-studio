@@ -68,7 +68,7 @@ export const ClimateIndicatorTooltip = ({
         className="cursor-default"
         whileHover={{ scale: 1.02 }}
       >
-        <div className="flex items-center gap-2.5 md:gap-3">
+        <div className="flex items-center gap-1.5 md:gap-2">
           <IconCircle size={32}>
             <Icon 
               className="w-4 h-4 text-white/60" 
