@@ -33,14 +33,36 @@ class HAProxyClient {
 
   // Set direct config for fallback when no Supabase session
   setDirectConfig(config: DirectConfig | null) {
+    const previousConfig = this.directConfig;
     this.directConfig = config ? {
       ...config,
       baseUrl: config.baseUrl.replace(/\/+$/, '')
     } : null;
+    
+    if (config) {
+      console.log('[HA Proxy] Direct config SET:', { 
+        baseUrl: config.baseUrl,
+        hasToken: !!config.accessToken,
+        previouslyConfigured: !!previousConfig
+      });
+    } else {
+      console.log('[HA Proxy] Direct config CLEARED');
+    }
   }
 
   getDirectConfig(): DirectConfig | null {
     return this.directConfig;
+  }
+
+  /**
+   * Check if the client is ready to make requests
+   */
+  isReady(): boolean {
+    const ready = this.directConfig !== null;
+    if (!ready) {
+      console.warn('[HA Proxy] isReady check failed - no direct config');
+    }
+    return ready;
   }
 
   private async getAuthToken(): Promise<string | null> {

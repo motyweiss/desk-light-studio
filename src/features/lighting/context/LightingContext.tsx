@@ -214,7 +214,21 @@ export const LightingProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     source: AnimationSource
   ) => {
     const entityId = getLightEntity(lightId);
-    if (!entityId) return;
+    if (!entityId) {
+      logger.warn(`No entity ID for ${lightId}`);
+      return;
+    }
+
+    // Check if lights API is ready before attempting to send commands
+    if (source === 'user' && !lightsAPI.isReady()) {
+      logger.error(`Cannot control ${lightId} - Home Assistant not configured`);
+      toast({
+        title: 'Not connected',
+        description: 'Please configure Home Assistant connection in Settings',
+        variant: 'destructive',
+      });
+      return;
+    }
 
     // Optimistic update
     setLights(prev => ({
@@ -237,7 +251,7 @@ export const LightingProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       const delay = Math.abs(value - currentValue) > 50 ? 0 : 300;
       
       const timer = setTimeout(async () => {
-        logger.light(lightId, `Setting to ${value}%`);
+        logger.light(lightId, `Setting to ${value}% via ${entityId}`);
         
         try {
           if (value === 0) {
@@ -255,6 +269,7 @@ export const LightingProvider: React.FC<{ children: React.ReactNode }> = ({ chil
                 isPending: false,
               }
             }));
+            markSuccessfulSync();
           }, 200);
         } catch (error) {
           logger.error(`Failed to set ${lightId}`, error);
@@ -270,7 +285,7 @@ export const LightingProvider: React.FC<{ children: React.ReactNode }> = ({ chil
           
           toast({
             title: 'Failed to update light',
-            description: `Could not update ${lightId}`,
+            description: error instanceof Error ? error.message : `Could not update ${lightId}`,
             variant: 'destructive',
           });
         }
@@ -278,7 +293,7 @@ export const LightingProvider: React.FC<{ children: React.ReactNode }> = ({ chil
 
       debounceTimersRef.current.set(lightId, timer);
     }
-  }, [getLightEntity, lights, toast]);
+  }, [getLightEntity, lights, toast, markSuccessfulSync]);
 
   // Reconnect function - delegates to ConnectionManager
   const reconnect = useCallback(async () => {

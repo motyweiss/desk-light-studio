@@ -286,7 +286,17 @@ export const HAConnectionProvider: React.FC<{ children: React.ReactNode }> = ({ 
       // Configure and connect if we have config
       if (haConfig) {
         setConfig(haConfig);
+        
+        // CRITICAL: Configure clients FIRST before any connection attempts
+        logger.connection('Configuring HA clients before connection...');
         configureClients(haConfig);
+        
+        // Verify config was set
+        const configCheck = haProxyClient.getDirectConfig();
+        logger.connection('haProxyClient config verification:', { 
+          hasConfig: !!configCheck,
+          baseUrl: configCheck?.baseUrl 
+        });
 
         // Use ConnectionManager for connection
         const success = await connectionManager.connect(haConfig);
