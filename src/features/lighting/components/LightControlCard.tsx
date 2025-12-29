@@ -284,7 +284,7 @@ export const LightControlCard = ({
       {/* Top section: Icon */}
       <div className="flex items-start justify-between relative z-10 mb-8 md:mb-10">
         {/* Icon */}
-        <div className="relative w-8 h-8 md:w-9 md:h-9">
+        <div className="relative w-6 h-6 md:w-7 md:h-7">
           {/* Skeleton circle */}
           <motion.div
             className="absolute inset-0 rounded-full bg-white/10"
@@ -312,7 +312,7 @@ export const LightControlCard = ({
               filter: { duration: TIMING.medium, ease: EASE.smooth }
             }}
           >
-            <IconComponent className="w-8 h-8 md:w-9 md:h-9" />
+            <IconComponent className="w-6 h-6 md:w-7 md:h-7" />
           </motion.div>
         </div>
 
