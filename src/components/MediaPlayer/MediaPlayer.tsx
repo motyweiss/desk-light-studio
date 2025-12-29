@@ -1,8 +1,8 @@
 import { motion, AnimatePresence } from 'framer-motion';
 import { useState, useRef, useEffect } from 'react';
-import { Music } from 'lucide-react';
 import { useAuthenticatedImage } from '@/hooks/useAuthenticatedImage';
 import { useMediaPlayer, useMediaPlayerUI, PLAYER_HEIGHTS } from '@/features/mediaPlayer';
+import { useMediaPlayerAnimations, PLAYER_TRANSITIONS } from '@/hooks/useMediaPlayerAnimations';
 import { ProgressBar } from './ProgressBar';
 import { PlaybackControls } from './PlaybackControls';
 import { VolumeControl } from './VolumeControl';
@@ -11,7 +11,7 @@ import { MiniSpeakerBadge } from './MiniSpeakerBadge';
 import { SpeakerPopover } from './SpeakerPopover';
 import { AudioVisualizer } from './AudioVisualizer';
 import { MusicParticles } from './MusicParticles';
-import { MEDIA_PLAYER_ANIMATIONS, EASING } from '@/constants/animations';
+import { MEDIA_PLAYER } from '@/constants/animations';
 
 export const MediaPlayer = () => {
   const [isMinimized, setIsMinimizedLocal] = useState(true);
@@ -43,12 +43,15 @@ export const MediaPlayer = () => {
     handleSeek,
   } = useMediaPlayer();
 
-  // Debug: Log player state and album art
-  console.log('[MediaPlayer] playerState:', {
-    hasPlayerState: !!playerState,
-    isLoading,
-    currentTrack: playerState?.currentTrack,
-    albumArt: playerState?.currentTrack?.albumArt,
+  // Get unified animation system
+  const { 
+    containerTransition, 
+    contentTransition, 
+    entryTransition,
+    getStaggerDelay,
+  } = useMediaPlayerAnimations({
+    isMinimized,
+    isVisible: true,
   });
 
   // Fetch album art with authentication
@@ -60,14 +63,6 @@ export const MediaPlayer = () => {
   } = useAuthenticatedImage(
     playerState?.currentTrack?.albumArt || null
   );
-
-  // Debug: Log album art loading state
-  console.log('[MediaPlayer] Album art state:', {
-    albumArtPath: playerState?.currentTrack?.albumArt,
-    albumArtUrl: albumArtUrl ? 'loaded' : 'null',
-    isAlbumArtLoading,
-    albumArtError,
-  });
 
   // Sync visibility with UI context
   const isPlayerVisible = !isLoading && playerState && 
@@ -114,13 +109,11 @@ export const MediaPlayer = () => {
     height: isMinimized ? 48 : 64,
   };
 
-  // Unified transition system - single easing for consistency
-  const ease = [0.32, 0.72, 0, 1] as const;
-  
-  const containerTransition = { duration: 0.35, ease };
-  const contentTransition = { duration: 0.3, ease };
-  const elementTransition = { duration: 0.25, ease };
-  const stagger = 0.04;
+  // Element transition with stagger support
+  const elementTransition = {
+    duration: MEDIA_PLAYER.content.duration,
+    ease: MEDIA_PLAYER.content.ease,
+  };
 
   return (
     <>
@@ -131,11 +124,7 @@ export const MediaPlayer = () => {
           y: 0, 
           opacity: 1,
         }}
-        transition={{ 
-          duration: MEDIA_PLAYER_ANIMATIONS.entry.duration, 
-          ease: EASING.entrance,
-          delay: MEDIA_PLAYER_ANIMATIONS.entry.delay,
-        }}
+        transition={entryTransition}
         className="fixed bottom-4 left-0 right-0 z-50 flex justify-center px-4"
       >
         <motion.div 
@@ -221,7 +210,7 @@ export const MediaPlayer = () => {
                             initial={{ opacity: 0 }}
                             animate={{ opacity: 1 }}
                             exit={{ opacity: 0 }}
-                            transition={{ duration: 0.4, ease }}
+                            transition={{ duration: 0.4, ease: MEDIA_PLAYER.content.ease }}
                           />
                         ) : !isAlbumArtLoading && (
                           <motion.div 
@@ -305,7 +294,7 @@ export const MediaPlayer = () => {
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     exit={{ opacity: 0 }}
-                    transition={{ ...elementTransition, delay: stagger }}
+                    transition={{ ...elementTransition, delay: getStaggerDelay(1) }}
                     className="flex items-center justify-end"
                   >
                     <div onClick={(e) => e.stopPropagation()}>
@@ -342,7 +331,7 @@ export const MediaPlayer = () => {
                     className="flex justify-end"
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
-                    transition={{ ...elementTransition, delay: stagger }}
+                    transition={{ ...elementTransition, delay: getStaggerDelay(1) }}
                   >
                     <SourceIndicator appName={playerState.appName} />
                   </motion.div>
@@ -354,7 +343,7 @@ export const MediaPlayer = () => {
                       onClick={(e) => e.stopPropagation()}
                       initial={{ opacity: 0 }}
                       animate={{ opacity: 1 }}
-                      transition={{ ...elementTransition, delay: stagger * 2 }}
+                      transition={{ ...elementTransition, delay: getStaggerDelay(2) }}
                     >
                       <ProgressBar
                         position={currentTrack.position}
@@ -371,7 +360,7 @@ export const MediaPlayer = () => {
                     className="flex items-center justify-between gap-4"
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
-                    transition={{ ...elementTransition, delay: stagger * 3 }}
+                    transition={{ ...elementTransition, delay: getStaggerDelay(3) }}
                   >
                     <div className="flex-1 flex justify-center" onClick={(e) => e.stopPropagation()}>
                       <PlaybackControls

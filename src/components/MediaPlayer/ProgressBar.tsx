@@ -2,6 +2,7 @@ import { Slider } from '@/components/ui/slider';
 import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Loader2 } from 'lucide-react';
+import { MEDIA_PLAYER } from '@/constants/animations';
 
 interface ProgressBarProps {
   position: number;
@@ -15,6 +16,17 @@ const formatTime = (seconds: number): string => {
   const mins = Math.floor(seconds / 60);
   const secs = Math.floor(seconds % 60);
   return `${mins}:${secs.toString().padStart(2, '0')}`;
+};
+
+// Unified transitions
+const overlayTransition = {
+  duration: MEDIA_PLAYER.content.duration,
+  ease: MEDIA_PLAYER.content.ease,
+};
+
+const contentTransition = {
+  duration: MEDIA_PLAYER.duration.normal,
+  ease: MEDIA_PLAYER.easing.standard,
 };
 
 export const ProgressBar = ({ position, duration, isLoading, isTransitioning, onSeek }: ProgressBarProps) => {
@@ -65,6 +77,7 @@ export const ProgressBar = ({ position, duration, isLoading, isTransitioning, on
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
+            transition={overlayTransition}
             className="absolute inset-0 flex items-center justify-center bg-black/20 backdrop-blur-sm rounded-lg z-10"
           >
             <Loader2 className="w-4 h-4 text-white/60 animate-spin" />
@@ -76,7 +89,7 @@ export const ProgressBar = ({ position, duration, isLoading, isTransitioning, on
         animate={{ 
           opacity: (isLoading || isTransitioning) ? 0.3 : 1 
         }}
-        transition={{ duration: 0.3 }}
+        transition={contentTransition}
       >
         <Slider
           value={[percentage]}

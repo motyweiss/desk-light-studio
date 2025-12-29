@@ -2,6 +2,7 @@ import { Volume2, VolumeX, Volume1 } from 'lucide-react';
 import { Slider } from '@/components/ui/slider';
 import { motion } from 'framer-motion';
 import { useRef, useState, useEffect } from 'react';
+import { PLAYER_TRANSITIONS } from '@/hooks/useMediaPlayerAnimations';
 
 interface VolumeControlProps {
   volume: number;
@@ -10,6 +11,12 @@ interface VolumeControlProps {
   onMuteToggle: () => void;
   compact?: boolean;
 }
+
+// Unified interaction animation
+const interactionTransition = {
+  duration: PLAYER_TRANSITIONS.interaction.duration,
+  ease: [0.4, 0, 0.2, 1] as const,
+};
 
 export const VolumeControl = ({ volume, isMuted, onVolumeChange, onMuteToggle, compact = false }: VolumeControlProps) => {
   const debounceTimerRef = useRef<NodeJS.Timeout>();
@@ -47,8 +54,9 @@ export const VolumeControl = ({ volume, isMuted, onVolumeChange, onMuteToggle, c
   return (
     <div className="flex items-center gap-2 sm:gap-3">
       <motion.button
-        whileHover={{ scale: 1.1 }}
-        whileTap={{ scale: 0.95 }}
+        whileHover={{ scale: PLAYER_TRANSITIONS.interaction.hoverScale }}
+        whileTap={{ scale: PLAYER_TRANSITIONS.interaction.tapScale }}
+        transition={interactionTransition}
         onClick={onMuteToggle}
         className="text-white/60 hover:text-white transition-colors"
       >

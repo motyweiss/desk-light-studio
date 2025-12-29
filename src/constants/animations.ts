@@ -194,25 +194,90 @@ export const SPEAKER_SHEET_TRANSITIONS = {
 } as const;
 
 // ============================================================
-// MEDIA PLAYER ANIMATIONS
+// MEDIA PLAYER ANIMATIONS - Unified system
 // ============================================================
-export const MEDIA_PLAYER_ANIMATIONS = {
-  entry: {
-    duration: 0.8,
-    delay: 0.4,
-    ease: EASING.entrance,
+export const MEDIA_PLAYER = {
+  // Unified easing - soft, natural feel
+  easing: {
+    standard: [0.4, 0, 0.2, 1] as const,    // Material Design standard
+    decelerate: [0, 0, 0.2, 1] as const,     // Smooth stop
+    accelerate: [0.4, 0, 1, 1] as const,     // Quick start
+    soft: [0.25, 0.1, 0.25, 1] as const,     // Very gentle
   },
+  
+  // Duration tokens
+  duration: {
+    instant: 0.15,
+    fast: 0.2,
+    normal: 0.3,
+    mode: 0.4,          // Minimized/expanded transition
+    entry: 0.5,         // Initial page entry
+    content: 0.35,      // Content fade in/out
+    stagger: 0.04,      // Delay between elements
+  },
+  
+  // Container transitions (minimized/expanded)
+  container: {
+    duration: 0.4,
+    ease: [0.4, 0, 0.2, 1] as const,
+  },
+  
+  // Content element transitions
+  content: {
+    duration: 0.3,
+    ease: [0.25, 0.1, 0.25, 1] as const,
+  },
+  
+  // Entry animation (page load)
+  entry: {
+    delay: 0.35,
+    duration: 0.5,
+    ease: [0.22, 0.03, 0.26, 1] as const,
+    y: 12,              // Subtle vertical offset
+  },
+  
+  // Track change crossfade
   trackChange: {
     duration: 0.4,
-    ease: EASING.smooth,
+    ease: [0.25, 0.1, 0.25, 1] as const,
   },
+  
+  // Hover/tap interactions - subtle!
+  interaction: {
+    hoverScale: 1.04,
+    tapScale: 0.97,
+    duration: 0.15,
+  },
+  
+  // Popover animations
+  popover: {
+    duration: 0.25,
+    ease: [0.4, 0, 0.2, 1] as const,
+    y: 8,
+  },
+  
+  // Progress/volume slider
+  slider: {
+    duration: 0.1,
+    ease: [0.4, 0, 0.2, 1] as const,
+  },
+} as const;
+
+// Legacy alias for backwards compatibility
+export const MEDIA_PLAYER_ANIMATIONS = {
+  entry: {
+    duration: MEDIA_PLAYER.entry.duration,
+    delay: MEDIA_PLAYER.entry.delay,
+    ease: MEDIA_PLAYER.entry.ease,
+  },
+  trackChange: MEDIA_PLAYER.trackChange,
   modeChange: {
-    duration: 0.5,
-    ease: EASING.mediaPlayer,
+    duration: MEDIA_PLAYER.container.duration,
+    ease: MEDIA_PLAYER.container.ease,
   },
   textFade: {
-    duration: 0.35,
-    ease: EASING.smooth,
+    duration: MEDIA_PLAYER.content.duration,
+    ease: MEDIA_PLAYER.content.ease,
   },
 } as const;
 

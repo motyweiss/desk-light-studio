@@ -2,12 +2,19 @@ import { Speaker, Smartphone, Users, Tv } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { forwardRef, useMemo } from 'react';
 import type { PlaybackTarget } from '@/types/mediaPlayer';
+import { PLAYER_TRANSITIONS } from '@/hooks/useMediaPlayerAnimations';
 
 interface MiniSpeakerBadgeProps {
   playbackTarget: PlaybackTarget | null;
   onClick: (e: React.MouseEvent) => void;
   compact?: boolean;
 }
+
+// Unified interaction animation
+const interactionTransition = {
+  duration: PLAYER_TRANSITIONS.interaction.duration,
+  ease: [0.4, 0, 0.2, 1] as const,
+};
 
 export const MiniSpeakerBadge = forwardRef<HTMLButtonElement, MiniSpeakerBadgeProps>(
   ({ playbackTarget, onClick, compact = false }, ref) => {
@@ -48,8 +55,9 @@ export const MiniSpeakerBadge = forwardRef<HTMLButtonElement, MiniSpeakerBadgePr
             ? 'px-3 py-1.5 sm:px-4 sm:py-2' 
             : 'px-4 py-2'
         }`}
-        whileHover={{ scale: 1.02 }}
-        whileTap={{ scale: 0.98 }}
+        whileHover={{ scale: PLAYER_TRANSITIONS.interaction.hoverScale }}
+        whileTap={{ scale: PLAYER_TRANSITIONS.interaction.tapScale }}
+        transition={interactionTransition}
       >
         <Icon className={compact ? "w-4 h-4 text-white/60" : "w-4 h-4 text-white/60"} />
         <span className={`font-light text-white/80 whitespace-nowrap ${

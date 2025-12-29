@@ -1,5 +1,6 @@
 import { Play, Pause, SkipBack, SkipForward, Shuffle, Repeat, Repeat1 } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { PLAYER_TRANSITIONS } from '@/hooks/useMediaPlayerAnimations';
 
 interface PlaybackControlsProps {
   isPlaying: boolean;
@@ -12,6 +13,12 @@ interface PlaybackControlsProps {
   onRepeatToggle: () => void;
   compact?: boolean;
 }
+
+// Unified interaction animation
+const interactionTransition = {
+  duration: PLAYER_TRANSITIONS.interaction.duration,
+  ease: [0.4, 0, 0.2, 1] as const,
+};
 
 export const PlaybackControls = ({
   isPlaying,
@@ -36,8 +43,9 @@ export const PlaybackControls = ({
       {/* Shuffle - hidden in compact mode */}
       {!compact && (
         <motion.button
-          whileHover={{ scale: 1.1 }}
-          whileTap={{ scale: 0.95 }}
+          whileHover={{ scale: PLAYER_TRANSITIONS.interaction.hoverScale }}
+          whileTap={{ scale: PLAYER_TRANSITIONS.interaction.tapScale }}
+          transition={interactionTransition}
           onClick={onShuffleToggle}
           className={`transition-colors ${
             shuffle ? 'text-[hsl(44_85%_58%)]' : 'text-white/40 hover:text-white/60'
@@ -49,8 +57,9 @@ export const PlaybackControls = ({
 
       {/* Previous */}
       <motion.button
-        whileHover={{ scale: 1.1 }}
-        whileTap={{ scale: 0.95 }}
+        whileHover={{ scale: PLAYER_TRANSITIONS.interaction.hoverScale }}
+        whileTap={{ scale: PLAYER_TRANSITIONS.interaction.tapScale }}
+        transition={interactionTransition}
         onClick={onPrevious}
         className="text-white/60 hover:text-white transition-colors"
       >
@@ -60,7 +69,8 @@ export const PlaybackControls = ({
       {/* Play/Pause */}
       <motion.button
         whileHover={{ scale: 1.02 }}
-        whileTap={{ scale: 0.95 }}
+        whileTap={{ scale: PLAYER_TRANSITIONS.interaction.tapScale }}
+        transition={interactionTransition}
         onClick={onPlayPause}
         className={`bg-white/10 hover:bg-white/15 rounded-full transition-colors backdrop-blur-xl ${
           compact ? 'w-9 h-9 sm:w-10 sm:h-10' : 'w-10 h-10 sm:w-12 sm:h-12'
@@ -75,8 +85,9 @@ export const PlaybackControls = ({
 
       {/* Next */}
       <motion.button
-        whileHover={{ scale: 1.1 }}
-        whileTap={{ scale: 0.95 }}
+        whileHover={{ scale: PLAYER_TRANSITIONS.interaction.hoverScale }}
+        whileTap={{ scale: PLAYER_TRANSITIONS.interaction.tapScale }}
+        transition={interactionTransition}
         onClick={onNext}
         className="text-white/60 hover:text-white transition-colors"
       >
@@ -86,8 +97,9 @@ export const PlaybackControls = ({
       {/* Repeat - hidden in compact mode */}
       {!compact && (
         <motion.button
-          whileHover={{ scale: 1.1 }}
-          whileTap={{ scale: 0.95 }}
+          whileHover={{ scale: PLAYER_TRANSITIONS.interaction.hoverScale }}
+          whileTap={{ scale: PLAYER_TRANSITIONS.interaction.tapScale }}
+          transition={interactionTransition}
           onClick={onRepeatToggle}
           className={`transition-colors ${
             repeat !== 'off' ? 'text-[hsl(44_85%_58%)]' : 'text-white/40 hover:text-white/60'
