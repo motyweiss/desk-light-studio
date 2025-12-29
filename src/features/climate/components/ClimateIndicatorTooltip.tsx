@@ -63,16 +63,14 @@ export const ClimateIndicatorTooltip = ({
       onMouseEnter={onToggle}
       onMouseLeave={onToggle}
     >
-      {/* Compact indicator - simple circle with icon */}
+      {/* Compact indicator - icon without circle */}
       <div className="cursor-default">
-        <div className="flex items-center gap-1.5 md:gap-2">
-          <IconCircle size={32}>
-            <Icon 
-              className="w-4 h-4 text-white/60" 
-              strokeWidth={1.5}
-              fill="none"
-            />
-          </IconCircle>
+        <div className="flex items-center gap-2 md:gap-2.5">
+          <Icon 
+            className="w-5 h-5 text-white/50" 
+            strokeWidth={1.5}
+            fill="none"
+          />
           <motion.div 
             className="text-sm font-light text-white/90 tabular-nums tracking-tight"
             animate={{
