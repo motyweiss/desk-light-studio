@@ -1,11 +1,32 @@
 import { haProxyClient } from '@/services/haProxyClient';
-import type { HAMediaPlayerEntity } from '../types';
+import type { HAMediaPlayerEntity, HAEntity } from '../types';
 import { logger } from '@/shared/utils/logger';
 
 /**
  * Media Player entity operations
  * Uses haProxyClient for consistent connection handling
  */
+
+// Cache for batch fetched states
+let allStatesCache: HAEntity[] | null = null;
+let allStatesCacheTime = 0;
+const CACHE_TTL = 2000; // 2 second cache
+
+async function getAllStates(): Promise<HAEntity[]> {
+  // Return cached data if still valid
+  if (allStatesCache && Date.now() - allStatesCacheTime < CACHE_TTL) {
+    return allStatesCache;
+  }
+
+  const { data, error } = await haProxyClient.get<HAEntity[]>('/api/states');
+  if (error || !data) {
+    return allStatesCache || [];
+  }
+
+  allStatesCache = data;
+  allStatesCacheTime = Date.now();
+  return data;
+}
 
 export const mediaPlayer = {
   /**
@@ -187,28 +208,28 @@ export const mediaPlayer = {
   },
 
   /**
-   * Get media player state
+   * Get media player state - uses batch fetch for efficiency
    */
   async getState(entityId: string): Promise<HAMediaPlayerEntity | null> {
-    const { data, error } = await haProxyClient.get<HAMediaPlayerEntity>(`/api/states/${entityId}`);
-    if (error || !data) {
-      logger.error(`Failed to get state for ${entityId}`, error);
+    // Use batch fetch and filter locally to avoid 404 errors
+    const allStates = await getAllStates();
+    const entity = allStates.find(e => e.entity_id === entityId);
+    
+    if (!entity) {
+      // Entity not found - don't log as error, it might just not be configured
       return null;
     }
-    return data;
+    
+    return entity as HAMediaPlayerEntity;
   },
 
   /**
    * Get available media players
    */
   async getAvailablePlayers(): Promise<HAMediaPlayerEntity[]> {
-    const { data, error } = await haProxyClient.get<HAMediaPlayerEntity[]>('/api/states');
-    if (error || !data) {
-      logger.error('Failed to get all states', error);
-      return [];
-    }
-    return data.filter(
+    const allStates = await getAllStates();
+    return allStates.filter(
       entity => entity.entity_id.startsWith('media_player.')
-    );
+    ) as HAMediaPlayerEntity[];
   },
 };

@@ -70,25 +70,28 @@ export const LightingProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     }
   }, [entityMapping]);
 
-  // Fetch light states from API
+  // Fetch light states from API - uses batch fetch for efficiency
   const fetchLightStates = useCallback(async () => {
     if (!entityMapping) return;
 
-    logger.sync('Fetching light states...');
     const lightIds: Array<'spotlight' | 'deskLamp' | 'monitorLight'> = ['spotlight', 'deskLamp', 'monitorLight'];
     
-    for (const lightId of lightIds) {
-      const entityId = getLightEntity(lightId);
-      if (!entityId) continue;
+    // Collect all entity IDs that are configured
+    const entityIds = lightIds
+      .map(id => getLightEntity(id))
+      .filter((id): id is string => !!id);
 
-      try {
-        let state;
-        if (connectionMode === 'websocket') {
-          state = await websocketService.getEntityState(entityId);
-        } else {
-          state = await lightsAPI.getState(entityId);
-        }
+    if (entityIds.length === 0) return;
 
+    try {
+      // Batch fetch all light states at once
+      const states = await lightsAPI.getMultipleStates(entityIds);
+
+      for (const lightId of lightIds) {
+        const entityId = getLightEntity(lightId);
+        if (!entityId) continue;
+
+        const state = states[entityId];
         if (state) {
           const intensity = state.state === 'on'
             ? Math.round(((state.attributes?.brightness || 255) / 255) * 100)
@@ -98,8 +101,6 @@ export const LightingProvider: React.FC<{ children: React.ReactNode }> = ({ chil
             const light = prev[lightId];
             // Don't update if pending or same value
             if (light.isPending || light.confirmedValue === intensity) return prev;
-
-            logger.light(lightId, `Synced: ${intensity}%`);
 
             return {
               ...prev,
@@ -117,11 +118,11 @@ export const LightingProvider: React.FC<{ children: React.ReactNode }> = ({ chil
           // Mark successful sync in ConnectionManager
           markSuccessfulSync();
         }
-      } catch (error) {
-        logger.error(`Failed to fetch state for ${lightId}`, error);
       }
+    } catch (error) {
+      logger.error('Failed to fetch light states', error);
     }
-  }, [entityMapping, getLightEntity, connectionMode, markSuccessfulSync]);
+  }, [entityMapping, getLightEntity, markSuccessfulSync]);
 
   // Polling function
   const pollLights = useCallback(async () => {
