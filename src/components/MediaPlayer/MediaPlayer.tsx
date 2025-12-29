@@ -1,5 +1,5 @@
 import { motion, AnimatePresence } from 'framer-motion';
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useMemo } from 'react';
 import { useAuthenticatedImage } from '@/hooks/useAuthenticatedImage';
 import { useMediaPlayer, useMediaPlayerUI, PLAYER_HEIGHTS } from '@/features/mediaPlayer';
 import { useMediaPlayerAnimations } from '@/hooks/useMediaPlayerAnimations';
@@ -11,6 +11,19 @@ import { MiniSpeakerBadge } from './MiniSpeakerBadge';
 import { SpeakerPopover } from './SpeakerPopover';
 import { AudioVisualizer } from './AudioVisualizer';
 import { MusicParticles } from './MusicParticles';
+import { TIMING, EASE } from '@/lib/animations';
+
+// Unified transition for all layout properties - must be identical across all elements
+const PLAYER_LAYOUT_TRANSITION = {
+  duration: 0.4,
+  ease: [0.32, 0.72, 0, 1] as const, // Snappy ease-out
+};
+
+// Faster transition for content opacity
+const CONTENT_FADE_TRANSITION = {
+  duration: 0.25,
+  ease: [0.25, 0.1, 0.25, 1] as const,
+};
 
 export const MediaPlayer = () => {
   const [isMinimized, setIsMinimizedLocal] = useState(true);
@@ -44,8 +57,6 @@ export const MediaPlayer = () => {
 
   // Get unified animation system
   const { 
-    layoutTransition,
-    fadeTransition,
     entryProps,
     staggerProps,
   } = useMediaPlayerAnimations({
@@ -85,6 +96,25 @@ export const MediaPlayer = () => {
     setIsMinimizedLocal(prev => !prev);
   };
 
+  // Memoize animated values to prevent recalculation
+  const containerStyles = useMemo(() => ({
+    borderRadius: isMinimized ? 32 : 24,
+    maxWidth: isMinimized ? 420 : 672,
+    backgroundColor: isMinimized ? 'rgba(255, 255, 255, 0.12)' : 'rgba(255, 255, 255, 0.18)',
+  }), [isMinimized]);
+
+  const paddingStyles = useMemo(() => ({
+    paddingLeft: isMinimized ? 8 : 20,
+    paddingRight: isMinimized ? 8 : 20,
+    paddingTop: isMinimized ? 8 : 16,
+    paddingBottom: isMinimized ? 8 : 16,
+  }), [isMinimized]);
+
+  const albumArtSize = useMemo(() => ({
+    width: isMinimized ? 48 : 64,
+    height: isMinimized ? 48 : 64,
+  }), [isMinimized]);
+
   // Hide player only during loading or if no player state
   if (isLoading || !playerState) {
     return null;
@@ -102,12 +132,6 @@ export const MediaPlayer = () => {
 
   const currentTrack = playerState.currentTrack;
 
-  // Calculate album art sizes
-  const albumArtSize = {
-    width: isMinimized ? 48 : 64,
-    height: isMinimized ? 48 : 64,
-  };
-
   return (
     <>
       <motion.div
@@ -119,12 +143,8 @@ export const MediaPlayer = () => {
           onClick={handleToggleMinimized}
           className="relative cursor-pointer overflow-hidden"
           initial={false}
-          animate={{
-            borderRadius: isMinimized ? 32 : 24,
-            maxWidth: isMinimized ? 420 : 672,
-          }}
+          animate={containerStyles}
           style={{
-            backgroundColor: isMinimized ? 'rgba(255, 255, 255, 0.12)' : 'rgba(255, 255, 255, 0.18)',
             width: '100%',
             backdropFilter: 'blur(40px)',
             WebkitBackdropFilter: 'blur(40px)',
@@ -132,56 +152,52 @@ export const MediaPlayer = () => {
             boxShadow: isMinimized 
               ? '0 4px 24px rgba(0,0,0,0.15)' 
               : '0 8px 40px rgba(0,0,0,0.25), inset 0 1px 0 rgba(255,255,255,0.1)',
-            willChange: 'border-radius, max-width',
           }}
-          transition={layoutTransition}
+          transition={PLAYER_LAYOUT_TRANSITION}
           whileHover={{ 
-            backgroundColor: isMinimized ? 'rgba(255, 255, 255, 0.15)' : 'rgba(255, 255, 255, 0.22)'
+            backgroundColor: isMinimized ? 'rgba(255, 255, 255, 0.15)' : 'rgba(255, 255, 255, 0.22)',
+            transition: { duration: 0.2 }
           }}
         >
-          {/* Content Container */}
+          {/* Content Container - animate padding */}
           <motion.div 
-            className={isMinimized ? 'px-2 py-2' : 'px-5 py-4'}
             initial={false}
-            animate={{ 
-              paddingLeft: isMinimized ? 8 : 20,
-              paddingRight: isMinimized ? 8 : 20,
-              paddingTop: isMinimized ? 8 : 16,
-              paddingBottom: isMinimized ? 8 : 16,
-            }}
-            transition={layoutTransition}
+            animate={paddingStyles}
+            transition={PLAYER_LAYOUT_TRANSITION}
           >
-            <div className={`${isMinimized 
-              ? 'grid grid-cols-[auto_1fr_auto] items-center gap-3'
-              : 'flex flex-col gap-4'
-            }`}>
-              
+            {/* Inner content wrapper - always flex, gap changes */}
+            <motion.div 
+              className="flex items-center"
+              initial={false}
+              animate={{
+                gap: isMinimized ? 12 : 16,
+                flexDirection: isMinimized ? 'row' : 'column',
+                alignItems: isMinimized ? 'center' : 'stretch',
+              }}
+              transition={PLAYER_LAYOUT_TRANSITION}
+              style={{ display: 'flex' }}
+            >
               {/* Left Section: Album Art + Track Info */}
-              <div className="flex items-center gap-3 min-w-0">
+              <div className="flex items-center gap-3 min-w-0 flex-1">
                 {/* Album Art */}
                 <motion.div
                   className="relative flex-shrink-0 rounded-full overflow-hidden bg-white/8"
                   initial={false}
                   animate={albumArtSize}
-                  transition={fadeTransition}
+                  transition={PLAYER_LAYOUT_TRANSITION}
                 >
-                  <AnimatePresence mode="wait">
+                  <AnimatePresence mode="sync">
                     <motion.div
                       key={currentTrack?.title || 'no-track'}
                       initial={{ opacity: 0 }}
                       animate={{ opacity: 1 }}
                       exit={{ opacity: 0 }}
-                      transition={fadeTransition}
+                      transition={CONTENT_FADE_TRANSITION}
                       className="absolute inset-0"
                     >
-                      {/* Skeleton loader - show during loading or transition */}
+                      {/* Skeleton loader */}
                       {(isAlbumArtLoading || isAlbumArtTransitioning) && !albumArtUrl && (
-                        <motion.div 
-                          className="absolute inset-0 bg-white/5"
-                          initial={{ opacity: 0 }}
-                          animate={{ opacity: 1 }}
-                          exit={{ opacity: 0 }}
-                        >
+                        <div className="absolute inset-0 bg-white/5">
                           <div 
                             className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent"
                             style={{
@@ -189,197 +205,165 @@ export const MediaPlayer = () => {
                               animation: 'shimmer 1.5s infinite linear',
                             }}
                           />
-                        </motion.div>
+                        </div>
                       )}
                       
-                      <AnimatePresence mode="wait">
-                        {albumArtUrl && !albumArtError ? (
-                          <motion.img 
-                            key={albumArtUrl}
-                            src={albumArtUrl} 
-                            alt="Album art" 
-                            className="absolute inset-0 w-full h-full object-cover rounded-full"
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
-                            exit={{ opacity: 0 }}
-                            transition={fadeTransition}
-                          />
-                        ) : !isAlbumArtLoading && (
-                          <motion.div 
-                            key="placeholder"
-                            className="absolute inset-0 w-full h-full flex items-center justify-center bg-white/5 rounded-full"
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
-                            exit={{ opacity: 0 }}
-                            transition={fadeTransition}
-                          />
-                        )}
-                      </AnimatePresence>
+                      {albumArtUrl && !albumArtError ? (
+                        <img 
+                          src={albumArtUrl} 
+                          alt="Album art" 
+                          className="absolute inset-0 w-full h-full object-cover rounded-full"
+                        />
+                      ) : !isAlbumArtLoading && (
+                        <div className="absolute inset-0 w-full h-full flex items-center justify-center bg-white/5 rounded-full" />
+                      )}
                     </motion.div>
                   </AnimatePresence>
                   
-                  {/* Music Particles Effect */}
                   <MusicParticles 
                     isPlaying={playerState.isPlaying} 
                     containerSize={albumArtSize}
                   />
                 </motion.div>
 
-                {/* Track Info - Shared Element */}
+                {/* Track Info */}
                 <motion.div
-                  className="flex-1 min-w-0 relative"
+                  className="flex-1 min-w-0"
                   initial={false}
+                  animate={{ 
+                    scale: isMinimized ? 1 : 1.05,
+                    originX: 0,
+                  }}
+                  transition={PLAYER_LAYOUT_TRANSITION}
                 >
-                  <AnimatePresence mode="wait">
-                    <motion.div
-                      key={`${currentTrack?.title}-${currentTrack?.artist}`}
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      exit={{ opacity: 0 }}
-                      transition={fadeTransition}
-                    >
-                      <motion.div
-                        className="origin-left"
-                        initial={false}
-                        animate={{ 
-                          scale: isMinimized ? 1 : 1.125,
-                        }}
-                        transition={fadeTransition}
-                      >
-                        <h3 className={`text-white font-light truncate ${isMinimized ? 'text-[13px]' : 'text-sm sm:text-base'}`}>
-                          {currentTrack?.title || 'No media playing'}
-                        </h3>
-                        <div className="flex items-center gap-2">
-                          <p className="text-white/40 truncate text-xs">
-                            {currentTrack?.artist || 'Unknown Artist'}
-                          </p>
-                          {isMinimized && playerState.isPlaying && (
-                            <AudioVisualizer isPlaying={true} barCount={3} />
-                          )}
-                        </div>
-                      </motion.div>
-                      
-                      {/* Album name - Only in full mode */}
-                      {!isMinimized && currentTrack?.album && (
-                        <motion.p
-                          initial={{ opacity: 0 }}
-                          animate={{ opacity: 1 }}
-                          exit={{ opacity: 0 }}
-                          transition={fadeTransition}
-                          className="text-white/30 text-xs truncate mt-0.5"
-                        >
-                          {currentTrack.album}
-                        </motion.p>
-                      )}
-                    </motion.div>
-                  </AnimatePresence>
+                  <h3 className={`text-white font-light truncate ${isMinimized ? 'text-[13px]' : 'text-sm sm:text-base'}`}>
+                    {currentTrack?.title || 'No media playing'}
+                  </h3>
+                  <div className="flex items-center gap-2">
+                    <p className="text-white/40 truncate text-xs">
+                      {currentTrack?.artist || 'Unknown Artist'}
+                    </p>
+                    {isMinimized && playerState.isPlaying && (
+                      <AudioVisualizer isPlaying={true} barCount={3} />
+                    )}
+                  </div>
+                  
+                  {/* Album name - Only in full mode */}
+                  <motion.div
+                    initial={false}
+                    animate={{ 
+                      height: isMinimized ? 0 : 'auto',
+                      opacity: isMinimized ? 0 : 1,
+                      marginTop: isMinimized ? 0 : 2,
+                    }}
+                    transition={CONTENT_FADE_TRANSITION}
+                    style={{ overflow: 'hidden' }}
+                  >
+                    {currentTrack?.album && (
+                      <p className="text-white/30 text-xs truncate">
+                        {currentTrack.album}
+                      </p>
+                    )}
+                  </motion.div>
                 </motion.div>
               </div>
 
-              {/* Right Section: Mini Controls */}
-              <AnimatePresence mode="wait">
-                {isMinimized && (
-                  <motion.div
-                    key="mini-controls"
-                    initial={{ opacity: 0, x: 8 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    exit={{ opacity: 0, x: 8 }}
-                    transition={fadeTransition}
-                    className="flex items-center justify-end"
-                  >
-                    <div onClick={(e) => e.stopPropagation()}>
-                      <PlaybackControls
-                        isPlaying={playerState.isPlaying}
-                        shuffle={playerState.shuffle}
-                        repeat={playerState.repeat}
-                        onPlayPause={handlePlayPause}
-                        onPrevious={handlePrevious}
-                        onNext={handleNext}
-                        onShuffleToggle={handleShuffleToggle}
-                        onRepeatToggle={handleRepeatToggle}
-                        compact={true}
-                      />
-                    </div>
-                  </motion.div>
+              {/* Mini Controls - slide in/out */}
+              <motion.div
+                initial={false}
+                animate={{
+                  width: isMinimized ? 'auto' : 0,
+                  opacity: isMinimized ? 1 : 0,
+                  x: isMinimized ? 0 : 20,
+                }}
+                transition={CONTENT_FADE_TRANSITION}
+                style={{ overflow: 'hidden', flexShrink: 0 }}
+              >
+                <div onClick={(e) => e.stopPropagation()}>
+                  <PlaybackControls
+                    isPlaying={playerState.isPlaying}
+                    shuffle={playerState.shuffle}
+                    repeat={playerState.repeat}
+                    onPlayPause={handlePlayPause}
+                    onPrevious={handlePrevious}
+                    onNext={handleNext}
+                    onShuffleToggle={handleShuffleToggle}
+                    onRepeatToggle={handleRepeatToggle}
+                    compact={true}
+                  />
+                </div>
+              </motion.div>
+            </motion.div>
+
+            {/* Full Player Controls - height animation */}
+            <motion.div
+              initial={false}
+              animate={{
+                height: isMinimized ? 0 : 'auto',
+                opacity: isMinimized ? 0 : 1,
+                marginTop: isMinimized ? 0 : 16,
+              }}
+              transition={{
+                height: PLAYER_LAYOUT_TRANSITION,
+                opacity: { ...CONTENT_FADE_TRANSITION, delay: isMinimized ? 0 : 0.1 },
+                marginTop: PLAYER_LAYOUT_TRANSITION,
+              }}
+              style={{ overflow: 'hidden' }}
+            >
+              <div className="space-y-4">
+                {/* Source Indicator */}
+                <div className="flex justify-end">
+                  <SourceIndicator appName={playerState.appName} />
+                </div>
+
+                {/* Progress Bar */}
+                {currentTrack && (
+                  <div className="pt-1" onClick={(e) => e.stopPropagation()}>
+                    <ProgressBar
+                      position={currentTrack.position}
+                      duration={currentTrack.duration}
+                      isLoading={playerState.isTrackLoading}
+                      isTransitioning={playerState.isTrackTransitioning}
+                      onSeek={handleSeek}
+                    />
+                  </div>
                 )}
-              </AnimatePresence>
-            </div>
 
-            {/* Full Player Controls */}
-            <AnimatePresence mode="wait">
-              {!isMinimized && (
-                <motion.div
-                  key="full-controls"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                  transition={fadeTransition}
-                  className="space-y-4 pt-4 overflow-hidden"
-                >
-                  {/* Source Indicator */}
-                  <motion.div 
-                    className="flex justify-end"
-                    {...staggerProps(0)}
-                  >
-                    <SourceIndicator appName={playerState.appName} />
-                  </motion.div>
+                {/* Bottom Row */}
+                <div className="flex items-center justify-between gap-4">
+                  <div className="flex-1 flex justify-center" onClick={(e) => e.stopPropagation()}>
+                    <PlaybackControls
+                      isPlaying={playerState.isPlaying}
+                      shuffle={playerState.shuffle}
+                      repeat={playerState.repeat}
+                      onPlayPause={handlePlayPause}
+                      onPrevious={handlePrevious}
+                      onNext={handleNext}
+                      onShuffleToggle={handleShuffleToggle}
+                      onRepeatToggle={handleRepeatToggle}
+                    />
+                  </div>
 
-                   {/* Progress Bar */}
-                  {currentTrack && (
-                    <motion.div 
-                      className="pt-1" 
-                      onClick={(e) => e.stopPropagation()}
-                      {...staggerProps(1)}
-                    >
-                      <ProgressBar
-                        position={currentTrack.position}
-                        duration={currentTrack.duration}
-                        isLoading={playerState.isTrackLoading}
-                        isTransitioning={playerState.isTrackTransitioning}
-                        onSeek={handleSeek}
-                      />
-                    </motion.div>
-                  )}
+                  <div className="flex items-center gap-6" onClick={(e) => e.stopPropagation()}>
+                    <VolumeControl
+                      volume={playerState.volume}
+                      isMuted={playerState.isMuted}
+                      onVolumeChange={handleVolumeChange}
+                      onMuteToggle={handleMuteToggle}
+                    />
 
-                   {/* Bottom Row: Playback Controls + Volume + Speaker Selector */}
-                  <motion.div 
-                    className="flex items-center justify-between gap-4"
-                    {...staggerProps(2)}
-                  >
-                    <div className="flex-1 flex justify-center" onClick={(e) => e.stopPropagation()}>
-                      <PlaybackControls
-                        isPlaying={playerState.isPlaying}
-                        shuffle={playerState.shuffle}
-                        repeat={playerState.repeat}
-                        onPlayPause={handlePlayPause}
-                        onPrevious={handlePrevious}
-                        onNext={handleNext}
-                        onShuffleToggle={handleShuffleToggle}
-                        onRepeatToggle={handleRepeatToggle}
-                      />
-                    </div>
-
-                    <div className="flex items-center gap-6" onClick={(e) => e.stopPropagation()}>
-                      <VolumeControl
-                        volume={playerState.volume}
-                        isMuted={playerState.isMuted}
-                        onVolumeChange={handleVolumeChange}
-                        onMuteToggle={handleMuteToggle}
-                      />
-
-                      <MiniSpeakerBadge
-                        ref={speakerBadgeRef}
-                        playbackTarget={currentPlaybackTarget}
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setSpeakerPopoverOpen(true);
-                        }}
-                      />
-                    </div>
-                  </motion.div>
-                </motion.div>
-              )}
-            </AnimatePresence>
+                    <MiniSpeakerBadge
+                      ref={speakerBadgeRef}
+                      playbackTarget={currentPlaybackTarget}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setSpeakerPopoverOpen(true);
+                      }}
+                    />
+                  </div>
+                </div>
+              </div>
+            </motion.div>
           </motion.div>
         </motion.div>
       </motion.div>
