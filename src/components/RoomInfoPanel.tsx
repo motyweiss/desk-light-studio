@@ -131,7 +131,7 @@ export const RoomInfoPanel = ({
       {/* Devices Battery Section - Desktop only */}
       {devices && devices.length > 0 && (
         <div className="hidden md:block">
-          <div className="flex flex-row items-start justify-start gap-3">
+          <div className="flex flex-row items-start justify-start gap-6">
             {devices.map((device, index) => {
               const DeviceIcon = device.icon === 'headphones' 
                 ? AirPodsMaxIcon 
@@ -182,7 +182,7 @@ export const RoomInfoPanel = ({
                           delay: showSkeleton ? 0 : DELAY.minimal,
                         }}
                       >
-                        <DeviceIcon className="w-3.5 h-3.5 text-white/50" />
+                        <DeviceIcon className="w-5 h-5 text-white/60" />
                         <AnimatedCounter 
                           value={device.batteryLevel} 
                           suffix="%" 
