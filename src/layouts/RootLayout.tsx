@@ -25,10 +25,7 @@ const RootLayoutContent = ({ children }: RootLayoutProps) => {
 
   return (
     <div 
-      className="h-screen w-full relative flex flex-col overflow-hidden"
-      style={{
-        backgroundColor: "#90785D",
-      }}
+      className="h-screen w-full relative flex flex-col overflow-hidden bg-background"
     >
       {/* Content */}
       <div className="relative z-10 h-full flex flex-col overflow-hidden">
