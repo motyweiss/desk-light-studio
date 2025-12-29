@@ -14,13 +14,30 @@ export default defineConfig(({ mode }) => ({
     alias: {
       "@": path.resolve(__dirname, "./src"),
       // Force single React instance
-      "react": path.resolve(__dirname, "./node_modules/react"),
-      "react-dom": path.resolve(__dirname, "./node_modules/react-dom"),
+      "react": path.resolve(__dirname, "node_modules/react"),
+      "react-dom": path.resolve(__dirname, "node_modules/react-dom"),
     },
-    dedupe: ["react", "react-dom", "react-router-dom"],
+    dedupe: [
+      "react", 
+      "react-dom", 
+      "react-router-dom",
+      "@radix-ui/react-tooltip",
+      "@radix-ui/react-dialog",
+      "@radix-ui/react-popover",
+      "@radix-ui/react-select",
+      "@radix-ui/react-slider",
+      "@radix-ui/react-tabs",
+      "@radix-ui/react-toast",
+    ],
   },
   optimizeDeps: {
-    include: ["react", "react-dom", "react-router-dom"],
-    force: true,
+    include: [
+      "react", 
+      "react-dom", 
+      "react-router-dom",
+      "@radix-ui/react-tooltip",
+    ],
   },
+  // Clear cache by changing config version
+  cacheDir: "node_modules/.vite-v2",
 }));
