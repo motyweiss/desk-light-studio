@@ -164,13 +164,28 @@ export const MediaPlayer = () => {
             initial={false}
             animate={paddingStyles}
             transition={PLAYER_LAYOUT_TRANSITION}
+            className="relative"
           >
+            {/* Source Indicator - positioned in top right corner in expanded mode */}
+            <motion.div
+              initial={false}
+              animate={{
+                opacity: isMinimized ? 0 : 1,
+                scale: isMinimized ? 0.8 : 1,
+              }}
+              transition={CONTENT_FADE_TRANSITION}
+              className="absolute top-0 right-0 z-10"
+              style={{ pointerEvents: isMinimized ? 'none' : 'auto' }}
+            >
+              <SourceIndicator appName={playerState.appName} />
+            </motion.div>
+
             {/* Inner content wrapper - always flex, gap changes */}
             <motion.div 
               className="flex items-center"
               initial={false}
               animate={{
-                gap: isMinimized ? 12 : 16,
+                gap: isMinimized ? 12 : 12,
                 flexDirection: isMinimized ? 'row' : 'column',
                 alignItems: isMinimized ? 'center' : 'stretch',
               }}
@@ -301,7 +316,7 @@ export const MediaPlayer = () => {
               animate={{
                 height: isMinimized ? 0 : 'auto',
                 opacity: isMinimized ? 0 : 1,
-                marginTop: isMinimized ? 0 : 12,
+                marginTop: isMinimized ? 0 : 8,
               }}
               transition={{
                 height: PLAYER_LAYOUT_TRANSITION,
@@ -311,11 +326,6 @@ export const MediaPlayer = () => {
               style={{ overflow: 'hidden' }}
             >
               <div className="space-y-3">
-                {/* Source Indicator */}
-                <div className="flex justify-end">
-                  <SourceIndicator appName={playerState.appName} />
-                </div>
-
                 {/* Progress Bar */}
                 {currentTrack && (
                   <div onClick={(e) => e.stopPropagation()}>
