@@ -1,4 +1,12 @@
-import { supabase } from "@/integrations/supabase/client";
+// Lazy import to avoid circular dependency issues
+let _supabase: typeof import("@/integrations/supabase/client").supabase | null = null;
+const getSupabase = async () => {
+  if (!_supabase) {
+    const module = await import("@/integrations/supabase/client");
+    _supabase = module.supabase;
+  }
+  return _supabase;
+};
 
 interface ProxyRequest {
   path: string;
@@ -37,6 +45,7 @@ class HAProxyClient {
 
   private async getAuthToken(): Promise<string | null> {
     try {
+      const supabase = await getSupabase();
       const { data: { session } } = await supabase.auth.getSession();
       return session?.access_token ?? null;
     } catch {
@@ -85,6 +94,7 @@ class HAProxyClient {
     }
 
     try {
+      const supabase = await getSupabase();
       const { data, error } = await supabase.functions.invoke('ha-proxy', {
         body: params,
       });
@@ -180,6 +190,7 @@ class HAProxyClient {
 
     try {
       // Call the edge function directly to get the image
+      const supabase = await getSupabase();
       const { data: sessionData } = await supabase.auth.getSession();
       const supabaseUrl = sessionData?.session ? 
         `https://${import.meta.env.VITE_SUPABASE_PROJECT_ID}.supabase.co` : null;
@@ -279,6 +290,7 @@ class HAProxyClient {
   // Check if user has HA configured
   async isConfigured(): Promise<boolean> {
     try {
+      const supabase = await getSupabase();
       const { data } = await supabase
         .from('user_ha_configs')
         .select('id')
