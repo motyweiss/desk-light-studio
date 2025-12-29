@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
+import { TIMING, STAGGER, SEQUENCES } from '@/lib/animations';
 
 /**
  * Unified Load Stages:
@@ -17,33 +18,34 @@ export type LoadStage =
 
 // ============================================================
 // CENTRALIZED TIMING CONSTANTS (in milliseconds)
+// Uses tokens from lib/animations for consistency
 // ============================================================
 export const LOAD_TIMING = {
   // Overlay phase
-  minPreloadTime: 400,        // Minimum time to show overlay
-  overlayExitDuration: 500,   // Overlay fade out duration
+  minPreloadTime: 400,
+  overlayExitDuration: TIMING.slow * 1000,
   
   // Content entry phase (after overlay gone)
-  contentEntryDelay: 50,      // Small delay after overlay before content
-  contentEntryDuration: 500,  // How long content fades in
+  contentEntryDelay: 50,
+  contentEntryDuration: TIMING.slow * 1000,
   
   // Element stagger timing
   stagger: {
-    base: 60,                 // Base stagger between elements (ms)
-    header: 0,                // Header enters first
-    devices: 100,             // Devices section delay
-    lightCards: 160,          // Light cards delay
-    deskImage: 80,            // Desk image delay
+    base: STAGGER.normal * 1000,
+    header: 0,
+    devices: STAGGER.relaxed * 1000,
+    lightCards: STAGGER.wide * 1000,
+    deskImage: STAGGER.relaxed * 1000,
   },
   
   // Data hydration phase
-  minSkeletonTime: 500,       // Minimum time to show skeleton
-  crossfadeDuration: 500,     // Skeleton to data crossfade
-  crossfadeBlur: 4,           // Blur pixels during transition
+  minSkeletonTime: TIMING.slow * 1000,
+  crossfadeDuration: TIMING.slow * 1000,
+  crossfadeBlur: 4,
   
   // Post-hydration effects
-  progressRingDelay: 200,     // Delay before progress rings animate
-  glowLayerDelay: 300,        // Delay before glow layers appear
+  progressRingDelay: TIMING.fast * 1000,
+  glowLayerDelay: TIMING.medium * 1000,
 } as const;
 
 // Convert to seconds for framer-motion
@@ -97,7 +99,7 @@ export const usePageLoadSequence = (
   const [stage, setStage] = useState<LoadStage>('loading');
   const skeletonStartRef = useRef<number>(Date.now());
   const hasTransitionedToData = useRef(false);
-  const timeoutRefs = useRef<NodeJS.Timeout[]>([]);
+  const timeoutRefs = useRef<ReturnType<typeof setTimeout>[]>([]);
 
   // Clear all pending timeouts
   const clearTimeouts = useCallback(() => {
@@ -154,7 +156,7 @@ export const usePageLoadSequence = (
     // If connected and data loaded, proceed immediately
     // Otherwise, use a short timeout to show content anyway
     const shouldProceed = isConnected && isDataLoaded;
-    const timeoutDelay = shouldProceed ? 0 : 300; // Show content after 300ms even without HA
+    const timeoutDelay = shouldProceed ? 0 : 300;
 
     const skeletonShown = Date.now() - skeletonStartRef.current;
     const remaining = Math.max(timeoutDelay, LOAD_TIMING.minSkeletonTime - skeletonShown);

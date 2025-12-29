@@ -7,7 +7,7 @@ import { MagicKeyboardIcon } from "./icons/MagicKeyboardIcon";
 import { MagicMouseIcon } from "./icons/MagicMouseIcon";
 import { AnimatedCounter } from "./AnimatedCounter";
 import { ClimateIndicators } from "@/features/climate/components/ClimateIndicators";
-import { PAGE_LOAD, DATA_TRANSITION, EASING } from "@/constants/animations";
+import { TIMING, EASE, STAGGER, DELAY } from "@/lib/animations";
 
 interface Light {
   id: string;
@@ -46,17 +46,16 @@ interface RoomInfoPanelProps {
   dataReady?: boolean;
 }
 
-// Unified transition config
+// Unified transition configs using centralized tokens
 const entryTransition = {
-  duration: PAGE_LOAD.container.duration,
-  ease: EASING.entrance,
+  duration: TIMING.medium,
+  ease: EASE.entrance,
 };
 
 const crossfadeTransition = {
-  duration: DATA_TRANSITION.dataEnter.duration,
-  ease: EASING.smooth,
+  duration: TIMING.fast,
+  ease: EASE.smooth,
 };
-
 
 export const RoomInfoPanel = ({ 
   roomName, 
@@ -79,9 +78,9 @@ export const RoomInfoPanel = ({
         initial={{ opacity: 0 }}
         animate={{ opacity: isLoaded ? 1 : 0 }}
         transition={{
-          duration: PAGE_LOAD.elements.header.duration,
-          ease: EASING.entrance,
-          delay: PAGE_LOAD.elements.header.delay,
+          duration: TIMING.medium,
+          ease: EASE.entrance,
+          delay: DELAY.none,
         }}
         style={{ willChange: 'opacity' }}
       >
@@ -96,7 +95,7 @@ export const RoomInfoPanel = ({
             backgroundColor: masterSwitchOn ? 'rgba(255, 255, 255, 0.08)' : 'rgba(255, 255, 255, 0)',
             borderColor: masterSwitchOn ? 'rgba(255, 255, 255, 0.25)' : 'rgba(255, 255, 255, 0.1)'
           }}
-          transition={{ duration: 0.4, ease: EASING.smooth }}
+          transition={{ duration: TIMING.medium, ease: EASE.smooth }}
           onClick={() => onMasterToggle(!masterSwitchOn)}
           className="w-9 h-9 md:w-10 md:h-10 rounded-full backdrop-blur-xl border flex-shrink-0"
           whileHover={{
@@ -109,7 +108,7 @@ export const RoomInfoPanel = ({
             animate={{
               color: masterSwitchOn ? 'rgba(255, 255, 255, 0.95)' : 'rgba(255, 255, 255, 0.4)',
             }}
-            transition={{ duration: 0.4, ease: EASING.smooth }}
+            transition={{ duration: TIMING.medium, ease: EASE.smooth }}
             className="flex items-center justify-center"
           >
             <Power className="w-4 h-4" strokeWidth={2} />
@@ -149,9 +148,9 @@ export const RoomInfoPanel = ({
                     initial={{ opacity: 0 }}
                     animate={{ opacity: isLoaded ? 1 : 0 }}
                     transition={{
-                      duration: PAGE_LOAD.elements.devices.duration,
-                      ease: EASING.entrance,
-                      delay: PAGE_LOAD.elements.devices.delay + (index * PAGE_LOAD.elements.devices.stagger),
+                      duration: TIMING.medium,
+                      ease: EASE.entrance,
+                      delay: DELAY.short + (index * STAGGER.relaxed),
                     }}
                     style={{ willChange: 'opacity' }}
                   >
@@ -165,7 +164,7 @@ export const RoomInfoPanel = ({
                           opacity: showSkeleton ? [0.3, 0.5, 0.3] : 0,
                         }}
                         transition={showSkeleton ? {
-                          duration: DATA_TRANSITION.skeleton.shimmerDuration,
+                          duration: 1.5,
                           repeat: Infinity,
                           ease: "easeInOut"
                         } : crossfadeTransition}
@@ -176,11 +175,11 @@ export const RoomInfoPanel = ({
                         initial={false}
                         animate={{ 
                           opacity: dataReady && !showSkeleton ? 1 : 0,
-                          filter: dataReady && !showSkeleton ? 'blur(0px)' : `blur(${DATA_TRANSITION.dataEnter.blur}px)`,
+                          filter: dataReady && !showSkeleton ? 'blur(0px)' : 'blur(4px)',
                         }}
                         transition={{ 
                           ...crossfadeTransition,
-                          delay: showSkeleton ? 0 : DATA_TRANSITION.dataEnter.delay,
+                          delay: showSkeleton ? 0 : DELAY.minimal,
                         }}
                       >
                         <DeviceIcon className="w-5 h-5 text-white/50" />
@@ -224,9 +223,9 @@ export const RoomInfoPanel = ({
               initial={{ opacity: 0 }}
               animate={{ opacity: isLoaded ? 1 : 0 }}
               transition={{
-                duration: PAGE_LOAD.elements.lightCards.duration,
-                ease: EASING.entrance,
-                delay: PAGE_LOAD.elements.lightCards.delay + (index * PAGE_LOAD.elements.lightCards.stagger),
+                duration: TIMING.medium,
+                ease: EASE.entrance,
+                delay: DELAY.medium + (index * STAGGER.normal),
               }}
               style={{ willChange: 'opacity' }}
             >

@@ -1,6 +1,6 @@
 import { motion, AnimatePresence } from "framer-motion";
 import officeChairIcon from "@/assets/office-chair.svg";
-import { PAGE_LOAD, EASING } from "@/constants/animations";
+import { TIMING, EASE, LOADING_PRESETS } from "@/lib/animations";
 
 interface LoadingOverlayProps {
   isLoading: boolean;
@@ -17,8 +17,8 @@ export const LoadingOverlay = ({ isLoading, onExitComplete }: LoadingOverlayProp
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           transition={{ 
-            duration: PAGE_LOAD.overlay.exitDuration,
-            ease: EASING.smooth
+            duration: TIMING.slow,
+            ease: EASE.smooth
           }}
           style={{
             backgroundColor: "#96856e",
@@ -32,8 +32,8 @@ export const LoadingOverlay = ({ isLoading, onExitComplete }: LoadingOverlayProp
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ 
-              duration: 0.25,
-              ease: EASING.entrance
+              duration: TIMING.fast,
+              ease: EASE.entrance
             }}
           >
             {/* Rotating circle with gap */}
@@ -59,11 +59,11 @@ export const LoadingOverlay = ({ isLoading, onExitComplete }: LoadingOverlayProp
               style={{
                 background: 'radial-gradient(circle, rgba(255, 255, 255, 0.15) 0%, transparent 70%)',
               }}
-              animate={{ opacity: [0.4, 0.6, 0.4] }}
+              animate={{ opacity: [0.4, 0.7, 0.4] }}
               transition={{
-                duration: 1.8,
+                duration: 1.5,
                 repeat: Infinity,
-                ease: "easeInOut",
+                ease: EASE.smooth,
               }}
             />
 
@@ -73,9 +73,9 @@ export const LoadingOverlay = ({ isLoading, onExitComplete }: LoadingOverlayProp
               initial={{ opacity: 0 }}
               animate={{ opacity: 0.85 }}
               transition={{
-                duration: 0.25,
+                duration: TIMING.fast,
                 delay: 0.1,
-                ease: EASING.entrance
+                ease: EASE.entrance
               }}
             >
               <img 

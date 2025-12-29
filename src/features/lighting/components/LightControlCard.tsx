@@ -3,7 +3,7 @@ import { Slider } from "@/components/ui/slider";
 import { useState, useRef, useCallback, useEffect } from "react";
 import { getIconForLight } from "@/components/icons/LightIcons";
 import { Loader2 } from "lucide-react";
-import { LIGHT_ANIMATION, DATA_TRANSITION, EASING } from "@/constants/animations";
+import { TIMING, EASE, SEQUENCES } from "@/lib/animations";
 import { useLightAnimation } from "../hooks/useLightAnimation";
 
 interface LightControlCardProps {
@@ -18,15 +18,15 @@ interface LightControlCardProps {
   onRetry?: () => void;
 }
 
-// Smooth transition config
+// Smooth transition config using centralized tokens
 const smoothTransition = {
-  duration: 0.5,
-  ease: EASING.smooth,
+  duration: TIMING.slow,
+  ease: EASE.smooth,
 };
 
 const crossfadeTransition = {
-  duration: DATA_TRANSITION.dataEnter.duration,
-  ease: EASING.smooth,
+  duration: TIMING.fast,
+  ease: EASE.smooth,
 };
 
 export const LightControlCard = ({ 
@@ -49,7 +49,7 @@ export const LightControlCard = ({
   });
   
   const [displayNumber, setDisplayNumber] = useState(intensity);
-  const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const debounceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const userInteractingRef = useRef(false);
   
   useMotionValueEvent(displayValue, "change", (latest) => {
@@ -93,7 +93,7 @@ export const LightControlCard = ({
     
     setTimeout(() => {
       userInteractingRef.current = false;
-    }, LIGHT_ANIMATION.turnOn.duration * 1000);
+    }, SEQUENCES.lightControl.turnOnDuration * 1000);
   };
 
   const handleSliderChange = useCallback((values: number[]) => {
@@ -138,12 +138,12 @@ export const LightControlCard = ({
       whileHover={!isLoading ? {
         backgroundColor: isOn ? 'rgba(255, 255, 255, 0.08)' : 'rgba(255, 255, 255, 0.05)',
         borderColor: isOn ? 'rgba(255, 255, 255, 0.16)' : 'rgba(255, 255, 255, 0.1)',
-        transition: { duration: 0.4, ease: [0.25, 0.1, 0.25, 1] }
+        transition: { duration: TIMING.medium, ease: EASE.smooth }
       } : undefined}
       whileTap={!isLoading ? { 
         scale: 0.98,
         backgroundColor: isOn ? 'rgba(255, 255, 255, 0.1)' : 'rgba(255, 255, 255, 0.06)',
-        transition: { duration: 0.2, ease: [0.25, 0.1, 0.25, 1] }
+        transition: { duration: TIMING.fast, ease: EASE.smooth }
       } : undefined}
       style={{ pointerEvents: isLoading ? 'none' : 'auto' }}
     >
@@ -156,7 +156,7 @@ export const LightControlCard = ({
           opacity: isLoading ? 1 : 0
         }}
         transition={isLoading ? { 
-          x: { duration: DATA_TRANSITION.skeleton.shimmerDuration, repeat: Infinity, ease: "easeInOut" },
+          x: { duration: 1.5, repeat: Infinity, ease: "easeInOut" },
           opacity: crossfadeTransition
         } : { opacity: crossfadeTransition }}
       />
@@ -200,7 +200,7 @@ export const LightControlCard = ({
               opacity: isLoading ? [0.3, 0.5, 0.3] : 0 
             }}
             transition={isLoading ? { 
-              duration: DATA_TRANSITION.skeleton.shimmerDuration, 
+              duration: 1.5, 
               repeat: Infinity,
               ease: "easeInOut"
             } : crossfadeTransition}
@@ -211,12 +211,12 @@ export const LightControlCard = ({
             initial={false}
             animate={{
               opacity: isLoading ? 0 : 1,
-              filter: isLoading ? `blur(${DATA_TRANSITION.dataEnter.blur}px)` : 'blur(0px)',
+              filter: isLoading ? 'blur(4px)' : 'blur(0px)',
               color: isOn ? 'hsl(44 92% 62%)' : 'rgba(255, 255, 255, 0.35)'
             }}
             transition={{
               ...crossfadeTransition,
-              filter: { duration: 0.35, ease: EASING.smooth }
+              filter: { duration: TIMING.medium, ease: EASE.smooth }
             }}
           >
             <IconComponent className="w-7 h-7 md:w-8 md:h-8" />
@@ -231,7 +231,7 @@ export const LightControlCard = ({
                 initial={{ opacity: 0, scale: 0.7 }}
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 0.7 }}
-                transition={{ duration: 0.2 }}
+                transition={{ duration: TIMING.fast }}
               >
                 <Loader2 
                   className="w-4 h-4 text-white/40 animate-spin" 
@@ -259,7 +259,7 @@ export const LightControlCard = ({
                 opacity: isLoading ? [0.3, 0.5, 0.3] : 0 
               }}
               transition={isLoading ? { 
-                duration: DATA_TRANSITION.skeleton.shimmerDuration, 
+                duration: 1.5, 
                 repeat: Infinity,
                 ease: "easeInOut"
               } : crossfadeTransition}
@@ -269,11 +269,11 @@ export const LightControlCard = ({
               initial={false}
               animate={{ 
                 opacity: isLoading ? 0 : 1,
-                filter: isLoading ? `blur(${DATA_TRANSITION.dataEnter.blur}px)` : 'blur(0px)',
+                filter: isLoading ? 'blur(4px)' : 'blur(0px)',
               }}
               transition={{
                 ...crossfadeTransition,
-                filter: { duration: 0.35, ease: EASING.smooth }
+                filter: { duration: TIMING.medium, ease: EASE.smooth }
               }}
             >
               {label}
@@ -289,7 +289,7 @@ export const LightControlCard = ({
                 opacity: isLoading ? [0.3, 0.5, 0.3] : 0 
               }}
               transition={isLoading ? { 
-                duration: DATA_TRANSITION.skeleton.shimmerDuration, 
+                duration: 1.5, 
                 repeat: Infinity,
                 ease: "easeInOut",
                 delay: 0.1
@@ -300,12 +300,12 @@ export const LightControlCard = ({
               initial={false}
               animate={{
                 opacity: isLoading ? 0 : 1,
-                filter: isLoading ? `blur(${DATA_TRANSITION.dataEnter.blur}px)` : 'blur(0px)',
+                filter: isLoading ? 'blur(4px)' : 'blur(0px)',
                 color: isOn ? 'rgba(255, 255, 255, 0.6)' : 'rgba(255, 255, 255, 0.4)'
               }}
               transition={{
                 ...crossfadeTransition,
-                filter: { duration: 0.35, ease: EASING.smooth }
+                filter: { duration: TIMING.medium, ease: EASE.smooth }
               }}
             >
               {isOn ? `${displayNumber}%` : 'Off'}
@@ -333,7 +333,7 @@ export const LightControlCard = ({
                 className="w-full h-2 bg-white/10 rounded-full"
                 animate={{ opacity: [0.3, 0.5, 0.3] }}
                 transition={{ 
-                  duration: DATA_TRANSITION.skeleton.shimmerDuration, 
+                  duration: 1.5, 
                   repeat: Infinity,
                   ease: "easeInOut",
                   delay: 0.2
@@ -347,11 +347,11 @@ export const LightControlCard = ({
               initial={false}
               animate={{ 
                 opacity: isLoading ? 0 : 1,
-                filter: isLoading ? `blur(${DATA_TRANSITION.dataEnter.blur}px)` : 'blur(0px)',
+                filter: isLoading ? 'blur(4px)' : 'blur(0px)',
               }}
               transition={{
                 ...crossfadeTransition,
-                filter: { duration: 0.4, ease: EASING.smooth }
+                filter: { duration: TIMING.medium, ease: EASE.smooth }
               }}
             >
               <Slider
