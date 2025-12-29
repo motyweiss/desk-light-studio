@@ -123,7 +123,7 @@ export const ClimateIndicatorTooltip = ({
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     transition={{
-                      delay: 0.05,
+                      delay: 0.2,
                       duration: 0.2
                     }}
                   >
@@ -136,7 +136,7 @@ export const ClimateIndicatorTooltip = ({
                       initial={{ opacity: 0, x: -8 }}
                       animate={{ opacity: 1, x: 0 }}
                       transition={{
-                        delay: 0.08,
+                        delay: 0.25,
                         duration: 0.2,
                         ease: [0.4, 0, 0.2, 1]
                       }}
@@ -149,7 +149,7 @@ export const ClimateIndicatorTooltip = ({
                       initial={{ opacity: 0, x: -8 }}
                       animate={{ opacity: 1, x: 0 }}
                       transition={{
-                        delay: 0.12,
+                        delay: 0.3,
                         duration: 0.2,
                         ease: [0.4, 0, 0.2, 1]
                       }}
@@ -164,7 +164,7 @@ export const ClimateIndicatorTooltip = ({
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   transition={{
-                    delay: 0.16,
+                    delay: 0.35,
                     duration: 0.25
                   }}
                 >
