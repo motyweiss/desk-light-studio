@@ -21,8 +21,8 @@ const RootLayoutContent = ({ children }: RootLayoutProps) => {
   const isSettingsPage = location.pathname === '/settings';
 
   // Bottom padding to ensure content doesn't get hidden behind the player
-  // Player height (64px minimized) + bottom offset (16px) + comfortable buffer (16px)
-  const bottomPadding = isSettingsPage ? 0 : 96;
+  // Player height (64px minimized) + bottom offset (16px) + comfortable buffer (56px)
+  const bottomPadding = isSettingsPage ? 0 : 136;
 
   return (
     <div 
