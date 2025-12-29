@@ -17,10 +17,8 @@ import { MusicParticles } from './MusicParticles';
 // All animations use these for perfect sync
 // ============================================
 const TIMING = {
-  layout: 0.4,        // Container size/shape changes
-  contentFade: 0.2,   // Content opacity changes
-  staggerIn: 0.08,    // Delay between elements appearing
-  staggerOut: 0,      // No stagger on collapse (instant fade)
+  layout: 0.35,       // Container size/shape changes
+  contentFade: 0.15,  // Content opacity changes - faster for clean transitions
 } as const;
 
 const EASE = {
@@ -34,11 +32,20 @@ const layoutTransition = {
   ease: EASE.layout,
 };
 
-// Content fade - synced to layout
-const contentTransition = (isExpanding: boolean, delay = 0) => ({
+// Content transitions based on direction
+// On collapse: content fades out FIRST, then layout shrinks
+// On expand: layout expands FIRST, then content fades in
+const getContentTransition = (isExpanding: boolean) => ({
   duration: TIMING.contentFade,
   ease: EASE.fade,
-  delay: isExpanding ? TIMING.layout * 0.5 + delay : 0, // Fade in after layout starts, fade out immediately
+  delay: isExpanding ? TIMING.layout * 0.7 : 0, // Expanding: wait for layout. Collapsing: immediate
+});
+
+// Layout transition with delay for collapsing (wait for content to fade)
+const getLayoutTransition = (isCollapsing: boolean) => ({
+  duration: TIMING.layout,
+  ease: EASE.layout,
+  delay: isCollapsing ? TIMING.contentFade : 0, // Collapsing: wait for fade. Expanding: immediate
 });
 
 export const MediaPlayer = () => {
@@ -163,7 +170,7 @@ export const MediaPlayer = () => {
               opacity: isExpanded ? 1 : 0,
               scale: isExpanded ? 1 : 0.9,
             }}
-            transition={contentTransition(isExpanded, TIMING.staggerIn)}
+            transition={getContentTransition(isExpanded)}
             className="absolute z-10"
             style={{ top: 16, right: 20, pointerEvents: isExpanded ? 'auto' : 'none' }}
           >
@@ -250,7 +257,7 @@ export const MediaPlayer = () => {
                     }}
                     transition={{
                       height: layoutTransition,
-                      opacity: contentTransition(isExpanded),
+                      opacity: getContentTransition(isExpanded),
                       marginTop: layoutTransition,
                     }}
                     style={{ overflow: 'hidden' }}
@@ -271,11 +278,7 @@ export const MediaPlayer = () => {
                 }}
                 transition={{
                   width: layoutTransition,
-                  opacity: { 
-                    duration: TIMING.contentFade, 
-                    ease: EASE.fade,
-                    delay: isMinimized ? TIMING.layout * 0.6 : 0, // Appear after layout, disappear immediately
-                  },
+                  opacity: getContentTransition(isMinimized),
                 }}
                 style={{ overflow: 'hidden', flexShrink: 0 }}
               >
@@ -304,13 +307,9 @@ export const MediaPlayer = () => {
                 marginTop: isExpanded ? 16 : 0,
               }}
               transition={{
-                height: layoutTransition,
-                marginTop: layoutTransition,
-                opacity: {
-                  duration: TIMING.contentFade,
-                  ease: EASE.fade,
-                  delay: isExpanded ? TIMING.layout * 0.5 : 0, // Fade in after layout starts, fade out immediately
-                },
+                height: getLayoutTransition(!isExpanded),
+                marginTop: getLayoutTransition(!isExpanded),
+                opacity: getContentTransition(isExpanded),
               }}
               style={{ overflow: 'hidden' }}
             >
