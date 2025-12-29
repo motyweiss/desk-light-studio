@@ -64,10 +64,7 @@ export const ClimateIndicatorTooltip = ({
       onMouseLeave={onToggle}
     >
       {/* Compact indicator - simple circle with icon */}
-      <motion.div
-        className="cursor-default"
-        whileHover={{ scale: 1.02 }}
-      >
+      <div className="cursor-default">
         <div className="flex items-center gap-1.5 md:gap-2">
           <IconCircle size={32}>
             <Icon 
@@ -87,103 +84,102 @@ export const ClimateIndicatorTooltip = ({
             {!isLoading && <span className="text-xs text-white/40 ml-0.5">{unit}</span>}
           </motion.div>
         </div>
-      </motion.div>
+      </div>
 
       {/* Tooltip - rendered via Portal */}
-      {isOpen && trendData.length > 0 && createPortal(
+      {createPortal(
         <AnimatePresence>
-          <motion.div
-            initial={{ 
-              opacity: 0,
-              scale: 0.92,
-              y: -10
-            }}
-            animate={{ 
-              opacity: 1,
-              scale: 1,
-              y: 0
-            }}
-            exit={{ 
-              opacity: 0,
-              scale: 0.92,
-              y: -10
-            }}
-            transition={{
-              duration: 0.35,
-              ease: [0.25, 0.46, 0.45, 0.94]
-            }}
-            className="fixed"
-            style={{ 
-              top: `${tooltipPosition.top}px`,
-              left: `${tooltipPosition.left}px`,
-              transform: 'translateX(-50%)',
-              zIndex: 9999
-            }}
-          >
-            <div className="bg-white/8 backdrop-blur-[20px] rounded-xl px-3.5 py-3 shadow-[0_4px_16px_rgba(0,0,0,0.12)] border border-white/15 min-w-[200px]">
-              {/* Header with icon and value */}
-              <div className="flex items-center gap-3 mb-3.5">
+          {isOpen && trendData.length > 0 && (
+            <motion.div
+              initial={{ 
+                opacity: 0,
+                y: 8
+              }}
+              animate={{ 
+                opacity: 1,
+                y: 0
+              }}
+              exit={{ 
+                opacity: 0,
+                y: 4
+              }}
+              transition={{
+                duration: 0.25,
+                ease: [0.4, 0, 0.2, 1]
+              }}
+              className="fixed pointer-events-none"
+              style={{ 
+                top: `${tooltipPosition.top}px`,
+                left: `${tooltipPosition.left}px`,
+                transform: 'translateX(-50%)',
+                zIndex: 9999
+              }}
+            >
+              <div className="bg-black/40 backdrop-blur-xl rounded-2xl px-4 py-3.5 shadow-[0_8px_32px_rgba(0,0,0,0.25)] border border-white/10 min-w-[200px]">
+                {/* Header with icon and value */}
+                <div className="flex items-center gap-3 mb-3">
+                  <motion.div
+                    className="w-10 h-10 rounded-full flex items-center justify-center bg-white/10"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{
+                      delay: 0.05,
+                      duration: 0.2
+                    }}
+                  >
+                    <Icon className="w-5 h-5 text-white/80" strokeWidth={1.5} />
+                  </motion.div>
+                  
+                  <div className="flex-1">
+                    <motion.div
+                      className="text-2xl font-light text-white tabular-nums tracking-tight"
+                      initial={{ opacity: 0, x: -8 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{
+                        delay: 0.08,
+                        duration: 0.2,
+                        ease: [0.4, 0, 0.2, 1]
+                      }}
+                    >
+                      {value}
+                      <span className="text-sm text-white/40 ml-1 font-light">{unit}</span>
+                    </motion.div>
+                    <motion.div
+                      className="text-[10px] text-white/50 font-medium tracking-[0.1em] uppercase mt-0.5"
+                      initial={{ opacity: 0, x: -8 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{
+                        delay: 0.12,
+                        duration: 0.2,
+                        ease: [0.4, 0, 0.2, 1]
+                      }}
+                    >
+                      {label}
+                    </motion.div>
+                  </div>
+                </div>
+
+                {/* Trend Graph */}
                 <motion.div
-                  className="w-9 h-9 rounded-full flex items-center justify-center backdrop-blur-lg bg-white/10"
-                  initial={{ scale: 0.8, opacity: 0 }}
-                  animate={{ scale: 1, opacity: 1 }}
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
                   transition={{
-                    delay: 0.05,
-                    duration: 0.3,
-                    ease: [0.34, 1.56, 0.64, 1]
+                    delay: 0.16,
+                    duration: 0.25
                   }}
                 >
-                  <Icon className="w-4 h-4 text-white/90" strokeWidth={1.5} />
+                  <TrendGraph 
+                    data={trendData}
+                    width={180}
+                    height={40}
+                    color={color}
+                    animate={isOpen}
+                    colorType={colorType}
+                  />
                 </motion.div>
-                
-                <div className="flex-1">
-                  <motion.div
-                    className="text-xl font-extralight text-white tabular-nums tracking-tight"
-                    initial={{ opacity: 0, x: -6 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{
-                      delay: 0.08,
-                      duration: 0.25
-                    }}
-                  >
-                    {value}
-                    <span className="text-xs text-white/30 ml-1 font-light">{unit}</span>
-                  </motion.div>
-                  <motion.div
-                    className="text-[9px] text-white/40 font-medium tracking-[0.12em] uppercase"
-                    initial={{ opacity: 0, x: -6 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{
-                      delay: 0.12,
-                      duration: 0.25
-                    }}
-                  >
-                    {label}
-                  </motion.div>
-                </div>
               </div>
-
-              {/* Trend Graph */}
-              <motion.div
-                initial={{ opacity: 0, y: 6 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{
-                  delay: 0.15,
-                  duration: 0.3,
-                  ease: [0.25, 0.46, 0.45, 0.94]
-                }}
-              >
-                <TrendGraph 
-                  data={trendData}
-                  width={180}
-                  height={36}
-                  color={color}
-                  animate={isOpen}
-                  colorType={colorType}
-                />
-              </motion.div>
-            </div>
-          </motion.div>
+            </motion.div>
+          )}
         </AnimatePresence>,
         document.body
       )}
