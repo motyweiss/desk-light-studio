@@ -1,8 +1,7 @@
-import { useState, useEffect, useMemo, useCallback, useRef } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { motion } from "framer-motion";
 import { DeskDisplay } from "@/features/lighting/components/DeskDisplay";
 import { RoomInfoPanel } from "@/components/RoomInfoPanel";
-import { AmbientGlowLayers } from "@/features/lighting/components/AmbientGlowLayers";
 import { LoadingOverlay } from "@/components/LoadingOverlay";
 import { Toaster } from "@/components/ui/toaster";
 import { useClimate } from "@/features/climate";
@@ -10,7 +9,7 @@ import { useLighting } from "@/features/lighting";
 
 import { useAppLoad } from "@/contexts/AppLoadContext";
 import { usePageLoadSequence, LOAD_TIMING_SECONDS } from "@/hooks/usePageLoadSequence";
-import { LIGHT_ANIMATION, PAGE_LOAD, EASING } from "@/constants/animations";
+import { PAGE_LOAD, EASING } from "@/constants/animations";
 import { PAGE_TRANSITIONS } from "@/lib/animations/tokens";
 
 // Import primary desk image for preloading
@@ -118,20 +117,6 @@ const Index = () => {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [masterSwitchOn, lights, handleMasterToggle, setLightIntensity]);
 
-  // Calculate binary lighting state for background color
-  const lightingState = useMemo(() => {
-    const spotlightBit = lights.spotlight.targetValue > 0 ? "1" : "0";
-    const deskLampBit = lights.deskLamp.targetValue > 0 ? "1" : "0";
-    const monitorLightBit = lights.monitorLight.targetValue > 0 ? "1" : "0";
-    return `${spotlightBit}${deskLampBit}${monitorLightBit}`;
-  }, [lights.spotlight.targetValue, lights.deskLamp.targetValue, lights.monitorLight.targetValue]);
-
-  // Content transition config
-  const contentTransition = {
-    duration: LOAD_TIMING_SECONDS.contentEntryDuration,
-    ease: EASING.entrance,
-  };
-
   return (
     <>
       <LoadingOverlay 
@@ -157,42 +142,6 @@ const Index = () => {
           transformOrigin: 'center center',
         }}
       >
-        {/* Dynamic color overlay */}
-        <motion.div
-          className="fixed inset-0 pointer-events-none z-0"
-          initial={false}
-          animate={{
-            backgroundColor: lightingState === "000" 
-              ? "hsl(28 20% 18% / 0)"
-              : lightingState === "001" 
-              ? "hsl(32 22% 20% / 0.15)"
-              : lightingState === "010"
-              ? "hsl(34 24% 21% / 0.2)"
-              : lightingState === "011"
-              ? "hsl(36 25% 23% / 0.25)"
-              : lightingState === "100"
-              ? "hsl(35 23% 22% / 0.22)"
-              : lightingState === "101"
-              ? "hsl(37 26% 24% / 0.28)"
-              : lightingState === "110"
-              ? "hsl(38 27% 25% / 0.3)"
-              : "hsl(40 28% 26% / 0.35)"
-          }}
-          transition={{
-            duration: LIGHT_ANIMATION.turnOn.duration,
-            ease: LIGHT_ANIMATION.turnOn.ease
-          }}
-        />
-
-        {/* Ambient glow effects */}
-        <AmbientGlowLayers
-          spotlightIntensity={showData ? lights.spotlight.targetValue : 0}
-          deskLampIntensity={showData ? lights.deskLamp.targetValue : 0}
-          monitorLightIntensity={showData ? lights.monitorLight.targetValue : 0}
-          allLightsOn={allLightsOn}
-          isLoaded={showContent}
-          dataReady={showData}
-        />
 
         {/* Main content area */}
         <div className="w-full h-full max-w-5xl mx-auto flex flex-col md:flex-row items-center justify-center md:justify-between gap-4 md:gap-6 lg:gap-8 relative z-10">
