@@ -1,4 +1,4 @@
-import { createContext, useContext, ReactNode } from 'react';
+import React, { createContext, useContext, ReactNode } from 'react';
 import { useClimateSync } from '@/features/climate/hooks/useClimateSync';
 import { useHAConnection } from '@/contexts/HAConnectionContext';
 
