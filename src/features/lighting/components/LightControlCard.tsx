@@ -1,9 +1,9 @@
-import { useMotionValueEvent, AnimatePresence, motion } from "framer-motion";
+import { useMotionValueEvent, AnimatePresence, motion, useMotionValue, animate } from "framer-motion";
 import { Slider } from "@/components/ui/slider";
 import { useState, useRef, useCallback, useEffect } from "react";
 import { getIconForLight } from "@/components/icons/LightIcons";
 import { Loader2 } from "lucide-react";
-import { TIMING, EASE, SEQUENCES } from "@/lib/animations";
+import { TIMING, EASE, SEQUENCES, SPRINGS } from "@/lib/animations";
 import { useLightAnimation } from "../hooks/useLightAnimation";
 
 interface LightControlCardProps {
@@ -29,6 +29,9 @@ const crossfadeTransition = {
   ease: EASE.smooth,
 };
 
+const LONG_PRESS_DURATION = 350; // ms
+const AUTO_COLLAPSE_DELAY = 3000; // ms
+
 export const LightControlCard = ({ 
   id, 
   label, 
@@ -43,6 +46,16 @@ export const LightControlCard = ({
   const IconComponent = getIconForLight(id);
   const isOn = intensity > 0;
   
+  // Expansion state
+  const [isExpanded, setIsExpanded] = useState(false);
+  const longPressTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const autoCollapseTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const wasLongPressRef = useRef(false);
+  
+  // Slider animation value (for entry animation)
+  const sliderAnimatedValue = useMotionValue(0);
+  const [sliderDisplayValue, setSliderDisplayValue] = useState(0);
+  
   // Use unified animation hook
   const { displayValue, animateTo } = useLightAnimation(id, { 
     initialValue: intensity 
@@ -56,6 +69,10 @@ export const LightControlCard = ({
     setDisplayNumber(Math.round(latest));
   });
   
+  useMotionValueEvent(sliderAnimatedValue, "change", (latest) => {
+    setSliderDisplayValue(Math.round(latest));
+  });
+  
   // Sync with external intensity changes
   useEffect(() => {
     if (!userInteractingRef.current && Math.abs(displayValue.get() - intensity) > 0.5) {
@@ -63,11 +80,47 @@ export const LightControlCard = ({
     }
   }, [intensity, displayValue, animateTo]);
   
-  // Cleanup debounce timer on unmount
+  // Animate slider on expand
+  useEffect(() => {
+    if (isExpanded) {
+      // Start from 0 and animate to current intensity
+      sliderAnimatedValue.set(0);
+      animate(sliderAnimatedValue, intensity, {
+        ...SPRINGS.responsive,
+        duration: TIMING.medium,
+      });
+    }
+  }, [isExpanded, intensity, sliderAnimatedValue]);
+  
+  // Auto-collapse after inactivity
+  useEffect(() => {
+    if (isExpanded) {
+      if (autoCollapseTimerRef.current) {
+        clearTimeout(autoCollapseTimerRef.current);
+      }
+      autoCollapseTimerRef.current = setTimeout(() => {
+        setIsExpanded(false);
+      }, AUTO_COLLAPSE_DELAY);
+    }
+    
+    return () => {
+      if (autoCollapseTimerRef.current) {
+        clearTimeout(autoCollapseTimerRef.current);
+      }
+    };
+  }, [isExpanded, displayNumber]);
+  
+  // Cleanup timers on unmount
   useEffect(() => {
     return () => {
       if (debounceTimerRef.current) {
         clearTimeout(debounceTimerRef.current);
+      }
+      if (longPressTimerRef.current) {
+        clearTimeout(longPressTimerRef.current);
+      }
+      if (autoCollapseTimerRef.current) {
+        clearTimeout(autoCollapseTimerRef.current);
       }
     };
   }, []);
@@ -78,8 +131,41 @@ export const LightControlCard = ({
     }
   };
 
+  const handlePointerDown = (e: React.PointerEvent) => {
+    if ((e.target as HTMLElement).closest('[data-slider]')) {
+      return;
+    }
+    
+    wasLongPressRef.current = false;
+    longPressTimerRef.current = setTimeout(() => {
+      wasLongPressRef.current = true;
+      triggerHaptic();
+      setIsExpanded(true);
+    }, LONG_PRESS_DURATION);
+  };
+  
+  const handlePointerUp = () => {
+    if (longPressTimerRef.current) {
+      clearTimeout(longPressTimerRef.current);
+      longPressTimerRef.current = null;
+    }
+  };
+  
+  const handlePointerLeave = () => {
+    if (longPressTimerRef.current) {
+      clearTimeout(longPressTimerRef.current);
+      longPressTimerRef.current = null;
+    }
+  };
+
   const handleCardClick = (e: React.MouseEvent) => {
     if ((e.target as HTMLElement).closest('[data-slider]')) {
+      return;
+    }
+    
+    // Don't toggle if it was a long press
+    if (wasLongPressRef.current) {
+      wasLongPressRef.current = false;
       return;
     }
     
@@ -90,6 +176,11 @@ export const LightControlCard = ({
     userInteractingRef.current = true;
     animateTo(targetIntensity, 'user');
     onChange(targetIntensity);
+    
+    // Collapse when turning off
+    if (targetIntensity === 0) {
+      setIsExpanded(false);
+    }
     
     setTimeout(() => {
       userInteractingRef.current = false;
@@ -102,8 +193,17 @@ export const LightControlCard = ({
       triggerHaptic();
     }
     
+    // Reset auto-collapse timer on interaction
+    if (autoCollapseTimerRef.current) {
+      clearTimeout(autoCollapseTimerRef.current);
+    }
+    autoCollapseTimerRef.current = setTimeout(() => {
+      setIsExpanded(false);
+    }, AUTO_COLLAPSE_DELAY);
+    
     userInteractingRef.current = true;
     animateTo(newValue, 'user', { immediate: true });
+    setSliderDisplayValue(newValue);
     
     if (debounceTimerRef.current) {
       clearTimeout(debounceTimerRef.current);
@@ -118,9 +218,14 @@ export const LightControlCard = ({
   return (
     <motion.button
       onClick={handleCardClick}
+      onPointerDown={handlePointerDown}
+      onPointerUp={handlePointerUp}
+      onPointerLeave={handlePointerLeave}
+      onPointerCancel={handlePointerUp}
       onMouseEnter={() => onHover(id)}
       onMouseLeave={() => onHover(null)}
       className="w-full aspect-square rounded-2xl p-4 md:p-5 cursor-pointer text-left border backdrop-blur-xl relative overflow-hidden flex flex-col"
+      layout
       initial={false}
       animate={{
         backgroundColor: isLoading 
@@ -313,57 +418,74 @@ export const LightControlCard = ({
           </div>
         </div>
 
-        {/* Slider */}
-        <div 
-          className="w-full"
-          data-slider
-          onClick={(e) => e.stopPropagation()}
-          onPointerDown={(e) => e.stopPropagation()}
-        >
-          {/* Slider container */}
-          <div className="relative w-full flex items-center">
-            {/* Skeleton slider */}
+        {/* Slider - Expandable */}
+        <AnimatePresence>
+          {(isExpanded || isOn) && (
             <motion.div 
-              className="absolute inset-0 flex items-center"
-              initial={false}
-              animate={{ opacity: isLoading ? 1 : 0 }}
-              transition={crossfadeTransition}
-            >
-              <motion.div 
-                className="w-full h-2 bg-white/10 rounded-full"
-                animate={{ opacity: [0.3, 0.5, 0.3] }}
-                transition={{ 
-                  duration: 1.5, 
-                  repeat: Infinity,
-                  ease: "easeInOut",
-                  delay: 0.2
-                }}
-              />
-            </motion.div>
-            
-            {/* Real slider */}
-            <motion.div 
-              className="w-full"
-              initial={false}
+              className="w-full overflow-hidden"
+              data-slider
+              onClick={(e) => e.stopPropagation()}
+              onPointerDown={(e) => e.stopPropagation()}
+              initial={{ height: 0, opacity: 0 }}
               animate={{ 
-                opacity: isLoading ? 0 : 1,
-                filter: isLoading ? 'blur(4px)' : 'blur(0px)',
+                height: 'auto', 
+                opacity: 1,
+              }}
+              exit={{ 
+                height: 0, 
+                opacity: 0,
               }}
               transition={{
-                ...crossfadeTransition,
-                filter: { duration: TIMING.medium, ease: EASE.smooth }
+                height: { duration: TIMING.medium, ease: EASE.entrance },
+                opacity: { duration: TIMING.fast, ease: EASE.smooth }
               }}
             >
-              <Slider
-                value={[displayNumber]}
-                onValueChange={handleSliderChange}
-                max={100}
-                step={1}
-                className="w-full"
-              />
+              {/* Slider container */}
+              <div className="relative w-full flex items-center pt-1">
+                {/* Skeleton slider */}
+                <motion.div 
+                  className="absolute inset-0 flex items-center"
+                  initial={false}
+                  animate={{ opacity: isLoading ? 1 : 0 }}
+                  transition={crossfadeTransition}
+                >
+                  <motion.div 
+                    className="w-full h-2 bg-white/10 rounded-full"
+                    animate={{ opacity: [0.3, 0.5, 0.3] }}
+                    transition={{ 
+                      duration: 1.5, 
+                      repeat: Infinity,
+                      ease: "easeInOut",
+                      delay: 0.2
+                    }}
+                  />
+                </motion.div>
+                
+                {/* Real slider */}
+                <motion.div 
+                  className="w-full"
+                  initial={false}
+                  animate={{ 
+                    opacity: isLoading ? 0 : 1,
+                    filter: isLoading ? 'blur(4px)' : 'blur(0px)',
+                  }}
+                  transition={{
+                    ...crossfadeTransition,
+                    filter: { duration: TIMING.medium, ease: EASE.smooth }
+                  }}
+                >
+                  <Slider
+                    value={[isExpanded && sliderDisplayValue < displayNumber ? sliderDisplayValue : displayNumber]}
+                    onValueChange={handleSliderChange}
+                    max={100}
+                    step={1}
+                    className="w-full"
+                  />
+                </motion.div>
+              </div>
             </motion.div>
-          </div>
-        </div>
+          )}
+        </AnimatePresence>
       </div>
     </motion.button>
   );
