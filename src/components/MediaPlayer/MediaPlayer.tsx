@@ -278,10 +278,12 @@ export const MediaPlayer = () => {
                 animate={{
                   width: isMinimized ? 'auto' : 0,
                   opacity: isMinimized ? 1 : 0,
+                  filter: isMinimized ? 'blur(0px)' : 'blur(4px)',
                 }}
                 transition={{
                   width: layoutTransition,
                   opacity: getContentTransition(isMinimized),
+                  filter: getContentTransition(isMinimized),
                 }}
                 style={{ overflow: 'hidden', flexShrink: 0 }}
               >
