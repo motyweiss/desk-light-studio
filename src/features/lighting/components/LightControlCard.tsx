@@ -29,9 +29,9 @@ const crossfadeTransition = {
   ease: EASE.smooth,
 };
 
-const sliderTransition = {
+const contentTransition = {
   duration: TIMING.medium,
-  ease: EASE.entrance,
+  ease: EASE.gentle,
 };
 
 const LONG_PRESS_DURATION = 350; // ms
@@ -207,7 +207,7 @@ export const LightControlCard = ({
       onPointerCancel={handlePointerUp}
       onMouseEnter={() => onHover(id)}
       onMouseLeave={() => onHover(null)}
-      className="w-full rounded-2xl p-4 md:p-5 cursor-pointer text-left border backdrop-blur-xl relative overflow-hidden flex flex-col"
+      className="w-full aspect-square rounded-2xl p-4 md:p-5 cursor-pointer text-left border backdrop-blur-xl relative overflow-hidden flex flex-col justify-between"
       initial={false}
       animate={{
         backgroundColor: isLoading 
@@ -276,7 +276,7 @@ export const LightControlCard = ({
       )}
 
       {/* Top section: Icon + Spinner */}
-      <div className="flex items-start justify-between relative z-10 mb-auto">
+      <div className="flex items-start justify-between relative z-10">
         {/* Icon */}
         <div className="relative w-7 h-7 md:w-8 md:h-8">
           {/* Skeleton circle */}
@@ -330,13 +330,10 @@ export const LightControlCard = ({
         </div>
       </div>
 
-      {/* Spacer */}
-      <div className="min-h-8 md:min-h-12" />
-
       {/* Bottom section: Label + Status + Slider */}
-      <div className="relative z-10">
+      <div className="relative z-10 mt-auto">
         {/* Label & Status */}
-        <div className="space-y-0.5 mb-4">
+        <div className="space-y-0.5">
           {/* Label */}
           <div className="relative">
             <motion.div 
@@ -400,65 +397,65 @@ export const LightControlCard = ({
           </div>
         </div>
 
-        {/* Slider - Animated height */}
-        <motion.div 
-          className="w-full"
+        {/* Slider - Fixed position at bottom, opacity animation only */}
+        <div 
+          className="mt-4 h-6 relative"
           data-slider
           onClick={(e) => e.stopPropagation()}
           onPointerDown={(e) => e.stopPropagation()}
-          initial={false}
-          animate={{ 
-            height: showSlider ? 'auto' : 0,
-            opacity: showSlider ? 1 : 0,
-            marginTop: showSlider ? 0 : 0,
-          }}
-          transition={sliderTransition}
-          style={{ overflow: 'hidden' }}
         >
-          {/* Slider container */}
-          <div className="relative w-full flex items-center py-1">
-            {/* Skeleton slider */}
+          {/* Skeleton slider */}
+          <motion.div 
+            className="absolute inset-0 flex items-center"
+            initial={false}
+            animate={{ opacity: isLoading ? 1 : 0 }}
+            transition={crossfadeTransition}
+          >
             <motion.div 
-              className="absolute inset-0 flex items-center"
-              initial={false}
-              animate={{ opacity: isLoading ? 1 : 0 }}
-              transition={crossfadeTransition}
-            >
-              <motion.div 
-                className="w-full h-2 bg-white/10 rounded-full"
-                animate={{ opacity: [0.3, 0.5, 0.3] }}
-                transition={{ 
-                  duration: 1.5, 
-                  repeat: Infinity,
-                  ease: "easeInOut",
-                  delay: 0.2
-                }}
-              />
-            </motion.div>
-            
-            {/* Real slider */}
-            <motion.div 
+              className="w-full h-1.5 bg-white/10 rounded-full"
+              animate={{ opacity: [0.3, 0.5, 0.3] }}
+              transition={{ 
+                duration: 1.5, 
+                repeat: Infinity,
+                ease: "easeInOut",
+                delay: 0.2
+              }}
+            />
+          </motion.div>
+          
+          {/* Real slider - opacity and scale animation */}
+          <motion.div 
+            className="absolute inset-0 flex items-center"
+            initial={false}
+            animate={{ 
+              opacity: showSlider && !isLoading ? 1 : 0,
+              scale: showSlider && !isLoading ? 1 : 0.95,
+              filter: isLoading ? 'blur(4px)' : 'blur(0px)',
+            }}
+            transition={contentTransition}
+            style={{ pointerEvents: showSlider ? 'auto' : 'none' }}
+          >
+            <Slider
+              value={[displayNumber]}
+              onValueChange={handleSliderChange}
+              max={100}
+              step={1}
               className="w-full"
-              initial={false}
-              animate={{ 
-                opacity: isLoading ? 0 : 1,
-                filter: isLoading ? 'blur(4px)' : 'blur(0px)',
-              }}
-              transition={{
-                ...crossfadeTransition,
-                filter: { duration: TIMING.medium, ease: EASE.smooth }
-              }}
-            >
-              <Slider
-                value={[displayNumber]}
-                onValueChange={handleSliderChange}
-                max={100}
-                step={1}
-                className="w-full"
-              />
-            </motion.div>
-          </div>
-        </motion.div>
+            />
+          </motion.div>
+
+          {/* Placeholder line when slider hidden */}
+          <motion.div 
+            className="absolute inset-0 flex items-center"
+            initial={false}
+            animate={{ 
+              opacity: !showSlider && !isLoading ? 0.15 : 0,
+            }}
+            transition={contentTransition}
+          >
+            <div className="w-full h-1.5 bg-white/20 rounded-full" />
+          </motion.div>
+        </div>
       </div>
     </motion.button>
   );
