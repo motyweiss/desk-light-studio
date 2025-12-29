@@ -2,7 +2,7 @@ import { motion, AnimatePresence, LayoutGroup } from 'framer-motion';
 import { useState, useRef, useEffect } from 'react';
 import { useAuthenticatedImage } from '@/hooks/useAuthenticatedImage';
 import { useMediaPlayer, useMediaPlayerUI, PLAYER_HEIGHTS } from '@/features/mediaPlayer';
-import { useMediaPlayerAnimations, PLAYER_TRANSITIONS } from '@/hooks/useMediaPlayerAnimations';
+import { useMediaPlayerAnimations } from '@/hooks/useMediaPlayerAnimations';
 import { ProgressBar } from './ProgressBar';
 import { PlaybackControls } from './PlaybackControls';
 import { VolumeControl } from './VolumeControl';
@@ -11,7 +11,6 @@ import { MiniSpeakerBadge } from './MiniSpeakerBadge';
 import { SpeakerPopover } from './SpeakerPopover';
 import { AudioVisualizer } from './AudioVisualizer';
 import { MusicParticles } from './MusicParticles';
-import { MEDIA_PLAYER } from '@/constants/animations';
 
 export const MediaPlayer = () => {
   const [isMinimized, setIsMinimizedLocal] = useState(true);
@@ -45,10 +44,10 @@ export const MediaPlayer = () => {
 
   // Get unified animation system
   const { 
-    containerTransition, 
-    contentTransition, 
-    entryTransition,
-    getStaggerDelay,
+    layoutTransition,
+    fadeTransition,
+    entryProps,
+    staggerProps,
   } = useMediaPlayerAnimations({
     isMinimized,
     isVisible: true,
@@ -109,45 +108,11 @@ export const MediaPlayer = () => {
     height: isMinimized ? 48 : 64,
   };
 
-  // Smooth spring transition for layout changes
-  const smoothSpring = {
-    type: "spring" as const,
-    stiffness: 300,
-    damping: 30,
-    mass: 0.8,
-  };
-
-  // Simple fade transition
-  const fadeTransition = {
-    duration: 0.25,
-    ease: [0.25, 0.1, 0.25, 1] as const,
-  };
-
-  // Element transition for content
-  const elementTransition = {
-    duration: 0.3,
-    ease: [0.25, 0.1, 0.25, 1] as const,
-  };
-
-  // Staggered element animation for expanded mode
-  const staggeredElement = (index: number) => ({
-    initial: { opacity: 0, y: 6 },
-    animate: { opacity: 1, y: 0 },
-    exit: { opacity: 0, y: -4 },
-    transition: { 
-      duration: 0.3,
-      delay: index * 0.04,
-      ease: [0.25, 0.1, 0.25, 1] as const,
-    },
-  });
-
   return (
     <>
       <motion.div
         ref={playerRef}
-        initial={{ y: 20, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        transition={{ duration: 0.5, ease: [0.22, 0.03, 0.26, 1], delay: 0.2 }}
+        {...entryProps}
         className="fixed bottom-4 left-0 right-0 z-50 flex justify-center px-4"
       >
         <LayoutGroup>
@@ -168,7 +133,7 @@ export const MediaPlayer = () => {
                 ? '0 4px 24px rgba(0,0,0,0.15)' 
                 : '0 8px 40px rgba(0,0,0,0.25), inset 0 1px 0 rgba(255,255,255,0.1)',
             }}
-            transition={smoothSpring}
+            transition={layoutTransition}
             whileHover={{ 
               backgroundColor: isMinimized ? 'rgba(255, 255, 255, 0.15)' : 'rgba(255, 255, 255, 0.22)'
             }}
@@ -177,7 +142,7 @@ export const MediaPlayer = () => {
             <motion.div 
               layout
               className={isMinimized ? 'px-2 py-2' : 'px-5 py-4'}
-              transition={smoothSpring}
+              transition={layoutTransition}
             >
             <div className={`${isMinimized 
               ? 'grid grid-cols-[auto_1fr_auto] items-center gap-3'
@@ -191,15 +156,15 @@ export const MediaPlayer = () => {
                   className="relative flex-shrink-0 rounded-full overflow-hidden bg-white/8"
                   initial={false}
                   animate={albumArtSize}
-                  transition={contentTransition}
+                  transition={fadeTransition}
                 >
-                  <AnimatePresence mode="popLayout">
+                  <AnimatePresence mode="wait">
                     <motion.div
                       key={currentTrack?.title || 'no-track'}
                       initial={{ opacity: 0 }}
                       animate={{ opacity: 1 }}
                       exit={{ opacity: 0 }}
-                      transition={elementTransition}
+                      transition={fadeTransition}
                       className="absolute inset-0"
                     >
                       {/* Skeleton loader - show during loading or transition */}
@@ -220,7 +185,7 @@ export const MediaPlayer = () => {
                         </motion.div>
                       )}
                       
-                      <AnimatePresence mode="popLayout">
+                      <AnimatePresence mode="wait">
                         {albumArtUrl && !albumArtError ? (
                           <motion.img 
                             key={albumArtUrl}
@@ -230,7 +195,7 @@ export const MediaPlayer = () => {
                             initial={{ opacity: 0 }}
                             animate={{ opacity: 1 }}
                             exit={{ opacity: 0 }}
-                            transition={{ duration: 0.4, ease: MEDIA_PLAYER.content.ease }}
+                            transition={fadeTransition}
                           />
                         ) : !isAlbumArtLoading && (
                           <motion.div 
@@ -239,10 +204,8 @@ export const MediaPlayer = () => {
                             initial={{ opacity: 0 }}
                             animate={{ opacity: 1 }}
                             exit={{ opacity: 0 }}
-                            transition={{ duration: 0.3 }}
-                          >
-                            <div className="w-5 h-5 rounded-full bg-white/20" />
-                          </motion.div>
+                            transition={fadeTransition}
+                          />
                         )}
                       </AnimatePresence>
                     </motion.div>
@@ -260,13 +223,13 @@ export const MediaPlayer = () => {
                   className="flex-1 min-w-0 relative"
                   initial={false}
                 >
-                  <AnimatePresence mode="popLayout">
+                  <AnimatePresence mode="wait">
                     <motion.div
                       key={`${currentTrack?.title}-${currentTrack?.artist}`}
                       initial={{ opacity: 0 }}
                       animate={{ opacity: 1 }}
                       exit={{ opacity: 0 }}
-                      transition={elementTransition}
+                      transition={fadeTransition}
                     >
                       <motion.div
                         className="origin-left"
@@ -274,7 +237,7 @@ export const MediaPlayer = () => {
                         animate={{ 
                           scale: isMinimized ? 1 : 1.125,
                         }}
-                        transition={contentTransition}
+                        transition={fadeTransition}
                       >
                         <h3 className={`text-white font-light truncate ${isMinimized ? 'text-[13px]' : 'text-sm sm:text-base'}`}>
                           {currentTrack?.title || 'No media playing'}
@@ -295,7 +258,7 @@ export const MediaPlayer = () => {
                           initial={{ opacity: 0 }}
                           animate={{ opacity: 1 }}
                           exit={{ opacity: 0 }}
-                          transition={elementTransition}
+                          transition={fadeTransition}
                           className="text-white/30 text-xs truncate mt-0.5"
                         >
                           {currentTrack.album}
@@ -307,17 +270,14 @@ export const MediaPlayer = () => {
               </div>
 
               {/* Right Section: Mini Controls */}
-              <AnimatePresence mode="sync">
+              <AnimatePresence mode="wait">
                 {isMinimized && (
                   <motion.div
                     key="mini-controls"
                     initial={{ opacity: 0, x: 8 }}
                     animate={{ opacity: 1, x: 0 }}
                     exit={{ opacity: 0, x: 8 }}
-                    transition={{ 
-                      duration: MEDIA_PLAYER.content.duration,
-                      ease: MEDIA_PLAYER.easing.soft,
-                    }}
+                    transition={fadeTransition}
                     className="flex items-center justify-end"
                   >
                     <div onClick={(e) => e.stopPropagation()}>
@@ -339,20 +299,20 @@ export const MediaPlayer = () => {
             </div>
 
             {/* Full Player Controls */}
-            <AnimatePresence mode="sync">
+            <AnimatePresence mode="wait">
               {!isMinimized && (
                 <motion.div
                   key="full-controls"
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}
-                  transition={{ duration: MEDIA_PLAYER.content.duration, ease: MEDIA_PLAYER.easing.soft }}
+                  transition={fadeTransition}
                   className="space-y-4 pt-4 overflow-hidden"
                 >
                   {/* Source Indicator */}
                   <motion.div 
                     className="flex justify-end"
-                    {...staggeredElement(0)}
+                    {...staggerProps(0)}
                   >
                     <SourceIndicator appName={playerState.appName} />
                   </motion.div>
@@ -362,7 +322,7 @@ export const MediaPlayer = () => {
                     <motion.div 
                       className="pt-1" 
                       onClick={(e) => e.stopPropagation()}
-                      {...staggeredElement(1)}
+                      {...staggerProps(1)}
                     >
                       <ProgressBar
                         position={currentTrack.position}
@@ -377,7 +337,7 @@ export const MediaPlayer = () => {
                    {/* Bottom Row: Playback Controls + Volume + Speaker Selector */}
                   <motion.div 
                     className="flex items-center justify-between gap-4"
-                    {...staggeredElement(2)}
+                    {...staggerProps(2)}
                   >
                     <div className="flex-1 flex justify-center" onClick={(e) => e.stopPropagation()}>
                       <PlaybackControls
