@@ -105,7 +105,7 @@ export const MediaPlayer = () => {
 
   const paddingStyles = useMemo(() => ({
     paddingLeft: isMinimized ? 8 : 20,
-    paddingRight: isMinimized ? 8 : 20,
+    paddingRight: isMinimized ? 16 : 20,
     paddingTop: isMinimized ? 8 : 16,
     paddingBottom: isMinimized ? 8 : 16,
   }), [isMinimized]);
