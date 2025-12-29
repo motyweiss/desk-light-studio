@@ -18,40 +18,33 @@ import { MusicParticles } from './MusicParticles';
 // ============================================
 
 const DURATION = {
-  layout: 0.5,      // Container morphing - slightly longer for smoothness
-  content: 0.3,     // Content fade/blur
+  layout: 0.45,
+  content: 0.28,
 } as const;
 
+// All curves end with smooth deceleration (0, 1) for clean finish
 const EASE = {
-  // Smooth ease-out with gentle landing
-  layout: [0.32, 0.72, 0, 1] as const,
-  // Very smooth content transition
-  content: [0.25, 0.1, 0.25, 1] as const,
-  // Gentle deceleration for exit
-  exit: [0.4, 0, 1, 1] as const,
+  // Standard smooth ease-out
+  layout: [0.22, 1, 0.36, 1] as const,
+  // Slightly faster start, smooth end
+  content: [0.33, 1, 0.68, 1] as const,
 } as const;
-
-// Orchestrated animation phases:
-// EXPAND: Layout starts → Content fades in (staggered)
-// COLLAPSE: Content fades out smoothly → Layout shrinks
 
 const createTransitions = (isExpanding: boolean) => ({
-  // Layout with smooth easing
   layout: {
     duration: DURATION.layout,
     ease: EASE.layout,
   },
-  // Content with appropriate timing per direction
   content: {
-    duration: isExpanding ? DURATION.content : DURATION.content * 0.8,
-    ease: isExpanding ? EASE.content : EASE.exit,
-    delay: isExpanding ? DURATION.layout * 0.3 : 0,
+    duration: DURATION.content,
+    ease: EASE.content,
+    // Small delay when expanding to let layout start first
+    delay: isExpanding ? 0.08 : 0,
   },
-  // Layout delay for collapse
+  // No delay on layoutDelayed - runs in parallel for smooth finish
   layoutDelayed: {
     duration: DURATION.layout,
     ease: EASE.layout,
-    delay: isExpanding ? 0 : DURATION.content * 0.4,
   },
 });
 
