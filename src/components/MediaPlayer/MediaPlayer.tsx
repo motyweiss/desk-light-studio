@@ -141,7 +141,7 @@ export const MediaPlayer = () => {
       >
         <motion.div 
           onClick={handleToggleMinimized}
-          className="relative cursor-pointer overflow-hidden"
+          className="relative cursor-pointer"
           initial={false}
           animate={containerStyles}
           style={{
@@ -159,6 +159,24 @@ export const MediaPlayer = () => {
             transition: { duration: 0.2 }
           }}
         >
+          {/* Source Indicator - positioned in top right corner in expanded mode */}
+          <motion.div
+            initial={false}
+            animate={{
+              opacity: isMinimized ? 0 : 1,
+              scale: isMinimized ? 0.8 : 1,
+            }}
+            transition={CONTENT_FADE_TRANSITION}
+            className="absolute z-10"
+            style={{ 
+              top: 16, 
+              right: 20, 
+              pointerEvents: isMinimized ? 'none' : 'auto' 
+            }}
+          >
+            <SourceIndicator appName={playerState.appName} />
+          </motion.div>
+
           {/* Content Container - animate padding */}
           <motion.div 
             initial={false}
@@ -166,23 +184,6 @@ export const MediaPlayer = () => {
             transition={PLAYER_LAYOUT_TRANSITION}
             className="relative"
           >
-            {/* Source Indicator - positioned in top right corner in expanded mode */}
-            <motion.div
-              initial={false}
-              animate={{
-                opacity: isMinimized ? 0 : 1,
-                scale: isMinimized ? 0.8 : 1,
-              }}
-              transition={CONTENT_FADE_TRANSITION}
-              className="absolute z-10"
-              style={{ 
-                top: 0, 
-                right: 0, 
-                pointerEvents: isMinimized ? 'none' : 'auto' 
-              }}
-            >
-              <SourceIndicator appName={playerState.appName} />
-            </motion.div>
 
             {/* Inner content wrapper - always flex, gap changes */}
             <motion.div 
