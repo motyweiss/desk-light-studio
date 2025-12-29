@@ -169,6 +169,7 @@ export const MediaPlayer = () => {
             animate={{
               opacity: isExpanded ? 1 : 0,
               scale: isExpanded ? 1 : 0.9,
+              filter: isExpanded ? 'blur(0px)' : 'blur(4px)',
             }}
             transition={getContentTransition(isExpanded)}
             className="absolute z-10"
@@ -254,11 +255,13 @@ export const MediaPlayer = () => {
                       height: isExpanded ? 'auto' : 0,
                       opacity: isExpanded ? 1 : 0,
                       marginTop: isExpanded ? 2 : 0,
+                      filter: isExpanded ? 'blur(0px)' : 'blur(3px)',
                     }}
                     transition={{
                       height: layoutTransition,
                       opacity: getContentTransition(isExpanded),
                       marginTop: layoutTransition,
+                      filter: getContentTransition(isExpanded),
                     }}
                     style={{ overflow: 'hidden' }}
                   >
@@ -305,11 +308,13 @@ export const MediaPlayer = () => {
                 height: isExpanded ? 'auto' : 0,
                 opacity: isExpanded ? 1 : 0,
                 marginTop: isExpanded ? 16 : 0,
+                filter: isExpanded ? 'blur(0px)' : 'blur(4px)',
               }}
               transition={{
                 height: getLayoutTransition(!isExpanded),
                 marginTop: getLayoutTransition(!isExpanded),
                 opacity: getContentTransition(isExpanded),
+                filter: getContentTransition(isExpanded),
               }}
               style={{ overflow: 'hidden' }}
             >
