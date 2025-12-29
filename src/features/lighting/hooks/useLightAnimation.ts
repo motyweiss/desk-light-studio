@@ -1,6 +1,8 @@
 import { useCallback, useRef, useState } from 'react';
-import { useMotionValue, animate } from 'framer-motion';
-import { LIGHT_ANIMATION, type AnimationSource } from '@/constants/animations';
+import { useMotionValue, animate, type Easing } from 'framer-motion';
+import { TIMING, EASE, SEQUENCES } from '@/lib/animations';
+
+export type AnimationSource = 'initial' | 'user' | 'external';
 
 interface UseLightAnimationOptions {
   initialValue?: number;
@@ -49,8 +51,9 @@ export const useLightAnimation = (
 
     const diff = Math.abs(currentValue - target);
     
-    // Determine animation config based on context
-    let config;
+    // Determine animation config based on context using centralized tokens
+    let duration: number;
+    let ease: Easing;
     
     if (source === 'external') {
       // External changes from other apps/devices - smooth, quick animation
@@ -61,10 +64,8 @@ export const useLightAnimation = (
         return;
       } else {
         // Visible change - smooth short animation
-        config = { 
-          duration: 0.4, 
-          ease: LIGHT_ANIMATION.slider.ease 
-        };
+        duration = SEQUENCES.lightControl.externalSyncDuration;
+        ease = EASE.smooth as Easing;
       }
     } else if (source === 'user') {
       const isOn = target > 0;
@@ -72,10 +73,12 @@ export const useLightAnimation = (
       
       if (isOn !== wasOn) {
         // Toggle on/off - full dramatic animation
-        config = isOn ? LIGHT_ANIMATION.turnOn : LIGHT_ANIMATION.turnOff;
+        duration = isOn ? SEQUENCES.lightControl.turnOnDuration : SEQUENCES.lightControl.turnOffDuration;
+        ease = EASE.entrance as Easing;
       } else {
         // Slider adjustment - responsive animation
-        config = LIGHT_ANIMATION.slider;
+        duration = SEQUENCES.lightControl.sliderDuration;
+        ease = EASE.snappy as Easing;
       }
     } else {
       // Initial load - no animation
@@ -86,8 +89,10 @@ export const useLightAnimation = (
 
     setIsAnimating(true);
     
-    animationControlRef.current = animate(displayValue, target, {
-      ...config,
+    animationControlRef.current = animate(currentValue, target, {
+      duration,
+      ease,
+      onUpdate: (latest) => displayValue.set(latest),
       onComplete: () => {
         setIsAnimating(false);
         animationControlRef.current = null;

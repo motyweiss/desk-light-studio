@@ -1,29 +1,31 @@
-import { useEffect, useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { useState } from 'react';
+import { motion } from 'framer-motion';
 import { Thermometer, Droplets, Wind } from 'lucide-react';
 import { useClimate } from '../context/ClimateContext';
 import { ClimateIndicatorTooltip } from './ClimateIndicatorTooltip';
 import { useHistoryData } from '../hooks/useHistoryData';
 import { useHAConnection } from '@/contexts/HAConnectionContext';
 import { AnimatedCounter } from '@/components/AnimatedCounter';
+import { TIMING, EASE, STAGGER, DELAY } from '@/lib/animations';
+import type { Variants } from 'framer-motion';
 
-// Stagger animation variants for each indicator - fade only, no scale
-const indicatorVariants = {
+// Stagger animation variants using centralized tokens
+const indicatorVariants: Variants = {
   hidden: { 
     opacity: 0
   },
   visible: (i: number) => ({
     opacity: 1,
     transition: {
-      delay: 0.2 + i * 0.1,
-      duration: 0.4,
-      ease: [0.22, 0.03, 0.26, 1] as const
+      delay: DELAY.medium + i * STAGGER.relaxed,
+      duration: TIMING.medium,
+      ease: EASE.out
     }
   }),
   exit: {
     opacity: 0,
     transition: {
-      duration: 0.2
+      duration: TIMING.fast
     }
   }
 };
@@ -76,10 +78,6 @@ export const ClimateIndicators = () => {
   const handleMouseLeave = () => {
     setHoveredIndicator(null);
   };
-
-  // Show loading skeleton while waiting for data
-  // Changed: Show indicators even during loading to prevent layout shift
-  const showLoadingState = !climate.isLoaded;
 
   // Render temperature value with AnimatedCounter
   const renderTemperatureValue = () => (

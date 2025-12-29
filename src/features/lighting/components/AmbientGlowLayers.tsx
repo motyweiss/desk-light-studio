@@ -1,6 +1,6 @@
 import { motion } from "framer-motion";
 import { useMemo, useCallback, useState, useEffect } from "react";
-import { LIGHT_ANIMATION, PAGE_LOAD } from "@/constants/animations";
+import { TIMING, EASE, DELAY, SEQUENCES } from "@/lib/animations";
 
 interface AmbientGlowLayersProps {
   spotlightIntensity: number;
@@ -27,7 +27,7 @@ export const AmbientGlowLayers = ({
     if (isLoaded && dataReady && !hasAnimatedIn) {
       const timer = setTimeout(() => {
         setHasAnimatedIn(true);
-      }, PAGE_LOAD.effects.glowLayers.delay * 1000);
+      }, DELAY.long * 1000);
       return () => clearTimeout(timer);
     }
   }, [isLoaded, dataReady, hasAnimatedIn]);
@@ -46,15 +46,15 @@ export const AmbientGlowLayers = ({
     [monitorLightIntensity, hasAnimatedIn]
   );
 
-  // Unified animation timing
+  // Unified animation timing using centralized tokens
   const getDuration = useCallback((targetOpacity: number) => {
-    if (!hasAnimatedIn) return PAGE_LOAD.effects.glowLayers.duration;
-    return targetOpacity > 0 ? LIGHT_ANIMATION.turnOn.duration : LIGHT_ANIMATION.turnOff.duration;
+    if (!hasAnimatedIn) return TIMING.slow;
+    return targetOpacity > 0 ? SEQUENCES.lightControl.turnOnDuration : SEQUENCES.lightControl.turnOffDuration;
   }, [hasAnimatedIn]);
 
   const getEasing = useCallback((targetOpacity: number) => {
-    if (!hasAnimatedIn) return PAGE_LOAD.overlay.ease;
-    return targetOpacity > 0 ? LIGHT_ANIMATION.turnOn.ease : LIGHT_ANIMATION.turnOff.ease;
+    if (!hasAnimatedIn) return EASE.smooth;
+    return targetOpacity > 0 ? EASE.entrance : EASE.out;
   }, [hasAnimatedIn]);
 
   // Don't render until loaded
@@ -76,7 +76,7 @@ export const AmbientGlowLayers = ({
         animate={{ opacity: spotlightOpacity }}
         transition={{
           duration: getDuration(spotlightOpacity),
-          delay: hasAnimatedIn ? LIGHT_ANIMATION.stagger.glow : 0,
+          delay: hasAnimatedIn ? 0.05 : 0,
           ease: getEasing(spotlightOpacity)
         }}
       />
@@ -93,7 +93,7 @@ export const AmbientGlowLayers = ({
         animate={{ opacity: deskLampOpacity }}
         transition={{
           duration: getDuration(deskLampOpacity),
-          delay: hasAnimatedIn ? LIGHT_ANIMATION.stagger.glow : 0,
+          delay: hasAnimatedIn ? 0.05 : 0,
           ease: getEasing(deskLampOpacity)
         }}
       />
@@ -110,7 +110,7 @@ export const AmbientGlowLayers = ({
         animate={{ opacity: monitorLightOpacity }}
         transition={{
           duration: getDuration(monitorLightOpacity),
-          delay: hasAnimatedIn ? LIGHT_ANIMATION.stagger.glow : 0,
+          delay: hasAnimatedIn ? 0.05 : 0,
           ease: getEasing(monitorLightOpacity)
         }}
       />

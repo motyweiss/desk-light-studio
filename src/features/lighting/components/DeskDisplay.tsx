@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo, useCallback, useRef } from "react";
 import { motion } from "framer-motion";
 import { LightHotspot } from "./LightHotspot";
-import { LIGHT_ANIMATION } from "@/constants/animations";
+import { TIMING, EASE, SEQUENCES } from "@/lib/animations";
 
 // Import all 8 lighting state images
 import desk000 from "@/assets/desk-000.png";
@@ -100,11 +100,13 @@ export const DeskDisplay = ({
       
       const lightsOnNew = countLightsOn(newState);
       const lightsOnCurrent = countLightsOn(currentState);
-      const animConfig = lightsOnNew > lightsOnCurrent ? LIGHT_ANIMATION.turnOn : LIGHT_ANIMATION.turnOff;
+      const animDuration = lightsOnNew > lightsOnCurrent 
+        ? SEQUENCES.lightControl.turnOnDuration 
+        : SEQUENCES.lightControl.turnOffDuration;
       
       transitionTimeoutRef.current = window.setTimeout(() => {
         setIsTransitioning(false);
-      }, animConfig.duration * 1000);
+      }, animDuration * 1000);
     }
     
     return () => {
@@ -114,12 +116,11 @@ export const DeskDisplay = ({
     };
   }, [getStateFromIntensities, currentState, isReady]);
 
-  // Transition config based on direction
+  // Transition config based on direction using centralized tokens
   const transitionConfig = useMemo(() => {
-    const config = isTurningOn ? LIGHT_ANIMATION.turnOn : LIGHT_ANIMATION.turnOff;
     return {
-      duration: config.duration,
-      ease: config.ease,
+      duration: isTurningOn ? SEQUENCES.lightControl.turnOnDuration : SEQUENCES.lightControl.turnOffDuration,
+      ease: isTurningOn ? EASE.entrance : EASE.out,
     };
   }, [isTurningOn]);
 
