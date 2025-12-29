@@ -1,4 +1,4 @@
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence, LayoutGroup } from 'framer-motion';
 import { useState, useRef, useEffect } from 'react';
 import { useAuthenticatedImage } from '@/hooks/useAuthenticatedImage';
 import { useMediaPlayer, useMediaPlayerUI, PLAYER_HEIGHTS } from '@/features/mediaPlayer';
@@ -109,10 +109,24 @@ export const MediaPlayer = () => {
     height: isMinimized ? 48 : 64,
   };
 
-  // Element transition with stagger support - clean fade + subtle movement
+  // Smooth spring transition for layout changes
+  const smoothSpring = {
+    type: "spring" as const,
+    stiffness: 300,
+    damping: 30,
+    mass: 0.8,
+  };
+
+  // Simple fade transition
+  const fadeTransition = {
+    duration: 0.25,
+    ease: [0.25, 0.1, 0.25, 1] as const,
+  };
+
+  // Element transition for content
   const elementTransition = {
-    duration: MEDIA_PLAYER.content.duration,
-    ease: MEDIA_PLAYER.content.ease,
+    duration: 0.3,
+    ease: [0.25, 0.1, 0.25, 1] as const,
   };
 
   // Staggered element animation for expanded mode
@@ -121,9 +135,9 @@ export const MediaPlayer = () => {
     animate: { opacity: 1, y: 0 },
     exit: { opacity: 0, y: -4 },
     transition: { 
-      duration: MEDIA_PLAYER.content.duration,
-      delay: getStaggerDelay(index),
-      ease: MEDIA_PLAYER.easing.soft,
+      duration: 0.3,
+      delay: index * 0.04,
+      ease: [0.25, 0.1, 0.25, 1] as const,
     },
   });
 
@@ -131,55 +145,40 @@ export const MediaPlayer = () => {
     <>
       <motion.div
         ref={playerRef}
-        initial={{ y: 100, opacity: 0 }}
-        animate={{ 
-          y: 0, 
-          opacity: 1,
-        }}
-        transition={entryTransition}
+        initial={{ y: 20, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ duration: 0.5, ease: [0.22, 0.03, 0.26, 1], delay: 0.2 }}
         className="fixed bottom-4 left-0 right-0 z-50 flex justify-center px-4"
       >
-        <motion.div 
-          layout
-          onClick={handleToggleMinimized}
-          className="relative cursor-pointer overflow-hidden"
-          initial={false}
-          animate={{ 
-            borderRadius: isMinimized ? 32 : 24,
-            backgroundColor: isMinimized ? 'rgba(255, 255, 255, 0.12)' : 'rgba(255, 255, 255, 0.18)',
-            maxWidth: isMinimized ? 420 : 672,
-            width: '100%',
-          }}
-          transition={{
-            layout: MEDIA_PLAYER.layoutSpring,
-            borderRadius: { duration: 0.3, ease: MEDIA_PLAYER.easing.standard },
-            backgroundColor: { duration: 0.25, ease: MEDIA_PLAYER.easing.soft },
-            maxWidth: { duration: 0.35, ease: MEDIA_PLAYER.easing.standard },
-          }}
-          whileHover={{ 
-            backgroundColor: isMinimized ? 'rgba(255, 255, 255, 0.15)' : 'rgba(255, 255, 255, 0.22)'
-          }}
-          style={{
-            backdropFilter: 'blur(40px)',
-            WebkitBackdropFilter: 'blur(40px)',
-            border: '1px solid rgba(255, 255, 255, 0.15)',
-            boxShadow: isMinimized 
-              ? '0 4px 24px rgba(0,0,0,0.15)' 
-              : '0 8px 40px rgba(0,0,0,0.25), inset 0 1px 0 rgba(255,255,255,0.1)',
-          }}
-        >
-
-          {/* Content Container */}
+        <LayoutGroup>
           <motion.div 
             layout
-            className={isMinimized ? 'px-2 py-2' : 'px-5 py-4'}
-            initial={false}
-            animate={{ padding: isMinimized ? '8px' : '20px 16px' }}
-            transition={{
-              layout: MEDIA_PLAYER.layoutSpring,
-              padding: contentTransition,
+            layoutId="media-player-container"
+            onClick={handleToggleMinimized}
+            className="relative cursor-pointer overflow-hidden"
+            style={{
+              borderRadius: isMinimized ? 32 : 24,
+              backgroundColor: isMinimized ? 'rgba(255, 255, 255, 0.12)' : 'rgba(255, 255, 255, 0.18)',
+              maxWidth: isMinimized ? 420 : 672,
+              width: '100%',
+              backdropFilter: 'blur(40px)',
+              WebkitBackdropFilter: 'blur(40px)',
+              border: '1px solid rgba(255, 255, 255, 0.15)',
+              boxShadow: isMinimized 
+                ? '0 4px 24px rgba(0,0,0,0.15)' 
+                : '0 8px 40px rgba(0,0,0,0.25), inset 0 1px 0 rgba(255,255,255,0.1)',
+            }}
+            transition={smoothSpring}
+            whileHover={{ 
+              backgroundColor: isMinimized ? 'rgba(255, 255, 255, 0.15)' : 'rgba(255, 255, 255, 0.22)'
             }}
           >
+            {/* Content Container */}
+            <motion.div 
+              layout
+              className={isMinimized ? 'px-2 py-2' : 'px-5 py-4'}
+              transition={smoothSpring}
+            >
             <div className={`${isMinimized 
               ? 'grid grid-cols-[auto_1fr_auto] items-center gap-3'
               : 'flex flex-col gap-4'
@@ -416,6 +415,7 @@ export const MediaPlayer = () => {
             </AnimatePresence>
           </motion.div>
         </motion.div>
+        </LayoutGroup>
       </motion.div>
 
       {/* Speaker Popover */}
