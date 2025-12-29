@@ -134,18 +134,19 @@ export const MediaPlayer = () => {
           ease: EASING.entrance,
           delay: MEDIA_PLAYER_ANIMATIONS.entry.delay,
         }}
-        className="fixed bottom-4 left-4 right-4 z-50 md:left-6 md:right-6 lg:left-auto lg:right-auto lg:left-1/2 lg:-translate-x-1/2 lg:w-[calc(100%-48px)] lg:max-w-4xl"
+        className="fixed bottom-4 left-1/2 -translate-x-1/2 z-50 w-[calc(100%-32px)] max-w-3xl"
       >
         <motion.div 
           onClick={handleToggleMinimized}
-          className="bg-[hsl(35_12%_18%/0.85)] backdrop-blur-xl border border-white/12 rounded-2xl shadow-[0_8px_32px_rgba(0,0,0,0.25)] relative cursor-pointer"
+          className="bg-white/12 backdrop-blur-xl border border-white/15 shadow-[0_4px_24px_rgba(0,0,0,0.15)] relative cursor-pointer overflow-hidden"
           initial={false}
           animate={{ 
             height: isMinimized ? 72 : 'auto',
+            borderRadius: isMinimized ? 36 : 20,
           }}
           transition={smoothTransition}
           whileHover={{ 
-            backgroundColor: 'hsl(35 12% 20% / 0.9)'
+            backgroundColor: 'rgba(255, 255, 255, 0.15)'
           }}
         >
 
