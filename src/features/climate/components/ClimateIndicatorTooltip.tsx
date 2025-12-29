@@ -88,31 +88,35 @@ export const ClimateIndicatorTooltip = ({
 
       {/* Tooltip - rendered via Portal */}
       {createPortal(
-        <AnimatePresence>
+        <AnimatePresence mode="wait">
           {isOpen && trendData.length > 0 && (
             <motion.div
               initial={{ 
                 opacity: 0,
-                y: 8
+                y: 6,
+                scale: 0.98
               }}
               animate={{ 
                 opacity: 1,
-                y: 0
+                y: 0,
+                scale: 1
               }}
               exit={{ 
                 opacity: 0,
-                y: 4
+                y: 4,
+                scale: 0.98
               }}
               transition={{
-                duration: 0.25,
-                ease: [0.4, 0, 0.2, 1]
+                duration: 0.2,
+                ease: [0.32, 0.72, 0, 1]
               }}
               className="fixed pointer-events-none"
               style={{ 
                 top: `${tooltipPosition.top}px`,
                 left: `${tooltipPosition.left}px`,
                 transform: 'translateX(-50%)',
-                zIndex: 9999
+                zIndex: 9999,
+                willChange: 'opacity, transform'
               }}
             >
               <div className="bg-black/40 backdrop-blur-xl rounded-2xl px-4 py-3.5 shadow-[0_8px_32px_rgba(0,0,0,0.25)] border border-white/10 min-w-[200px]">
@@ -123,8 +127,8 @@ export const ClimateIndicatorTooltip = ({
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     transition={{
-                      delay: 0.2,
-                      duration: 0.2
+                      delay: 0.08,
+                      duration: 0.15
                     }}
                   >
                     <Icon className="w-5 h-5 text-white/80" strokeWidth={1.5} />
@@ -133,12 +137,12 @@ export const ClimateIndicatorTooltip = ({
                   <div className="flex-1">
                     <motion.div
                       className="text-2xl font-light text-white tabular-nums tracking-tight"
-                      initial={{ opacity: 0, x: -8 }}
+                      initial={{ opacity: 0, x: -6 }}
                       animate={{ opacity: 1, x: 0 }}
                       transition={{
-                        delay: 0.25,
-                        duration: 0.2,
-                        ease: [0.4, 0, 0.2, 1]
+                        delay: 0.1,
+                        duration: 0.15,
+                        ease: [0.32, 0.72, 0, 1]
                       }}
                     >
                       {value}
@@ -146,12 +150,12 @@ export const ClimateIndicatorTooltip = ({
                     </motion.div>
                     <motion.div
                       className="text-[10px] text-white/50 font-medium tracking-[0.1em] uppercase mt-0.5"
-                      initial={{ opacity: 0, x: -8 }}
+                      initial={{ opacity: 0, x: -6 }}
                       animate={{ opacity: 1, x: 0 }}
                       transition={{
-                        delay: 0.3,
-                        duration: 0.2,
-                        ease: [0.4, 0, 0.2, 1]
+                        delay: 0.12,
+                        duration: 0.15,
+                        ease: [0.32, 0.72, 0, 1]
                       }}
                     >
                       {label}
@@ -164,8 +168,8 @@ export const ClimateIndicatorTooltip = ({
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   transition={{
-                    delay: 0.35,
-                    duration: 0.25
+                    delay: 0.14,
+                    duration: 0.2
                   }}
                 >
                   <TrendGraph 
