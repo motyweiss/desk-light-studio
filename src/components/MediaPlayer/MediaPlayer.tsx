@@ -114,22 +114,13 @@ export const MediaPlayer = () => {
     height: isMinimized ? 48 : 64,
   };
 
-  // Unified transition configs
-  const containerTransition = {
-    duration: 0.4,
-    ease: [0.32, 0.72, 0, 1] as const,
-  };
-
-  const contentTransition = {
-    duration: 0.35,
-    ease: [0.4, 0, 0.2, 1] as const,
-  };
-
-  const staggeredFade = (delay: number) => ({
-    duration: 0.3,
-    delay,
-    ease: [0.4, 0, 0.2, 1] as const,
-  });
+  // Unified transition system - single easing for consistency
+  const ease = [0.32, 0.72, 0, 1] as const;
+  
+  const containerTransition = { duration: 0.35, ease };
+  const contentTransition = { duration: 0.3, ease };
+  const elementTransition = { duration: 0.25, ease };
+  const stagger = 0.04;
 
   return (
     <>
@@ -162,7 +153,12 @@ export const MediaPlayer = () => {
         >
 
           {/* Content Container */}
-          <div className={`${isMinimized ? 'px-2 py-2' : 'px-5 py-4'} transition-all duration-300`}>
+          <motion.div 
+            className={isMinimized ? 'px-2 py-2' : 'px-5 py-4'}
+            initial={false}
+            animate={{ padding: isMinimized ? '8px' : '20px 16px' }}
+            transition={contentTransition}
+          >
             {/* Grid layout: 3 columns in mini mode, single column in full mode */}
             <div className={`${isMinimized 
               ? 'grid grid-cols-[auto_1fr_auto] items-center gap-3'
@@ -171,29 +167,20 @@ export const MediaPlayer = () => {
               
               {/* Left Section: Album Art + Track Info */}
               <div className="flex items-center gap-3 min-w-0">
-                {/* Album Art - Shared Element */}
+                {/* Album Art */}
                 <motion.div
-                  layoutId="player-album-art"
                   className="relative flex-shrink-0 rounded-full overflow-hidden bg-white/8"
                   initial={false}
                   animate={albumArtSize}
                   transition={contentTransition}
                 >
-                  <AnimatePresence mode="wait">
+                  <AnimatePresence mode="popLayout">
                     <motion.div
                       key={currentTrack?.title || 'no-track'}
-                      initial={{ opacity: 0, scale: 0.88, y: 8 }}
-                      animate={{ 
-                        opacity: 1, 
-                        scale: 1,
-                        y: 0
-                      }}
-                      exit={{ opacity: 0, scale: 1.05, y: -4 }}
-                      transition={{ 
-                        duration: MEDIA_PLAYER_ANIMATIONS.trackChange.duration,
-                        ease: EASING.spring,
-                        opacity: { duration: 0.3 }
-                      }}
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
+                      transition={elementTransition}
                       className="absolute inset-0"
                     >
                       {/* Skeleton loader - show during loading or transition */}
@@ -221,14 +208,10 @@ export const MediaPlayer = () => {
                             src={albumArtUrl} 
                             alt="Album art" 
                             className="absolute inset-0 w-full h-full object-cover rounded-full"
-                            initial={{ filter: 'blur(20px)', opacity: 0, scale: 1.1 }}
-                            animate={{ filter: 'blur(0px)', opacity: 1, scale: 1 }}
-                            exit={{ filter: 'blur(10px)', opacity: 0, scale: 0.95 }}
-                            transition={{ 
-                              duration: 0.6, 
-                              ease: EASING.smooth,
-                              filter: { duration: 0.5 }
-                            }}
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            transition={{ duration: 0.4, ease }}
                           />
                         ) : !isAlbumArtLoading && (
                           <motion.div 
@@ -258,16 +241,13 @@ export const MediaPlayer = () => {
                   className="flex-1 min-w-0 relative"
                   initial={false}
                 >
-                  <AnimatePresence mode="wait">
+                  <AnimatePresence mode="popLayout">
                     <motion.div
                       key={`${currentTrack?.title}-${currentTrack?.artist}`}
-                      initial={{ opacity: 0, y: 6 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: -6 }}
-                      transition={{ 
-                        duration: MEDIA_PLAYER_ANIMATIONS.textFade.duration, 
-                        ease: EASING.smooth 
-                      }}
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
+                      transition={elementTransition}
                     >
                       <motion.div
                         className="origin-left"
@@ -293,13 +273,10 @@ export const MediaPlayer = () => {
                       {/* Album name - Only in full mode */}
                       {!isMinimized && currentTrack?.album && (
                         <motion.p
-                          initial={{ opacity: 0, height: 0 }}
-                          animate={{ opacity: 1, height: 'auto' }}
-                          exit={{ opacity: 0, height: 0 }}
-                          transition={{ 
-                            duration: MEDIA_PLAYER_ANIMATIONS.textFade.duration, 
-                            ease: EASING.smooth 
-                          }}
+                          initial={{ opacity: 0 }}
+                          animate={{ opacity: 1 }}
+                          exit={{ opacity: 0 }}
+                          transition={elementTransition}
                           className="text-white/30 text-xs truncate mt-0.5"
                         >
                           {currentTrack.album}
@@ -311,14 +288,14 @@ export const MediaPlayer = () => {
               </div>
 
               {/* Center Section: Mini Controls (desktop/tablet only) */}
-              <AnimatePresence mode="wait">
+              <AnimatePresence mode="popLayout">
                 {isMinimized && (
                   <motion.div
                     key="mini-controls"
-                    initial={{ opacity: 0, scale: 0.9 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    exit={{ opacity: 0, scale: 0.95 }}
-                    transition={staggeredFade(0.05)}
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    transition={{ ...elementTransition, delay: stagger }}
                     className="hidden sm:flex items-center justify-center"
                   >
                     <div onClick={(e) => e.stopPropagation()}>
@@ -339,14 +316,14 @@ export const MediaPlayer = () => {
               </AnimatePresence>
 
               {/* Right Section: Volume + Speaker Badge */}
-              <AnimatePresence mode="wait">
+              <AnimatePresence mode="popLayout">
                 {isMinimized && (
                   <motion.div
                     key="mini-right"
-                    initial={{ opacity: 0, x: 8 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    exit={{ opacity: 0, x: 4 }}
-                    transition={staggeredFade(0.08)}
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    transition={{ ...elementTransition, delay: stagger * 2 }}
                     className="flex items-center gap-3 justify-end pr-1"
                   >
                     <div className="hidden lg:block" onClick={(e) => e.stopPropagation()}>
@@ -376,25 +353,22 @@ export const MediaPlayer = () => {
             </div>
 
             {/* Full Player Controls */}
-            <AnimatePresence mode="wait">
+            <AnimatePresence mode="popLayout">
               {!isMinimized && (
                 <motion.div
                   key="full-controls"
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}
-                  transition={{ 
-                    duration: 0.25,
-                    ease: [0.4, 0, 0.2, 1] as const,
-                  }}
+                  transition={elementTransition}
                   className="space-y-4 pt-4 overflow-hidden"
                 >
                   {/* Source Indicator */}
                   <motion.div 
                     className="flex justify-end"
-                    initial={{ opacity: 0, y: 8 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={staggeredFade(0.05)}
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ ...elementTransition, delay: stagger }}
                   >
                     <SourceIndicator appName={playerState.appName} />
                   </motion.div>
@@ -404,9 +378,9 @@ export const MediaPlayer = () => {
                     <motion.div 
                       className="pt-1" 
                       onClick={(e) => e.stopPropagation()}
-                      initial={{ opacity: 0, y: 8 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={staggeredFade(0.1)}
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      transition={{ ...elementTransition, delay: stagger * 2 }}
                     >
                       <ProgressBar
                         position={currentTrack.position}
@@ -421,9 +395,9 @@ export const MediaPlayer = () => {
                    {/* Bottom Row: Playback Controls + Volume + Speaker Selector */}
                   <motion.div 
                     className="flex items-center justify-between gap-4"
-                    initial={{ opacity: 0, y: 8 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={staggeredFade(0.15)}
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ ...elementTransition, delay: stagger * 3 }}
                   >
                     <div className="flex-1 flex justify-center" onClick={(e) => e.stopPropagation()}>
                       <PlaybackControls
@@ -459,7 +433,7 @@ export const MediaPlayer = () => {
                 </motion.div>
               )}
             </AnimatePresence>
-          </div>
+          </motion.div>
         </motion.div>
       </motion.div>
 
