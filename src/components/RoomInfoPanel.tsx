@@ -71,10 +71,10 @@ export const RoomInfoPanel = ({
 }: RoomInfoPanelProps) => {
 
   return (
-    <div className="space-y-6 md:space-y-8">
+    <div className="space-y-5 md:space-y-6">
       {/* Room Title with Master Switch */}
       <motion.div 
-        className="flex items-center justify-between gap-4 md:gap-6"
+        className="flex items-center justify-between gap-3 md:gap-4"
         initial={{ opacity: 0 }}
         animate={{ opacity: isLoaded ? 1 : 0 }}
         transition={{
@@ -84,7 +84,7 @@ export const RoomInfoPanel = ({
         }}
         style={{ willChange: 'opacity' }}
       >
-        <h1 className="text-2xl md:text-4xl font-epunda font-light tracking-tight text-foreground leading-tight">
+        <h1 className="text-xl md:text-3xl font-epunda font-light tracking-tight text-foreground leading-tight">
           {roomName}
         </h1>
         
@@ -97,7 +97,7 @@ export const RoomInfoPanel = ({
           }}
           transition={{ duration: TIMING.medium, ease: EASE.smooth }}
           onClick={() => onMasterToggle(!masterSwitchOn)}
-          className="w-9 h-9 md:w-10 md:h-10 rounded-full backdrop-blur-xl border flex-shrink-0"
+          className="w-8 h-8 md:w-9 md:h-9 rounded-full backdrop-blur-xl border flex-shrink-0"
           whileHover={{
             backgroundColor: masterSwitchOn ? 'rgba(255, 255, 255, 0.12)' : 'rgba(255, 255, 255, 0.05)',
           }}
@@ -118,7 +118,7 @@ export const RoomInfoPanel = ({
 
       {/* Climate Indicators - Below header with hover tooltips */}
       {climateData && (
-        <div className="space-y-6">
+        <div className="space-y-5">
           <ClimateIndicators />
         </div>
       )}
@@ -131,7 +131,7 @@ export const RoomInfoPanel = ({
       {/* Devices Battery Section - Desktop only */}
       {devices && devices.length > 0 && (
         <div className="hidden md:block">
-          <div className="flex flex-row items-start justify-start gap-8">
+          <div className="flex flex-row items-start justify-start gap-5">
             {devices.map((device, index) => {
               const DeviceIcon = device.icon === 'headphones' 
                 ? AirPodsMaxIcon 
@@ -142,7 +142,7 @@ export const RoomInfoPanel = ({
                 : IPhoneIcon;
               
               return (
-                <div key={device.id} className="flex items-center gap-6">
+                <div key={device.id} className="flex items-center gap-4">
                   <motion.div 
                     className="flex flex-col gap-1.5"
                     initial={{ opacity: 0 }}
@@ -182,14 +182,14 @@ export const RoomInfoPanel = ({
                           delay: showSkeleton ? 0 : DELAY.minimal,
                         }}
                       >
-                        <DeviceIcon className="w-5 h-5 text-white/50" />
+                        <DeviceIcon className="w-4 h-4 text-white/50" />
                         <AnimatedCounter 
                           value={device.batteryLevel} 
                           suffix="%" 
                           isActive={dataReady && !showSkeleton}
                           delay={0.4 + (index * 0.15)}
-                          className="text-xl font-epunda font-normal text-white tabular-nums tracking-tight"
-                          suffixClassName="text-sm text-white/40 ml-0.5 font-light"
+                          className="text-lg font-epunda font-normal text-white tabular-nums tracking-tight"
+                          suffixClassName="text-xs text-white/40 ml-0.5 font-light"
                         />
                         {device.isCharging && (
                           <Zap className="w-3.5 h-3.5 text-status-caution" fill="currentColor" />
@@ -205,7 +205,7 @@ export const RoomInfoPanel = ({
                   
                   {/* Separator line */}
                   {index < devices.length - 1 && (
-                    <div className="h-8 w-px bg-white/10 ml-6" />
+                    <div className="h-7 w-px bg-white/10 ml-4" />
                   )}
                 </div>
               );
@@ -215,8 +215,8 @@ export const RoomInfoPanel = ({
       )}
 
       {/* Light Controls Section - 3 Column Grid */}
-      <div className="pt-2">
-        <div className="grid grid-cols-3 gap-3 md:gap-4">
+      <div className="pt-1">
+        <div className="grid grid-cols-3 gap-2 md:gap-3">
           {lights.map((light, index) => (
             <motion.div 
               key={light.id}
