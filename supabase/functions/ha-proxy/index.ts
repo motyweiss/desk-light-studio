@@ -76,11 +76,13 @@ serve(async (req) => {
     const haUrl = `${haConfig.base_url}${path}`;
     console.log(`[HA Proxy] Proxying ${method} request to: ${haUrl}`);
 
-    // Make the request to Home Assistant with retry logic
+    // Make the request to Home Assistant with retry logic (3 attempts with exponential backoff)
     let haResponse: Response;
     let lastError: Error | null = null;
+    const maxRetries = 3;
+    const backoffDelays = [500, 1000, 2000];
     
-    for (let attempt = 0; attempt < 2; attempt++) {
+    for (let attempt = 0; attempt < maxRetries; attempt++) {
       try {
         haResponse = await fetch(haUrl, {
           method,
@@ -94,9 +96,18 @@ serve(async (req) => {
         break;
       } catch (fetchError) {
         lastError = fetchError as Error;
-        console.error(`[HA Proxy] Fetch attempt ${attempt + 1} failed:`, fetchError);
-        if (attempt < 1) {
-          await new Promise(resolve => setTimeout(resolve, 500));
+        const errorMessage = lastError.message || '';
+        const isTlsError = errorMessage.includes('tls') || errorMessage.includes('handshake') || errorMessage.includes('eof');
+        
+        // Log silently for TLS errors (expected with Nabu Casa), otherwise log as error
+        if (isTlsError) {
+          console.log(`[HA Proxy] TLS retry ${attempt + 1}/${maxRetries} for: ${path}`);
+        } else {
+          console.error(`[HA Proxy] Fetch attempt ${attempt + 1}/${maxRetries} failed:`, fetchError);
+        }
+        
+        if (attempt < maxRetries - 1) {
+          await new Promise(resolve => setTimeout(resolve, backoffDelays[attempt]));
         }
       }
     }

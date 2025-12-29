@@ -39,6 +39,8 @@ interface HAConnectionContextValue {
 }
 
 // ============= Default Entity Mapping =============
+// Default entity mapping - only include entities that are likely to exist
+// Battery sensors are optional and should not have defaults
 const DEFAULT_ENTITY_MAPPING: EntityMapping = {
   deskLamp: 'light.go',
   monitorLight: 'light.screen',
@@ -46,11 +48,15 @@ const DEFAULT_ENTITY_MAPPING: EntityMapping = {
   temperatureSensor: 'sensor.dyson_pure_temperature',
   humiditySensor: 'sensor.dyson_pure_humidity',
   airQualitySensor: 'sensor.dyson_pure_pm_2_5',
-  iphoneBatteryLevel: 'sensor.moty_s_iphone_battery_level',
-  iphoneBatteryState: 'sensor.moty_s_iphone_battery_state',
+  // Optional entities - no defaults to avoid 404s
+  iphoneBatteryLevel: undefined,
+  iphoneBatteryState: undefined,
+  airpodsMaxBatteryLevel: undefined,
+  airpodsMaxBatteryState: undefined,
   mediaPlayer: 'media_player.spotify',
 };
 
+// Default devices mapping - only climate sensors and lights, no battery sensors
 const DEFAULT_DEVICES_MAPPING: DevicesMapping = {
   rooms: [{
     id: 'office',
@@ -64,6 +70,7 @@ const DEFAULT_DEVICES_MAPPING: DevicesMapping = {
       { id: 'temperature', label: 'Temperature', entity_id: 'sensor.dyson_pure_temperature', type: 'temperature' },
       { id: 'humidity', label: 'Humidity', entity_id: 'sensor.dyson_pure_humidity', type: 'humidity' },
       { id: 'air_quality', label: 'Air Quality', entity_id: 'sensor.dyson_pure_pm_2_5', type: 'air_quality' },
+      // Battery sensors removed - they cause 404s when iPhone is offline
     ],
     mediaPlayers: [
       { id: 'spotify', label: 'Spotify', entity_id: 'media_player.spotify' },
@@ -93,8 +100,9 @@ const convertToLegacyFormat = (devicesMapping: DevicesMapping): EntityMapping =>
     temperatureSensor: office.sensors.find(s => s.type === 'temperature')?.entity_id || 'sensor.dyson_pure_temperature',
     humiditySensor: office.sensors.find(s => s.type === 'humidity')?.entity_id || 'sensor.dyson_pure_humidity',
     airQualitySensor: office.sensors.find(s => s.type === 'air_quality')?.entity_id || 'sensor.dyson_pure_pm_2_5',
-    iphoneBatteryLevel: iphoneBatterySensor?.entity_id || DEFAULT_ENTITY_MAPPING.iphoneBatteryLevel,
-    iphoneBatteryState: iphoneBatterySensor ? iphoneBatterySensor.entity_id.replace('_battery_level', '_battery_state').replace('_level', '_state') : DEFAULT_ENTITY_MAPPING.iphoneBatteryState,
+    // Only set battery entities if explicitly configured - no fallbacks
+    iphoneBatteryLevel: iphoneBatterySensor?.entity_id,
+    iphoneBatteryState: iphoneBatterySensor ? iphoneBatterySensor.entity_id.replace('_battery_level', '_battery_state').replace('_level', '_state') : undefined,
     airpodsMaxBatteryLevel: airpodsBatterySensor?.entity_id,
     airpodsMaxBatteryState: airpodsBatterySensor ? airpodsBatterySensor.entity_id.replace('_battery_level', '_battery_state').replace('_level', '_state') : undefined,
     mediaPlayer: office.mediaPlayers[0]?.entity_id || 'media_player.spotify',
