@@ -12,7 +12,7 @@ export const LoadingOverlay = ({ isLoading, onExitComplete }: LoadingOverlayProp
     <AnimatePresence onExitComplete={onExitComplete}>
       {isLoading && (
         <motion.div
-          className="fixed inset-0 z-50 flex items-center justify-center"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-background"
           initial={{ opacity: 1, scale: 1 }}
           animate={{ opacity: 1, scale: 1 }}
           exit={{ opacity: 0, scale: PAGE_TRANSITIONS.overlay.scale }}
@@ -21,7 +21,6 @@ export const LoadingOverlay = ({ isLoading, onExitComplete }: LoadingOverlayProp
             ease: PAGE_TRANSITIONS.overlay.ease
           }}
           style={{
-            backgroundColor: "#96856e",
             willChange: 'opacity, transform',
             transformOrigin: 'center center',
           }}
@@ -42,8 +41,8 @@ export const LoadingOverlay = ({ isLoading, onExitComplete }: LoadingOverlayProp
               className="absolute inset-0 rounded-full"
               style={{
                 border: '3px solid transparent',
-                borderTopColor: 'rgba(255, 255, 255, 0.8)',
-                borderRightColor: 'rgba(255, 255, 255, 0.5)',
+                borderTopColor: 'hsl(var(--foreground) / 0.8)',
+                borderRightColor: 'hsl(var(--foreground) / 0.5)',
                 willChange: 'transform',
               }}
               animate={{ rotate: 360 }}
@@ -58,7 +57,7 @@ export const LoadingOverlay = ({ isLoading, onExitComplete }: LoadingOverlayProp
             <motion.div
               className="absolute inset-0 rounded-full"
               style={{
-                background: 'radial-gradient(circle, rgba(255, 255, 255, 0.15) 0%, transparent 70%)',
+                background: 'radial-gradient(circle, hsl(var(--foreground) / 0.15) 0%, transparent 70%)',
               }}
               animate={{ opacity: [0.4, 0.7, 0.4] }}
               transition={{
@@ -82,8 +81,7 @@ export const LoadingOverlay = ({ isLoading, onExitComplete }: LoadingOverlayProp
               <img 
                 src={officeChairIcon}
                 alt="Office Chair"
-                className="w-14 h-14"
-                style={{ filter: 'brightness(0) invert(1)' }}
+                className="w-14 h-14 brightness-0 invert opacity-90"
               />
             </motion.div>
           </motion.div>
