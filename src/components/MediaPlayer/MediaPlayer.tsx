@@ -276,33 +276,29 @@ export const MediaPlayer = () => {
               </div>
 
               {/* Mini Controls - minimized only */}
-              <motion.div
-                initial={false}
-                animate={{
-                  opacity: isMinimized ? 1 : 0,
-                  scale: isMinimized ? 1 : 0.9,
-                  x: isMinimized ? 0 : 20,
-                }}
-                transition={transitions.content}
-                style={{ 
-                  flexShrink: 0,
-                  pointerEvents: isMinimized ? 'auto' : 'none',
-                }}
-              >
-                <div onClick={(e) => e.stopPropagation()}>
-                  <PlaybackControls
-                    isPlaying={playerState.isPlaying}
-                    shuffle={playerState.shuffle}
-                    repeat={playerState.repeat}
-                    onPlayPause={handlePlayPause}
-                    onPrevious={handlePrevious}
-                    onNext={handleNext}
-                    onShuffleToggle={handleShuffleToggle}
-                    onRepeatToggle={handleRepeatToggle}
-                    compact={true}
-                  />
-                </div>
-              </motion.div>
+              {isMinimized && (
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.9 }}
+                  transition={transitions.content}
+                  style={{ flexShrink: 0 }}
+                >
+                  <div onClick={(e) => e.stopPropagation()}>
+                    <PlaybackControls
+                      isPlaying={playerState.isPlaying}
+                      shuffle={playerState.shuffle}
+                      repeat={playerState.repeat}
+                      onPlayPause={handlePlayPause}
+                      onPrevious={handlePrevious}
+                      onNext={handleNext}
+                      onShuffleToggle={handleShuffleToggle}
+                      onRepeatToggle={handleRepeatToggle}
+                      compact={true}
+                    />
+                  </div>
+                </motion.div>
+              )}
             </motion.div>
 
             {/* Expanded Controls */}
