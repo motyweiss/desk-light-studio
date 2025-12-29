@@ -117,7 +117,7 @@ export const RoomInfoPanel = ({
 
       {/* Devices Battery Section - Desktop only */}
       {devices && devices.length > 0 && (
-        <div className="hidden md:block">
+        <div className="hidden md:block pt-2">
           <div className="flex flex-row items-start justify-start gap-6">
             {devices.map((device, index) => {
               const DeviceIcon = device.icon === 'headphones' 
@@ -202,7 +202,7 @@ export const RoomInfoPanel = ({
       )}
 
       {/* Light Controls Section - 3 Column Grid */}
-      <div className="pt-4 md:pt-6">
+      <div className="pt-6 md:pt-8">
         <div className="grid grid-cols-3 gap-2 md:gap-3">
           {lights.map((light, index) => (
             <motion.div 
