@@ -128,17 +128,22 @@ export const MediaPlayer = () => {
         className="fixed bottom-4 left-0 right-0 z-50 flex justify-center px-4"
       >
         <motion.div 
+          layout
           onClick={handleToggleMinimized}
           className="relative cursor-pointer overflow-hidden"
           initial={false}
           animate={{ 
-            height: isMinimized ? 64 : 'auto',
             borderRadius: isMinimized ? 32 : 24,
             backgroundColor: isMinimized ? 'rgba(255, 255, 255, 0.12)' : 'rgba(255, 255, 255, 0.18)',
             maxWidth: isMinimized ? 420 : 672,
             width: '100%',
           }}
-          transition={containerTransition}
+          transition={{
+            layout: MEDIA_PLAYER.layoutSpring,
+            borderRadius: { duration: 0.3, ease: MEDIA_PLAYER.easing.standard },
+            backgroundColor: { duration: 0.25, ease: MEDIA_PLAYER.easing.soft },
+            maxWidth: { duration: 0.35, ease: MEDIA_PLAYER.easing.standard },
+          }}
           whileHover={{ 
             backgroundColor: isMinimized ? 'rgba(255, 255, 255, 0.15)' : 'rgba(255, 255, 255, 0.22)'
           }}
@@ -154,10 +159,14 @@ export const MediaPlayer = () => {
 
           {/* Content Container */}
           <motion.div 
+            layout
             className={isMinimized ? 'px-2 py-2' : 'px-5 py-4'}
             initial={false}
             animate={{ padding: isMinimized ? '8px' : '20px 16px' }}
-            transition={contentTransition}
+            transition={{
+              layout: MEDIA_PLAYER.layoutSpring,
+              padding: contentTransition,
+            }}
           >
             <div className={`${isMinimized 
               ? 'grid grid-cols-[auto_1fr_auto] items-center gap-3'
