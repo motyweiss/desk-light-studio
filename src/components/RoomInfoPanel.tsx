@@ -6,7 +6,6 @@ import { IPhoneIcon } from "./icons/IPhoneIcon";
 import { MagicKeyboardIcon } from "./icons/MagicKeyboardIcon";
 import { MagicMouseIcon } from "./icons/MagicMouseIcon";
 import { AnimatedCounter } from "./AnimatedCounter";
-import { ClimateIndicators } from "@/features/climate/components/ClimateIndicators";
 import { TIMING, EASE, STAGGER, DELAY } from "@/lib/animations";
 
 interface Light {
@@ -115,18 +114,6 @@ export const RoomInfoPanel = ({
           </motion.div>
         </motion.button>
       </motion.div>
-
-      {/* Climate Indicators - Below header with hover tooltips */}
-      {climateData && (
-        <div className="space-y-4 -mt-3 md:-mt-4">
-          <ClimateIndicators />
-        </div>
-      )}
-
-      {/* Separator between climate and devices */}
-      {climateData && devices && devices.length > 0 && (
-        <div className="h-px bg-white/10 -mt-2" />
-      )}
 
       {/* Devices Battery Section - Desktop only */}
       {devices && devices.length > 0 && (
