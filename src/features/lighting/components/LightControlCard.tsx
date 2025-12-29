@@ -265,7 +265,7 @@ export const LightControlCard = ({
               } : crossfadeTransition}
             />
             <motion.div 
-              className="font-light text-sm md:text-base text-white tracking-wide"
+              className="font-light text-xs md:text-sm text-white tracking-wide"
               initial={false}
               animate={{ 
                 opacity: isLoading ? 0 : 1,
