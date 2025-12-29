@@ -70,7 +70,7 @@ export const RoomInfoPanel = ({
 }: RoomInfoPanelProps) => {
 
   return (
-    <div className="space-y-3 md:space-y-4">
+    <div className="space-y-5 md:space-y-7">
       {/* Room Title with Master Switch */}
       <motion.div 
         className="flex items-center justify-between gap-3 md:gap-4"
@@ -117,7 +117,7 @@ export const RoomInfoPanel = ({
 
       {/* Devices Battery Section - Desktop only */}
       {devices && devices.length > 0 && (
-        <div className="hidden md:block pt-2">
+        <div className="hidden md:block pt-3">
           <div className="flex flex-row items-start justify-start gap-10">
             {devices.map((device, index) => {
               const DeviceIcon = device.icon === 'headphones' 
@@ -202,7 +202,7 @@ export const RoomInfoPanel = ({
       )}
 
       {/* Light Controls Section - 3 Column Grid */}
-      <div className="pt-6 md:pt-8">
+      <div className="pt-4 md:pt-6">
         <div className="grid grid-cols-3 gap-2 md:gap-3">
           {lights.map((light, index) => (
             <motion.div 
