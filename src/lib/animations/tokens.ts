@@ -190,6 +190,30 @@ export const SPRINGS = {
 // ANIMATION SEQUENCES
 // =============================================================================
 
+// =============================================================================
+// PAGE TRANSITIONS
+// =============================================================================
+
+export const PAGE_TRANSITIONS = {
+  /** Duration for page transitions */
+  duration: 0.45,
+  /** Easing curve for page transitions */
+  ease: EASE.entrance,
+  /** Scale values for enter/exit */
+  scale: {
+    /** Scale on enter (starts slightly smaller) */
+    enter: 0.97,
+    /** Scale on exit (shrinks slightly) */
+    exit: 0.98,
+  },
+  /** Overlay exit animation */
+  overlay: {
+    duration: 0.5,
+    ease: EASE.gentle,
+    scale: 1.02, // Slight zoom out effect
+  },
+} as const;
+
 export const SEQUENCES = {
   /** Page load sequence timings */
   pageLoad: {
@@ -235,3 +259,4 @@ export type StaggerKey = keyof typeof STAGGER;
 export type TransitionKey = keyof typeof TRANSITIONS;
 export type SpringKey = keyof typeof SPRINGS;
 export type SequenceKey = keyof typeof SEQUENCES;
+export type PageTransitionsKey = keyof typeof PAGE_TRANSITIONS;

@@ -6,7 +6,7 @@
  */
 
 import type { Transition, Variants, TargetAndTransition } from 'framer-motion';
-import { TIMING, EASE, STAGGER, DELAY, TRANSITIONS } from './tokens';
+import { TIMING, EASE, STAGGER, DELAY, TRANSITIONS, PAGE_TRANSITIONS } from './tokens';
 
 // =============================================================================
 // MOTION PRESETS (initial/animate/exit patterns)
@@ -49,6 +49,17 @@ export const MOTION_PRESETS = {
     initial: { opacity: 0, scale: 0.96, y: 8 },
     animate: { opacity: 1, scale: 1, y: 0 },
     exit: { opacity: 0, scale: 0.96, y: -4 },
+  },
+  
+  // ---------------------------------------------------------------------------
+  // Page Transitions
+  // ---------------------------------------------------------------------------
+  
+  /** Page scale transition - smooth scale + fade for page changes */
+  pageScaleIn: {
+    initial: { opacity: 0, scale: PAGE_TRANSITIONS.scale.enter },
+    animate: { opacity: 1, scale: 1 },
+    exit: { opacity: 0, scale: PAGE_TRANSITIONS.scale.exit },
   },
   
   // ---------------------------------------------------------------------------

@@ -14,12 +14,14 @@ export {
   TRANSITIONS,
   SPRINGS,
   SEQUENCES,
+  PAGE_TRANSITIONS,
   type TimingKey,
   type EaseKey,
   type StaggerKey,
   type TransitionKey,
   type SpringKey,
   type SequenceKey,
+  type PageTransitionsKey,
 } from './tokens';
 
 // Presets
