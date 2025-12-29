@@ -7,7 +7,7 @@ import { LoadingOverlay } from "@/components/LoadingOverlay";
 import { Toaster } from "@/components/ui/toaster";
 import { useClimate } from "@/features/climate";
 import { useLighting } from "@/features/lighting";
-import { ClimateIndicators } from "@/features/climate/components/ClimateIndicators";
+
 import { useAppLoad } from "@/contexts/AppLoadContext";
 import { usePageLoadSequence, LOAD_TIMING_SECONDS } from "@/hooks/usePageLoadSequence";
 import { LIGHT_ANIMATION, PAGE_LOAD, EASING } from "@/constants/animations";
@@ -189,7 +189,7 @@ const Index = () => {
 
         {/* Main content area */}
         <div className="w-full h-full max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-center md:justify-between gap-4 md:gap-8 lg:gap-10 relative z-10">
-          {/* Desk Display + Climate Indicators */}
+          {/* Desk Display */}
           <div className="w-full md:w-[45%] lg:w-[43%] flex-shrink-0 md:order-1 order-2 max-w-[320px] md:max-w-none flex flex-col items-center">
             <motion.div
               className="w-full"
@@ -214,30 +214,18 @@ const Index = () => {
                 dataReady={showData}
               />
             </motion.div>
-            
-            {/* Climate Indicators - centered below desk, reveals only when data is ready */}
-            <motion.div
-              className="-mt-2 md:-mt-4 flex justify-center w-full min-h-[40px]"
-              initial={{ opacity: 0, y: 12 }}
-              animate={{ 
-                opacity: climate.isLoaded && showData ? 1 : 0,
-                y: climate.isLoaded && showData ? 0 : 12
-              }}
-              transition={{ 
-                duration: 0.5, 
-                delay: climate.isLoaded && showData ? 0.15 : 0,
-                ease: [0.22, 0.03, 0.26, 1]
-              }}
-              style={{ visibility: climate.isLoaded && showData ? 'visible' : 'hidden' }}
-            >
-              <ClimateIndicators />
-            </motion.div>
           </div>
 
           {/* Room Info Panel */}
           <div className="w-full md:w-[52%] flex-shrink-0 md:order-2 order-1">
             <RoomInfoPanel
               roomName="Office Desk"
+              climateData={{
+                temperature: climate.temperature,
+                humidity: climate.humidity,
+                airQuality: climate.airQuality,
+                isLoaded: climate.isLoaded && showData
+              }}
               devices={[
                 {
                   id: 'iphone',
