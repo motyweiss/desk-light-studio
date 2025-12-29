@@ -137,7 +137,7 @@ export const MediaPlayer = () => {
       <motion.div
         ref={playerRef}
         {...entryProps}
-        className="fixed bottom-4 left-0 right-0 z-50 flex justify-center px-4"
+        className="fixed bottom-6 md:bottom-8 left-0 right-0 z-50 flex justify-center px-4"
       >
         <motion.div 
           onClick={handleToggleMinimized}
