@@ -118,7 +118,12 @@ export const RoomInfoPanel = ({
       </motion.div>
 
       {/* Climate Indicators - Below header with hover tooltips */}
-      {climateData && <ClimateIndicators />}
+      {climateData && (
+        <>
+          <ClimateIndicators />
+          <div className="h-px bg-white/10 mx-0" />
+        </>
+      )}
 
       {/* Devices Battery Section - Desktop only */}
       {devices && devices.length > 0 && (
