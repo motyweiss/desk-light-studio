@@ -30,8 +30,14 @@ const crossfadeTransition = {
 };
 
 const contentTransition = {
-  duration: TIMING.medium,
+  duration: TIMING.slow,
   ease: EASE.gentle,
+};
+
+// Slider entrance - very soft and gentle
+const sliderEntranceTransition = {
+  duration: 0.6,
+  ease: [0.16, 0.1, 0.3, 1] as const, // Very gentle ease
 };
 
 const LONG_PRESS_DURATION = 350; // ms
@@ -276,9 +282,9 @@ export const LightControlCard = ({
       )}
 
       {/* Top section: Icon */}
-      <div className="flex items-start justify-between relative z-10">
+      <div className="flex items-start justify-between relative z-10 mb-6">
         {/* Icon */}
-        <div className="relative w-8 h-8 md:w-9 md:h-9">
+        <div className="relative w-9 h-9 md:w-10 md:h-10">
           {/* Skeleton circle */}
           <motion.div
             className="absolute inset-0 rounded-full bg-white/10"
@@ -306,7 +312,7 @@ export const LightControlCard = ({
               filter: { duration: TIMING.medium, ease: EASE.smooth }
             }}
           >
-            <IconComponent className="w-8 h-8 md:w-9 md:h-9" />
+            <IconComponent className="w-9 h-9 md:w-10 md:h-10" />
           </motion.div>
         </div>
 
@@ -397,21 +403,19 @@ export const LightControlCard = ({
           </div>
         </div>
 
-        {/* Slider - Smooth fade in/out */}
+        {/* Slider - Very soft fade in/out */}
         <motion.div 
-          className="mt-5 h-6 relative"
+          className="mt-6 h-6 relative"
           data-slider
           onClick={(e) => e.stopPropagation()}
           onPointerDown={(e) => e.stopPropagation()}
           initial={false}
           animate={{ 
             opacity: showSlider ? 1 : 0,
-            y: showSlider ? 0 : 8,
+            y: showSlider ? 0 : 4,
+            scale: showSlider ? 1 : 0.98,
           }}
-          transition={{
-            duration: TIMING.medium,
-            ease: EASE.gentle,
-          }}
+          transition={sliderEntranceTransition}
           style={{ pointerEvents: showSlider ? 'auto' : 'none' }}
         >
           {/* Skeleton slider */}
