@@ -1,6 +1,8 @@
 import { useState } from "react";
+import { motion } from "framer-motion";
 import { Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
+import { PAGE_TRANSITIONS } from "@/lib/animations/tokens";
 import {
   Sidebar,
   ColorPalette,
@@ -96,7 +98,20 @@ export default function DesignSystem() {
   };
 
   return (
-    <div className="flex min-h-screen bg-background">
+    <motion.div 
+      className="flex min-h-screen bg-background"
+      initial={{ opacity: 0, scale: PAGE_TRANSITIONS.scale.enter }}
+      animate={{ opacity: 1, scale: 1 }}
+      exit={{ opacity: 0, scale: PAGE_TRANSITIONS.scale.exit }}
+      transition={{
+        duration: PAGE_TRANSITIONS.duration,
+        ease: PAGE_TRANSITIONS.ease,
+      }}
+      style={{ 
+        transformOrigin: 'center center',
+        willChange: 'opacity, transform',
+      }}
+    >
       {/* Sidebar Navigation */}
       <Sidebar
         activeSection={activeSection}
@@ -126,6 +141,6 @@ export default function DesignSystem() {
         {/* Content Area */}
         <div className="max-w-5xl mx-auto px-8 py-8">{renderSection()}</div>
       </div>
-    </div>
+    </motion.div>
   );
 }

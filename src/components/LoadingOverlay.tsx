@@ -1,6 +1,6 @@
 import { motion, AnimatePresence } from "framer-motion";
 import officeChairIcon from "@/assets/office-chair.svg";
-import { TIMING, EASE, LOADING_PRESETS } from "@/lib/animations";
+import { TIMING, EASE, PAGE_TRANSITIONS } from "@/lib/animations/tokens";
 
 interface LoadingOverlayProps {
   isLoading: boolean;
@@ -13,16 +13,17 @@ export const LoadingOverlay = ({ isLoading, onExitComplete }: LoadingOverlayProp
       {isLoading && (
         <motion.div
           className="fixed inset-0 z-50 flex items-center justify-center"
-          initial={{ opacity: 1 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
+          initial={{ opacity: 1, scale: 1 }}
+          animate={{ opacity: 1, scale: 1 }}
+          exit={{ opacity: 0, scale: PAGE_TRANSITIONS.overlay.scale }}
           transition={{ 
-            duration: TIMING.slow,
-            ease: EASE.smooth
+            duration: PAGE_TRANSITIONS.overlay.duration,
+            ease: PAGE_TRANSITIONS.overlay.ease
           }}
           style={{
             backgroundColor: "#96856e",
-            willChange: 'opacity',
+            willChange: 'opacity, transform',
+            transformOrigin: 'center center',
           }}
         >
           {/* Minimalist spinner */}

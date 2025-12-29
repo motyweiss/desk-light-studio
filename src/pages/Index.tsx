@@ -11,6 +11,7 @@ import { useLighting } from "@/features/lighting";
 import { useAppLoad } from "@/contexts/AppLoadContext";
 import { usePageLoadSequence, LOAD_TIMING_SECONDS } from "@/hooks/usePageLoadSequence";
 import { LIGHT_ANIMATION, PAGE_LOAD, EASING } from "@/constants/animations";
+import { PAGE_TRANSITIONS } from "@/lib/animations/tokens";
 
 // Import primary desk image for preloading
 import desk000 from "@/assets/desk-000.png";
@@ -141,14 +142,20 @@ const Index = () => {
 
       <motion.div 
         className="h-full min-h-0 flex items-center justify-center p-3 md:p-8 relative"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: showContent ? 1 : 0 }}
-        transition={{ 
-          duration: contentTransition.duration,
-          delay: LOAD_TIMING_SECONDS.contentEntryDelay,
-          ease: contentTransition.ease,
+        initial={{ opacity: 0, scale: PAGE_TRANSITIONS.scale.enter }}
+        animate={{ 
+          opacity: showContent ? 1 : 0,
+          scale: showContent ? 1 : PAGE_TRANSITIONS.scale.enter
         }}
-        style={{ willChange: 'opacity' }}
+        transition={{ 
+          duration: PAGE_TRANSITIONS.duration,
+          delay: LOAD_TIMING_SECONDS.contentEntryDelay,
+          ease: PAGE_TRANSITIONS.ease,
+        }}
+        style={{ 
+          willChange: 'opacity, transform',
+          transformOrigin: 'center center',
+        }}
       >
         {/* Dynamic color overlay */}
         <motion.div
