@@ -7,15 +7,13 @@ import { useHistoryData } from '../hooks/useHistoryData';
 import { useHAConnection } from '@/contexts/HAConnectionContext';
 import { AnimatedCounter } from '@/components/AnimatedCounter';
 
-// Stagger animation variants for each indicator - scale up with fade
+// Stagger animation variants for each indicator - fade only, no scale
 const indicatorVariants = {
   hidden: { 
-    opacity: 0, 
-    scale: 0.85
+    opacity: 0
   },
   visible: (i: number) => ({
     opacity: 1,
-    scale: 1,
     transition: {
       delay: 0.2 + i * 0.1,
       duration: 0.4,
@@ -24,7 +22,6 @@ const indicatorVariants = {
   }),
   exit: {
     opacity: 0,
-    scale: 0.9,
     transition: {
       duration: 0.2
     }
