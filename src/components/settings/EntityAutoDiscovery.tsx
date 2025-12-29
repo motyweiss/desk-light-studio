@@ -14,8 +14,7 @@ import {
   ChevronUp,
   RefreshCw
 } from "lucide-react";
-import { haClient } from "@/api/homeAssistant/client";
-import { HAEntity } from "@/services/homeAssistant";
+import { homeAssistant, HAEntity } from "@/services/homeAssistant";
 
 interface DiscoveredEntity {
   entity_id: string;
@@ -136,7 +135,7 @@ export const EntityAutoDiscovery = ({
     setError(null);
 
     try {
-      const allEntities = await haClient.getAllStates();
+      const allEntities = await homeAssistant.getEntitiesWithContext();
       const categorized = categorizeEntities(allEntities);
       setEntities(categorized);
       setIsExpanded(true);

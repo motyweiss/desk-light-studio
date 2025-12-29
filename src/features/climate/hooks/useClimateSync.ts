@@ -1,6 +1,7 @@
 import { useState, useCallback, useEffect } from 'react';
 import { usePolling } from '@/shared/hooks';
-import { sensors, haClient } from '@/api/homeAssistant';
+import { sensors } from '@/api/homeAssistant';
+import { haProxyClient } from '@/services/haProxyClient';
 import { logger } from '@/shared/utils/logger';
 
 interface ClimateData {
@@ -51,8 +52,8 @@ export const useClimateSync = (config: UseClimateSyncConfig): ClimateData => {
    * Sync all climate sensors
    */
   const syncClimateData = useCallback(async () => {
-    // Check if haClient is configured
-    if (!haClient.getConfig()) {
+    // Check if haProxyClient is configured
+    if (!haProxyClient.getDirectConfig()) {
       logger.warn('HA client not configured, skipping climate sync');
       return;
     }
@@ -185,27 +186,14 @@ export const useClimateSync = (config: UseClimateSyncConfig): ClimateData => {
 
   // Initial sync and entity discovery
   useEffect(() => {
-    if (isConnected && haClient.getConfig()) {
+    if (isConnected && haProxyClient.getDirectConfig()) {
       logger.info('Initial climate sync triggered');
       syncClimateData();
-      
-      // Discover iPhone battery entities for debugging
-      haClient.searchEntities(['iphone', 'battery']).then(entities => {
-        console.log('🔍 [EntityDiscovery] iPhone battery entities found:', 
-          entities.map(e => ({
-            entity_id: e.entity_id,
-            friendly_name: e.attributes?.friendly_name,
-            state: e.state,
-          }))
-        );
-      }).catch(err => {
-        console.error('🔍 [EntityDiscovery] Failed to search entities:', err);
-      });
     }
   }, [isConnected, syncClimateData]);
 
-  // Setup polling - only when connected AND haClient is configured
-  const shouldPoll = isConnected && !!haClient.getConfig();
+  // Setup polling - only when connected AND haProxyClient is configured
+  const shouldPoll = isConnected && !!haProxyClient.getDirectConfig();
   
   usePolling(syncClimateData, {
     interval: pollingInterval,

@@ -1,9 +1,10 @@
-import { haClient } from '../client';
+import { haProxyClient } from '@/services/haProxyClient';
 import type { HASensorEntity } from '../types';
 import { logger } from '@/shared/utils/logger';
 
 /**
  * Sensor entity operations
+ * Uses haProxyClient for consistent connection handling
  */
 
 export const sensors = {
@@ -11,14 +12,14 @@ export const sensors = {
    * Get sensor state
    */
   async getState(entityId: string): Promise<HASensorEntity | null> {
-    const entity = await haClient.getEntityState(entityId);
+    const { data, error } = await haProxyClient.get<HASensorEntity>(`/api/states/${entityId}`);
     
-    if (!entity) {
-      logger.warn(`Sensor not found: ${entityId}`);
+    if (error || !data) {
+      logger.error(`Failed to get state for ${entityId}`, error);
       return null;
     }
 
-    return entity as HASensorEntity;
+    return data;
   },
 
   /**

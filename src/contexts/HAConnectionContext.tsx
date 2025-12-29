@@ -2,7 +2,7 @@ import React, { createContext, useContext, useState, useEffect, useCallback, use
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { homeAssistant, type EntityMapping } from '@/services/homeAssistant';
-import { haClient } from '@/api/homeAssistant/client';
+import { haProxyClient } from '@/services/haProxyClient';
 import { connectionManager, type ConnectionState, type ConnectionMode } from '@/services/ConnectionManager';
 import { DevicesMapping, DeviceConfig, RoomConfig } from '@/types/settings';
 import { logger } from '@/shared/utils/logger';
@@ -176,8 +176,10 @@ export const HAConnectionProvider: React.FC<{ children: React.ReactNode }> = ({ 
       accessToken: haConfig.accessToken,
     };
     
+    // Configure homeAssistant service (which internally sets haProxyClient.setDirectConfig)
     homeAssistant.setConfig(configObj);
-    haClient.setConfig(configObj);
+    // Also set haProxyClient directly for redundancy
+    haProxyClient.setDirectConfig(configObj);
     
     logger.connection('All HA clients configured', { baseUrl: configObj.baseUrl });
   }, []);
@@ -194,7 +196,7 @@ export const HAConnectionProvider: React.FC<{ children: React.ReactNode }> = ({ 
         // If direct connection works, configure the clients
         const tempConfig = { baseUrl: cleanUrl, accessToken };
         homeAssistant.setConfig(tempConfig);
-        haClient.setConfig(tempConfig);
+        haProxyClient.setDirectConfig(tempConfig);
       }
       
       return directResult;
