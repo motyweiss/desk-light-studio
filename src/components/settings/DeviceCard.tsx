@@ -38,7 +38,7 @@ const getIconColor = (category: string) => {
     case 'lights': return 'text-amber-400';
     case 'sensors': return 'text-blue-400';
     case 'mediaPlayers': return 'text-purple-400';
-    default: return 'text-foreground/60';
+    default: return 'text-white/60';
   }
 };
 
@@ -47,7 +47,7 @@ const getIconBgColor = (category: string) => {
     case 'lights': return 'bg-amber-400/10';
     case 'sensors': return 'bg-blue-400/10';
     case 'mediaPlayers': return 'bg-purple-400/10';
-    default: return 'bg-secondary/50';
+    default: return 'bg-white/[0.06]';
   }
 };
 
@@ -98,11 +98,11 @@ const DeviceCard = ({
   return (
     <motion.div
       layout
-      initial={{ opacity: 0, scale: 0.95 }}
-      animate={{ opacity: 1, scale: 1 }}
-      exit={{ opacity: 0, scale: 0.95 }}
-      transition={{ duration: 0.25, delay: index * 0.03, ease: [0.22, 0.03, 0.26, 1] }}
-      className="group relative p-4 rounded-2xl bg-secondary/40 border border-border/30 hover:border-border/50 hover:bg-secondary/50 transition-all duration-200"
+      initial={{ opacity: 0, scale: 0.97, filter: "blur(4px)" }}
+      animate={{ opacity: 1, scale: 1, filter: "blur(0px)" }}
+      exit={{ opacity: 0, scale: 0.97, filter: "blur(4px)" }}
+      transition={{ duration: 0.3, delay: index * 0.03, ease: [0.16, 1, 0.3, 1] }}
+      className="group relative p-4 rounded-xl bg-white/[0.03] border border-white/[0.06] hover:border-white/[0.1] hover:bg-white/[0.05] transition-all duration-300"
     >
       <div className="flex items-start gap-4">
         {/* Device Icon */}
@@ -121,14 +121,14 @@ const DeviceCard = ({
                   onChange={(e) => setEditedLabel(e.target.value)}
                   onBlur={handleLabelSave}
                   onKeyDown={handleLabelKeyDown}
-                  className="h-8 bg-secondary/60 border-border/50 text-foreground text-sm"
+                  className="h-8 bg-white/[0.04] border-white/[0.08] text-white text-sm rounded-lg focus:border-warm-glow/50"
                   autoFocus
                 />
                 <Button
                   variant="ghost"
                   size="sm"
                   onClick={handleLabelSave}
-                  className="h-8 w-8 p-0 text-status-optimal hover:bg-status-optimal/10"
+                  className="h-8 w-8 p-0 text-status-optimal hover:bg-status-optimal/10 rounded-lg"
                 >
                   <Check className="w-4 h-4" />
                 </Button>
@@ -136,7 +136,7 @@ const DeviceCard = ({
                   variant="ghost"
                   size="sm"
                   onClick={handleLabelCancel}
-                  className="h-8 w-8 p-0 text-foreground/50 hover:bg-secondary/50"
+                  className="h-8 w-8 p-0 text-white/50 hover:bg-white/[0.06] rounded-lg"
                 >
                   <X className="w-4 h-4" />
                 </Button>
@@ -144,10 +144,10 @@ const DeviceCard = ({
             ) : (
               <button
                 onClick={() => setIsEditing(true)}
-                className="group/label flex items-center gap-2 text-sm font-medium text-foreground/90 hover:text-foreground transition-colors text-left"
+                className="group/label flex items-center gap-2 text-sm font-light text-white/90 hover:text-white transition-colors text-left"
               >
                 <span className="truncate">{device.label}</span>
-                <Pencil className="w-3 h-3 text-foreground/30 group-hover/label:text-foreground/50 transition-colors" />
+                <Pencil className="w-3 h-3 text-white/20 group-hover/label:text-white/50 transition-colors" />
               </button>
             )}
           </div>
@@ -169,7 +169,7 @@ const DeviceCard = ({
           variant="ghost"
           size="sm"
           onClick={onRemove}
-          className="h-9 w-9 p-0 text-foreground/30 hover:text-destructive hover:bg-destructive/10 transition-all duration-200 opacity-100 sm:opacity-0 sm:group-hover:opacity-100"
+          className="h-9 w-9 p-0 text-white/20 hover:text-status-critical hover:bg-status-critical/10 transition-all duration-300 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 rounded-lg"
         >
           <Trash2 className="w-4 h-4" />
         </Button>
@@ -178,7 +178,7 @@ const DeviceCard = ({
       {/* Entity ID Badge */}
       {device.entity_id && (
         <div className="mt-3 pl-14">
-          <span className="inline-block text-[11px] font-mono text-muted-foreground/50 bg-secondary/30 px-2 py-0.5 rounded-md truncate max-w-full">
+          <span className="inline-block text-[11px] font-mono text-white/30 bg-white/[0.03] px-2 py-0.5 rounded-md truncate max-w-full border border-white/[0.04]">
             {device.entity_id}
           </span>
         </div>

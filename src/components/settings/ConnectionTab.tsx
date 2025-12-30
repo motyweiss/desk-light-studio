@@ -2,7 +2,7 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Loader2, CheckCircle2, XCircle, Eye, EyeOff, HelpCircle, RefreshCw, Home } from "lucide-react";
+import { Loader2, CheckCircle2, XCircle, Eye, EyeOff, Key, RefreshCw, Home } from "lucide-react";
 import { SettingsSection } from "./SettingsSection";
 import { SettingsField } from "./SettingsField";
 import { QuickConnectSuggestions } from "./QuickConnectSuggestions";
@@ -16,6 +16,27 @@ interface ConnectionTabProps {
   onAccessTokenChange: (value: string) => void;
   onEntitiesFetched?: (entities: HAEntity[]) => void;
 }
+
+const staggerContainer = {
+  hidden: { opacity: 0 },
+  show: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.08,
+      delayChildren: 0.05
+    }
+  }
+};
+
+const itemVariants = {
+  hidden: { opacity: 0, y: 12, filter: "blur(4px)" },
+  show: { 
+    opacity: 1, 
+    y: 0,
+    filter: "blur(0px)",
+    transition: { duration: 0.45, ease: [0.16, 1, 0.3, 1] as const }
+  }
+};
 
 const ConnectionTab = ({
   baseUrl,
@@ -47,17 +68,13 @@ const ConnectionTab = ({
     try {
       const normalizedUrl = baseUrl.replace(/\/+$/, '');
       
-      // Use direct connection test (bypasses Supabase auth requirement)
       const result = await homeAssistant.testDirectConnection(normalizedUrl, accessToken);
 
       if (result.success) {
-        // Set config for future use
         homeAssistant.setConfig({ baseUrl: normalizedUrl, accessToken });
         
-        // Fetch entities after successful connection
         const entities = await homeAssistant.getEntitiesWithContext();
         
-        // Notify parent component of fetched entities
         if (onEntitiesFetched) {
           onEntitiesFetched(entities);
         }
@@ -101,19 +118,18 @@ const ConnectionTab = ({
 
   return (
     <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      transition={{ duration: 0.25, ease: [0.22, 0.03, 0.26, 1] }}
-      className="space-y-8"
+      variants={staggerContainer}
+      initial="hidden"
+      animate="show"
+      className="space-y-5"
     >
-      <SettingsSection icon={Home} title="Home Assistant Connection">
-        {/* Quick Connect Suggestions */}
+      {/* Quick Connect */}
+      <motion.div variants={itemVariants}>
         <QuickConnectSuggestions
           currentUrl={baseUrl}
           accessToken={accessToken}
           onUrlSelect={(url) => {
             onBaseUrlChange(url);
-            // Auto-trigger test after URL selection
             setTimeout(() => {
               if (accessToken) {
                 handleTestConnection();
@@ -121,110 +137,111 @@ const ConnectionTab = ({
             }, 100);
           }}
         />
-
-        <div className="h-px bg-border/30 my-4" />
-
-        <SettingsField 
-          label="Base URL"
-          description="Your Home Assistant instance URL (e.g., http://homeassistant.local:8123)"
-        >
-          <Input
-            value={baseUrl}
-            onChange={(e) => onBaseUrlChange(e.target.value)}
-            placeholder="http://homeassistant.local:8123"
-            className="bg-secondary/50 border-border/30 text-foreground placeholder:text-muted-foreground/50"
-          />
-        </SettingsField>
-
-        <SettingsField
-          label="Access Token"
-          description="Long-lived access token from Home Assistant"
-        >
-          <div className="relative">
-            <Input
-              type={showToken ? "text" : "password"}
-              value={accessToken}
-              onChange={(e) => onAccessTokenChange(e.target.value)}
-              placeholder="eyJ0eXAiOiJKV1QiLCJhbGc..."
-              className="bg-secondary/50 border-border/30 text-foreground placeholder:text-muted-foreground/50 pr-10"
-            />
-            <button
-              type="button"
-              onClick={() => setShowToken(!showToken)}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+      </motion.div>
+      
+      {/* Connection Settings */}
+      <motion.div variants={itemVariants}>
+        <SettingsSection icon={Home} title="Home Assistant Connection">
+          <div className="space-y-5">
+            <SettingsField 
+              label="Base URL"
+              description="Your Home Assistant instance URL (e.g., http://homeassistant.local:8123)"
             >
-              {showToken ? (
-                <EyeOff className="w-4 h-4" />
-              ) : (
-                <Eye className="w-4 h-4" />
-              )}
-            </button>
-          </div>
-        </SettingsField>
+              <Input
+                value={baseUrl}
+                onChange={(e) => onBaseUrlChange(e.target.value)}
+                placeholder="http://homeassistant.local:8123"
+                className="h-11 bg-white/[0.04] border-white/[0.08] text-white placeholder:text-white/30 focus:border-warm-glow/50 focus:ring-warm-glow/20 rounded-xl transition-all duration-300"
+              />
+            </SettingsField>
 
-        {/* Token Help */}
-        <div className="pt-4 mt-4 border-t border-border/30">
-          <div className="flex items-start gap-3">
-            <HelpCircle className="w-4 h-4 text-muted-foreground flex-shrink-0 mt-0.5" />
-            <p className="text-xs text-muted-foreground leading-relaxed">
-              To create a token: Go to your Home Assistant → Profile → Long-Lived Access Tokens → Create Token.{" "}
-              <a 
-                href="https://www.home-assistant.io/docs/authentication/#your-account-profile" 
-                target="_blank" 
-                rel="noopener noreferrer"
-                className="text-warm-glow hover:text-warm-glow/80 underline transition-colors"
-              >
-                Learn more
-              </a>
-            </p>
-          </div>
-        </div>
-
-        <div className="flex flex-col gap-3 pt-2">
-          <Button
-            onClick={handleTestConnection}
-            disabled={testing || !baseUrl || !accessToken}
-            className="w-full bg-transparent hover:bg-warm-glow/10 text-warm-glow border border-warm-glow/40 hover:border-warm-glow/60 rounded-xl h-11 font-light transition-all duration-200"
-          >
-            {testing ? (
-              <>
-                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                Testing Connection...
-              </>
-            ) : (
-              <>
-                <RefreshCw className="w-4 h-4 mr-2" />
-                Test Connection
-              </>
-            )}
-          </Button>
-
-          {testResult && (
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              className={`flex items-start gap-3 p-4 rounded-lg ${
-                testResult.success
-                  ? "bg-green-500/10 border border-green-500/20"
-                  : "bg-red-500/10 border border-red-500/20"
-              }`}
+            <SettingsField
+              label="Access Token"
+              description="Long-lived access token from Home Assistant"
             >
-              {testResult.success ? (
-                <CheckCircle2 className="w-5 h-5 text-green-400 flex-shrink-0 mt-0.5" />
-              ) : (
-                <XCircle className="w-5 h-5 text-red-400 flex-shrink-0 mt-0.5" />
-              )}
-              <p
-                className={`text-sm ${
-                  testResult.success ? "text-green-100" : "text-red-100"
-                }`}
-              >
-                {testResult.message}
+              <div className="relative">
+                <Input
+                  type={showToken ? "text" : "password"}
+                  value={accessToken}
+                  onChange={(e) => onAccessTokenChange(e.target.value)}
+                  placeholder="eyJ0eXAiOiJKV1QiLCJhbGc..."
+                  className="h-11 bg-white/[0.04] border-white/[0.08] text-white placeholder:text-white/30 focus:border-warm-glow/50 focus:ring-warm-glow/20 pr-12 rounded-xl transition-all duration-300"
+                />
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => setShowToken(!showToken)}
+                  className="absolute right-1.5 top-1/2 -translate-y-1/2 h-8 w-8 text-white/40 hover:text-white/70 hover:bg-white/[0.06] rounded-lg transition-all duration-300"
+                >
+                  {showToken ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                </Button>
+              </div>
+            </SettingsField>
+
+            {/* Help text */}
+            <motion.div 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.3 }}
+              className="flex items-start gap-2.5 p-3.5 rounded-xl bg-white/[0.02] border border-white/[0.04]"
+            >
+              <Key className="w-4 h-4 text-white/30 mt-0.5 flex-shrink-0" />
+              <p className="text-xs text-white/40 leading-relaxed font-light">
+                To get a token: Profile → Security → Long-Lived Access Tokens → Create Token.{" "}
+                <a 
+                  href="https://www.home-assistant.io/docs/authentication/#your-account-profile" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="text-warm-glow hover:text-warm-glow/80 underline transition-colors"
+                >
+                  Learn more
+                </a>
               </p>
             </motion.div>
-          )}
-        </div>
-      </SettingsSection>
+
+            {/* Test Connection Button */}
+            <Button
+              onClick={handleTestConnection}
+              disabled={testing || !baseUrl || !accessToken}
+              className="w-full h-11 bg-white/[0.06] hover:bg-white/[0.1] text-white/90 rounded-xl font-light border border-white/[0.08] hover:border-white/[0.12] transition-all duration-300 disabled:opacity-40"
+            >
+              {testing ? (
+                <>
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  Testing...
+                </>
+              ) : (
+                <>
+                  <RefreshCw className="w-4 h-4 mr-2" />
+                  Test Connection
+                </>
+              )}
+            </Button>
+
+            {/* Test Result */}
+            {testResult && (
+              <motion.div
+                initial={{ opacity: 0, y: 8, scale: 0.98 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] as const }}
+                className={`flex items-center gap-3 p-4 rounded-xl border ${
+                  testResult.success 
+                    ? "bg-status-optimal/10 border-status-optimal/20 text-status-optimal" 
+                    : "bg-status-critical/10 border-status-critical/20 text-status-critical"
+                }`}
+              >
+                {testResult.success ? (
+                  <CheckCircle2 className="w-5 h-5 flex-shrink-0" />
+                ) : (
+                  <XCircle className="w-5 h-5 flex-shrink-0" />
+                )}
+                <span className="text-sm font-light">{testResult.message}</span>
+              </motion.div>
+            )}
+          </div>
+        </SettingsSection>
+      </motion.div>
     </motion.div>
   );
 };

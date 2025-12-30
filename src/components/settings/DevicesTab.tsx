@@ -35,11 +35,12 @@ const staggerContainer = {
 };
 
 const itemVariants = {
-  hidden: { opacity: 0, y: 16 },
+  hidden: { opacity: 0, y: 12, filter: "blur(4px)" },
   show: { 
     opacity: 1, 
     y: 0,
-    transition: { duration: 0.4, ease: [0.22, 0.03, 0.26, 1] as const }
+    filter: "blur(0px)",
+    transition: { duration: 0.45, ease: [0.16, 1, 0.3, 1] as const }
   }
 };
 
@@ -96,7 +97,7 @@ const DevicesTab = ({
       variants={staggerContainer}
       initial="hidden"
       animate="show"
-      className="space-y-6"
+      className="space-y-5"
     >
       {/* Auto Discovery Section */}
       <motion.div variants={itemVariants}>
@@ -108,15 +109,15 @@ const DevicesTab = ({
       </motion.div>
 
       {/* Configured Devices Header */}
-      <motion.div variants={itemVariants} className="pt-4">
+      <motion.div variants={itemVariants} className="pt-3">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-xl bg-warm-glow/10 flex items-center justify-center">
-              <Home className="w-4 h-4 text-warm-glow" strokeWidth={1.5} />
+            <div className="w-9 h-9 rounded-xl bg-warm-glow/10 flex items-center justify-center">
+              <Home className="w-[18px] h-[18px] text-warm-glow" strokeWidth={1.5} />
             </div>
             <div>
-              <h3 className="text-sm font-medium text-foreground/90">Configured Devices</h3>
-              <p className="text-xs text-muted-foreground">{totalDevices} devices in {devicesMapping.rooms.length} room{devicesMapping.rooms.length !== 1 ? 's' : ''}</p>
+              <h3 className="text-sm font-light text-white/90 tracking-wide">Configured Devices</h3>
+              <p className="text-xs text-white/40 font-light">{totalDevices} devices in {devicesMapping.rooms.length} room{devicesMapping.rooms.length !== 1 ? 's' : ''}</p>
             </div>
           </div>
         </div>
