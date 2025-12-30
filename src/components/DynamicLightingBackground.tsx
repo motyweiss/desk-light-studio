@@ -2,6 +2,7 @@ import { motion } from 'framer-motion';
 import { useMemo } from 'react';
 import { useLighting } from '@/features/lighting';
 import { useReducedMotion } from '@/hooks/useReducedMotion';
+import { useLoadState } from '@/layouts/RootLayout';
 
 interface GlowConfig {
   opacity: number;
@@ -13,6 +14,10 @@ interface GlowConfig {
 export const DynamicLightingBackground = () => {
   const { lights } = useLighting();
   const prefersReducedMotion = useReducedMotion();
+  const { showHeader } = useLoadState();
+  
+  // Only show background effect after page has loaded
+  const isPageLoaded = showHeader;
 
   // Calculate glow configs based on light intensities
   const spotlightGlow = useMemo((): GlowConfig => {
@@ -122,10 +127,13 @@ export const DynamicLightingBackground = () => {
         </defs>
       </svg>
 
-      <div 
+      <motion.div 
         className="fixed inset-0 pointer-events-none overflow-hidden"
         style={{ zIndex: 0 }}
         aria-hidden="true"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: isPageLoaded ? 1 : 0 }}
+        transition={{ duration: 0.8, ease: [0.4, 0, 0.2, 1] }}
       >
         {/* Dark overlay when lights are off - creates cozy darkness */}
         <motion.div
@@ -260,7 +268,7 @@ export const DynamicLightingBackground = () => {
             mixBlendMode: 'overlay',
           }}
         />
-      </div>
+      </motion.div>
     </>
   );
 };
