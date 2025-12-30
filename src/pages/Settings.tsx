@@ -307,7 +307,7 @@ const Settings = () => {
             >
               <ArrowLeft className="w-5 h-5" strokeWidth={1.5} />
             </Button>
-            <h1 className="text-xl font-page-title text-white/90 tracking-wide">Settings</h1>
+            <h1 className="text-xl font-sans font-light text-white/90 tracking-wide">Settings</h1>
           </div>
           
           <SettingsConnectionBadge />
