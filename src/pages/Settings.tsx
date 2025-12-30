@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowLeft, Loader2 } from "lucide-react";
+import { ArrowLeft, Loader2, Settings as SettingsIcon, Plug, Cpu } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import ConnectionTab from "@/components/settings/ConnectionTab";
@@ -17,9 +17,18 @@ const staggerContainer = {
   show: {
     opacity: 1,
     transition: {
-      staggerChildren: 0.08,
-      delayChildren: 0.15
+      staggerChildren: 0.06,
+      delayChildren: 0.1
     }
+  }
+};
+
+const itemVariants = {
+  hidden: { opacity: 0, y: 12 },
+  show: { 
+    opacity: 1, 
+    y: 0,
+    transition: { duration: 0.4, ease: [0.22, 0.03, 0.26, 1] as const }
   }
 };
 
@@ -27,7 +36,6 @@ const Settings = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   
-  // Use the global HAConnection context - Single Source of Truth
   const { 
     config: haConfig, 
     isLoading: isLoadingHAConfig,
@@ -47,7 +55,6 @@ const Settings = () => {
   const [isDirty, setIsDirty] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
 
-  // Initialize form with config from context
   useEffect(() => {
     if (haConfig) {
       setBaseUrl(haConfig.baseUrl);
@@ -59,7 +66,6 @@ const Settings = () => {
     setLocalDevicesMapping(devicesMapping);
   }, [devicesMapping]);
 
-  // Auto-fetch entities when page loads if config exists
   useEffect(() => {
     const fetchEntitiesOnLoad = async () => {
       if (haConfig?.baseUrl && haConfig?.accessToken) {
@@ -147,7 +153,6 @@ const Settings = () => {
     setIsSaving(true);
     
     try {
-      // Save connection config to database via context
       const configResult = await saveHAConfig(baseUrl, accessToken);
       
       if (!configResult.success) {
@@ -160,7 +165,6 @@ const Settings = () => {
         return;
       }
       
-      // Save devices mapping to database via context
       const devicesResult = await saveHADevicesMapping(localDevicesMapping);
       
       if (!devicesResult.success) {
@@ -202,34 +206,41 @@ const Settings = () => {
 
   if (isLoadingHAConfig) {
     return (
-      <div className="h-full flex items-center justify-center">
-        <Loader2 className="w-8 h-8 animate-spin text-white/60" />
+      <div className="h-full flex items-center justify-center bg-card">
+        <Loader2 className="w-8 h-8 animate-spin text-foreground/60" />
       </div>
     );
   }
 
   return (
-    <div className="h-full flex flex-col">
+    <div className="h-full flex flex-col bg-card">
       {/* Fixed Header */}
       <motion.div 
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ duration: 0.3, ease: [0.22, 0.03, 0.26, 1] }}
-        className="flex-shrink-0 bg-background/80 backdrop-blur-xl border-b border-white/10"
+        initial={{ opacity: 0, y: -10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4, ease: [0.22, 0.03, 0.26, 1] }}
+        className="flex-shrink-0 bg-card/90 backdrop-blur-2xl border-b border-border/50"
       >
-        <div className="max-w-2xl mx-auto px-6 py-4 flex items-center justify-between">
-          <motion.button
-            onClick={handleCancel}
-            className="w-10 h-10 rounded-full backdrop-blur-xl border border-white/10 flex items-center justify-center text-white/60 hover:text-white hover:border-white/25 hover:bg-white/5 transition-all duration-300"
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            aria-label="Go back"
-          >
-            <ArrowLeft className="w-4 h-4" strokeWidth={2} />
-          </motion.button>
-          <h1 className="text-xl font-sans font-medium text-white">
-            Settings
-          </h1>
+        <div className="max-w-2xl mx-auto px-6 py-5 flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <motion.button
+              onClick={handleCancel}
+              className="w-10 h-10 rounded-full bg-secondary/50 backdrop-blur-xl border border-border/50 flex items-center justify-center text-foreground/60 hover:text-foreground hover:border-border hover:bg-secondary/80 transition-all duration-300"
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              aria-label="Go back"
+            >
+              <ArrowLeft className="w-4 h-4" strokeWidth={2} />
+            </motion.button>
+            <div className="flex items-center gap-3">
+              <div className="w-9 h-9 rounded-xl bg-warm-glow/10 flex items-center justify-center">
+                <SettingsIcon className="w-4 h-4 text-warm-glow" strokeWidth={1.5} />
+              </div>
+              <h1 className="text-xl font-sans font-medium text-foreground tracking-tight">
+                Settings
+              </h1>
+            </div>
+          </div>
           <SettingsConnectionBadge />
         </div>
       </motion.div>
@@ -241,63 +252,77 @@ const Settings = () => {
         animate="show"
         className="flex-1 overflow-y-auto min-h-0"
       >
-        <div className="max-w-2xl mx-auto px-6 py-8 pb-24">
-          <Tabs defaultValue="connection" className="w-full">
-            <TabsList className="w-full mb-6">
-              <TabsTrigger value="connection" className="flex-1">Connection</TabsTrigger>
-              <TabsTrigger value="devices" className="flex-1">Devices</TabsTrigger>
-              <TabsTrigger value="rooms" className="flex-1" disabled>Rooms</TabsTrigger>
-            </TabsList>
-            
-            <TabsContent value="connection">
-              <ConnectionTab
-                baseUrl={baseUrl}
-                accessToken={accessToken}
-                onBaseUrlChange={setBaseUrl}
-                onAccessTokenChange={setAccessToken}
-                onEntitiesFetched={setAllEntities}
-              />
-            </TabsContent>
-            
-            <TabsContent value="devices">
-              <DevicesTab
-                devicesMapping={localDevicesMapping}
-                entities={allEntities}
-                onAddDevice={handleAddDevice}
-                onUpdateDevice={handleUpdateDevice}
-                onRemoveDevice={handleRemoveDevice}
-                isLoading={isLoadingEntities}
-              />
-            </TabsContent>
-          </Tabs>
+        <div className="max-w-2xl mx-auto px-6 py-8 pb-32">
+          <motion.div variants={itemVariants}>
+            <Tabs defaultValue="connection" className="w-full">
+              <TabsList className="w-full mb-8 p-1.5 bg-secondary/30 border border-border/30 rounded-2xl">
+                <TabsTrigger 
+                  value="connection" 
+                  className="flex-1 gap-2 data-[state=active]:bg-secondary data-[state=active]:shadow-lg rounded-xl py-3"
+                >
+                  <Plug className="w-4 h-4" strokeWidth={1.5} />
+                  Connection
+                </TabsTrigger>
+                <TabsTrigger 
+                  value="devices" 
+                  className="flex-1 gap-2 data-[state=active]:bg-secondary data-[state=active]:shadow-lg rounded-xl py-3"
+                >
+                  <Cpu className="w-4 h-4" strokeWidth={1.5} />
+                  Devices
+                </TabsTrigger>
+              </TabsList>
+              
+              <TabsContent value="connection" className="mt-0">
+                <ConnectionTab
+                  baseUrl={baseUrl}
+                  accessToken={accessToken}
+                  onBaseUrlChange={setBaseUrl}
+                  onAccessTokenChange={setAccessToken}
+                  onEntitiesFetched={setAllEntities}
+                />
+              </TabsContent>
+              
+              <TabsContent value="devices" className="mt-0">
+                <DevicesTab
+                  devicesMapping={localDevicesMapping}
+                  entities={allEntities}
+                  onAddDevice={handleAddDevice}
+                  onUpdateDevice={handleUpdateDevice}
+                  onRemoveDevice={handleRemoveDevice}
+                  isLoading={isLoadingEntities}
+                />
+              </TabsContent>
+            </Tabs>
+          </motion.div>
         </div>
       </motion.div>
 
-      {/* Fixed Footer - Only shown when there are changes */}
+      {/* Fixed Footer - Floating Save Bar */}
       <AnimatePresence>
         {isDirty && (
           <motion.div 
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ 
-              duration: 0.25, 
-              ease: [0.22, 0.03, 0.26, 1] 
-            }}
-            className="flex-shrink-0 bg-background/80 backdrop-blur-xl border-t border-white/10"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 20 }}
+            transition={{ duration: 0.3, ease: [0.22, 0.03, 0.26, 1] }}
+            className="absolute bottom-6 left-1/2 -translate-x-1/2 z-50"
           >
-            <div className="max-w-2xl mx-auto px-6 py-4 flex justify-between gap-4">
+            <div className="flex items-center gap-3 px-4 py-3 bg-secondary/95 backdrop-blur-2xl border border-border/50 rounded-2xl shadow-2xl shadow-black/30">
+              <span className="text-sm text-foreground/70 font-light px-2">Unsaved changes</span>
+              <div className="w-px h-6 bg-border/50" />
               <Button
-                variant="outline"
+                variant="ghost"
+                size="sm"
                 onClick={handleCancel}
-                className="flex-1"
+                className="text-foreground/60 hover:text-foreground hover:bg-secondary/80"
               >
                 Discard
               </Button>
               <Button
                 onClick={handleSave}
                 disabled={!isFormValid || isSaving}
-                className="flex-1 bg-[hsl(28_18%_12%)] hover:bg-[hsl(28_18%_16%)] text-white border-white/10 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
+                size="sm"
+                className="bg-warm-glow hover:bg-warm-glow/90 text-primary-foreground font-medium px-6 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
               >
                 {isSaving ? (
                   <>
@@ -305,7 +330,7 @@ const Settings = () => {
                     Saving...
                   </>
                 ) : (
-                  "Save Changes"
+                  "Save"
                 )}
               </Button>
             </div>
