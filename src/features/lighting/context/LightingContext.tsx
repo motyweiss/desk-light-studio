@@ -16,6 +16,8 @@ interface LightState {
   isPending: boolean;
   source: AnimationSource;
   lastUserChangeTime: number; // Timestamp of last user change - used to ignore stale external updates
+  lastSentValue: number; // Last value sent to API - prevents duplicate calls
+  lastSentTime: number; // Timestamp of last API call
 }
 
 interface LightingContextValue {
@@ -52,9 +54,9 @@ export const LightingProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   const [connectionType, setConnectionType] = useState<'websocket' | 'polling' | 'disconnected'>('disconnected');
   const [pollingEnabled, setPollingEnabled] = useState(false);
   const [lights, setLights] = useState<LightingContextValue['lights']>({
-    spotlight: { targetValue: 0, displayValue: 0, confirmedValue: 0, isAnimating: false, isPending: false, source: 'initial', lastUserChangeTime: 0 },
-    deskLamp: { targetValue: 0, displayValue: 0, confirmedValue: 0, isAnimating: false, isPending: false, source: 'initial', lastUserChangeTime: 0 },
-    monitorLight: { targetValue: 0, displayValue: 0, confirmedValue: 0, isAnimating: false, isPending: false, source: 'initial', lastUserChangeTime: 0 },
+    spotlight: { targetValue: 0, displayValue: 0, confirmedValue: 0, isAnimating: false, isPending: false, source: 'initial', lastUserChangeTime: 0, lastSentValue: -1, lastSentTime: 0 },
+    deskLamp: { targetValue: 0, displayValue: 0, confirmedValue: 0, isAnimating: false, isPending: false, source: 'initial', lastUserChangeTime: 0, lastSentValue: -1, lastSentTime: 0 },
+    monitorLight: { targetValue: 0, displayValue: 0, confirmedValue: 0, isAnimating: false, isPending: false, source: 'initial', lastUserChangeTime: 0, lastSentValue: -1, lastSentTime: 0 },
   });
   
   // Grace period to ignore stale external updates after user changes
@@ -265,10 +267,28 @@ export const LightingProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         clearTimeout(existingTimer);
       }
 
-      const currentValue = lights[lightId].targetValue;
+      const currentLight = lights[lightId];
+      const currentValue = currentLight.targetValue;
       const delay = Math.abs(value - currentValue) > 50 ? 0 : 300;
       
       const timer = setTimeout(async () => {
+        // Prevent duplicate API calls for the same value within 500ms
+        const now = Date.now();
+        if (value === currentLight.lastSentValue && (now - currentLight.lastSentTime) < 500) {
+          logger.light(lightId, `Skipping duplicate call for ${value}%`);
+          setLights(prev => ({
+            ...prev,
+            [lightId]: { ...prev[lightId], isPending: false }
+          }));
+          return;
+        }
+        
+        // Update lastSentValue before API call
+        setLights(prev => ({
+          ...prev,
+          [lightId]: { ...prev[lightId], lastSentValue: value, lastSentTime: now }
+        }));
+        
         logger.light(lightId, `Setting to ${value}% via ${entityId}`);
         
         try {
