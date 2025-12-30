@@ -165,7 +165,7 @@ export const CircularProgress = ({
         <motion.div 
           className="absolute inset-0 flex items-end justify-center"
           style={{ 
-            paddingBottom: size * 0.02,
+            bottom: -5,
           }}
           initial={{ opacity: 0 }}
           animate={{ 
