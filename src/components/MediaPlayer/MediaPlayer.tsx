@@ -25,8 +25,8 @@ const CONTAINER_HEIGHTS = {
 
 // Spring-based animation for smooth, natural motion
 const SPRING = {
-  // Soft spring for container morphing - the main growth animation
-  layout: { type: 'spring', stiffness: 260, damping: 28, mass: 1 },
+  // Soft spring with subtle bounce for container morphing
+  layout: { type: 'spring', stiffness: 300, damping: 22, mass: 0.9 },
   // Slightly stiffer for content
   content: { type: 'spring', stiffness: 350, damping: 35, mass: 0.8 },
 } as const;
