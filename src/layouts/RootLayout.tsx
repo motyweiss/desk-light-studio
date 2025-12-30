@@ -28,65 +28,6 @@ const LoadStateContext = createContext<LoadStateContextValue>({
 
 export const useLoadState = () => useContext(LoadStateContext);
 
-// Page transition variants - simple and reliable
-const pageVariants = {
-  initial: { 
-    opacity: 0,
-    scale: 0.97,
-    y: 16,
-  },
-  animate: { 
-    opacity: 1,
-    scale: 1,
-    y: 0,
-  },
-  exit: { 
-    opacity: 0,
-    scale: 0.99,
-    y: -8,
-  },
-};
-
-const pageTransition = {
-  duration: 0.35,
-  ease: [0.4, 0, 0.2, 1] as const,
-};
-
-// Media player variants - smoother timing
-const mediaPlayerVariants = {
-  initial: { 
-    y: 80, 
-    opacity: 0,
-    scale: 0.98,
-  },
-  animate: { 
-    y: 0, 
-    opacity: 1,
-    scale: 1,
-  },
-  exit: { 
-    y: 60, 
-    opacity: 0,
-    scale: 0.98,
-  },
-};
-
-// Header variants - no blur for reliability
-const headerVariants = {
-  initial: { 
-    y: -20, 
-    opacity: 0,
-  },
-  animate: { 
-    y: 0, 
-    opacity: 1,
-  },
-  exit: { 
-    y: -10, 
-    opacity: 0,
-  },
-};
-
 // Inner component that uses the UI context
 const RootLayoutContent = ({ children }: RootLayoutProps) => {
   const location = useLocation();
@@ -98,107 +39,62 @@ const RootLayoutContent = ({ children }: RootLayoutProps) => {
   const isSettingsPage = location.pathname === '/settings';
   const isMainPage = location.pathname === '/';
 
-  // Immediately hide header and media player when navigating away from main page
+  // Hide header and media player when navigating away from main page
   useEffect(() => {
     if (!isMainPage) {
-      // Small delay for exit animation
-      const timer = setTimeout(() => {
-        setShowHeader(false);
-        setShowMediaPlayer(false);
-      }, 50);
-      return () => clearTimeout(timer);
+      setShowHeader(false);
+      setShowMediaPlayer(false);
     }
   }, [isMainPage, setShowHeader, setShowMediaPlayer]);
 
   // Bottom padding to ensure content doesn't get hidden behind the player
-  const bottomPadding = isSettingsPage ? 0 : (showMediaPlayer ? 136 : 0);
+  const bottomPadding = isMainPage && showMediaPlayer ? 136 : 0;
 
   return (
     <div className="h-screen w-full relative flex flex-col overflow-hidden bg-background">
       {/* Dynamic lighting background - only on main page */}
-      <AnimatePresence>
-        {isMainPage && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.5 }}
-          >
-            <DynamicLightingBackground />
-          </motion.div>
-        )}
-      </AnimatePresence>
+      {isMainPage && <DynamicLightingBackground />}
 
       {/* Content */}
       <div className="relative z-10 h-full flex flex-col overflow-hidden">
         {/* Global Top Navigation Bar */}
-        <AnimatePresence mode="wait">
-          {isMainPage && showHeader && (
-            <motion.div
-              key="header"
-              variants={headerVariants}
-              initial="initial"
-              animate="animate"
-              exit="exit"
-              transition={{
-                duration: 0.4,
-                ease: [0.16, 1, 0.3, 1],
-              }}
-            >
-              <TopNavigationBar
-                currentPath={location.pathname}
-                isConnected={isConnected}
-                isConnecting={isConnecting}
-                isReconnecting={isReconnecting}
-                onReconnectClick={reconnect}
-              />
-            </motion.div>
-          )}
-        </AnimatePresence>
+        {isMainPage && showHeader && (
+          <TopNavigationBar
+            currentPath={location.pathname}
+            isConnected={isConnected}
+            isConnecting={isConnecting}
+            isReconnecting={isReconnecting}
+            onReconnectClick={reconnect}
+          />
+        )}
 
-        {/* Page Content */}
+        {/* Page Content - Simple fade transition */}
         <div 
           className={`flex-1 overflow-auto ${isMainPage && showHeader ? 'pt-[56px] md:pt-[68px]' : 'pt-0'}`}
           style={{ paddingBottom: bottomPadding }}
         >
-          <AnimatePresence mode="popLayout" initial={false}>
-            <motion.div
-              key={location.pathname}
-              variants={pageVariants}
-              initial="initial"
-              animate="animate"
-              exit="exit"
-              transition={pageTransition}
-              className="w-full h-full"
-              style={{ 
-                transformOrigin: 'center top',
-                willChange: 'opacity, transform',
-              }}
-            >
-              {children}
-            </motion.div>
-          </AnimatePresence>
+          <motion.div
+            key={location.pathname}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.3 }}
+            className="w-full h-full"
+          >
+            {children}
+          </motion.div>
         </div>
 
-        {/* Global Media Player - entry from bottom */}
-        <AnimatePresence mode="wait">
-          {isMainPage && showMediaPlayer && (
-            <motion.div
-              key="media-player"
-              variants={mediaPlayerVariants}
-              initial="initial"
-              animate="animate"
-              exit="exit"
-              transition={{
-                duration: 0.5,
-                ease: [0.16, 1, 0.3, 1],
-              }}
-              className="relative z-20"
-            >
-              <MediaPlayer />
-            </motion.div>
-          )}
-        </AnimatePresence>
+        {/* Global Media Player */}
+        {isMainPage && showMediaPlayer && (
+          <motion.div
+            initial={{ y: 80, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+            className="relative z-20"
+          >
+            <MediaPlayer />
+          </motion.div>
+        )}
       </div>
     </div>
   );
