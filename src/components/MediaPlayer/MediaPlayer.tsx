@@ -337,13 +337,10 @@ export const MediaPlayer = () => {
                   </div>
                 )}
 
-                {/* Bottom Row - Controls centered, Volume & Speaker on right */}
-                <div className="flex items-center">
-                  {/* Left spacer for balance */}
-                  <div className="flex-1" />
-                  
-                  {/* Centered Playback Controls */}
-                  <div className="flex justify-center" onClick={(e) => e.stopPropagation()}>
+                {/* Bottom Row - Controls left, Volume & Speaker on right */}
+                <div className="flex items-center justify-between">
+                  {/* Left-aligned Playback Controls */}
+                  <div className="flex" onClick={(e) => e.stopPropagation()}>
                     <PlaybackControls
                       isPlaying={playerState.isPlaying}
                       shuffle={playerState.shuffle}
@@ -357,7 +354,7 @@ export const MediaPlayer = () => {
                   </div>
                   
                   {/* Right side - Volume & Speaker */}
-                  <div className="flex-1 flex items-center justify-end gap-5" onClick={(e) => e.stopPropagation()}>
+                  <div className="flex items-center gap-5" onClick={(e) => e.stopPropagation()}>
                     <VolumeControl
                       volume={playerState.volume}
                       isMuted={playerState.isMuted}
