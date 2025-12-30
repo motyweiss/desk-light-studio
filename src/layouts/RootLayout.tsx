@@ -4,6 +4,7 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { MediaPlayerProvider, MediaPlayerUIProvider, useMediaPlayerUISafe } from '@/features/mediaPlayer';
 import { MediaPlayer } from '@/components/MediaPlayer/MediaPlayer';
 import { TopNavigationBar } from '@/components/navigation/TopNavigationBar';
+import { DynamicLightingBackground } from '@/components/DynamicLightingBackground';
 import { useHAConnection } from '@/contexts/HAConnectionContext';
 import { PAGE_TRANSITIONS } from '@/lib/animations/tokens';
 import { LOAD_SEQUENCE } from '@/constants/loadingSequence';
@@ -46,6 +47,9 @@ const RootLayoutContent = ({ children }: RootLayoutProps) => {
     <div 
       className="h-screen w-full relative flex flex-col overflow-hidden bg-background"
     >
+      {/* Dynamic lighting background - only on main page */}
+      {!isSettingsPage && <DynamicLightingBackground />}
+
       {/* Content */}
       <div className="relative z-10 h-full flex flex-col overflow-hidden">
         {/* Global Top Navigation Bar */}
