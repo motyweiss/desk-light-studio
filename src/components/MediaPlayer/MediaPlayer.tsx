@@ -20,7 +20,7 @@ import { MusicParticles } from './MusicParticles';
 // Fixed heights for organic growth animation
 const CONTAINER_HEIGHTS = {
   minimized: 64,
-  expanded: 280,
+  expanded: 310,
 } as const;
 
 // Spring-based animation for smooth, natural motion
@@ -321,7 +321,7 @@ export const MediaPlayer = () => {
                 pointerEvents: isExpanded ? 'auto' : 'none',
               }}
               transition={transitions.content}
-              className="mt-6"
+              className="mt-10"
             >
               <div className="space-y-6">
                 {/* Progress Bar */}
