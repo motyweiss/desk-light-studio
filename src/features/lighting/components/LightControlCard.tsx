@@ -516,11 +516,11 @@ export const LightControlCard = ({
             {isOn && !isLoading && (
               <motion.div 
                 className="absolute inset-0 flex items-center"
-                initial={{ opacity: 0, scale: 0.95 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.95 }}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
                 transition={{
-                  duration: 0.3,
+                  duration: 0.2,
                   ease: [0.22, 0.68, 0.35, 1.0],
                 }}
               >
@@ -528,7 +528,6 @@ export const LightControlCard = ({
                   value={[displayNumber]}
                   onValueChange={handleSliderChange}
                   onValueCommit={(values) => {
-                    // Final value commit - ensure it's sent
                     onChange(values[0]);
                     userInteractingRef.current = false;
                   }}
@@ -536,6 +535,7 @@ export const LightControlCard = ({
                   min={1}
                   step={1}
                   className="w-full"
+                  animateIn={true}
                 />
               </motion.div>
             )}
