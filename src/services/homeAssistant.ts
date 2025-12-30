@@ -183,39 +183,20 @@ class HomeAssistantService {
 
   async getEntitiesWithContext(): Promise<HAEntity[]> {
     try {
-      const [statesRes, areasRes, devicesRes, entityRegistryRes] = await Promise.all([
-        haProxyClient.get<HAEntity[]>('/api/states'),
-        haProxyClient.get<any[]>('/api/config/area_registry/list'),
-        haProxyClient.get<any[]>('/api/config/device_registry/list'),
-        haProxyClient.get<any[]>('/api/config/entity_registry/list')
-      ]);
-
+      // Only fetch states - the config registry endpoints are WebSocket-only in HA
+      // and return 404 via REST API
+      const statesRes = await haProxyClient.get<HAEntity[]>('/api/states');
       const states = statesRes.data || [];
-      const areas = areasRes.data || [];
-      const devices = devicesRes.data || [];
-      const entityRegistry = entityRegistryRes.data || [];
 
-      const areaMap = new Map<string, string>(areas.map((a: any) => [a.area_id, a.name]));
-      const deviceMap = new Map<string, { name: string; area_id?: string }>(
-        devices.map((d: any) => [d.id, { name: d.name_by_user || d.name, area_id: d.area_id }])
-      );
-      const entityMap = new Map<string, { device_id?: string; area_id?: string }>(
-        entityRegistry.map((e: any) => [e.entity_id, { device_id: e.device_id, area_id: e.area_id }])
-      );
-
-      return states.map((entity: HAEntity) => {
-        const entityInfo = entityMap.get(entity.entity_id);
-        const deviceInfo = entityInfo?.device_id ? deviceMap.get(entityInfo.device_id) : null;
-        const areaId = entityInfo?.area_id || deviceInfo?.area_id;
-        
-        return {
-          ...entity,
-          area_id: areaId,
-          area_name: areaId ? areaMap.get(areaId) : undefined,
-          device_id: entityInfo?.device_id,
-          device_name: deviceInfo?.name
-        };
-      });
+      // Return entities with just their state data
+      // Area/device context would require WebSocket API which is not available via proxy
+      return states.map((entity: HAEntity) => ({
+        ...entity,
+        area_id: undefined,
+        area_name: undefined,
+        device_id: undefined,
+        device_name: undefined
+      }));
     } catch (error) {
       console.error("Failed to get entities with context:", error);
       return [];

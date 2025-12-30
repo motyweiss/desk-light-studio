@@ -132,6 +132,20 @@ serve(async (req) => {
       });
     }
 
+    // Handle non-2xx responses from Home Assistant
+    if (!haResponse!.ok) {
+      const errorText = await haResponse!.text();
+      console.log(`[HA Proxy] HA returned ${haResponse!.status} for ${path}`);
+      return new Response(
+        JSON.stringify({ 
+          error: `Home Assistant returned ${haResponse!.status}`, 
+          code: 'HA_ERROR_RESPONSE',
+          status: haResponse!.status 
+        }),
+        { status: haResponse!.status, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
     // Handle empty responses
     const responseText = await haResponse!.text();
     if (!responseText || responseText.trim() === '') {
