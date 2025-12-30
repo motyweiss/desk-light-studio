@@ -61,7 +61,7 @@ export const LightingProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   
   // Grace period to ignore stale external updates after user changes
   // Covers: animation (~750ms) + debounce (300ms) + API call (~500ms) + response + buffer
-  const USER_CHANGE_GRACE_PERIOD = 3000; // 3 seconds
+  const USER_CHANGE_GRACE_PERIOD = 3500; // 3.5 seconds - increased for safety
 
   const debounceTimersRef = useRef<Map<string, NodeJS.Timeout>>(new Map());
   const wsSubscriptionsRef = useRef<Array<() => void>>([]);
@@ -111,8 +111,9 @@ export const LightingProvider: React.FC<{ children: React.ReactNode }> = ({ chil
             // Ignore external updates during grace period after user change
             const isInGracePeriod = (now - light.lastUserChangeTime) < USER_CHANGE_GRACE_PERIOD;
             
-            // Don't update if pending, in grace period, or same value
-            if (light.isPending || isInGracePeriod || light.confirmedValue === intensity) return prev;
+            // Don't update if pending, in grace period, or same value (within 3% tolerance)
+            if (light.isPending || isInGracePeriod) return prev;
+            if (Math.abs(light.confirmedValue - intensity) < 3) return prev;
 
             return {
               ...prev,
@@ -195,11 +196,11 @@ export const LightingProvider: React.FC<{ children: React.ReactNode }> = ({ chil
             // Don't update if pending or in grace period
             if (light.isPending || isInGracePeriod) return prev;
             
-            // Don't update if same as current target (user intent preserved)
-            if (Math.abs(light.targetValue - newIntensity) < 2) return prev;
+            // Don't update if same as current target (user intent preserved) - increased tolerance to 3%
+            if (Math.abs(light.targetValue - newIntensity) < 3) return prev;
             
-            // Don't update if same value (within 2% tolerance)
-            if (Math.abs(light.confirmedValue - newIntensity) < 2) return prev;
+            // Don't update if same value (within 3% tolerance)
+            if (Math.abs(light.confirmedValue - newIntensity) < 3) return prev;
             
             logger.light(lightId, `WebSocket: ${newIntensity}%`);
             
@@ -208,7 +209,7 @@ export const LightingProvider: React.FC<{ children: React.ReactNode }> = ({ chil
               [lightId]: {
                 ...light,
                 targetValue: newIntensity,
-                displayValue: newIntensity, // Also update displayValue for UI sync
+                displayValue: newIntensity,
                 confirmedValue: newIntensity,
                 source: 'external',
               }

@@ -80,6 +80,22 @@ export const LightControlCard = ({
   const debounceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const userInteractingRef = useRef(false);
   
+  // User interaction lock - blocks external updates for a duration after user action
+  const userLockRef = useRef<{ locked: boolean; unlockTime: number }>({ locked: false, unlockTime: 0 });
+  
+  const lockUserInteraction = useCallback((duration: number) => {
+    userLockRef.current = { locked: true, unlockTime: Date.now() + duration };
+  }, []);
+  
+  const isUserLocked = useCallback(() => {
+    if (!userLockRef.current.locked) return false;
+    if (Date.now() > userLockRef.current.unlockTime) {
+      userLockRef.current.locked = false;
+      return false;
+    }
+    return true;
+  }, []);
+  
   // Show slider only when light is on
   const showSlider = isOn;
   
@@ -95,15 +111,20 @@ export const LightControlCard = ({
     setDisplayNumber(Math.round(latest));
   });
   
-  // Sync with external intensity changes - ONLY when source is external
+  // Sync with external intensity changes - ONLY when source is external and not locked
   useEffect(() => {
-    // Skip if user is interacting or if the change originated from user action
-    if (userInteractingRef.current || animationSource === 'user') return;
+    // Skip if user is interacting, locked, or if the change originated from user action
+    if (userInteractingRef.current || isUserLocked() || animationSource === 'user') return;
     
-    if (Math.abs(displayValue.get() - intensity) > 0.5) {
+    const currentValue = displayValue.get();
+    const diff = Math.abs(currentValue - intensity);
+    
+    // Only sync if difference is significant (> 2%)
+    if (diff > 2) {
       animateTo(intensity, 'external');
+      setDisplayNumber(intensity);
     }
-  }, [intensity, animationSource, displayValue, animateTo]);
+  }, [intensity, animationSource, displayValue, animateTo, isUserLocked]);
   
   // Auto-collapse after inactivity (only for manual expansion when light is off)
   useEffect(() => {
@@ -179,8 +200,15 @@ export const LightControlCard = ({
     triggerHaptic();
     
     const targetIntensity = isOn ? 0 : 100;
+    const animationDuration = isOn 
+      ? SEQUENCES.lightControl.turnOffDuration 
+      : SEQUENCES.lightControl.turnOnDuration;
+    
+    // Lock for animation duration + API call buffer (2 seconds extra)
+    lockUserInteraction((animationDuration * 1000) + 2000);
     
     userInteractingRef.current = true;
+    setDisplayNumber(targetIntensity);
     animateTo(targetIntensity, 'user');
     onChange(targetIntensity);
     
@@ -191,13 +219,17 @@ export const LightControlCard = ({
     
     setTimeout(() => {
       userInteractingRef.current = false;
-    }, SEQUENCES.lightControl.turnOnDuration * 1000);
+    }, animationDuration * 1000 + 500);
   };
 
   const handleSliderChange = useCallback((values: number[]) => {
     const newValue = values[0];
     
-    // Immediate visual update for responsiveness
+    // Lock during slider interaction + debounce + API buffer
+    lockUserInteraction(1200);
+    
+    // Immediate visual update - sync both motion value and display number
+    displayValue.set(newValue);
     setDisplayNumber(newValue);
     
     if (Math.abs(newValue - displayNumber) >= 10) {
@@ -215,7 +247,6 @@ export const LightControlCard = ({
     }
     
     userInteractingRef.current = true;
-    animateTo(newValue, 'user', { immediate: true });
     
     if (debounceTimerRef.current) {
       clearTimeout(debounceTimerRef.current);
@@ -225,7 +256,7 @@ export const LightControlCard = ({
       onChange(newValue);
       userInteractingRef.current = false;
     }, 300);
-  }, [displayNumber, onChange, animateTo, isOn]);
+  }, [displayNumber, onChange, displayValue, isOn, lockUserInteraction]);
 
   return (
     <motion.button
