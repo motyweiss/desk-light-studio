@@ -130,7 +130,7 @@ export const MediaPlayer = () => {
     paddingLeft: isMinimized ? 8 : 24,
     paddingRight: isMinimized ? 16 : 24,
     paddingTop: isMinimized ? 8 : 20,
-    paddingBottom: isMinimized ? 8 : 16,
+    paddingBottom: isMinimized ? 8 : 12,
   }), [isMinimized]);
 
   const albumArtSize = useMemo(() => ({
@@ -321,9 +321,9 @@ export const MediaPlayer = () => {
                 pointerEvents: isExpanded ? 'auto' : 'none',
               }}
               transition={transitions.content}
-              className="mt-6"
+              className="mt-8"
             >
-              <div className="space-y-5">
+              <div className="space-y-4">
                 {/* Progress Bar */}
                 {currentTrack && (
                   <div onClick={(e) => e.stopPropagation()}>
