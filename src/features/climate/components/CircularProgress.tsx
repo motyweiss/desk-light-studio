@@ -160,17 +160,16 @@ export const CircularProgress = ({
         />
       </svg>
       
-      {/* Percentage in gap area */}
+      {/* Percentage in gap area - centered in the gap */}
       {showPercentage && gapAngle > 0 && (
         <motion.div 
-          className="absolute left-1/2 -translate-x-1/2 flex items-center justify-center"
+          className="absolute inset-0 flex items-end justify-center"
           style={{ 
-            bottom: -2,
+            paddingBottom: size * 0.02,
           }}
-          initial={{ opacity: 0, y: 4 }}
+          initial={{ opacity: 0 }}
           animate={{ 
-            opacity: isShowingSkeleton ? 0 : 0.55,
-            y: isShowingSkeleton ? 4 : 0,
+            opacity: isShowingSkeleton ? 0 : 0.5,
           }}
           transition={{
             duration: 0.5,
@@ -181,11 +180,11 @@ export const CircularProgress = ({
           <span 
             className="font-normal text-foreground tabular-nums"
             style={{ 
-              fontSize: size * 0.19,
-              letterSpacing: '-0.03em',
+              fontSize: size * 0.18,
+              letterSpacing: '-0.02em',
             }}
           >
-            {Math.round(percentage * 100)}
+            {Math.round(percentage * 100)}%
           </span>
         </motion.div>
       )}
