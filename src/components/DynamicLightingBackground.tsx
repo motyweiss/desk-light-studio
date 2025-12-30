@@ -117,11 +117,11 @@ export const DynamicLightingBackground = () => {
           className="absolute inset-0"
           initial={{ opacity: 0 }}
           animate={{ 
-            opacity: anyLightOn ? 0 : 0.6,
+            opacity: anyLightOn ? 0 : 0.25,
           }}
           transition={{ duration: 1.5, ease: [0.4, 0, 0.2, 1] }}
           style={{
-            background: 'radial-gradient(ellipse at 50% 50%, hsl(220 25% 8% / 0.7) 0%, hsl(220 30% 5% / 0.9) 100%)',
+            background: 'radial-gradient(ellipse at 50% 50%, hsl(220 20% 12% / 0.4) 0%, hsl(220 25% 8% / 0.5) 100%)',
           }}
         />
 
