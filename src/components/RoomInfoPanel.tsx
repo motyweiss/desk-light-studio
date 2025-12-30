@@ -6,7 +6,7 @@ import { IPhoneIcon } from "./icons/IPhoneIcon";
 import { MagicKeyboardIcon } from "./icons/MagicKeyboardIcon";
 import { MagicMouseIcon } from "./icons/MagicMouseIcon";
 import { CircularProgress } from "@/features/climate/components/CircularProgress";
-import { TIMING, EASE, STAGGER, DELAY } from "@/lib/animations";
+import { LOAD_SEQUENCE } from "@/constants/loadingSequence";
 
 interface Light {
   id: string;
@@ -45,15 +45,13 @@ interface RoomInfoPanelProps {
   dataReady?: boolean;
 }
 
-// Unified transition configs using centralized tokens
-const entryTransition = {
-  duration: TIMING.medium,
-  ease: EASE.entrance,
-};
-
 // Device battery indicator size
 const DEVICE_SIZE = 56;
 const DEVICE_STROKE = 3;
+
+// Get timings from centralized config
+const elements = LOAD_SEQUENCE.elements;
+const contentEase = LOAD_SEQUENCE.content.ease;
 
 export const RoomInfoPanel = ({ 
   roomName, 
@@ -73,14 +71,17 @@ export const RoomInfoPanel = ({
       {/* Room Title with Master Switch */}
       <motion.div 
         className="flex items-center justify-between gap-3 md:gap-4"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: isLoaded ? 1 : 0 }}
-        transition={{
-          duration: TIMING.medium,
-          ease: EASE.entrance,
-          delay: DELAY.none,
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ 
+          opacity: isLoaded ? 1 : 0,
+          y: isLoaded ? 0 : 10,
         }}
-        style={{ willChange: 'opacity' }}
+        transition={{
+          duration: elements.roomTitle.duration,
+          ease: contentEase,
+          delay: elements.roomTitle.delay,
+        }}
+        style={{ willChange: 'opacity, transform' }}
       >
         <h1 className="text-xl md:text-3xl font-sans font-light tracking-tight text-foreground leading-tight">
           {roomName}
@@ -93,7 +94,7 @@ export const RoomInfoPanel = ({
             backgroundColor: masterSwitchOn ? 'rgba(255, 255, 255, 0.08)' : 'rgba(255, 255, 255, 0)',
             borderColor: masterSwitchOn ? 'rgba(255, 255, 255, 0.25)' : 'rgba(255, 255, 255, 0.1)'
           }}
-          transition={{ duration: TIMING.medium, ease: EASE.smooth }}
+          transition={{ duration: 0.35, ease: [0.25, 0.1, 0.25, 1] }}
           onClick={() => onMasterToggle(!masterSwitchOn)}
           className="w-8 h-8 md:w-9 md:h-9 rounded-full backdrop-blur-xl border flex-shrink-0"
           whileHover={{
@@ -106,7 +107,7 @@ export const RoomInfoPanel = ({
             animate={{
               color: masterSwitchOn ? 'rgba(255, 255, 255, 0.95)' : 'rgba(255, 255, 255, 0.4)',
             }}
-            transition={{ duration: TIMING.medium, ease: EASE.smooth }}
+            transition={{ duration: 0.35, ease: [0.25, 0.1, 0.25, 1] }}
             className="flex items-center justify-center"
           >
             <Power className="w-4 h-4" strokeWidth={2} />
@@ -121,9 +122,9 @@ export const RoomInfoPanel = ({
           initial={{ opacity: 0 }}
           animate={{ opacity: isLoaded ? 1 : 0 }}
           transition={{
-            duration: TIMING.medium,
-            ease: EASE.entrance,
-            delay: DELAY.short,
+            duration: elements.devices.duration,
+            ease: contentEase,
+            delay: elements.devices.delay,
           }}
         >
           <div className="flex flex-row items-center justify-start gap-7">
@@ -145,9 +146,9 @@ export const RoomInfoPanel = ({
                     scale: isLoaded ? 1 : 0.9,
                   }}
                   transition={{
-                    duration: TIMING.medium,
-                    ease: EASE.entrance,
-                    delay: DELAY.medium + (index * STAGGER.relaxed),
+                    duration: elements.devices.duration,
+                    ease: contentEase,
+                    delay: elements.devices.delay + (index * elements.devices.stagger),
                   }}
                 >
                   <CircularProgress
@@ -159,7 +160,7 @@ export const RoomInfoPanel = ({
                     isLoaded={dataReady}
                     showSkeleton={showSkeleton}
                     colorType="battery"
-                    delay={0.3 + (index * 0.12)}
+                    delay={LOAD_SEQUENCE.finishing.progressRings.delay + (index * 0.12)}
                     gapAngle={60}
                   >
                     <DeviceIcon className="w-6 h-6 text-white/70" />
@@ -177,14 +178,17 @@ export const RoomInfoPanel = ({
           {lights.map((light, index) => (
             <motion.div 
               key={light.id}
-              initial={{ opacity: 0 }}
-              animate={{ opacity: isLoaded ? 1 : 0 }}
-              transition={{
-                duration: TIMING.medium,
-                ease: EASE.entrance,
-                delay: DELAY.medium + (index * STAGGER.normal),
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ 
+                opacity: isLoaded ? 1 : 0,
+                y: isLoaded ? 0 : 8,
               }}
-              style={{ willChange: 'opacity' }}
+              transition={{
+                duration: elements.lightCards.duration,
+                ease: contentEase,
+                delay: elements.lightCards.delay + (index * elements.lightCards.stagger),
+              }}
+              style={{ willChange: 'opacity, transform' }}
             >
               <LightControlCard
                 id={light.id}

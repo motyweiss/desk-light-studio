@@ -7,7 +7,8 @@ import { Toaster } from "@/components/ui/toaster";
 import { useClimate } from "@/features/climate";
 import { useLighting } from "@/features/lighting";
 import { useAppLoad } from "@/contexts/AppLoadContext";
-import { usePageLoadSequence, LOAD_TIMING, LOAD_EASE } from "@/hooks/usePageLoadSequence";
+import { usePageLoadSequence, LOAD_EASE } from "@/hooks/usePageLoadSequence";
+import { LOAD_SEQUENCE } from "@/constants/loadingSequence";
 
 // Import primary desk image for preloading
 import desk000 from "@/assets/desk-000.png";
@@ -21,9 +22,11 @@ const Index = () => {
 
   const { 
     stage,
+    showOverlay,
     showContent, 
     showSkeleton, 
     showData,
+    showMediaPlayer,
     onOverlayExitComplete,
   } = usePageLoadSequence({
     overlayComplete: isOverlayComplete,
@@ -97,21 +100,21 @@ const Index = () => {
   return (
     <>
       <LoadingOverlay 
-        isLoading={stage === 'loading'} 
+        isLoading={showOverlay} 
         onExitComplete={onOverlayExitComplete} 
       />
       <Toaster />
 
       <motion.div 
         className="h-full min-h-0 flex items-center justify-center p-3 md:p-8 relative"
-        initial={{ opacity: 0, scale: 0.97 }}
+        initial={{ opacity: 0, scale: LOAD_SEQUENCE.content.scaleFrom }}
         animate={{ 
           opacity: showContent ? 1 : 0,
-          scale: showContent ? 1 : 0.97,
+          scale: showContent ? 1 : LOAD_SEQUENCE.content.scaleFrom,
         }}
         transition={{ 
-          duration: LOAD_TIMING.contentEntry,
-          delay: LOAD_TIMING.contentDelay,
+          duration: LOAD_SEQUENCE.content.duration,
+          delay: LOAD_SEQUENCE.content.delay,
           ease: LOAD_EASE.content,
         }}
       >
@@ -123,8 +126,8 @@ const Index = () => {
               initial={{ opacity: 0 }}
               animate={{ opacity: showContent ? 1 : 0 }}
               transition={{ 
-                duration: LOAD_TIMING.contentEntry, 
-                delay: 0.15,
+                duration: LOAD_SEQUENCE.elements.deskImage.duration, 
+                delay: LOAD_SEQUENCE.elements.deskImage.delay,
                 ease: LOAD_EASE.content,
               }}
             >
