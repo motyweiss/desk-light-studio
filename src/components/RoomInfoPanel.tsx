@@ -48,7 +48,7 @@ interface RoomInfoPanelProps {
 
 // Device battery indicator size
 const DEVICE_SIZE = 62;
-const DEVICE_STROKE = 2.5;
+const DEVICE_STROKE = 3;
 
 // Get timings from centralized config
 const elements = LOAD_SEQUENCE.elements;
