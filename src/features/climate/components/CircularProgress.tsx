@@ -165,26 +165,27 @@ export const CircularProgress = ({
         <motion.div 
           className="absolute left-1/2 -translate-x-1/2 flex items-center justify-center"
           style={{ 
-            bottom: strokeWidth,
+            bottom: -2,
           }}
-          initial={{ opacity: 0 }}
+          initial={{ opacity: 0, y: 4 }}
           animate={{ 
-            opacity: isShowingSkeleton ? 0 : 0.35,
+            opacity: isShowingSkeleton ? 0 : 0.55,
+            y: isShowingSkeleton ? 4 : 0,
           }}
           transition={{
-            duration: 0.6,
-            delay: isShowingSkeleton ? 0 : delay + 0.4,
+            duration: 0.5,
+            delay: isShowingSkeleton ? 0 : delay + 0.3,
             ease: [0.25, 0.1, 0.25, 1],
           }}
         >
           <span 
-            className="font-light text-foreground tabular-nums"
+            className="font-normal text-foreground tabular-nums"
             style={{ 
-              fontSize: size * 0.14,
-              letterSpacing: '-0.02em',
+              fontSize: size * 0.19,
+              letterSpacing: '-0.03em',
             }}
           >
-            {Math.round(percentage * 100)}%
+            {Math.round(percentage * 100)}
           </span>
         </motion.div>
       )}
