@@ -140,18 +140,18 @@ export const CircularProgress = ({
           }}
           transition={{ 
             strokeDasharray: {
-              duration: 1.2,
+              duration: 1.8,
               delay: isShowingSkeleton ? 0 : delay,
-              ease: [0.16, 1, 0.3, 1], // Soft ease-out
+              ease: [0.25, 0.1, 0.25, 1], // Smooth ease-out
             },
             stroke: {
-              duration: 0.6,
-              ease: [0.16, 1, 0.3, 1],
+              duration: 1,
+              ease: [0.25, 0.1, 0.25, 1],
             },
             opacity: {
-              duration: 0.4,
+              duration: 0.6,
               delay: isShowingSkeleton ? 0 : delay,
-              ease: [0.16, 1, 0.3, 1],
+              ease: [0.25, 0.1, 0.25, 1],
             }
           }}
         />
@@ -160,15 +160,15 @@ export const CircularProgress = ({
       {/* Icon container */}
       <motion.div 
         className="absolute inset-0 flex items-center justify-center"
-        initial={{ opacity: 0, scale: 0.8 }}
+        initial={{ opacity: 0, scale: 0.85 }}
         animate={{ 
           opacity: isShowingSkeleton ? 0.4 : 1,
           scale: isShowingSkeleton ? 0.9 : 1,
         }}
         transition={{
-          duration: 0.6,
-          delay: isShowingSkeleton ? 0 : delay + 0.15,
-          ease: [0.16, 1, 0.3, 1],
+          duration: 0.9,
+          delay: isShowingSkeleton ? 0 : delay + 0.2,
+          ease: [0.25, 0.1, 0.25, 1],
         }}
       >
         {children}
