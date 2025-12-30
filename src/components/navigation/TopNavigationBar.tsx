@@ -31,12 +31,13 @@ export const TopNavigationBar = ({
   
   const headerConfig = LOAD_SEQUENCE.header;
   const ease = headerConfig.ease;
+  const blurFrom = headerConfig.blurFrom || 6;
 
   return (
     <motion.header
-      initial={{ opacity: 0, y: -10 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: -10 }}
+      initial={{ opacity: 0, y: -20, filter: `blur(${blurFrom}px)` }}
+      animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
+      exit={{ opacity: 0, y: -10, filter: `blur(${blurFrom / 2}px)` }}
       transition={{
         duration: headerConfig.duration,
         delay: headerConfig.delay,
@@ -44,15 +45,27 @@ export const TopNavigationBar = ({
       }}
       className="fixed top-0 inset-x-0 z-30 h-[56px] md:h-[68px]"
     >
-      <div className="bg-white/8 backdrop-blur-[24px] h-full">
+      {/* Backdrop with separate fade */}
+      <motion.div 
+        className="absolute inset-0 bg-white/8 backdrop-blur-[24px]"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{
+          duration: headerConfig.duration * 0.6,
+          delay: headerConfig.delay,
+          ease: ease,
+        }}
+      />
+      
+      <div className="relative h-full">
         <div className="max-w-7xl mx-auto px-3 md:px-6 h-full flex items-center justify-between">
           {/* Left: Home Branding */}
           <motion.div 
             className="flex items-center gap-2 md:gap-3"
-            initial={{ opacity: 0, x: -10 }}
-            animate={{ opacity: 1, x: 0 }}
+            initial={{ opacity: 0, x: -16, filter: 'blur(4px)' }}
+            animate={{ opacity: 1, x: 0, filter: 'blur(0px)' }}
             transition={{ 
-              duration: headerConfig.duration, 
+              duration: headerConfig.duration * 0.85, 
               delay: headerConfig.sections.branding, 
               ease: ease,
             }}
@@ -64,10 +77,10 @@ export const TopNavigationBar = ({
           {/* Center: Climate Indicators */}
           <motion.div
             className="flex-1 flex justify-center"
-            initial={{ opacity: 0, y: -8 }}
-            animate={{ opacity: 1, y: 0 }}
+            initial={{ opacity: 0, y: -12, scale: 0.96, filter: 'blur(4px)' }}
+            animate={{ opacity: 1, y: 0, scale: 1, filter: 'blur(0px)' }}
             transition={{ 
-              duration: headerConfig.duration, 
+              duration: headerConfig.duration * 0.85, 
               delay: headerConfig.sections.climate, 
               ease: ease,
             }}
@@ -78,10 +91,10 @@ export const TopNavigationBar = ({
           {/* Right: Connection Status + Settings + Logout */}
           <motion.div 
             className="flex items-center gap-1 md:gap-2 overflow-visible"
-            initial={{ opacity: 0, x: 10 }}
-            animate={{ opacity: 1, x: 0 }}
+            initial={{ opacity: 0, x: 16, filter: 'blur(4px)' }}
+            animate={{ opacity: 1, x: 0, filter: 'blur(0px)' }}
             transition={{ 
-              duration: headerConfig.duration, 
+              duration: headerConfig.duration * 0.85, 
               delay: headerConfig.sections.controls, 
               ease: ease,
             }}
