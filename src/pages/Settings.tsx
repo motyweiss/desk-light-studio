@@ -328,17 +328,11 @@ const Settings = () => {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.4, delay: 0.15, ease: [0.16, 1, 0.3, 1] as const }}
             >
-              <TabsList className="w-full mb-8 bg-white/[0.03] backdrop-blur-xl border border-white/[0.06] p-1 rounded-xl">
-                <TabsTrigger 
-                  value="connection" 
-                  className="flex-1 rounded-lg py-2 text-sm font-light data-[state=active]:bg-white/[0.08] data-[state=active]:text-white data-[state=active]:shadow-none text-white/50 transition-all duration-300"
-                >
+              <TabsList className="w-full mb-8">
+                <TabsTrigger value="connection" className="flex-1">
                   Connection
                 </TabsTrigger>
-                <TabsTrigger 
-                  value="devices" 
-                  className="flex-1 rounded-lg py-2 text-sm font-light data-[state=active]:bg-white/[0.08] data-[state=active]:text-white data-[state=active]:shadow-none text-white/50 transition-all duration-300"
-                >
+                <TabsTrigger value="devices" className="flex-1">
                   Devices
                 </TabsTrigger>
               </TabsList>
