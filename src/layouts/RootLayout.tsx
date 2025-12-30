@@ -1,11 +1,14 @@
-import React, { ReactNode, useState } from 'react';
+import React, { ReactNode } from 'react';
 import { useLocation } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
-import { MediaPlayerProvider, MediaPlayerUIProvider, useMediaPlayerUISafe, PLAYER_HEIGHTS } from '@/features/mediaPlayer';
+import { MediaPlayerProvider, MediaPlayerUIProvider, useMediaPlayerUISafe } from '@/features/mediaPlayer';
 import { MediaPlayer } from '@/components/MediaPlayer/MediaPlayer';
 import { TopNavigationBar } from '@/components/navigation/TopNavigationBar';
 import { useHAConnection } from '@/contexts/HAConnectionContext';
-import { PAGE_TRANSITIONS, EASE } from '@/lib/animations/tokens';
+import { PAGE_TRANSITIONS } from '@/lib/animations/tokens';
+import { LOAD_SEQUENCE } from '@/constants/loadingSequence';
+import { usePageLoadSequence } from '@/hooks/usePageLoadSequence';
+import { useClimate } from '@/features/climate';
 
 interface RootLayoutProps {
   children: ReactNode;
@@ -17,8 +20,16 @@ const RootLayoutContent = ({ children }: RootLayoutProps) => {
   const { entityMapping, isConnected, isLoading: isConnecting, reconnect, connectionStatus } = useHAConnection();
   const isReconnecting = connectionStatus === 'connecting';
   const { isVisible } = useMediaPlayerUISafe();
+  const climate = useClimate();
 
   const isSettingsPage = location.pathname === '/settings';
+
+  // Use page load sequence for media player visibility
+  const { showMediaPlayer, showHeader, showContent } = usePageLoadSequence({
+    overlayComplete: true, // RootLayout assumes overlay is managed by Index
+    isConnected,
+    isDataLoaded: climate.isLoaded,
+  });
 
   // Bottom padding to ensure content doesn't get hidden behind the player
   // Player height (64px minimized) + bottom offset (16px) + comfortable buffer (56px)
@@ -31,15 +42,17 @@ const RootLayoutContent = ({ children }: RootLayoutProps) => {
       {/* Content */}
       <div className="relative z-10 h-full flex flex-col overflow-hidden">
         {/* Global Top Navigation Bar - Fixed at top (hidden on mobile and settings page) */}
-        {!isSettingsPage && (
-          <TopNavigationBar
-            currentPath={location.pathname}
-            isConnected={isConnected}
-            isConnecting={isConnecting}
-            isReconnecting={isReconnecting}
-            onReconnectClick={reconnect}
-          />
-        )}
+        <AnimatePresence>
+          {!isSettingsPage && showHeader && (
+            <TopNavigationBar
+              currentPath={location.pathname}
+              isConnected={isConnected}
+              isConnecting={isConnecting}
+              isReconnecting={isReconnecting}
+              onReconnectClick={reconnect}
+            />
+          )}
+        </AnimatePresence>
 
         {/* Page Content with AnimatePresence for smooth transitions */}
         <div 
@@ -67,8 +80,39 @@ const RootLayoutContent = ({ children }: RootLayoutProps) => {
           </AnimatePresence>
         </div>
 
-        {/* Global Media Player - Fixed at bottom (hidden on settings page) */}
-        {!isSettingsPage && <MediaPlayer />}
+        {/* Global Media Player - Fixed at bottom with entry animation (hidden on settings page) */}
+        <AnimatePresence>
+          {!isSettingsPage && showMediaPlayer && (
+            <motion.div
+              initial={{ 
+                y: LOAD_SEQUENCE.mediaPlayer.yFrom, 
+                opacity: 0 
+              }}
+              animate={{ 
+                y: 0, 
+                opacity: 1 
+              }}
+              exit={{ 
+                y: LOAD_SEQUENCE.mediaPlayer.yFrom, 
+                opacity: 0 
+              }}
+              transition={{
+                y: {
+                  duration: LOAD_SEQUENCE.mediaPlayer.duration,
+                  delay: LOAD_SEQUENCE.mediaPlayer.delay,
+                  ease: LOAD_SEQUENCE.mediaPlayer.ease,
+                },
+                opacity: {
+                  duration: LOAD_SEQUENCE.mediaPlayer.opacity.duration,
+                  delay: LOAD_SEQUENCE.mediaPlayer.opacity.delay,
+                  ease: LOAD_SEQUENCE.mediaPlayer.ease,
+                },
+              }}
+            >
+              <MediaPlayer />
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
     </div>
   );

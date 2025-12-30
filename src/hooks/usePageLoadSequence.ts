@@ -1,42 +1,47 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { TIMING, EASE } from '@/lib/animations';
+import { LOAD_SEQUENCE, LoadStage } from '@/constants/loadingSequence';
 
-/**
- * Simplified Load Stages:
- * 1. 'loading'  - Initial state, showing overlay
- * 2. 'entering' - Overlay exiting, content fading in
- * 3. 'ready'    - Content visible, data loaded
- */
-export type LoadStage = 'loading' | 'entering' | 'ready';
+// Re-export for backward compatibility
+export { LOAD_SEQUENCE as LOAD_TIMING };
+export type { LoadStage };
 
-// Timing constants (in seconds for framer-motion)
-export const LOAD_TIMING = {
-  overlayExit: 0.5,
-  contentEntry: 0.6,
-  contentDelay: 0.1,
-  crossfade: 0.4,
-  minSkeleton: 0.3,
-} as const;
-
-// Easing curves
+// Export commonly used values for direct access
 export const LOAD_EASE = {
-  overlay: EASE.gentle,
-  content: [0.22, 0.68, 0.35, 1.0] as const, // Smooth organic
+  overlay: LOAD_SEQUENCE.spinner.exitEase,
+  content: LOAD_SEQUENCE.content.ease,
+  header: LOAD_SEQUENCE.header.ease,
 } as const;
 
 interface UsePageLoadSequenceOptions {
+  /** Whether the initial overlay/spinner is complete */
   overlayComplete: boolean;
+  /** Whether the app is connected to data source */
   isConnected: boolean;
+  /** Whether the data has been loaded */
   isDataLoaded: boolean;
 }
 
 interface UsePageLoadSequenceResult {
+  /** Current loading stage */
   stage: LoadStage;
+  /** Whether to show the loading overlay */
+  showOverlay: boolean;
+  /** Whether header should be visible */
+  showHeader: boolean;
+  /** Whether main content should be visible */
   showContent: boolean;
+  /** Whether to show skeleton states */
   showSkeleton: boolean;
+  /** Whether real data should be displayed */
   showData: boolean;
+  /** Whether media player should be visible */
+  showMediaPlayer: boolean;
+  /** Whether the entire load sequence is complete */
   isComplete: boolean;
+  /** Callback for when overlay exit animation completes */
   onOverlayExitComplete: () => void;
+  /** Get delay for a specific element */
+  getElementDelay: (element: keyof typeof LOAD_SEQUENCE.elements) => number;
 }
 
 export const usePageLoadSequence = ({
@@ -44,53 +49,104 @@ export const usePageLoadSequence = ({
   isConnected,
   isDataLoaded,
 }: UsePageLoadSequenceOptions): UsePageLoadSequenceResult => {
-  const [stage, setStage] = useState<LoadStage>('loading');
-  const hasShownData = useRef(false);
-  const enteredAtRef = useRef<number | null>(null);
+  const [stage, setStage] = useState<LoadStage>('spinner');
+  const stageStartTimeRef = useRef<number>(Date.now());
+  const hasShownDataRef = useRef(false);
 
-  // When overlay finishes loading, start exit
+  // Stage transitions
   useEffect(() => {
-    if (overlayComplete && stage === 'loading') {
-      setStage('entering');
-      enteredAtRef.current = Date.now();
+    if (stage === 'spinner' && overlayComplete) {
+      // Transition to exiting
+      setStage('exiting');
+      stageStartTimeRef.current = Date.now();
     }
-  }, [overlayComplete, stage]);
+  }, [stage, overlayComplete]);
 
-  // Handle transition to ready state
   useEffect(() => {
-    if (stage !== 'entering' || hasShownData.current) return;
+    if (stage === 'exiting') {
+      // After exit animation, start entering
+      const timer = setTimeout(() => {
+        setStage('entering');
+        stageStartTimeRef.current = Date.now();
+      }, LOAD_SEQUENCE.spinner.exitDuration * 1000);
+
+      return () => clearTimeout(timer);
+    }
+  }, [stage]);
+
+  useEffect(() => {
+    if (stage === 'entering') {
+      // Move to hydrating after content has entered
+      const timer = setTimeout(() => {
+        setStage('hydrating');
+        stageStartTimeRef.current = Date.now();
+      }, (LOAD_SEQUENCE.content.delay + LOAD_SEQUENCE.content.duration) * 1000);
+
+      return () => clearTimeout(timer);
+    }
+  }, [stage]);
+
+  useEffect(() => {
+    if (stage !== 'hydrating' || hasShownDataRef.current) return;
 
     const dataReady = isConnected && isDataLoaded;
     
-    // Calculate minimum skeleton time
-    const enteredAt = enteredAtRef.current || Date.now();
-    const elapsed = (Date.now() - enteredAt) / 1000;
-    const remaining = Math.max(0, LOAD_TIMING.minSkeleton - elapsed);
+    // Calculate minimum skeleton display time
+    const elapsed = (Date.now() - stageStartTimeRef.current) / 1000;
+    const remaining = Math.max(0, LOAD_SEQUENCE.skeleton.minDisplayTime - elapsed);
 
-    // Transition to ready after minimum skeleton time
     const timer = setTimeout(() => {
-      hasShownData.current = true;
-      setStage('ready');
-    }, dataReady ? remaining * 1000 : LOAD_TIMING.minSkeleton * 1000 + 200);
+      if (dataReady) {
+        hasShownDataRef.current = true;
+        setStage('ready');
+      }
+    }, remaining * 1000);
 
     return () => clearTimeout(timer);
   }, [stage, isConnected, isDataLoaded]);
 
+  // Force ready after a maximum wait time
+  useEffect(() => {
+    if (stage === 'hydrating') {
+      const maxWait = setTimeout(() => {
+        if (!hasShownDataRef.current) {
+          hasShownDataRef.current = true;
+          setStage('ready');
+        }
+      }, 3000); // Max 3 seconds in hydrating state
+
+      return () => clearTimeout(maxWait);
+    }
+  }, [stage]);
+
   const onOverlayExitComplete = useCallback(() => {
-    // No-op, transitions handled by useEffect
+    // Transitions are now handled by timers, this is for additional cleanup if needed
   }, []);
 
-  // Derived states
-  const showContent = stage === 'entering' || stage === 'ready';
-  const showSkeleton = stage === 'entering' && !hasShownData.current;
-  const showData = hasShownData.current || stage === 'ready';
+  const getElementDelay = useCallback((element: keyof typeof LOAD_SEQUENCE.elements): number => {
+    const config = LOAD_SEQUENCE.elements[element];
+    return LOAD_SEQUENCE.content.delay + config.delay;
+  }, []);
+
+  // Derived visibility states
+  const showOverlay = stage === 'spinner';
+  const showHeader = stage !== 'spinner';
+  const showContent = stage === 'entering' || stage === 'hydrating' || stage === 'ready';
+  const showSkeleton = (stage === 'entering' || stage === 'hydrating') && !hasShownDataRef.current;
+  const showData = hasShownDataRef.current || stage === 'ready';
+  const showMediaPlayer = stage === 'entering' || stage === 'hydrating' || stage === 'ready';
+  const isComplete = stage === 'ready';
 
   return {
     stage,
+    showOverlay,
+    showHeader,
     showContent,
     showSkeleton,
     showData,
-    isComplete: stage === 'ready',
+    showMediaPlayer,
+    isComplete,
     onOverlayExitComplete,
+    getElementDelay,
   };
 };
