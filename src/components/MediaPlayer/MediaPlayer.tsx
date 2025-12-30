@@ -127,8 +127,8 @@ export const MediaPlayer = () => {
   }), [isMinimized]);
 
   const paddingStyles = useMemo(() => ({
-    paddingLeft: isMinimized ? 10 : 24,
-    paddingRight: isMinimized ? 10 : 24,
+    paddingLeft: isMinimized ? 8 : 24,
+    paddingRight: isMinimized ? 12 : 24,
     paddingTop: isMinimized ? 8 : 20,
     paddingBottom: isMinimized ? 8 : 12,
   }), [isMinimized]);
@@ -197,14 +197,14 @@ export const MediaPlayer = () => {
             initial={false}
             animate={paddingStyles}
             transition={transitions.layout}
-            className="relative"
+            className="relative h-full flex flex-col justify-center"
           >
             {/* Main content row */}
             <motion.div 
-              className="flex items-center"
+              className="flex items-center justify-between"
               initial={false}
               animate={{
-                gap: 12,
+                gap: isMinimized ? 12 : 0,
                 flexDirection: isMinimized ? 'row' : 'column',
                 alignItems: isMinimized ? 'center' : 'stretch',
               }}
