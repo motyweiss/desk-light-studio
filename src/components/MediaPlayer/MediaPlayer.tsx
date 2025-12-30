@@ -257,9 +257,11 @@ export const MediaPlayer = () => {
                     {currentTrack?.title || 'Not Playing'}
                   </h3>
                   <div className="flex items-center gap-2">
-                    <p className={`text-white/40 truncate transition-all duration-300 leading-tight ${isMinimized ? 'text-xs' : 'text-sm'}`}>
-                      {currentTrack?.artist || 'Select a device to play'}
-                    </p>
+                    {currentTrack?.artist && (
+                      <p className={`text-white/40 truncate transition-all duration-300 leading-tight ${isMinimized ? 'text-xs' : 'text-sm'}`}>
+                        {currentTrack.artist}
+                      </p>
+                    )}
                     {isMinimized && playerState.isPlaying && (
                       <AudioVisualizer isPlaying={true} barCount={3} />
                     )}
