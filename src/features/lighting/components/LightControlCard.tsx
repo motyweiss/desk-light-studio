@@ -2,6 +2,7 @@ import { useMotionValueEvent, AnimatePresence, motion } from "framer-motion";
 import { Slider } from "@/components/ui/slider";
 import { useState, useRef, useCallback, useEffect } from "react";
 import { getIconForLight } from "@/components/icons/LightIcons";
+import { Loader2 } from "lucide-react";
 import { TIMING, EASE, SEQUENCES } from "@/lib/animations";
 import { useLightAnimation } from "../hooks/useLightAnimation";
 
@@ -276,20 +277,18 @@ export const LightControlCard = ({
         } : { opacity: crossfadeTransition }}
       />
 
-      {/* Pending State Overlay - subtle pulse */}
+      {/* Pending State Overlay */}
       <motion.div
-        className="absolute inset-0 rounded-2xl"
+        className="absolute inset-0 bg-white/5"
         initial={false}
         animate={{ 
-          opacity: isPending ? 1 : 0,
-          boxShadow: isPending 
-            ? ['inset 0 0 0 1px rgba(255, 255, 255, 0.08)', 'inset 0 0 0 1px rgba(255, 255, 255, 0.15)', 'inset 0 0 0 1px rgba(255, 255, 255, 0.08)']
-            : 'inset 0 0 0 1px rgba(255, 255, 255, 0)',
+          opacity: isPending ? [0.3, 0.6, 0.3] : 0 
         }}
         transition={isPending ? { 
-          boxShadow: { duration: 1.2, repeat: Infinity, ease: "easeInOut" },
-          opacity: { duration: 0.2 }
-        } : { opacity: { duration: 0.2 } }}
+          duration: 1.5, 
+          repeat: Infinity,
+          ease: "easeInOut"
+        } : smoothTransition}
       />
 
       {/* Error State Overlay */}
@@ -343,24 +342,21 @@ export const LightControlCard = ({
           </motion.div>
         </div>
 
-        {/* Pending indicator - small dot */}
+        {/* Spinner */}
         <div className="w-4 h-4 flex items-center justify-center flex-shrink-0">
-          <AnimatePresence mode="wait">
+          <AnimatePresence>
             {isPending && !isLoading && (
               <motion.div
-                key="pending-dot"
-                initial={{ opacity: 0, scale: 0.5 }}
-                animate={{ 
-                  opacity: [0.4, 0.8, 0.4], 
-                  scale: 1,
-                }}
-                exit={{ opacity: 0, scale: 0.5 }}
-                transition={{ 
-                  opacity: { duration: 1.2, repeat: Infinity, ease: "easeInOut" },
-                  scale: { duration: 0.15 }
-                }}
-                className="w-1.5 h-1.5 rounded-full bg-amber-400/70"
-              />
+                initial={{ opacity: 0, scale: 0.7 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.7 }}
+                transition={{ duration: TIMING.fast }}
+              >
+                <Loader2 
+                  className="w-4 h-4 text-white/40 animate-spin" 
+                  strokeWidth={2}
+                />
+              </motion.div>
             )}
           </AnimatePresence>
         </div>
