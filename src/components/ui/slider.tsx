@@ -49,15 +49,16 @@ const Slider = React.forwardRef<
             }}
             initial={animateIn ? { scaleX: 0, opacity: 0 } : false}
             animate={{ 
-              scaleX: 1, 
+              scaleX: currentValue > 0 ? 1 : 0, 
               opacity: currentValue > 0 ? 1 : 0,
             }}
+            exit={{ scaleX: 0, opacity: 0 }}
             transition={{
               scaleX: { 
-                duration: animateIn && !hasAnimatedIn ? 0.5 : 0,
+                duration: 0.4,
                 ease: [0.22, 0.68, 0.35, 1.0],
               },
-              opacity: { duration: 0.15 },
+              opacity: { duration: 0.2 },
             }}
           />
         </SliderPrimitive.Range>
@@ -67,10 +68,11 @@ const Slider = React.forwardRef<
           className="block h-5 w-5 rounded-full bg-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/40 focus-visible:ring-offset-2 focus-visible:ring-offset-transparent disabled:pointer-events-none disabled:opacity-50 cursor-grab active:cursor-grabbing"
           initial={animateIn ? { scale: 0, opacity: 0 } : false}
           animate={{
-            scale: 1,
-            opacity: 1,
+            scale: currentValue > 0 ? 1 : 0,
+            opacity: currentValue > 0 ? 1 : 0,
             boxShadow: thumbGlow,
           }}
+          exit={{ scale: 0, opacity: 0 }}
           whileHover={{ 
             scale: 1.12,
             boxShadow: `0 0 ${16 * Math.max(intensity, 0.3)}px rgba(221, 175, 76, ${0.5 * Math.max(intensity, 0.3)}), 0 4px 16px rgba(0,0,0,0.2)`,
@@ -81,13 +83,13 @@ const Slider = React.forwardRef<
           }}
           transition={{
             scale: { 
-              duration: animateIn && !hasAnimatedIn ? 0.4 : 0.1, 
+              duration: 0.35, 
               ease: [0.22, 0.68, 0.35, 1.0],
-              delay: animateIn && !hasAnimatedIn ? 0.15 : 0,
+              delay: animateIn && !hasAnimatedIn ? 0.1 : 0,
             },
             opacity: { 
-              duration: 0.3,
-              delay: animateIn && !hasAnimatedIn ? 0.1 : 0,
+              duration: 0.25,
+              delay: animateIn && !hasAnimatedIn ? 0.08 : 0,
             },
             boxShadow: { duration: 0.15 },
           }}

@@ -520,8 +520,8 @@ export const LightControlCard = ({
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
                 transition={{
-                  duration: 0.2,
-                  ease: [0.22, 0.68, 0.35, 1.0],
+                  duration: 0.15,
+                  ease: [0.4, 0, 0.2, 1],
                 }}
               >
                 <Slider
