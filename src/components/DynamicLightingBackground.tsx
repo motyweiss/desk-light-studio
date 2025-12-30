@@ -112,6 +112,19 @@ export const DynamicLightingBackground = () => {
         style={{ zIndex: 0 }}
         aria-hidden="true"
       >
+        {/* Dark overlay when lights are off - creates cozy darkness */}
+        <motion.div
+          className="absolute inset-0"
+          initial={{ opacity: 0 }}
+          animate={{ 
+            opacity: anyLightOn ? 0 : 0.6,
+          }}
+          transition={{ duration: 1.5, ease: [0.4, 0, 0.2, 1] }}
+          style={{
+            background: 'radial-gradient(ellipse at 50% 50%, hsl(220 25% 8% / 0.7) 0%, hsl(220 30% 5% / 0.9) 100%)',
+          }}
+        />
+
         {/* Base ambient layer - subtle warmth when any light is on */}
         <motion.div
           className="absolute inset-0"
@@ -200,11 +213,16 @@ export const DynamicLightingBackground = () => {
           transition={opacityTransition}
         />
 
-        {/* Subtle vignette for depth */}
-        <div 
+        {/* Subtle vignette for depth - stronger when lights off */}
+        <motion.div 
           className="absolute inset-0"
+          initial={{ opacity: 0.4 }}
+          animate={{
+            opacity: anyLightOn ? 0.3 : 0.7,
+          }}
+          transition={{ duration: 1.2, ease: [0.4, 0, 0.2, 1] }}
           style={{
-            background: 'radial-gradient(ellipse at 50% 50%, transparent 40%, hsl(220 20% 8% / 0.4) 100%)',
+            background: 'radial-gradient(ellipse at 50% 50%, transparent 30%, hsl(220 25% 5% / 0.6) 100%)',
             pointerEvents: 'none',
           }}
         />
