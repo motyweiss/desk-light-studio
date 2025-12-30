@@ -136,7 +136,7 @@ const ConnectionTab = ({
       {/* Token Help Box - Under the title */}
       <motion.div 
         variants={itemVariants}
-        className="flex items-start gap-3 p-4 rounded-xl bg-white/[0.03] border border-white/[0.06]"
+        className="flex items-start gap-3 px-1"
       >
         <Key className="w-4 h-4 text-warm-glow/60 mt-0.5 flex-shrink-0" />
         <p className="text-xs text-white/50 leading-relaxed font-light">
@@ -150,6 +150,11 @@ const ConnectionTab = ({
             Learn more
           </a>
         </p>
+      </motion.div>
+
+      {/* Separator */}
+      <motion.div variants={itemVariants}>
+        <div className="h-px bg-white/[0.06]" />
       </motion.div>
 
       {/* Quick Connect */}
