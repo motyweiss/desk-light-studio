@@ -47,11 +47,6 @@ All colors MUST be HSL.
     --spotlight-glow: 42 85% 58%;
     --lamp-glow: 44 80% 60%;
     
-    /* Ambient glow colors for lighting effects */
-    --glow-warm-orange: 40 45% 50%;
-    --glow-warm-gold: 42 50% 52%;
-    --glow-warm-cream: 41 48% 52%;
-    --glow-base: 41 40% 48%;
     
     /* Status colors for sensors */
     --status-cold: 200 70% 55%;
