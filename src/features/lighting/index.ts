@@ -8,4 +8,3 @@ export { useLightSync } from './hooks/useLightSync';
 export { DeskDisplay } from './components/DeskDisplay';
 export { LightControlCard } from './components/LightControlCard';
 export { LightHotspot } from './components/LightHotspot';
-export { AmbientGlowLayers } from './components/AmbientGlowLayers';

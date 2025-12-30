@@ -29,7 +29,6 @@ export const DURATION = {
   slow: 0.8,
   
   // Page specific
-  background: 0.8,
   mediaEntry: 1.0,
   pageTransition: 0.5,
 } as const;
@@ -51,8 +50,7 @@ export const LIGHT_ANIMATION = {
     ease: EASING.smooth,
   },
   stagger: {
-    glow: 0.05,
-    background: 0.1,
+    delay: 0.05,
   }
 } as const;
 
@@ -107,10 +105,6 @@ export const PAGE_LOAD = {
       delay: 0.2,
       duration: 0.6,
     },
-    glowLayers: {
-      delay: 0.3,
-      duration: 0.8,
-    },
   },
   
   // Skeleton to data crossfade
@@ -131,7 +125,6 @@ export const PAGE_LOAD_SEQUENCE = {
   lightCards: { ...PAGE_LOAD.elements.lightCards, ease: EASING.entrance },
   deskImage: { ...PAGE_LOAD.elements.deskImage, ease: EASING.entrance, scale: 1 },
   circularProgress: { ...PAGE_LOAD.effects.progressRings, ease: EASING.entrance },
-  glowLayers: { ...PAGE_LOAD.effects.glowLayers, ease: EASING.smooth },
 } as const;
 
 // ============================================================
