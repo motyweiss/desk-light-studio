@@ -28,31 +28,28 @@ const LoadStateContext = createContext<LoadStateContextValue>({
 
 export const useLoadState = () => useContext(LoadStateContext);
 
-// Page transition variants with blur
+// Page transition variants - simple and reliable
 const pageVariants = {
   initial: { 
     opacity: 0,
     scale: 0.97,
     y: 16,
-    filter: 'blur(8px)',
   },
   animate: { 
     opacity: 1,
     scale: 1,
     y: 0,
-    filter: 'blur(0px)',
   },
   exit: { 
     opacity: 0,
     scale: 0.99,
     y: -8,
-    filter: 'blur(4px)',
   },
 };
 
 const pageTransition = {
-  duration: 0.45,
-  ease: [0.16, 1, 0.3, 1] as const,
+  duration: 0.35,
+  ease: [0.4, 0, 0.2, 1] as const,
 };
 
 // Media player variants - smoother timing
@@ -74,22 +71,19 @@ const mediaPlayerVariants = {
   },
 };
 
-// Header variants
+// Header variants - no blur for reliability
 const headerVariants = {
   initial: { 
     y: -20, 
     opacity: 0,
-    filter: 'blur(4px)',
   },
   animate: { 
     y: 0, 
     opacity: 1,
-    filter: 'blur(0px)',
   },
   exit: { 
     y: -10, 
     opacity: 0,
-    filter: 'blur(4px)',
   },
 };
 
@@ -167,7 +161,7 @@ const RootLayoutContent = ({ children }: RootLayoutProps) => {
           className={`flex-1 overflow-auto ${isMainPage && showHeader ? 'pt-[56px] md:pt-[68px]' : 'pt-0'}`}
           style={{ paddingBottom: bottomPadding }}
         >
-          <AnimatePresence mode="wait" initial={false}>
+          <AnimatePresence mode="popLayout" initial={false}>
             <motion.div
               key={location.pathname}
               variants={pageVariants}
@@ -178,7 +172,7 @@ const RootLayoutContent = ({ children }: RootLayoutProps) => {
               className="w-full h-full"
               style={{ 
                 transformOrigin: 'center top',
-                willChange: 'opacity, transform, filter',
+                willChange: 'opacity, transform',
               }}
             >
               {children}
