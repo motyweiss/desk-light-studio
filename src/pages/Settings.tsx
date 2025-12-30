@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowLeft, Loader2, Settings as SettingsIcon, Plug, Cpu } from "lucide-react";
+import { ArrowLeft, Loader2, Plug, Cpu } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import ConnectionTab from "@/components/settings/ConnectionTab";
@@ -232,14 +232,9 @@ const Settings = () => {
             >
               <ArrowLeft className="w-4 h-4" strokeWidth={2} />
             </motion.button>
-            <div className="flex items-center gap-3">
-              <div className="w-9 h-9 rounded-xl bg-warm-glow/10 flex items-center justify-center">
-                <SettingsIcon className="w-4 h-4 text-warm-glow" strokeWidth={1.5} />
-              </div>
-              <h1 className="text-xl font-sans font-medium text-foreground tracking-tight">
-                Settings
-              </h1>
-            </div>
+            <h1 className="text-xl font-display font-normal text-foreground tracking-tight">
+              Settings
+            </h1>
           </div>
           <SettingsConnectionBadge />
         </div>
