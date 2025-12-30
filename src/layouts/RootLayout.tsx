@@ -73,14 +73,30 @@ const RootLayoutContent = ({ children }: RootLayoutProps) => {
           <AnimatePresence mode="popLayout" initial={false}>
             <motion.div
               key={location.pathname}
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
+              initial={{ 
+                opacity: 0,
+                scale: 0.96,
+                y: 20,
+              }}
+              animate={{ 
+                opacity: 1,
+                scale: 1,
+                y: 0,
+              }}
+              exit={{ 
+                opacity: 0,
+                scale: 0.98,
+                y: -10,
+              }}
               transition={{
-                duration: 0.3,
-                ease: [0.4, 0, 0.2, 1],
+                duration: 0.4,
+                ease: [0.16, 1, 0.3, 1],
               }}
               className="w-full h-full"
+              style={{ 
+                transformOrigin: 'center top',
+                willChange: 'opacity, transform',
+              }}
             >
               {children}
             </motion.div>
