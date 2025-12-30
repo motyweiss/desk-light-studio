@@ -131,7 +131,7 @@ export const ClimateIndicatorTooltip = ({
                 <div className="flex flex-col items-center text-center mb-6">
                   {/* Icon circle */}
                   <motion.div
-                    className="w-16 h-16 rounded-full flex items-center justify-center bg-white/[0.05] border border-white/[0.06] mb-4"
+                    className="w-10 h-10 rounded-full flex items-center justify-center bg-white/[0.05] border border-white/[0.06] mb-3"
                     initial={{ scale: 0.7, opacity: 0 }}
                     animate={{ scale: 1, opacity: 1 }}
                     transition={{
@@ -140,7 +140,7 @@ export const ClimateIndicatorTooltip = ({
                       ease: [0.34, 1.56, 0.64, 1]
                     }}
                   >
-                    <Icon className="w-7 h-7 text-white/45" strokeWidth={1.5} />
+                    <Icon className="w-4 h-4 text-white/45" strokeWidth={1.5} />
                   </motion.div>
                   
                   {/* Value */}
