@@ -201,17 +201,18 @@ export const MediaPlayer = () => {
           >
             {/* Main content row */}
             <motion.div 
-              className="flex items-center justify-between"
+              className="flex items-center justify-between h-full"
               initial={false}
               animate={{
                 gap: isMinimized ? 12 : 0,
                 flexDirection: isMinimized ? 'row' : 'column',
                 alignItems: isMinimized ? 'center' : 'stretch',
+                minHeight: isMinimized ? 48 : 'auto',
               }}
               transition={transitions.layout}
             >
               {/* Album Art + Track Info */}
-              <div className="flex items-center gap-3 min-w-0 flex-1">
+              <div className="flex items-center gap-3 min-w-0 flex-1 h-full">
                 {/* Album Art */}
                 <motion.div
                   className="relative flex-shrink-0 rounded-full overflow-hidden bg-white/8"
@@ -249,12 +250,12 @@ export const MediaPlayer = () => {
                 </motion.div>
 
                 {/* Track Info */}
-                <div className="flex-1 min-w-0">
-                  <h3 className={`text-white font-medium truncate transition-all duration-300 ${isMinimized ? 'text-[13px]' : 'text-lg'}`}>
+                <div className="flex-1 min-w-0 flex flex-col justify-center">
+                  <h3 className={`text-white font-medium truncate transition-all duration-300 leading-tight ${isMinimized ? 'text-[13px]' : 'text-lg'}`}>
                     {currentTrack?.title || 'No media playing'}
                   </h3>
                   <div className="flex items-center gap-2">
-                    <p className={`text-white/50 truncate transition-all duration-300 ${isMinimized ? 'text-xs' : 'text-sm'}`}>
+                    <p className={`text-white/50 truncate transition-all duration-300 leading-tight ${isMinimized ? 'text-xs' : 'text-sm'}`}>
                       {currentTrack?.artist || 'Unknown Artist'}
                     </p>
                     {isMinimized && playerState.isPlaying && (
