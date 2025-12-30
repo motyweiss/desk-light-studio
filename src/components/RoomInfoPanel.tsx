@@ -1,11 +1,11 @@
 import { motion } from "framer-motion";
-import { Power, Zap } from "lucide-react";
+import { Power } from "lucide-react";
 import { LightControlCard } from "@/features/lighting/components/LightControlCard";
 import { AirPodsMaxIcon } from "./icons/AirPodsMaxIcon";
 import { IPhoneIcon } from "./icons/IPhoneIcon";
 import { MagicKeyboardIcon } from "./icons/MagicKeyboardIcon";
 import { MagicMouseIcon } from "./icons/MagicMouseIcon";
-import { AnimatedCounter } from "./AnimatedCounter";
+import { CircularProgress } from "@/features/climate/components/CircularProgress";
 import { TIMING, EASE, STAGGER, DELAY } from "@/lib/animations";
 
 interface Light {
@@ -51,10 +51,9 @@ const entryTransition = {
   ease: EASE.entrance,
 };
 
-const crossfadeTransition = {
-  duration: TIMING.fast,
-  ease: EASE.smooth,
-};
+// Device battery indicator size
+const DEVICE_SIZE = 56;
+const DEVICE_STROKE = 3;
 
 export const RoomInfoPanel = ({ 
   roomName, 
@@ -115,10 +114,19 @@ export const RoomInfoPanel = ({
         </motion.button>
       </motion.div>
 
-      {/* Devices Battery Section - Desktop only */}
+      {/* Devices Battery Section - Desktop only - macOS Widget Style */}
       {devices && devices.length > 0 && (
-        <div className="hidden md:block pt-3 pr-8 lg:pr-16">
-          <div className="flex flex-row items-start justify-start gap-8">
+        <motion.div 
+          className="hidden md:block pt-2"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: isLoaded ? 1 : 0 }}
+          transition={{
+            duration: TIMING.medium,
+            ease: EASE.entrance,
+            delay: DELAY.short,
+          }}
+        >
+          <div className="flex flex-row items-center justify-start gap-5">
             {devices.map((device, index) => {
               const DeviceIcon = device.icon === 'headphones' 
                 ? AirPodsMaxIcon 
@@ -129,76 +137,38 @@ export const RoomInfoPanel = ({
                 : IPhoneIcon;
               
               return (
-                <div key={device.id} className="flex items-stretch gap-3">
-                  <motion.div 
-                    className="flex flex-col gap-1.5"
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: isLoaded ? 1 : 0 }}
-                    transition={{
-                      duration: TIMING.medium,
-                      ease: EASE.entrance,
-                      delay: DELAY.short + (index * STAGGER.relaxed),
-                    }}
-                    style={{ willChange: 'opacity' }}
+                <motion.div 
+                  key={device.id}
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  animate={{ 
+                    opacity: isLoaded ? 1 : 0,
+                    scale: isLoaded ? 1 : 0.9,
+                  }}
+                  transition={{
+                    duration: TIMING.medium,
+                    ease: EASE.entrance,
+                    delay: DELAY.medium + (index * STAGGER.relaxed),
+                  }}
+                >
+                  <CircularProgress
+                    value={device.batteryLevel}
+                    max={100}
+                    min={0}
+                    size={DEVICE_SIZE}
+                    strokeWidth={DEVICE_STROKE}
+                    isLoaded={dataReady}
+                    showSkeleton={showSkeleton}
+                    colorType="battery"
+                    delay={0.3 + (index * 0.12)}
+                    gapAngle={60}
                   >
-                    {/* Row 1: Icon + Battery % */}
-                    <div className="relative h-6">
-                      {/* Skeleton layer */}
-                      <motion.div
-                        className="absolute inset-0 h-6 w-14 bg-white/10 rounded"
-                        initial={false}
-                        animate={{ 
-                          opacity: showSkeleton ? [0.3, 0.5, 0.3] : 0,
-                        }}
-                        transition={showSkeleton ? {
-                          duration: 1.5,
-                          repeat: Infinity,
-                          ease: "easeInOut"
-                        } : crossfadeTransition}
-                      />
-                      {/* Value layer */}
-                      <motion.div 
-                        className="flex items-center gap-2"
-                        initial={false}
-                        animate={{ 
-                          opacity: dataReady && !showSkeleton ? 1 : 0,
-                          filter: dataReady && !showSkeleton ? 'blur(0px)' : 'blur(4px)',
-                        }}
-                        transition={{ 
-                          ...crossfadeTransition,
-                          delay: showSkeleton ? 0 : DELAY.minimal,
-                        }}
-                      >
-                        <DeviceIcon className="w-5 h-5 text-white/60" />
-                        <AnimatedCounter 
-                          value={device.batteryLevel} 
-                          suffix="%" 
-                          isActive={dataReady && !showSkeleton}
-                          delay={0.4 + (index * 0.15)}
-                          className="text-base font-sans font-normal text-white tabular-nums tracking-tight"
-                          suffixClassName="text-[10px] text-white/40 ml-0.5 font-light"
-                        />
-                        {device.isCharging && (
-                          <Zap className="w-3.5 h-3.5 text-status-caution" fill="currentColor" />
-                        )}
-                      </motion.div>
-                    </div>
-                    
-                    {/* Row 2: Device Name */}
-                    <span className="text-[9px] text-white/40 font-light tracking-[0.12em] uppercase whitespace-nowrap">
-                      {device.name}
-                    </span>
-                  </motion.div>
-                  
-                  {/* Separator line */}
-                  {index < devices.length - 1 && (
-                    <div className="self-stretch w-px bg-white/10 ml-3" />
-                  )}
-                </div>
+                    <DeviceIcon className="w-6 h-6 text-white/70" />
+                  </CircularProgress>
+                </motion.div>
               );
             })}
           </div>
-        </div>
+        </motion.div>
       )}
 
       {/* Light Controls Section - 3 Column Grid */}
