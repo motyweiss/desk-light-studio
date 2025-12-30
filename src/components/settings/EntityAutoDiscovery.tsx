@@ -7,12 +7,12 @@ import {
   Droplets, 
   Wind, 
   Battery, 
-  Speaker,
+  Music,
   Plus,
   Check,
   ChevronDown,
-  ChevronUp,
-  RefreshCw
+  Radar,
+  Sparkles
 } from "lucide-react";
 import { homeAssistant, HAEntity } from "@/services/homeAssistant";
 
@@ -42,12 +42,12 @@ interface EntityAutoDiscoveryProps {
 }
 
 const CATEGORY_CONFIG = {
-  lights: { icon: Lightbulb, label: 'Lights', color: 'text-amber-400' },
-  temperature: { icon: Thermometer, label: 'Temperature', color: 'text-red-400' },
-  humidity: { icon: Droplets, label: 'Humidity', color: 'text-blue-400' },
-  airQuality: { icon: Wind, label: 'Air Quality', color: 'text-emerald-400' },
-  battery: { icon: Battery, label: 'Battery', color: 'text-amber-400' },
-  mediaPlayers: { icon: Speaker, label: 'Media Players', color: 'text-purple-400' },
+  lights: { icon: Lightbulb, label: 'Lights', color: 'text-amber-400', bgColor: 'bg-amber-400/10' },
+  temperature: { icon: Thermometer, label: 'Temperature', color: 'text-red-400', bgColor: 'bg-red-400/10' },
+  humidity: { icon: Droplets, label: 'Humidity', color: 'text-blue-400', bgColor: 'bg-blue-400/10' },
+  airQuality: { icon: Wind, label: 'Air Quality', color: 'text-emerald-400', bgColor: 'bg-emerald-400/10' },
+  battery: { icon: Battery, label: 'Battery', color: 'text-amber-400', bgColor: 'bg-amber-400/10' },
+  mediaPlayers: { icon: Music, label: 'Media', color: 'text-purple-400', bgColor: 'bg-purple-400/10' },
 };
 
 const categorizeEntities = (entities: HAEntity[]): CategorizedEntities => {
@@ -74,19 +74,16 @@ const categorizeEntities = (entities: HAEntity[]): CategorizedEntities => {
       unit_of_measurement: entity.attributes?.unit_of_measurement,
     };
 
-    // Lights
     if (domain === 'light') {
       result.lights.push(discovered);
       return;
     }
 
-    // Media Players
     if (domain === 'media_player') {
       result.mediaPlayers.push(discovered);
       return;
     }
 
-    // Sensors - categorize by device_class or entity name
     if (domain === 'sensor') {
       if (deviceClass === 'temperature' || entityId.includes('temperature') || entityId.includes('temp')) {
         result.temperature.push(discovered);
@@ -172,6 +169,10 @@ export const EntityAutoDiscovery = ({
     ? Object.values(entities).reduce((sum, arr) => sum + arr.length, 0)
     : 0;
 
+  const unconfiguredCount = entities
+    ? Object.values(entities).flat().filter(e => !isConfigured(e.entity_id)).length
+    : 0;
+
   // Flatten all entities for the unified list
   const allEntitiesList = entities ? [
     ...entities.lights.map(e => ({ ...e, category: 'lights' as const })),
@@ -183,83 +184,97 @@ export const EntityAutoDiscovery = ({
   ] : [];
 
   return (
-    <div className="space-y-5">
+    <div className="rounded-2xl bg-secondary/30 border border-border/30 overflow-hidden">
       {/* Header */}
-      <h3 className="text-sm font-light text-white/70">Auto Discovery</h3>
+      <div className="px-5 py-4 flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <div className="w-9 h-9 rounded-xl bg-warm-glow/10 flex items-center justify-center">
+            <Sparkles className="w-4 h-4 text-warm-glow" strokeWidth={1.5} />
+          </div>
+          <div>
+            <h3 className="text-sm font-medium text-foreground/90">Auto Discovery</h3>
+            <p className="text-xs text-muted-foreground">Find available devices</p>
+          </div>
+        </div>
 
-      {/* Scan Button */}
-      <motion.button
-        onClick={scanForDevices}
-        disabled={!isConnected || isScanning}
-        whileHover={isConnected && !isScanning ? { scale: 1.01 } : {}}
-        whileTap={isConnected && !isScanning ? { scale: 0.99 } : {}}
-        className={`
-          w-full flex items-center justify-center gap-3 py-4 px-6 rounded-2xl
-          text-sm font-light transition-all duration-300
-          border-2
-          ${isConnected 
-            ? 'bg-transparent hover:bg-amber-500/5 text-amber-400 border-amber-400/30 hover:border-amber-400/50' 
-            : 'bg-white/[0.02] text-white/30 cursor-not-allowed border-white/10'
-          }
-        `}
-      >
-        {isScanning ? (
-          <>
-            <Loader2 className="w-4 h-4 animate-spin" />
-            <span>Scanning for devices...</span>
-          </>
-        ) : entities ? (
-          <>
-            <RefreshCw className="w-4 h-4" />
-            <span>Rescan ({totalEntities} devices found)</span>
-          </>
-        ) : (
-          <>
-            <RefreshCw className="w-4 h-4" />
-            <span>Scan for Available Devices</span>
-          </>
-        )}
-      </motion.button>
+        {/* Scan Button */}
+        <motion.button
+          onClick={scanForDevices}
+          disabled={!isConnected || isScanning}
+          whileHover={isConnected && !isScanning ? { scale: 1.02 } : {}}
+          whileTap={isConnected && !isScanning ? { scale: 0.98 } : {}}
+          className={`
+            flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium
+            transition-all duration-200
+            ${isConnected 
+              ? 'bg-warm-glow/10 hover:bg-warm-glow/20 text-warm-glow border border-warm-glow/20' 
+              : 'bg-secondary/30 text-muted-foreground cursor-not-allowed border border-border/20'
+            }
+          `}
+        >
+          {isScanning ? (
+            <>
+              <Loader2 className="w-4 h-4 animate-spin" />
+              <span>Scanning...</span>
+            </>
+          ) : (
+            <>
+              <Radar className="w-4 h-4" />
+              <span>Scan</span>
+            </>
+          )}
+        </motion.button>
+      </div>
 
       {error && (
-        <p className="text-xs text-red-400/80 text-center">{error}</p>
+        <div className="px-5 pb-4">
+          <p className="text-xs text-destructive bg-destructive/10 px-3 py-2 rounded-lg">{error}</p>
+        </div>
       )}
 
       {/* Results */}
       <AnimatePresence>
         {entities && (
           <motion.div
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: 'auto' }}
-            exit={{ opacity: 0, height: 0 }}
-            transition={{ duration: 0.3, ease: [0.22, 0.03, 0.26, 1] }}
-            className="overflow-hidden"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
           >
-            <div className="space-y-4">
-              {/* Toggle header */}
-              <button
-                onClick={() => setIsExpanded(!isExpanded)}
-                className="w-full flex items-center justify-between py-2 text-sm text-white/50 hover:text-white/70 transition-colors"
+            {/* Toggle header */}
+            <button
+              onClick={() => setIsExpanded(!isExpanded)}
+              className="w-full flex items-center justify-between px-5 py-3 border-t border-border/20 hover:bg-secondary/20 transition-colors"
+            >
+              <div className="flex items-center gap-2">
+                <span className="text-sm text-foreground/70">
+                  {totalEntities} devices found
+                </span>
+                {unconfiguredCount > 0 && (
+                  <span className="text-xs text-warm-glow bg-warm-glow/10 px-2 py-0.5 rounded-full">
+                    {unconfiguredCount} new
+                  </span>
+                )}
+              </div>
+              <motion.div
+                animate={{ rotate: isExpanded ? 180 : 0 }}
+                transition={{ duration: 0.2 }}
               >
-                <span className="font-light">Discovered Devices</span>
-                <motion.div
-                  animate={{ rotate: isExpanded ? 180 : 0 }}
-                  transition={{ duration: 0.2 }}
-                >
-                  <ChevronUp className="w-4 h-4" />
-                </motion.div>
-              </button>
+                <ChevronDown className="w-4 h-4 text-foreground/40" />
+              </motion.div>
+            </button>
 
-              {/* Entity list */}
-              <AnimatePresence>
-                {isExpanded && (
-                  <motion.div
-                    initial={{ opacity: 0, height: 0 }}
-                    animate={{ opacity: 1, height: 'auto' }}
-                    exit={{ opacity: 0, height: 0 }}
-                    transition={{ duration: 0.2 }}
-                    className="space-y-2 max-h-[500px] overflow-y-auto"
-                  >
+            {/* Entity list */}
+            <AnimatePresence>
+              {isExpanded && (
+                <motion.div
+                  initial={{ height: 0, opacity: 0 }}
+                  animate={{ height: 'auto', opacity: 1 }}
+                  exit={{ height: 0, opacity: 0 }}
+                  transition={{ duration: 0.25, ease: [0.22, 0.03, 0.26, 1] }}
+                  className="overflow-hidden"
+                >
+                  <div className="px-4 pb-4 space-y-2 max-h-[400px] overflow-y-auto">
                     {allEntitiesList.map((entity, index) => {
                       const configured = isConfigured(entity.entity_id);
                       const config = CATEGORY_CONFIG[entity.category];
@@ -268,47 +283,49 @@ export const EntityAutoDiscovery = ({
                       return (
                         <motion.div
                           key={entity.entity_id}
-                          initial={{ opacity: 0, y: 8 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          transition={{ duration: 0.2, delay: index * 0.015 }}
+                          initial={{ opacity: 0, x: -8 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          transition={{ duration: 0.2, delay: index * 0.02 }}
                           className={`
-                            group flex items-center justify-between gap-4 p-4 rounded-2xl
+                            group flex items-center gap-3 p-3 rounded-xl
                             transition-all duration-200
                             ${configured 
-                              ? 'bg-white/[0.04] border border-amber-400/20' 
-                              : 'bg-white/[0.03] hover:bg-white/[0.05] border border-transparent hover:border-white/10'
+                              ? 'bg-warm-glow/5 border border-warm-glow/20' 
+                              : 'bg-secondary/30 hover:bg-secondary/50 border border-transparent hover:border-border/30'
                             }
                           `}
                         >
-                          <div className="flex items-start gap-3 flex-1 min-w-0">
-                            <div className={`mt-0.5 ${config.color}`}>
-                              <Icon className="w-4 h-4" strokeWidth={1.5} />
+                          {/* Icon */}
+                          <div className={`w-8 h-8 rounded-lg ${config.bgColor} flex items-center justify-center flex-shrink-0`}>
+                            <Icon className={`w-4 h-4 ${config.color}`} strokeWidth={1.5} />
+                          </div>
+
+                          {/* Content */}
+                          <div className="flex-1 min-w-0">
+                            <div className="text-sm font-light text-foreground/90 truncate">
+                              {entity.friendly_name}
                             </div>
-                            <div className="flex-1 min-w-0">
-                              <div className="text-[15px] font-light text-white leading-snug">
-                                {entity.friendly_name}
-                              </div>
-                              <div className="flex items-center gap-2 mt-1 text-xs text-white/40 font-light">
-                                <span className="font-mono truncate">{entity.entity_id}</span>
-                                <span className="text-white/20">•</span>
-                                <span className={entity.state === 'on' ? 'text-emerald-400/70' : 'text-white/30'}>
-                                  {entity.state}
-                                </span>
-                              </div>
+                            <div className="flex items-center gap-2 text-[11px] text-muted-foreground/60">
+                              <span className="font-mono truncate max-w-[180px]">{entity.entity_id}</span>
+                              <span>•</span>
+                              <span className={entity.state === 'on' ? 'text-status-optimal' : ''}>
+                                {entity.state}
+                              </span>
                             </div>
                           </div>
 
+                          {/* Add Button */}
                           <motion.button
                             onClick={() => handleAddEntity(entity, entity.category)}
                             disabled={configured}
-                            whileHover={!configured ? { scale: 1.1 } : {}}
+                            whileHover={!configured ? { scale: 1.05 } : {}}
                             whileTap={!configured ? { scale: 0.95 } : {}}
                             className={`
-                              flex-shrink-0 w-9 h-9 rounded-full flex items-center justify-center
+                              flex-shrink-0 w-8 h-8 rounded-lg flex items-center justify-center
                               transition-all duration-200
                               ${configured 
-                                ? 'bg-amber-400/10 text-amber-400 cursor-default' 
-                                : 'bg-white/[0.06] hover:bg-amber-400/20 text-white/50 hover:text-amber-400'
+                                ? 'bg-warm-glow/10 text-warm-glow cursor-default' 
+                                : 'bg-secondary/50 hover:bg-warm-glow/20 text-foreground/40 hover:text-warm-glow'
                               }
                             `}
                           >
@@ -323,14 +340,14 @@ export const EntityAutoDiscovery = ({
                     })}
 
                     {totalEntities === 0 && (
-                      <p className="text-sm text-white/40 text-center py-8 font-light">
+                      <p className="text-sm text-muted-foreground/60 text-center py-8">
                         No supported devices found
                       </p>
                     )}
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </div>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
           </motion.div>
         )}
       </AnimatePresence>

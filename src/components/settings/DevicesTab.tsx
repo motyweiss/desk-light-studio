@@ -4,6 +4,8 @@ import { EntityAutoDiscovery } from "./EntityAutoDiscovery";
 import { DevicesMapping, DeviceConfig } from "@/types/settings";
 import { HAEntity } from "@/services/homeAssistant";
 import { useHAConnection } from "@/contexts/HAConnectionContext";
+import { Home } from "lucide-react";
+
 interface DiscoveredEntity {
   entity_id: string;
   friendly_name: string;
@@ -11,6 +13,7 @@ interface DiscoveredEntity {
   device_class?: string;
   unit_of_measurement?: string;
 }
+
 interface DevicesTabProps {
   devicesMapping: DevicesMapping;
   entities: HAEntity[];
@@ -19,6 +22,27 @@ interface DevicesTabProps {
   onRemoveDevice: (roomId: string, category: 'lights' | 'sensors' | 'mediaPlayers', deviceId: string) => void;
   isLoading?: boolean;
 }
+
+const staggerContainer = {
+  hidden: { opacity: 0 },
+  show: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.08,
+      delayChildren: 0.05
+    }
+  }
+};
+
+const itemVariants = {
+  hidden: { opacity: 0, y: 16 },
+  show: { 
+    opacity: 1, 
+    y: 0,
+    transition: { duration: 0.4, ease: [0.22, 0.03, 0.26, 1] as const }
+  }
+};
+
 const DevicesTab = ({
   devicesMapping,
   entities,
@@ -27,22 +51,24 @@ const DevicesTab = ({
   onRemoveDevice,
   isLoading
 }: DevicesTabProps) => {
-  const {
-    isConnected
-  } = useHAConnection();
+  const { isConnected } = useHAConnection();
 
   // Get all configured entity IDs
-  const configuredEntityIds = devicesMapping.rooms.flatMap(room => [...room.lights.map(l => l.entity_id), ...room.sensors.map(s => s.entity_id), ...room.mediaPlayers.map(m => m.entity_id)]);
+  const configuredEntityIds = devicesMapping.rooms.flatMap(room => [
+    ...room.lights.map(l => l.entity_id), 
+    ...room.sensors.map(s => s.entity_id), 
+    ...room.mediaPlayers.map(m => m.entity_id)
+  ]);
 
   // Handle adding discovered entity to first room
-  const handleAddDiscoveredEntity = (entity: DiscoveredEntity, category: 'lights' | 'sensors' | 'mediaPlayers', sensorType?: 'temperature' | 'humidity' | 'air_quality' | 'battery') => {
+  const handleAddDiscoveredEntity = (
+    entity: DiscoveredEntity, 
+    category: 'lights' | 'sensors' | 'mediaPlayers', 
+    sensorType?: 'temperature' | 'humidity' | 'air_quality' | 'battery'
+  ) => {
     const roomId = devicesMapping.rooms[0]?.id || 'office';
-
-    // First add a new device slot
     onAddDevice(roomId, category);
 
-    // Then update it with the discovered entity data
-    // We need to find the newly added device and update it
     setTimeout(() => {
       const room = devicesMapping.rooms.find(r => r.id === roomId);
       if (!room) return;
@@ -60,27 +86,45 @@ const DevicesTab = ({
       }
     }, 100);
   };
+
+  const totalDevices = devicesMapping.rooms.reduce((sum, room) => 
+    sum + room.lights.length + room.sensors.length + room.mediaPlayers.length, 0
+  );
+
   return (
     <motion.div 
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      transition={{ duration: 0.25, ease: [0.22, 0.03, 0.26, 1] }}
-      className="space-y-8"
+      variants={staggerContainer}
+      initial="hidden"
+      animate="show"
+      className="space-y-6"
     >
       {/* Auto Discovery Section */}
-      <EntityAutoDiscovery
-        onAddEntity={handleAddDiscoveredEntity}
-        configuredEntityIds={configuredEntityIds}
-        isConnected={isConnected}
-      />
+      <motion.div variants={itemVariants}>
+        <EntityAutoDiscovery
+          onAddEntity={handleAddDiscoveredEntity}
+          configuredEntityIds={configuredEntityIds}
+          isConnected={isConnected}
+        />
+      </motion.div>
 
-      {/* Separator */}
-      <div className="h-px bg-white/[0.06]" />
+      {/* Configured Devices Header */}
+      <motion.div variants={itemVariants} className="pt-4">
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 rounded-xl bg-secondary/50 flex items-center justify-center">
+              <Home className="w-4 h-4 text-foreground/70" strokeWidth={1.5} />
+            </div>
+            <div>
+              <h3 className="text-sm font-medium text-foreground/90">Configured Devices</h3>
+              <p className="text-xs text-muted-foreground">{totalDevices} devices in {devicesMapping.rooms.length} room{devicesMapping.rooms.length !== 1 ? 's' : ''}</p>
+            </div>
+          </div>
+        </div>
+      </motion.div>
 
       {/* Room Sections */}
-      <div className="space-y-6">
-        <h3 className="text-sm font-light text-white/70">Configured Devices</h3>
-        {devicesMapping.rooms.map(room => (
+      <motion.div variants={itemVariants} className="space-y-4">
+        {devicesMapping.rooms.map((room, index) => (
           <RoomSection 
             key={room.id} 
             room={room} 
@@ -88,10 +132,11 @@ const DevicesTab = ({
             onAddDevice={category => onAddDevice(room.id, category)} 
             onUpdateDevice={(category, deviceId, updates) => onUpdateDevice(room.id, category, deviceId, updates)} 
             onRemoveDevice={(category, deviceId) => onRemoveDevice(room.id, category, deviceId)} 
-            isLoading={isLoading} 
+            isLoading={isLoading}
+            index={index}
           />
         ))}
-      </div>
+      </motion.div>
     </motion.div>
   );
 };
