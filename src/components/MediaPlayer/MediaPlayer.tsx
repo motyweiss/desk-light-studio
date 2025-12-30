@@ -241,7 +241,9 @@ export const MediaPlayer = () => {
                       {albumArtUrl && !albumArtError ? (
                         <img src={albumArtUrl} alt="Album art" className="absolute inset-0 w-full h-full object-cover rounded-full" />
                       ) : !isAlbumArtLoading && (
-                        <div className="absolute inset-0 w-full h-full flex items-center justify-center bg-white/5 rounded-full" />
+                        <div className="absolute inset-0 w-full h-full flex items-center justify-center bg-gradient-to-br from-white/8 to-white/4 rounded-full">
+                          <div className="w-1/3 h-1/3 rounded-full bg-white/10" />
+                        </div>
                       )}
                     </motion.div>
                   </AnimatePresence>
@@ -252,11 +254,11 @@ export const MediaPlayer = () => {
                 {/* Track Info */}
                 <div className="flex-1 min-w-0 flex flex-col justify-center">
                   <h3 className={`text-white font-medium truncate transition-all duration-300 leading-tight ${isMinimized ? 'text-[13px]' : 'text-lg'}`}>
-                    {currentTrack?.title || 'No media playing'}
+                    {currentTrack?.title || 'Not Playing'}
                   </h3>
                   <div className="flex items-center gap-2">
-                    <p className={`text-white/50 truncate transition-all duration-300 leading-tight ${isMinimized ? 'text-xs' : 'text-sm'}`}>
-                      {currentTrack?.artist || 'Unknown Artist'}
+                    <p className={`text-white/40 truncate transition-all duration-300 leading-tight ${isMinimized ? 'text-xs' : 'text-sm'}`}>
+                      {currentTrack?.artist || 'Select a device to play'}
                     </p>
                     {isMinimized && playerState.isPlaying && (
                       <AudioVisualizer isPlaying={true} barCount={3} />

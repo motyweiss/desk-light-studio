@@ -35,8 +35,8 @@ export const AlbumArt = ({ albumArt, isPlaying }: AlbumArtProps) => {
           className="w-full h-full object-cover"
         />
       ) : (
-        <div className="w-full h-full flex items-center justify-center">
-          <Music className="w-8 h-8 text-white/20" />
+        <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-white/8 to-white/4">
+          <div className="w-6 h-6 rounded-full bg-white/10" />
         </div>
       )}
     </motion.div>
