@@ -63,7 +63,6 @@ const DeviceCard = ({
 }: DeviceCardProps) => {
   const [isEditing, setIsEditing] = useState(false);
   const [editedLabel, setEditedLabel] = useState(device.label);
-  const [isHovered, setIsHovered] = useState(false);
 
   const Icon = getDeviceIcon(category, device.type);
   const iconColor = getIconColor(category);
@@ -103,8 +102,6 @@ const DeviceCard = ({
       animate={{ opacity: 1, scale: 1 }}
       exit={{ opacity: 0, scale: 0.95 }}
       transition={{ duration: 0.25, delay: index * 0.03, ease: [0.22, 0.03, 0.26, 1] }}
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
       className="group relative p-4 rounded-2xl bg-secondary/40 border border-border/30 hover:border-border/50 hover:bg-secondary/50 transition-all duration-200"
     >
       <div className="flex items-start gap-4">
@@ -167,21 +164,15 @@ const DeviceCard = ({
           />
         </div>
 
-        {/* Delete Button */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: isHovered ? 1 : 0 }}
-          transition={{ duration: 0.15 }}
+        {/* Delete Button - Always visible on mobile, hover on desktop */}
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={onRemove}
+          className="h-9 w-9 p-0 text-foreground/30 hover:text-destructive hover:bg-destructive/10 transition-all duration-200 opacity-100 sm:opacity-0 sm:group-hover:opacity-100"
         >
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={onRemove}
-            className="h-9 w-9 p-0 text-foreground/30 hover:text-destructive hover:bg-destructive/10 transition-all duration-200"
-          >
-            <Trash2 className="w-4 h-4" />
-          </Button>
-        </motion.div>
+          <Trash2 className="w-4 h-4" />
+        </Button>
       </div>
 
       {/* Entity ID Badge */}
