@@ -2,7 +2,6 @@ import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { Settings as SettingsIcon } from 'lucide-react';
 import { ConnectionStatusIndicator } from '@/components/ConnectionStatusIndicator';
-import { LogoutButton } from '@/components/LogoutButton';
 import { HomeAssistantIcon } from '@/components/icons/HomeAssistantIcon';
 import { ClimateIndicators } from '@/features/climate/components/ClimateIndicators';
 import { LOAD_SEQUENCE } from '@/constants/loadingSequence';
@@ -125,10 +124,6 @@ export const TopNavigationBar = ({
                 <p>Settings</p>
               </TooltipContent>
             </Tooltip>
-
-            <div className="hidden md:block">
-              <LogoutButton />
-            </div>
           </motion.div>
         </div>
       </div>

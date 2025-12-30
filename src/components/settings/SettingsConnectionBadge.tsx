@@ -47,20 +47,9 @@ const SettingsConnectionBadge = () => {
     >
       {config.showSpinner ? (
         <Loader2 className={`w-3.5 h-3.5 ${config.color} animate-spin`} />
-      ) : (
-        <motion.div
-          animate={connectionStatus === "connected" ? { 
-            opacity: [0.7, 1, 0.7],
-          } : {}}
-          transition={{ 
-            duration: 2, 
-            repeat: Infinity,
-            ease: "easeInOut" 
-          }}
-        >
-          <Zap className={`w-3.5 h-3.5 ${config.color}`} />
-        </motion.div>
-      )}
+      ) : connectionStatus !== "connected" ? (
+        <Zap className={`w-3.5 h-3.5 ${config.color}`} />
+      ) : null}
       <span className={`text-xs font-light ${config.color}`}>
         {config.label}
       </span>

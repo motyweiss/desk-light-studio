@@ -2,6 +2,7 @@ import { useState, useEffect, useMemo, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { ArrowLeft, Loader2 } from "lucide-react";
+import { LogoutButton } from "@/components/LogoutButton";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import ConnectionTab from "@/components/settings/ConnectionTab";
@@ -310,7 +311,10 @@ const Settings = () => {
             <h1 className="text-xl font-sans font-light text-white/90 tracking-wide">Settings</h1>
           </div>
           
-          <SettingsConnectionBadge />
+          <div className="flex items-center gap-2">
+            <SettingsConnectionBadge />
+            <LogoutButton />
+          </div>
         </div>
       </motion.header>
 
