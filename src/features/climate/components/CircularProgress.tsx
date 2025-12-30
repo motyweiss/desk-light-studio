@@ -13,6 +13,8 @@ interface CircularProgressProps {
   showSkeleton?: boolean;
   colorType?: 'temperature' | 'humidity' | 'airQuality' | 'battery' | 'default';
   delay?: number;
+  /** Gap in the circle (in degrees, starting from bottom) */
+  gapAngle?: number;
 }
 
 // Smooth transition config
@@ -31,64 +33,91 @@ export const CircularProgress = ({
   isLoaded = true,
   showSkeleton = false,
   colorType = 'default',
-  delay = 0.2
+  delay = 0.2,
+  gapAngle = 0,
 }: CircularProgressProps) => {
   const radius = (size - strokeWidth) / 2;
   const circumference = 2 * Math.PI * radius;
   const percentage = Math.min(Math.max((value - min) / (max - min), 0), 1);
-  const offset = circumference * (1 - percentage);
+  
+  // Calculate arc length considering the gap
+  const gapFraction = gapAngle / 360;
+  const availableCircumference = circumference * (1 - gapFraction);
+  const progressLength = availableCircumference * percentage;
+  const remainingLength = availableCircumference - progressLength;
+  
+  // For gapped circles, we need to offset the start point
+  const startOffset = circumference * (gapFraction / 2);
   
   const getProgressColor = (): string => {
-    // All indicators use white
-    return 'rgba(255, 255, 255, 0.5)';
+    return 'rgba(255, 255, 255, 0.7)';
+  };
+
+  const getTrackColor = (): string => {
+    return 'rgba(255, 255, 255, 0.08)';
   };
 
   const isShowingSkeleton = showSkeleton || !isLoaded;
 
+  // Calculate rotation to position gap at bottom center
+  const rotationOffset = gapAngle > 0 ? 90 + (gapAngle / 2) : -90;
+
   return (
     <div className="relative" style={{ width: size, height: size }}>
-      <svg className="absolute inset-0 -rotate-90" width={size} height={size}>
-        {/* Background ring */}
+      <svg 
+        className="absolute inset-0" 
+        width={size} 
+        height={size}
+        style={{ transform: `rotate(${rotationOffset}deg)` }}
+      >
+        {/* Background ring with gap */}
         <circle
           cx={size/2} 
           cy={size/2} 
           r={radius}
-          stroke="rgba(255,255,255,0.1)"
-          strokeWidth={strokeWidth}
-          fill="none"
-        />
-        
-        {/* Skeleton shimmer ring */}
-        <motion.circle
-          cx={size/2} 
-          cy={size/2} 
-          r={radius}
+          stroke={getTrackColor()}
           strokeWidth={strokeWidth}
           fill="none"
           strokeLinecap="round"
-          style={{ 
-            strokeDasharray: circumference,
-            strokeDashoffset: circumference * 0.7,
-            stroke: 'rgba(255,255,255,0.15)',
+          style={{
+            strokeDasharray: gapAngle > 0 
+              ? `${availableCircumference} ${circumference}`
+              : circumference,
           }}
-          initial={false}
-          animate={{ 
-            opacity: isShowingSkeleton ? [0.3, 0.6, 0.3] : 0,
-            rotate: isShowingSkeleton ? [0, 360] : 0,
-          }}
-          transition={isShowingSkeleton ? { 
-            opacity: {
-              duration: DATA_TRANSITION.skeleton.shimmerDuration,
-              repeat: Infinity,
-              ease: "easeInOut",
-            },
-            rotate: {
-              duration: 3,
-              repeat: Infinity,
-              ease: 'linear',
-            }
-          } : smoothTransition}
         />
+        
+        {/* Skeleton shimmer ring */}
+        {isShowingSkeleton && (
+          <motion.circle
+            cx={size/2} 
+            cy={size/2} 
+            r={radius}
+            strokeWidth={strokeWidth}
+            fill="none"
+            strokeLinecap="round"
+            style={{ 
+              strokeDasharray: `${availableCircumference * 0.3} ${circumference}`,
+              stroke: 'rgba(255,255,255,0.2)',
+            }}
+            initial={{ rotate: 0 }}
+            animate={{ 
+              rotate: 360,
+              opacity: [0.3, 0.6, 0.3],
+            }}
+            transition={{ 
+              rotate: {
+                duration: 2,
+                repeat: Infinity,
+                ease: 'linear',
+              },
+              opacity: {
+                duration: 1.5,
+                repeat: Infinity,
+                ease: "easeInOut",
+              }
+            }}
+          />
+        )}
         
         {/* Progress ring */}
         <motion.circle
@@ -99,17 +128,19 @@ export const CircularProgress = ({
           fill="none"
           strokeLinecap="round"
           style={{ 
-            strokeDasharray: circumference,
+            strokeDasharray: `${progressLength} ${remainingLength + (circumference * gapFraction)}`,
           }}
           initial={false}
           animate={{ 
-            strokeDashoffset: isShowingSkeleton ? circumference : offset,
+            strokeDasharray: isShowingSkeleton 
+              ? `0 ${circumference}` 
+              : `${progressLength} ${remainingLength + (circumference * gapFraction)}`,
             stroke: getProgressColor(),
             opacity: isShowingSkeleton ? 0 : 1,
           }}
           transition={{ 
-            strokeDashoffset: {
-              duration: 0.6,
+            strokeDasharray: {
+              duration: 0.8,
               delay: isShowingSkeleton ? 0 : delay,
               ease: EASING.entrance,
             },
@@ -127,19 +158,13 @@ export const CircularProgress = ({
         className="absolute inset-0 flex items-center justify-center"
         initial={false}
         animate={{ 
-          opacity: isShowingSkeleton ? [0.4, 0.7, 0.4] : 1,
-          filter: isShowingSkeleton ? `blur(${DATA_TRANSITION.dataEnter.blur / 2}px)` : 'blur(0px)',
+          opacity: isShowingSkeleton ? 0.5 : 1,
+          scale: isShowingSkeleton ? 0.95 : 1,
         }}
-        transition={isShowingSkeleton ? {
-          opacity: {
-            duration: DATA_TRANSITION.skeleton.shimmerDuration,
-            repeat: Infinity,
-            ease: "easeInOut",
-          },
-          filter: { duration: 0.1 }
-        } : {
-          ...smoothTransition,
-          filter: { duration: 0.35, ease: EASING.smooth }
+        transition={{
+          duration: 0.4,
+          delay: isShowingSkeleton ? 0 : delay + 0.1,
+          ease: EASING.entrance,
         }}
       >
         {children}
