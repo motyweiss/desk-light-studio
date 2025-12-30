@@ -9,25 +9,33 @@ import { AnimatedCounter } from '@/components/AnimatedCounter';
 import { TIMING, EASE, STAGGER, DELAY } from '@/lib/animations';
 import type { Variants } from 'framer-motion';
 
-// Stagger animation variants using centralized tokens
+// Stagger animation variants with modern blur and movement
 const indicatorVariants: Variants = {
   hidden: { 
-    opacity: 0
+    opacity: 0,
+    y: -8,
+    scale: 0.96,
+    filter: 'blur(3px)',
   },
   visible: (i: number) => ({
     opacity: 1,
+    y: 0,
+    scale: 1,
+    filter: 'blur(0px)',
     transition: {
-      delay: DELAY.medium + i * STAGGER.relaxed,
-      duration: TIMING.medium,
-      ease: EASE.out
-    }
+      delay: DELAY.short + i * 0.12,
+      duration: 0.55,
+      ease: [0.16, 1, 0.3, 1],
+    },
   }),
   exit: {
     opacity: 0,
+    y: -4,
+    filter: 'blur(2px)',
     transition: {
-      duration: TIMING.fast
-    }
-  }
+      duration: TIMING.fast,
+    },
+  },
 };
 
 export const ClimateIndicators = () => {

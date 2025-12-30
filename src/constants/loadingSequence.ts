@@ -31,18 +31,20 @@ export const LOAD_SEQUENCE = {
   // ─────────────────────────────────────────────────────────────────────────────
   header: {
     /** Delay before header starts entering (s) */
-    delay: 0.1,
+    delay: 0.08,
     /** Duration of header entry (s) */
-    duration: 0.5,
-    /** Header entry easing */
-    ease: [0.22, 0.68, 0.35, 1] as const,
+    duration: 0.7,
+    /** Header entry easing - ease-out-expo for soft, modern feel */
+    ease: [0.16, 1, 0.3, 1] as const,
+    /** Initial blur amount (px) */
+    blurFrom: 6,
     /** Stagger between internal elements (s) */
-    stagger: 0.06,
+    stagger: 0.1,
     /** Delays for each section */
     sections: {
-      branding: 0.1,
-      climate: 0.16,
-      controls: 0.22,
+      branding: 0.12,
+      climate: 0.24,
+      controls: 0.36,
     },
   },
 
