@@ -18,6 +18,7 @@ interface LightState {
   lastUserChangeTime: number; // Timestamp of last user change - used to ignore stale external updates
   lastSentValue: number; // Last value sent to API - prevents duplicate calls
   lastSentTime: number; // Timestamp of last API call
+  retryCount: number; // Number of retry attempts
 }
 
 interface LightingContextValue {
@@ -54,16 +55,19 @@ export const LightingProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   const [connectionType, setConnectionType] = useState<'websocket' | 'polling' | 'disconnected'>('disconnected');
   const [pollingEnabled, setPollingEnabled] = useState(false);
   const [lights, setLights] = useState<LightingContextValue['lights']>({
-    spotlight: { targetValue: 0, displayValue: 0, confirmedValue: 0, isAnimating: false, isPending: false, source: 'initial', lastUserChangeTime: 0, lastSentValue: -1, lastSentTime: 0 },
-    deskLamp: { targetValue: 0, displayValue: 0, confirmedValue: 0, isAnimating: false, isPending: false, source: 'initial', lastUserChangeTime: 0, lastSentValue: -1, lastSentTime: 0 },
-    monitorLight: { targetValue: 0, displayValue: 0, confirmedValue: 0, isAnimating: false, isPending: false, source: 'initial', lastUserChangeTime: 0, lastSentValue: -1, lastSentTime: 0 },
+    spotlight: { targetValue: 0, displayValue: 0, confirmedValue: 0, isAnimating: false, isPending: false, source: 'initial', lastUserChangeTime: 0, lastSentValue: -1, lastSentTime: 0, retryCount: 0 },
+    deskLamp: { targetValue: 0, displayValue: 0, confirmedValue: 0, isAnimating: false, isPending: false, source: 'initial', lastUserChangeTime: 0, lastSentValue: -1, lastSentTime: 0, retryCount: 0 },
+    monitorLight: { targetValue: 0, displayValue: 0, confirmedValue: 0, isAnimating: false, isPending: false, source: 'initial', lastUserChangeTime: 0, lastSentValue: -1, lastSentTime: 0, retryCount: 0 },
   });
   
   // Grace period to ignore stale external updates after user changes
   // Covers: animation (~750ms) + debounce (300ms) + API call (~500ms) + response + buffer
   const USER_CHANGE_GRACE_PERIOD = 3000; // 3 seconds
+  const MAX_RETRIES = 3;
+  const RETRY_DELAYS = [500, 1000, 2000]; // Exponential backoff
 
   const debounceTimersRef = useRef<Map<string, NodeJS.Timeout>>(new Map());
+  const retryTimersRef = useRef<Map<string, NodeJS.Timeout>>(new Map());
   const wsSubscriptionsRef = useRef<Array<() => void>>([]);
 
   // Map light IDs to entity IDs
@@ -300,45 +304,80 @@ export const LightingProvider: React.FC<{ children: React.ReactNode }> = ({ chil
           };
         });
         
-        logger.light(lightId, `Setting to ${value}% via ${entityId}`);
-        
-        try {
-          if (value === 0) {
-            await lightsAPI.turnOff(entityId);
-          } else {
-            await lightsAPI.setBrightness(entityId, value);
+        // Helper function to execute API call with retry logic
+        const executeWithRetry = async (attempt: number = 0): Promise<void> => {
+          logger.light(lightId, `Setting to ${value}% via ${entityId} (attempt ${attempt + 1})`);
+          
+          try {
+            if (value === 0) {
+              await lightsAPI.turnOff(entityId);
+            } else {
+              await lightsAPI.setBrightness(entityId, value);
+            }
+            
+            // Success - confirm value and reset retry count
+            setLights(prev => ({
+              ...prev,
+              [lightId]: {
+                ...prev[lightId],
+                confirmedValue: value,
+                isPending: false,
+                retryCount: 0,
+              }
+            }));
+            markSuccessfulSync();
+            
+            // Clear any pending retry timer
+            const existingRetryTimer = retryTimersRef.current.get(lightId);
+            if (existingRetryTimer) {
+              clearTimeout(existingRetryTimer);
+              retryTimersRef.current.delete(lightId);
+            }
+          } catch (error) {
+            logger.error(`Failed to set ${lightId} (attempt ${attempt + 1})`, error);
+            
+            if (attempt < MAX_RETRIES - 1) {
+              // Schedule retry with exponential backoff
+              const retryDelay = RETRY_DELAYS[attempt] || RETRY_DELAYS[RETRY_DELAYS.length - 1];
+              logger.light(lightId, `Retrying in ${retryDelay}ms...`);
+              
+              setLights(prev => ({
+                ...prev,
+                [lightId]: {
+                  ...prev[lightId],
+                  retryCount: attempt + 1,
+                }
+              }));
+              
+              const retryTimer = setTimeout(() => {
+                executeWithRetry(attempt + 1);
+              }, retryDelay);
+              
+              retryTimersRef.current.set(lightId, retryTimer);
+            } else {
+              // Max retries reached - rollback and show error
+              setLights(prev => ({
+                ...prev,
+                [lightId]: {
+                  ...prev[lightId],
+                  targetValue: prev[lightId].confirmedValue,
+                  displayValue: prev[lightId].confirmedValue,
+                  isPending: false,
+                  retryCount: 0,
+                }
+              }));
+              
+              toast({
+                title: 'Failed to update light',
+                description: `Could not update ${lightId === 'deskLamp' ? 'Desk Lamp' : lightId === 'monitorLight' ? 'Monitor Light' : 'Spotlight'} after ${MAX_RETRIES} attempts`,
+                variant: 'destructive',
+              });
+            }
           }
-          
-          // Confirm value after successful API call
-          setLights(prev => ({
-            ...prev,
-            [lightId]: {
-              ...prev[lightId],
-              confirmedValue: value,
-              isPending: false,
-            }
-          }));
-          markSuccessfulSync();
-        } catch (error) {
-          logger.error(`Failed to set ${lightId}`, error);
-          
-          // Rollback to confirmed value on error
-          setLights(prev => ({
-            ...prev,
-            [lightId]: {
-              ...prev[lightId],
-              targetValue: prev[lightId].confirmedValue,
-              displayValue: prev[lightId].confirmedValue,
-              isPending: false,
-            }
-          }));
-          
-          toast({
-            title: 'Failed to update light',
-            description: error instanceof Error ? error.message : `Could not update ${lightId}`,
-            variant: 'destructive',
-          });
-        }
+        };
+        
+        // Start the API call with retry logic
+        executeWithRetry(0);
       }, delay);
 
       debounceTimersRef.current.set(lightId, timer);
