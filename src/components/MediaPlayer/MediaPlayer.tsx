@@ -197,7 +197,7 @@ export const MediaPlayer = () => {
             initial={false}
             animate={paddingStyles}
             transition={transitions.layout}
-            className="relative h-full flex flex-col justify-center"
+            className="relative"
           >
             {/* Main content row */}
             <motion.div 
