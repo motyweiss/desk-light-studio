@@ -162,6 +162,7 @@ export const RoomInfoPanel = ({
                     colorType="battery"
                     delay={LOAD_SEQUENCE.finishing.progressRings.delay + (index * 0.12)}
                     gapAngle={60}
+                    showPercentage={true}
                   >
                     <DeviceIcon className="w-6 h-6 text-white/70" />
                   </CircularProgress>
