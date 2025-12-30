@@ -149,13 +149,19 @@ export const MediaPlayer = () => {
       <motion.div
         ref={playerRef}
         {...entryProps}
-        className="fixed bottom-6 md:bottom-8 left-0 right-0 z-50 flex justify-center px-4"
+        className="fixed bottom-6 md:bottom-8 left-0 right-0 z-50 flex justify-center items-end px-4"
       >
         <motion.div 
           onClick={handleToggleMinimized}
-          className="relative cursor-pointer"
+          className="relative cursor-pointer overflow-hidden"
+          layout
           initial={false}
-          animate={containerStyles}
+          animate={{
+            height: isMinimized ? CONTAINER_HEIGHTS.minimized : CONTAINER_HEIGHTS.expanded,
+            borderRadius: isMinimized ? 32 : 24,
+            maxWidth: isMinimized ? 420 : 672,
+            backgroundColor: isMinimized ? 'rgba(255, 255, 255, 0.12)' : 'rgba(255, 255, 255, 0.18)',
+          }}
           transition={transitions.layout}
           style={{
             width: '100%',
@@ -165,8 +171,6 @@ export const MediaPlayer = () => {
             boxShadow: isMinimized 
               ? '0 8px 32px rgba(0,0,0,0.08), 0 2px 8px rgba(0,0,0,0.04)' 
               : '0 12px 48px rgba(0,0,0,0.12), 0 4px 16px rgba(0,0,0,0.06)',
-            originY: 1, // Expand upward from bottom
-            transformOrigin: 'bottom center',
           }}
           whileHover={{ 
             backgroundColor: isMinimized ? 'rgba(255, 255, 255, 0.15)' : 'rgba(255, 255, 255, 0.22)',
