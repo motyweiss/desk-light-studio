@@ -15,7 +15,7 @@ export default {
     extend: {
       fontFamily: {
         sans: ['Google Sans', '-apple-system', 'BlinkMacSystemFont', 'system-ui', 'Segoe UI', 'Roboto', 'sans-serif'],
-        display: ['Google Sans', '-apple-system', 'BlinkMacSystemFont', 'system-ui', 'sans-serif'],
+        display: ['DM Serif Display', 'Georgia', 'serif'],
         'epunda': ['Google Sans', '-apple-system', 'BlinkMacSystemFont', 'system-ui', 'sans-serif'],
       },
       letterSpacing: {
