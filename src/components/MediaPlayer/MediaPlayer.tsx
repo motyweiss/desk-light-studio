@@ -20,7 +20,7 @@ import { MusicParticles } from './MusicParticles';
 // Fixed heights for organic growth animation
 const CONTAINER_HEIGHTS = {
   minimized: 64,
-  expanded: 270,
+  expanded: 240,
 } as const;
 
 // Spring-based animation for smooth, natural motion
