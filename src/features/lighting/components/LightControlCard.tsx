@@ -35,10 +35,10 @@ const contentTransition = {
   ease: EASE.gentle,
 };
 
-// Slider entrance - very soft and gentle
+// Slider entrance - smooth and synchronized
 const sliderEntranceTransition = {
-  duration: 0.7,
-  ease: [0.16, 0.1, 0.3, 1] as const, // Very gentle ease
+  duration: 0.4,
+  ease: [0.22, 0.68, 0.35, 1.0] as const,
 };
 
 // Icon glow transition - extra smooth
@@ -512,42 +512,49 @@ export const LightControlCard = ({
           </motion.div>
           
           {/* Real slider - visible when on */}
-          <motion.div 
-            className="absolute inset-0 flex items-center"
-            initial={false}
-            animate={{ 
-              opacity: isOn && !isLoading ? 1 : 0,
-              y: isOn && !isLoading ? 0 : 3,
-            }}
-            transition={sliderEntranceTransition}
-            style={{ pointerEvents: isOn ? 'auto' : 'none' }}
-          >
-            <Slider
-              value={[displayNumber]}
-              onValueChange={handleSliderChange}
-              onValueCommit={(values) => {
-                // Final value commit - ensure it's sent
-                onChange(values[0]);
-                userInteractingRef.current = false;
-              }}
-              max={100}
-              min={1}
-              step={1}
-              className="w-full"
-            />
-          </motion.div>
+          <AnimatePresence mode="wait">
+            {isOn && !isLoading && (
+              <motion.div 
+                className="absolute inset-0 flex items-center"
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.95 }}
+                transition={{
+                  duration: 0.3,
+                  ease: [0.22, 0.68, 0.35, 1.0],
+                }}
+              >
+                <Slider
+                  value={[displayNumber]}
+                  onValueChange={handleSliderChange}
+                  onValueCommit={(values) => {
+                    // Final value commit - ensure it's sent
+                    onChange(values[0]);
+                    userInteractingRef.current = false;
+                  }}
+                  max={100}
+                  min={1}
+                  step={1}
+                  className="w-full"
+                />
+              </motion.div>
+            )}
+          </AnimatePresence>
 
           {/* Inactive line - visible when off */}
-          <motion.div 
-            className="absolute inset-0 flex items-center"
-            initial={false}
-            animate={{ 
-              opacity: !isOn && !isLoading ? 0.2 : 0,
-            }}
-            transition={sliderEntranceTransition}
-          >
-            <div className="w-full h-1.5 bg-white/30 rounded-full" />
-          </motion.div>
+          <AnimatePresence>
+            {!isOn && !isLoading && (
+              <motion.div 
+                className="absolute inset-0 flex items-center"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 0.2 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.25, ease: [0.22, 0.68, 0.35, 1.0] }}
+              >
+                <div className="w-full h-1.5 bg-white/30 rounded-full" />
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
       </div>
     </motion.button>
