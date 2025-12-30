@@ -242,12 +242,16 @@ export const DynamicLightingBackground = () => {
           }}
         />
 
-        {/* Subtle grain texture overlay */}
-        <div 
+        {/* Subtle grain texture overlay - more visible when lights off */}
+        <motion.div 
           className="absolute inset-0 pointer-events-none"
+          initial={{ opacity: 0.04 }}
+          animate={{
+            opacity: anyLightOn ? 0.03 : 0.08,
+          }}
+          transition={{ duration: 1.2, ease: [0.4, 0, 0.2, 1] }}
           style={{
             filter: 'url(#grain-filter)',
-            opacity: 0.04,
             mixBlendMode: 'overlay',
           }}
         />
