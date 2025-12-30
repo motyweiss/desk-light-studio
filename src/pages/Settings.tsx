@@ -249,7 +249,8 @@ const Settings = () => {
 
   const isFormValid = baseUrl && accessToken;
 
-  if (isLoadingHAConfig) {
+  // Show loading state only for initial load, not indefinitely
+  if (isLoadingHAConfig && !haConfig) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <motion.div 
