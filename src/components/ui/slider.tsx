@@ -57,8 +57,12 @@ const Slider = React.forwardRef<
               scaleX: { 
                 duration: 0.4,
                 ease: [0.22, 0.68, 0.35, 1.0],
+                delay: currentValue > 0 ? 0 : 0.1, // Delay shrink on turn-off (after thumb)
               },
-              opacity: { duration: 0.2 },
+              opacity: { 
+                duration: 0.2,
+                delay: currentValue > 0 ? 0 : 0.08,
+              },
             }}
           />
         </SliderPrimitive.Range>
@@ -83,13 +87,13 @@ const Slider = React.forwardRef<
           }}
           transition={{
             scale: { 
-              duration: 0.35, 
+              duration: currentValue > 0 ? 0.35 : 0.25, 
               ease: [0.22, 0.68, 0.35, 1.0],
-              delay: animateIn && !hasAnimatedIn ? 0.1 : 0,
+              delay: animateIn && !hasAnimatedIn && currentValue > 0 ? 0.1 : 0, // Delay on enter only
             },
             opacity: { 
-              duration: 0.25,
-              delay: animateIn && !hasAnimatedIn ? 0.08 : 0,
+              duration: currentValue > 0 ? 0.25 : 0.15,
+              delay: animateIn && !hasAnimatedIn && currentValue > 0 ? 0.08 : 0,
             },
             boxShadow: { duration: 0.15 },
           }}
