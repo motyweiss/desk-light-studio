@@ -1,4 +1,4 @@
-import { useCallback, useRef, useState } from 'react';
+import { useCallback, useRef, useState, useEffect } from 'react';
 import { useMotionValue, animate, type Easing } from 'framer-motion';
 import { EASE, SEQUENCES } from '@/lib/animations';
 
@@ -23,6 +23,17 @@ export const useLightAnimation = (
   const targetRef = useRef(initialValue);
   const sourceRef = useRef<AnimationSource>('initial');
   const animationControlRef = useRef<any>(null);
+  
+  // Sync initial value when it changes (e.g., on first load from context)
+  const initialValueRef = useRef(initialValue);
+  useEffect(() => {
+    // Only update if initial value changed significantly and we're not animating
+    if (Math.abs(initialValueRef.current - initialValue) > 0.5 && !isAnimating) {
+      displayValue.set(initialValue);
+      targetRef.current = initialValue;
+      initialValueRef.current = initialValue;
+    }
+  }, [initialValue, displayValue, isAnimating]);
 
   const animateTo = useCallback((
     target: number,

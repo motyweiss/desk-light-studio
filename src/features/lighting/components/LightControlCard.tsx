@@ -72,10 +72,11 @@ export const LightControlCard = ({
   const wasLongPressRef = useRef(false);
   
   // Use unified animation hook
-  const { displayValue, animateTo } = useLightAnimation(id, { 
+  const { displayValue, animateTo, getCurrentValue } = useLightAnimation(id, { 
     initialValue: intensity 
   });
   
+  // Display number tracks the rounded value for UI
   const [displayNumber, setDisplayNumber] = useState(intensity);
   const debounceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const userInteractingRef = useRef(false);
@@ -111,20 +112,43 @@ export const LightControlCard = ({
     setDisplayNumber(Math.round(latest));
   });
   
-  // Sync with external intensity changes - ONLY when source is external and not locked
+  // Sync with external intensity changes - handle all non-user updates
   useEffect(() => {
-    // Skip if user is interacting, locked, or if the change originated from user action
-    if (userInteractingRef.current || isUserLocked() || animationSource === 'user') return;
+    // Skip if user is actively interacting or in lock period
+    if (userInteractingRef.current || isUserLocked()) {
+      console.log(`[LightCard ${id}] Skipping sync - user interacting or locked`);
+      return;
+    }
     
-    const currentValue = displayValue.get();
+    // Skip if this is a user-initiated change
+    if (animationSource === 'user') {
+      console.log(`[LightCard ${id}] Skipping sync - user source`);
+      return;
+    }
+    
+    const currentValue = getCurrentValue();
     const diff = Math.abs(currentValue - intensity);
     
-    // Only sync if difference is significant (> 2%)
-    if (diff > 2) {
-      animateTo(intensity, 'external');
+    console.log(`[LightCard ${id}] Sync check:`, {
+      intensity,
+      currentValue,
+      diff,
+      animationSource
+    });
+    
+    // Only sync if difference is significant (> 1%)
+    if (diff > 1) {
+      console.log(`[LightCard ${id}] Syncing to ${intensity} from ${currentValue}`);
+      
+      // Use immediate update for initial load, animate for external updates
+      if (animationSource === 'initial') {
+        displayValue.set(intensity);
+      } else {
+        animateTo(intensity, 'external');
+      }
       setDisplayNumber(intensity);
     }
-  }, [intensity, animationSource, displayValue, animateTo, isUserLocked]);
+  }, [intensity, animationSource, displayValue, animateTo, isUserLocked, getCurrentValue, id]);
   
   // Auto-collapse after inactivity (only for manual expansion when light is off)
   useEffect(() => {
