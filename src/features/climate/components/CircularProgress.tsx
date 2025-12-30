@@ -127,10 +127,10 @@ export const CircularProgress = ({
           strokeWidth={strokeWidth}
           fill="none"
           strokeLinecap="round"
-          style={{ 
-            strokeDasharray: `${progressLength} ${remainingLength + (circumference * gapFraction)}`,
+          initial={{ 
+            strokeDasharray: `0 ${circumference}`,
+            opacity: 0,
           }}
-          initial={false}
           animate={{ 
             strokeDasharray: isShowingSkeleton 
               ? `0 ${circumference}` 
@@ -140,15 +140,19 @@ export const CircularProgress = ({
           }}
           transition={{ 
             strokeDasharray: {
-              duration: 0.8,
+              duration: 1.2,
               delay: isShowingSkeleton ? 0 : delay,
-              ease: EASING.entrance,
+              ease: [0.16, 1, 0.3, 1], // Soft ease-out
             },
             stroke: {
-              duration: 0.5,
-              ease: 'easeInOut'
+              duration: 0.6,
+              ease: [0.16, 1, 0.3, 1],
             },
-            opacity: smoothTransition
+            opacity: {
+              duration: 0.4,
+              delay: isShowingSkeleton ? 0 : delay,
+              ease: [0.16, 1, 0.3, 1],
+            }
           }}
         />
       </svg>
@@ -156,15 +160,15 @@ export const CircularProgress = ({
       {/* Icon container */}
       <motion.div 
         className="absolute inset-0 flex items-center justify-center"
-        initial={false}
+        initial={{ opacity: 0, scale: 0.8 }}
         animate={{ 
-          opacity: isShowingSkeleton ? 0.5 : 1,
-          scale: isShowingSkeleton ? 0.95 : 1,
+          opacity: isShowingSkeleton ? 0.4 : 1,
+          scale: isShowingSkeleton ? 0.9 : 1,
         }}
         transition={{
-          duration: 0.4,
-          delay: isShowingSkeleton ? 0 : delay + 0.1,
-          ease: EASING.entrance,
+          duration: 0.6,
+          delay: isShowingSkeleton ? 0 : delay + 0.15,
+          ease: [0.16, 1, 0.3, 1],
         }}
       >
         {children}
