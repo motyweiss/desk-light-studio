@@ -85,7 +85,7 @@ export const DynamicLightingBackground = () => {
 
   return (
     <>
-      {/* CSS Keyframes */}
+      {/* CSS Keyframes and Noise Filter */}
       <style>{`
         @keyframes float1 {
           0%, 100% { transform: translate(0, 0); }
@@ -106,6 +106,21 @@ export const DynamicLightingBackground = () => {
           75% { transform: scale(0.98); }
         }
       `}</style>
+
+      {/* SVG Noise Filter Definition */}
+      <svg className="absolute w-0 h-0">
+        <defs>
+          <filter id="grain-filter">
+            <feTurbulence 
+              type="fractalNoise" 
+              baseFrequency="0.75" 
+              numOctaves="4" 
+              stitchTiles="stitch"
+            />
+            <feColorMatrix type="saturate" values="0" />
+          </filter>
+        </defs>
+      </svg>
 
       <div 
         className="fixed inset-0 pointer-events-none overflow-hidden"
@@ -224,6 +239,16 @@ export const DynamicLightingBackground = () => {
           style={{
             background: 'radial-gradient(ellipse at 50% 50%, transparent 30%, hsl(220 25% 5% / 0.6) 100%)',
             pointerEvents: 'none',
+          }}
+        />
+
+        {/* Subtle grain texture overlay */}
+        <div 
+          className="absolute inset-0 pointer-events-none"
+          style={{
+            filter: 'url(#grain-filter)',
+            opacity: 0.04,
+            mixBlendMode: 'overlay',
           }}
         />
       </div>
