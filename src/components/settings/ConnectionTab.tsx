@@ -136,16 +136,16 @@ const ConnectionTab = ({
       {/* Token Help Box - Under the title */}
       <motion.div 
         variants={itemVariants}
-        className="flex items-start gap-3 px-1"
+        className="flex items-center justify-center gap-2"
       >
-        <Key className="w-4 h-4 text-warm-glow/60 mt-0.5 flex-shrink-0" />
-        <p className="text-xs text-white/50 leading-relaxed font-light">
+        <Key className="w-4 h-4 text-warm-glow/60 flex-shrink-0" />
+        <p className="text-xs text-white/50 leading-relaxed font-light text-center">
           To get a token: Profile → Security → Long-Lived Access Tokens → Create Token.{" "}
           <a 
             href="https://www.home-assistant.io/docs/authentication/#your-account-profile" 
             target="_blank" 
             rel="noopener noreferrer"
-            className="text-warm-glow hover:text-warm-glow/80 underline transition-colors"
+            className="text-white/70 hover:text-white underline transition-colors"
           >
             Learn more
           </a>
