@@ -143,9 +143,9 @@ export const ClimateIndicatorTooltip = ({
                     <Icon className="w-4 h-4 text-white/45" strokeWidth={1.5} />
                   </motion.div>
                   
-                  {/* Value */}
-                  <motion.span 
-                    className="text-[32px] font-light text-white/90 tabular-nums tracking-tight leading-none"
+                  {/* Value with unit */}
+                  <motion.div 
+                    className="flex items-baseline gap-0.5"
                     initial={{ opacity: 0, y: 8 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{
@@ -154,8 +154,13 @@ export const ClimateIndicatorTooltip = ({
                       ease: [0.25, 0.46, 0.45, 0.94]
                     }}
                   >
-                    {value}
-                  </motion.span>
+                    <span className="text-[32px] font-light text-white/90 tabular-nums tracking-tight leading-none">
+                      {value}
+                    </span>
+                    <span className="text-lg font-light text-white/40">
+                      {unit}
+                    </span>
+                  </motion.div>
                   
                   {/* Label */}
                   <motion.span 
