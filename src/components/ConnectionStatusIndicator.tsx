@@ -23,9 +23,9 @@ export const ConnectionStatusIndicator = ({
 }: ConnectionStatusIndicatorProps) => {
 
   const getStatusColor = () => {
-    if (isConnecting || isReconnecting) return "text-yellow-400";
-    if (!isConnected) return "text-foreground/30";
-    return "text-yellow-400"; // Changed from white to yellow for connected state
+    if (isConnecting || isReconnecting) return "text-white/60";
+    if (!isConnected) return "text-white/30";
+    return "text-white/70";
   };
 
   const getTooltipText = () => {
@@ -61,7 +61,7 @@ export const ConnectionStatusIndicator = ({
           aria-label={getTooltipText()}
         >
           {showSpinner ? (
-            <Loader2 className="w-5 h-5 animate-spin text-yellow-400" strokeWidth={1.5} />
+            <Loader2 className="w-5 h-5 animate-spin text-white/60" strokeWidth={1.5} />
           ) : (
             <Zap className="w-5 h-5" strokeWidth={1.5} />
           )}
