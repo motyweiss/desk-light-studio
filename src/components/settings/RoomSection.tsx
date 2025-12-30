@@ -20,20 +20,20 @@ const categoryConfig = {
   lights: { 
     icon: Lightbulb, 
     label: 'Lights',
-    iconColor: 'text-amber-400',
-    bgColor: 'bg-amber-400/10'
+    iconColor: 'text-warm-glow',
+    bgColor: 'bg-warm-glow/10'
   },
   sensors: { 
     icon: Thermometer, 
     label: 'Climate Sensors',
-    iconColor: 'text-blue-400',
-    bgColor: 'bg-blue-400/10'
+    iconColor: 'text-warm-glow',
+    bgColor: 'bg-warm-glow/10'
   },
   mediaPlayers: { 
     icon: Music, 
     label: 'Media Players',
-    iconColor: 'text-purple-400',
-    bgColor: 'bg-purple-400/10'
+    iconColor: 'text-warm-glow',
+    bgColor: 'bg-warm-glow/10'
   },
 };
 

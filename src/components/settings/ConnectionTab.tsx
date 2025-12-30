@@ -106,7 +106,7 @@ const ConnectionTab = ({
       transition={{ duration: 0.25, ease: [0.22, 0.03, 0.26, 1] }}
       className="space-y-8"
     >
-      <SettingsSection icon={Home} iconClassName="w-5 h-5 text-yellow-400" title="Home Assistant Connection">
+      <SettingsSection icon={Home} title="Home Assistant Connection">
         {/* Quick Connect Suggestions */}
         <QuickConnectSuggestions
           currentUrl={baseUrl}
@@ -122,7 +122,7 @@ const ConnectionTab = ({
           }}
         />
 
-        <div className="h-px bg-white/10 my-4" />
+        <div className="h-px bg-border/30 my-4" />
 
         <SettingsField 
           label="Base URL"
@@ -132,7 +132,7 @@ const ConnectionTab = ({
             value={baseUrl}
             onChange={(e) => onBaseUrlChange(e.target.value)}
             placeholder="http://homeassistant.local:8123"
-            className="bg-white/5 border-white/20 text-white placeholder:text-white/30"
+            className="bg-secondary/50 border-border/30 text-foreground placeholder:text-muted-foreground/50"
           />
         </SettingsField>
 
@@ -146,12 +146,12 @@ const ConnectionTab = ({
               value={accessToken}
               onChange={(e) => onAccessTokenChange(e.target.value)}
               placeholder="eyJ0eXAiOiJKV1QiLCJhbGc..."
-              className="bg-white/5 border-white/20 text-white placeholder:text-white/30 pr-10"
+              className="bg-secondary/50 border-border/30 text-foreground placeholder:text-muted-foreground/50 pr-10"
             />
             <button
               type="button"
               onClick={() => setShowToken(!showToken)}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-white/50 hover:text-white/80 transition-colors"
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
             >
               {showToken ? (
                 <EyeOff className="w-4 h-4" />
@@ -163,16 +163,16 @@ const ConnectionTab = ({
         </SettingsField>
 
         {/* Token Help */}
-        <div className="pt-4 mt-4 border-t border-white/10">
+        <div className="pt-4 mt-4 border-t border-border/30">
           <div className="flex items-start gap-3">
-            <HelpCircle className="w-4 h-4 text-white/40 flex-shrink-0 mt-0.5" />
-            <p className="text-xs text-white/50 leading-relaxed">
+            <HelpCircle className="w-4 h-4 text-muted-foreground flex-shrink-0 mt-0.5" />
+            <p className="text-xs text-muted-foreground leading-relaxed">
               To create a token: Go to your Home Assistant → Profile → Long-Lived Access Tokens → Create Token.{" "}
               <a 
                 href="https://www.home-assistant.io/docs/authentication/#your-account-profile" 
                 target="_blank" 
                 rel="noopener noreferrer"
-                className="text-yellow-400 hover:text-yellow-300 underline transition-colors"
+                className="text-warm-glow hover:text-warm-glow/80 underline transition-colors"
               >
                 Learn more
               </a>
@@ -184,7 +184,7 @@ const ConnectionTab = ({
           <Button
             onClick={handleTestConnection}
             disabled={testing || !baseUrl || !accessToken}
-            className="w-full bg-white/10 hover:bg-white/15 text-white border border-white/20"
+            className="w-full bg-transparent hover:bg-warm-glow/10 text-warm-glow border border-warm-glow/40 hover:border-warm-glow/60 rounded-xl h-11 font-light transition-all duration-200"
           >
             {testing ? (
               <>

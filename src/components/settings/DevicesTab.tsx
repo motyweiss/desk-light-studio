@@ -111,8 +111,8 @@ const DevicesTab = ({
       <motion.div variants={itemVariants} className="pt-4">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-xl bg-secondary/50 flex items-center justify-center">
-              <Home className="w-4 h-4 text-foreground/70" strokeWidth={1.5} />
+            <div className="w-8 h-8 rounded-xl bg-warm-glow/10 flex items-center justify-center">
+              <Home className="w-4 h-4 text-warm-glow" strokeWidth={1.5} />
             </div>
             <div>
               <h3 className="text-sm font-medium text-foreground/90">Configured Devices</h3>
