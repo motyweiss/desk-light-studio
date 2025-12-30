@@ -15,6 +15,8 @@ interface CircularProgressProps {
   delay?: number;
   /** Gap in the circle (in degrees, starting from bottom) */
   gapAngle?: number;
+  /** Show percentage in the gap area */
+  showPercentage?: boolean;
 }
 
 // Smooth transition config
@@ -35,6 +37,7 @@ export const CircularProgress = ({
   colorType = 'default',
   delay = 0.2,
   gapAngle = 0,
+  showPercentage = false,
 }: CircularProgressProps) => {
   const radius = (size - strokeWidth) / 2;
   const circumference = 2 * Math.PI * radius;
@@ -156,6 +159,35 @@ export const CircularProgress = ({
           }}
         />
       </svg>
+      
+      {/* Percentage in gap area */}
+      {showPercentage && gapAngle > 0 && (
+        <motion.div 
+          className="absolute left-1/2 -translate-x-1/2 flex items-center justify-center"
+          style={{ 
+            bottom: strokeWidth,
+          }}
+          initial={{ opacity: 0 }}
+          animate={{ 
+            opacity: isShowingSkeleton ? 0 : 0.35,
+          }}
+          transition={{
+            duration: 0.6,
+            delay: isShowingSkeleton ? 0 : delay + 0.4,
+            ease: [0.25, 0.1, 0.25, 1],
+          }}
+        >
+          <span 
+            className="font-light text-foreground tabular-nums"
+            style={{ 
+              fontSize: size * 0.14,
+              letterSpacing: '-0.02em',
+            }}
+          >
+            {Math.round(percentage * 100)}%
+          </span>
+        </motion.div>
+      )}
       
       {/* Icon container */}
       <motion.div 
