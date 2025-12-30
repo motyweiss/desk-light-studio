@@ -120,73 +120,73 @@ export const ClimateIndicatorTooltip = ({
               }}
             >
               <div 
-                className="backdrop-blur-[32px] rounded-3xl px-6 py-5 min-w-[240px] overflow-hidden"
+                className="backdrop-blur-[32px] rounded-3xl px-7 py-6 min-w-[260px] overflow-hidden"
                 style={{
-                  backgroundColor: 'rgba(255, 255, 255, 0.08)',
-                  boxShadow: '0 8px 40px rgba(0,0,0,0.12), 0 2px 8px rgba(0,0,0,0.06)',
-                  border: '1px solid rgba(255, 255, 255, 0.12)',
+                  backgroundColor: 'rgba(255, 255, 255, 0.06)',
+                  boxShadow: '0 12px 48px rgba(0,0,0,0.1), 0 4px 12px rgba(0,0,0,0.04)',
+                  border: '1px solid rgba(255, 255, 255, 0.08)',
                 }}
               >
-                {/* Header with icon and value */}
-                <div className="flex items-center gap-5 mb-5">
-                  {/* Icon circle - subtle frosted glass */}
+                {/* Header - centered layout */}
+                <div className="flex flex-col items-center text-center mb-6">
+                  {/* Icon circle */}
                   <motion.div
-                    className="w-14 h-14 rounded-full flex items-center justify-center flex-shrink-0 bg-white/[0.06] border border-white/[0.08]"
+                    className="w-16 h-16 rounded-full flex items-center justify-center bg-white/[0.05] border border-white/[0.06] mb-4"
                     initial={{ scale: 0.7, opacity: 0 }}
                     animate={{ scale: 1, opacity: 1 }}
                     transition={{
-                      delay: 0.12,
-                      duration: 0.35,
+                      delay: 0.1,
+                      duration: 0.4,
                       ease: [0.34, 1.56, 0.64, 1]
                     }}
                   >
-                    <Icon className="w-6 h-6 text-white/50" strokeWidth={1.5} />
+                    <Icon className="w-7 h-7 text-white/45" strokeWidth={1.5} />
                   </motion.div>
                   
-                  {/* Text content */}
-                  <div className="flex flex-col items-start gap-0.5">
-                    <motion.span 
-                      className="text-[28px] font-light text-white/90 tabular-nums tracking-tight leading-none"
-                      initial={{ opacity: 0, x: -8 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{
-                        delay: 0.18,
-                        duration: 0.35,
-                        ease: [0.25, 0.46, 0.45, 0.94]
-                      }}
-                    >
-                      {value}
-                    </motion.span>
-                    <motion.span 
-                      className="text-[11px] text-white/35 font-light tracking-[0.15em] uppercase mt-1"
-                      initial={{ opacity: 0, x: -8 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{
-                        delay: 0.24,
-                        duration: 0.35,
-                        ease: [0.25, 0.46, 0.45, 0.94]
-                      }}
-                    >
-                      {label}
-                    </motion.span>
-                  </div>
+                  {/* Value */}
+                  <motion.span 
+                    className="text-[32px] font-light text-white/90 tabular-nums tracking-tight leading-none"
+                    initial={{ opacity: 0, y: 8 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{
+                      delay: 0.15,
+                      duration: 0.35,
+                      ease: [0.25, 0.46, 0.45, 0.94]
+                    }}
+                  >
+                    {value}
+                  </motion.span>
+                  
+                  {/* Label */}
+                  <motion.span 
+                    className="text-[10px] text-white/30 font-light tracking-[0.2em] uppercase mt-2"
+                    initial={{ opacity: 0, y: 6 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{
+                      delay: 0.2,
+                      duration: 0.35,
+                      ease: [0.25, 0.46, 0.45, 0.94]
+                    }}
+                  >
+                    {label}
+                  </motion.span>
                 </div>
 
                 {/* Trend Graph */}
                 <motion.div 
-                  className="pt-2"
+                  className="pt-1"
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   transition={{
-                    delay: 0.3,
+                    delay: 0.28,
                     duration: 0.35,
                     ease: [0.25, 0.46, 0.45, 0.94]
                   }}
                 >
                   <TrendGraph 
                     data={trendData}
-                    width={200}
-                    height={52}
+                    width={220}
+                    height={56}
                     color={color}
                     animate={isOpen}
                     colorType={colorType}
