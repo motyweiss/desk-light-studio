@@ -52,8 +52,8 @@ const RootLayoutContent = ({ children }: RootLayoutProps) => {
 
   return (
     <div className="h-screen w-full relative flex flex-col overflow-hidden bg-background">
-      {/* Dynamic lighting background - only on main page */}
-      {isMainPage && <DynamicLightingBackground />}
+      {/* Static background - always present across all pages */}
+      <DynamicLightingBackground />
 
       {/* Content */}
       <div className="relative z-10 h-full flex flex-col overflow-hidden">
@@ -68,20 +68,26 @@ const RootLayoutContent = ({ children }: RootLayoutProps) => {
           />
         )}
 
-        {/* Page Content - Simple fade transition */}
+        {/* Page Content - AnimatePresence for clean enter/exit */}
         <div 
           className={`flex-1 overflow-auto ${isMainPage && showHeader ? 'pt-[56px] md:pt-[68px]' : 'pt-0'}`}
           style={{ paddingBottom: bottomPadding }}
         >
-          <motion.div
-            key={location.pathname}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.3 }}
-            className="w-full h-full"
-          >
-            {children}
-          </motion.div>
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={location.pathname}
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -12 }}
+              transition={{ 
+                duration: 0.35, 
+                ease: [0.22, 0.03, 0.26, 1] 
+              }}
+              className="w-full h-full"
+            >
+              {children}
+            </motion.div>
+          </AnimatePresence>
         </div>
 
         {/* Global Media Player */}
