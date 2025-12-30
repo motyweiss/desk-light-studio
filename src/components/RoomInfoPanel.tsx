@@ -14,6 +14,7 @@ interface Light {
   intensity: number;
   isPending?: boolean;
   isLoading?: boolean;
+  animationSource?: 'user' | 'external' | 'initial';
   onChange: (intensity: number) => void;
 }
 
@@ -197,6 +198,7 @@ export const RoomInfoPanel = ({
                 intensity={light.intensity}
                 isPending={light.isPending}
                 isLoading={showSkeleton || light.isLoading}
+                animationSource={light.animationSource}
                 onChange={light.onChange}
                 onHover={(isHovered) => onLightHover(isHovered ? light.id : null)}
               />

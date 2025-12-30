@@ -60,7 +60,8 @@ export const LightingProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   });
   
   // Grace period to ignore stale external updates after user changes
-  const USER_CHANGE_GRACE_PERIOD = 2000; // 2 seconds
+  // Covers: animation (~750ms) + debounce (300ms) + API call (~500ms) + response + buffer
+  const USER_CHANGE_GRACE_PERIOD = 3000; // 3 seconds
 
   const debounceTimersRef = useRef<Map<string, NodeJS.Timeout>>(new Map());
   const wsSubscriptionsRef = useRef<Array<() => void>>([]);
@@ -193,6 +194,9 @@ export const LightingProvider: React.FC<{ children: React.ReactNode }> = ({ chil
             
             // Don't update if pending or in grace period
             if (light.isPending || isInGracePeriod) return prev;
+            
+            // Don't update if same as current target (user intent preserved)
+            if (Math.abs(light.targetValue - newIntensity) < 2) return prev;
             
             // Don't update if same value (within 2% tolerance)
             if (Math.abs(light.confirmedValue - newIntensity) < 2) return prev;
