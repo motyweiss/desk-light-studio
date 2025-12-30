@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowLeft, Loader2, Plug, Cpu } from "lucide-react";
+import { ArrowLeft, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import ConnectionTab from "@/components/settings/ConnectionTab";
@@ -328,19 +328,17 @@ const Settings = () => {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.4, delay: 0.15, ease: [0.16, 1, 0.3, 1] as const }}
             >
-              <TabsList className="w-full mb-6 bg-white/[0.03] backdrop-blur-xl border border-white/[0.06] p-1.5 rounded-2xl">
+              <TabsList className="w-full mb-8 bg-white/[0.03] backdrop-blur-xl border border-white/[0.06] p-1 rounded-xl">
                 <TabsTrigger 
                   value="connection" 
-                  className="flex-1 gap-2 rounded-xl py-2.5 text-sm font-light data-[state=active]:bg-white/[0.08] data-[state=active]:text-white data-[state=active]:shadow-none text-white/50 transition-all duration-300"
+                  className="flex-1 rounded-lg py-2 text-sm font-light data-[state=active]:bg-white/[0.08] data-[state=active]:text-white data-[state=active]:shadow-none text-white/50 transition-all duration-300"
                 >
-                  <Plug className="w-4 h-4" strokeWidth={1.5} />
                   Connection
                 </TabsTrigger>
                 <TabsTrigger 
                   value="devices" 
-                  className="flex-1 gap-2 rounded-xl py-2.5 text-sm font-light data-[state=active]:bg-white/[0.08] data-[state=active]:text-white data-[state=active]:shadow-none text-white/50 transition-all duration-300"
+                  className="flex-1 rounded-lg py-2 text-sm font-light data-[state=active]:bg-white/[0.08] data-[state=active]:text-white data-[state=active]:shadow-none text-white/50 transition-all duration-300"
                 >
-                  <Cpu className="w-4 h-4" strokeWidth={1.5} />
                   Devices
                 </TabsTrigger>
               </TabsList>
