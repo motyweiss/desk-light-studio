@@ -20,7 +20,7 @@ import { MusicParticles } from './MusicParticles';
 // Fixed heights for organic growth animation
 const CONTAINER_HEIGHTS = {
   minimized: 64,
-  expanded: 310,
+  expanded: 270,
 } as const;
 
 // Spring-based animation for smooth, natural motion
@@ -130,7 +130,7 @@ export const MediaPlayer = () => {
     paddingLeft: isMinimized ? 8 : 28,
     paddingRight: isMinimized ? 16 : 28,
     paddingTop: isMinimized ? 8 : 24,
-    paddingBottom: isMinimized ? 8 : 24,
+    paddingBottom: isMinimized ? 8 : 20,
   }), [isMinimized]);
 
   const albumArtSize = useMemo(() => ({
@@ -321,7 +321,7 @@ export const MediaPlayer = () => {
                 pointerEvents: isExpanded ? 'auto' : 'none',
               }}
               transition={transitions.content}
-              className="mt-10"
+              className="mt-8"
             >
               <div className="space-y-6">
                 {/* Progress Bar */}
