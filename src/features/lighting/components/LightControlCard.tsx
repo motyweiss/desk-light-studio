@@ -426,10 +426,11 @@ export const LightControlCard = ({
 
         {/* Slider area - always present, content animates */}
         <div 
-          className="mt-4 h-5 relative"
+          className="mt-4 h-6 relative"
           data-slider
           onClick={(e) => e.stopPropagation()}
           onPointerDown={(e) => e.stopPropagation()}
+          onTouchStart={(e) => e.stopPropagation()}
         >
           {/* Skeleton slider */}
           <motion.div 
@@ -457,18 +458,20 @@ export const LightControlCard = ({
             animate={{ 
               opacity: isOn && !isLoading ? 1 : 0,
               y: isOn && !isLoading ? 0 : 3,
-              scale: isPending ? [1, 1.01, 1] : 1,
             }}
-            transition={isPending ? {
-              ...sliderEntranceTransition,
-              scale: { duration: 1, repeat: Infinity, ease: "easeInOut" }
-            } : sliderEntranceTransition}
+            transition={sliderEntranceTransition}
             style={{ pointerEvents: isOn ? 'auto' : 'none' }}
           >
             <Slider
               value={[displayNumber]}
               onValueChange={handleSliderChange}
+              onValueCommit={(values) => {
+                // Final value commit - ensure it's sent
+                onChange(values[0]);
+                userInteractingRef.current = false;
+              }}
               max={100}
+              min={1}
               step={1}
               className="w-full"
             />
