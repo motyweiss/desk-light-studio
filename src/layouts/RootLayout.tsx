@@ -77,19 +77,16 @@ const RootLayoutContent = ({ children }: RootLayoutProps) => {
                 opacity: 0, 
                 scale: PAGE_TRANSITIONS.scale.enter,
                 y: PAGE_TRANSITIONS.y.enter,
-                filter: `blur(${PAGE_TRANSITIONS.blur.enter}px)`,
               }}
               animate={{ 
                 opacity: 1, 
                 scale: 1,
                 y: 0,
-                filter: 'blur(0px)',
               }}
               exit={{ 
                 opacity: 0, 
                 scale: PAGE_TRANSITIONS.scale.exit,
                 y: PAGE_TRANSITIONS.y.exit,
-                filter: `blur(${PAGE_TRANSITIONS.blur.exit}px)`,
               }}
               transition={{
                 duration: PAGE_TRANSITIONS.duration,
@@ -98,7 +95,7 @@ const RootLayoutContent = ({ children }: RootLayoutProps) => {
               className="w-full h-full"
               style={{ 
                 transformOrigin: 'center center',
-                willChange: 'opacity, transform, filter',
+                willChange: 'opacity, transform',
               }}
             >
               {children}
