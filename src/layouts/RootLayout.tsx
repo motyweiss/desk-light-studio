@@ -70,33 +70,17 @@ const RootLayoutContent = ({ children }: RootLayoutProps) => {
           className={`flex-1 overflow-auto ${!isSettingsPage ? 'pt-[56px] md:pt-[68px]' : 'pt-0'}`}
           style={{ paddingBottom: bottomPadding }}
         >
-          <AnimatePresence mode="wait" initial={false}>
+          <AnimatePresence mode="popLayout" initial={false}>
             <motion.div
               key={location.pathname}
-              initial={{ 
-                opacity: 0, 
-                scale: PAGE_TRANSITIONS.scale.enter,
-                y: PAGE_TRANSITIONS.y.enter,
-              }}
-              animate={{ 
-                opacity: 1, 
-                scale: 1,
-                y: 0,
-              }}
-              exit={{ 
-                opacity: 0, 
-                scale: PAGE_TRANSITIONS.scale.exit,
-                y: PAGE_TRANSITIONS.y.exit,
-              }}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
               transition={{
-                duration: PAGE_TRANSITIONS.duration,
-                ease: PAGE_TRANSITIONS.ease,
+                duration: 0.3,
+                ease: [0.4, 0, 0.2, 1],
               }}
               className="w-full h-full"
-              style={{ 
-                transformOrigin: 'center center',
-                willChange: 'opacity, transform',
-              }}
             >
               {children}
             </motion.div>
