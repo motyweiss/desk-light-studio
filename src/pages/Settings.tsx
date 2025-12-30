@@ -232,7 +232,7 @@ const Settings = () => {
             >
               <ArrowLeft className="w-4 h-4" strokeWidth={2} />
             </motion.button>
-            <h1 className="text-xl font-display font-normal text-foreground tracking-tight">
+            <h1 className="text-xl font-page-title font-normal text-foreground tracking-tight">
               Settings
             </h1>
           </div>
