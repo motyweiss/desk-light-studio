@@ -20,21 +20,49 @@ const categoryConfig = {
   lights: { 
     icon: Lightbulb, 
     label: 'Lights',
-    iconColor: 'text-warm-glow',
-    bgColor: 'bg-warm-glow/10'
+    iconColor: 'text-amber-400',
+    bgColor: 'bg-amber-400/10'
   },
   sensors: { 
     icon: Thermometer, 
     label: 'Climate Sensors',
-    iconColor: 'text-warm-glow',
-    bgColor: 'bg-warm-glow/10'
+    iconColor: 'text-blue-400',
+    bgColor: 'bg-blue-400/10'
   },
   mediaPlayers: { 
     icon: Music, 
     label: 'Media Players',
-    iconColor: 'text-warm-glow',
-    bgColor: 'bg-warm-glow/10'
+    iconColor: 'text-purple-400',
+    bgColor: 'bg-purple-400/10'
   },
+};
+
+const contentVariants = {
+  hidden: { 
+    opacity: 0, 
+    height: 0,
+    filter: "blur(4px)"
+  },
+  visible: { 
+    opacity: 1, 
+    height: "auto",
+    filter: "blur(0px)",
+    transition: {
+      height: { duration: 0.35, ease: [0.16, 1, 0.3, 1] as const },
+      opacity: { duration: 0.3, delay: 0.05 },
+      filter: { duration: 0.3, delay: 0.05 }
+    }
+  },
+  exit: { 
+    opacity: 0, 
+    height: 0,
+    filter: "blur(4px)",
+    transition: {
+      height: { duration: 0.25, ease: [0.4, 0, 0.2, 1] as const },
+      opacity: { duration: 0.2 },
+      filter: { duration: 0.2 }
+    }
+  }
 };
 
 const RoomSection = ({
@@ -66,18 +94,16 @@ const RoomSection = ({
             <div className={`w-7 h-7 rounded-lg ${config.bgColor} flex items-center justify-center`}>
               <Icon className={`w-3.5 h-3.5 ${config.iconColor}`} strokeWidth={1.5} />
             </div>
-            <span className="text-sm font-light text-foreground/80">{config.label}</span>
-            <span className="text-xs text-muted-foreground px-1.5 py-0.5 rounded-md bg-secondary/50">
-              {devices.length}
-            </span>
+            <span className="text-sm font-light text-white/70">{config.label}</span>
+            <span className="text-xs text-white/30 font-light">({devices.length})</span>
           </div>
           <Button
             variant="ghost"
             size="sm"
             onClick={() => onAddDevice(category)}
-            className="h-7 px-2.5 text-xs text-foreground/50 hover:text-foreground hover:bg-secondary/50 gap-1.5"
+            className="h-8 px-3 text-xs text-white/50 hover:text-white hover:bg-white/[0.06] rounded-lg font-light transition-all duration-300"
           >
-            <Plus className="w-3 h-3" />
+            <Plus className="w-3.5 h-3.5 mr-1.5" />
             Add
           </Button>
         </div>
@@ -86,15 +112,15 @@ const RoomSection = ({
         <AnimatePresence mode="popLayout">
           {devices.length === 0 ? (
             <motion.div 
-              initial={{ opacity: 0, scale: 0.95 }}
+              initial={{ opacity: 0, scale: 0.97 }}
               animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.95 }}
-              className="py-6 text-center text-sm text-muted-foreground/60 border border-dashed border-border/30 rounded-2xl bg-secondary/20"
+              exit={{ opacity: 0, scale: 0.97 }}
+              className="py-4 text-center text-xs text-white/30 font-light bg-white/[0.02] rounded-xl border border-white/[0.04] border-dashed"
             >
               No {config.label.toLowerCase()} configured
             </motion.div>
           ) : (
-            <div className="grid gap-3">
+            <div className="grid gap-2.5">
               {devices.map((device, deviceIndex) => (
                 <DeviceCard
                   key={device.id}
@@ -117,27 +143,27 @@ const RoomSection = ({
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 12 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.4, delay: index * 0.05, ease: [0.22, 0.03, 0.26, 1] }}
-      className="rounded-2xl bg-secondary/30 border border-border/30 overflow-hidden"
+      initial={{ opacity: 0, y: 12, filter: "blur(4px)" }}
+      animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+      transition={{ duration: 0.45, delay: index * 0.08, ease: [0.16, 1, 0.3, 1] as const }}
+      className="bg-white/[0.03] backdrop-blur-xl border border-white/[0.06] rounded-2xl overflow-hidden hover:bg-white/[0.04] hover:border-white/[0.08] transition-all duration-500"
     >
       {/* Room Header */}
       <button
         onClick={() => setIsExpanded(!isExpanded)}
-        className="w-full flex items-center justify-between px-5 py-4 hover:bg-secondary/30 transition-colors"
+        className="w-full flex items-center justify-between px-5 py-4 hover:bg-white/[0.02] transition-colors duration-300"
       >
         <div className="flex items-center gap-3">
-          <h3 className="text-base font-medium text-foreground tracking-tight">{room.name}</h3>
-          <span className="text-xs text-muted-foreground">
+          <h3 className="text-base font-light text-white/90 tracking-wide">{room.name}</h3>
+          <span className="text-xs text-white/30 font-light bg-white/[0.04] px-2.5 py-1 rounded-lg">
             {totalDevices} device{totalDevices !== 1 ? 's' : ''}
           </span>
         </div>
         <motion.div
           animate={{ rotate: isExpanded ? 180 : 0 }}
-          transition={{ duration: 0.2 }}
+          transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
         >
-          <ChevronDown className="w-4 h-4 text-foreground/40" />
+          <ChevronDown className="w-5 h-5 text-white/30" />
         </motion.div>
       </button>
 
@@ -145,29 +171,21 @@ const RoomSection = ({
       <AnimatePresence>
         {isExpanded && (
           <motion.div
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: 'auto', opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            transition={{ duration: 0.3, ease: [0.22, 0.03, 0.26, 1] }}
+            variants={contentVariants}
+            initial="hidden"
+            animate="visible"
+            exit="exit"
             className="overflow-hidden"
           >
-            <div className="px-5 pb-5 space-y-6">
-              {/* Separator */}
-              <div className="h-px bg-border/30" />
-
-              {/* Lights */}
+            <div className="px-5 pb-5 space-y-6 border-t border-white/[0.04] pt-5">
               {renderDeviceCategory('lights', room.lights, 'light')}
-
-              {/* Divider */}
-              <div className="h-px bg-border/20" />
-
-              {/* Climate Sensors */}
+              
+              <div className="h-px bg-white/[0.04]" />
+              
               {renderDeviceCategory('sensors', room.sensors, 'sensor')}
-
-              {/* Divider */}
-              <div className="h-px bg-border/20" />
-
-              {/* Media Players */}
+              
+              <div className="h-px bg-white/[0.04]" />
+              
               {renderDeviceCategory('mediaPlayers', room.mediaPlayers, 'media_player')}
             </div>
           </motion.div>

@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { ArrowLeft, Loader2, Plug, Cpu } from "lucide-react";
@@ -12,23 +12,94 @@ import { homeAssistant, type HAEntity } from "@/services/homeAssistant";
 import { useToast } from "@/hooks/use-toast";
 import { DeviceConfig } from "@/types/settings";
 
-const staggerContainer = {
-  hidden: { opacity: 0 },
-  show: {
-    opacity: 1,
+// Animation variants matching Index.tsx
+const pageVariants = {
+  initial: { 
+    opacity: 0, 
+    scale: 0.97,
+    filter: "blur(8px)"
+  },
+  animate: { 
+    opacity: 1, 
+    scale: 1,
+    filter: "blur(0px)",
     transition: {
+      duration: 0.6,
+      ease: [0.16, 1, 0.3, 1] as const,
       staggerChildren: 0.06,
       delayChildren: 0.1
+    }
+  },
+  exit: {
+    opacity: 0,
+    scale: 0.98,
+    filter: "blur(6px)",
+    transition: {
+      duration: 0.35,
+      ease: [0.4, 0, 0.2, 1] as const
     }
   }
 };
 
-const itemVariants = {
-  hidden: { opacity: 0, y: 12 },
-  show: { 
+const headerVariants = {
+  initial: { 
+    opacity: 0, 
+    y: -16,
+    filter: "blur(6px)"
+  },
+  animate: { 
     opacity: 1, 
     y: 0,
-    transition: { duration: 0.4, ease: [0.22, 0.03, 0.26, 1] as const }
+    filter: "blur(0px)",
+    transition: {
+      duration: 0.5,
+      ease: [0.16, 1, 0.3, 1] as const
+    }
+  }
+};
+
+const contentVariants = {
+  initial: { 
+    opacity: 0, 
+    y: 16,
+    filter: "blur(4px)"
+  },
+  animate: { 
+    opacity: 1, 
+    y: 0,
+    filter: "blur(0px)",
+    transition: {
+      duration: 0.5,
+      ease: [0.16, 1, 0.3, 1] as const
+    }
+  }
+};
+
+const floatBarVariants = {
+  initial: { 
+    opacity: 0, 
+    y: 20,
+    scale: 0.95,
+    filter: "blur(4px)"
+  },
+  animate: { 
+    opacity: 1, 
+    y: 0,
+    scale: 1,
+    filter: "blur(0px)",
+    transition: {
+      duration: 0.4,
+      ease: [0.16, 1, 0.3, 1] as const
+    }
+  },
+  exit: { 
+    opacity: 0, 
+    y: 10,
+    scale: 0.98,
+    filter: "blur(4px)",
+    transition: {
+      duration: 0.25
+    }
   }
 };
 
@@ -93,7 +164,7 @@ const Settings = () => {
     setIsDirty(hasChanges);
   }, [baseUrl, accessToken, localDevicesMapping, haConfig, devicesMapping]);
 
-  const handleAddDevice = (roomId: string, category: 'lights' | 'sensors' | 'mediaPlayers') => {
+  const handleAddDevice = useCallback((roomId: string, category: 'lights' | 'sensors' | 'mediaPlayers') => {
     const newDevice: DeviceConfig = {
       id: `device_${Date.now()}`,
       label: `New ${category === 'lights' ? 'Light' : category === 'sensors' ? 'Sensor' : 'Media Player'}`,
@@ -109,9 +180,9 @@ const Settings = () => {
           : room
       )
     }));
-  };
+  }, []);
 
-  const handleUpdateDevice = (
+  const handleUpdateDevice = useCallback((
     roomId: string, 
     category: 'lights' | 'sensors' | 'mediaPlayers', 
     deviceId: string, 
@@ -130,9 +201,9 @@ const Settings = () => {
           : room
       )
     }));
-  };
+  }, []);
 
-  const handleRemoveDevice = (roomId: string, category: 'lights' | 'sensors' | 'mediaPlayers', deviceId: string) => {
+  const handleRemoveDevice = useCallback((roomId: string, category: 'lights' | 'sensors' | 'mediaPlayers', deviceId: string) => {
     const confirmed = window.confirm('Are you sure you want to remove this device?');
     if (!confirmed) return;
     
@@ -147,7 +218,7 @@ const Settings = () => {
           : room
       )
     }));
-  };
+  }, []);
 
   const handleSave = async () => {
     setIsSaving(true);
@@ -206,67 +277,103 @@ const Settings = () => {
 
   if (isLoadingHAConfig) {
     return (
-      <div className="h-full flex items-center justify-center bg-card">
-        <Loader2 className="w-8 h-8 animate-spin text-foreground/60" />
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <motion.div 
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          className="flex items-center gap-3"
+        >
+          <div className="w-2 h-2 rounded-full bg-warm-glow animate-pulse" />
+          <span className="text-sm text-white/50 font-light">Loading settings...</span>
+        </motion.div>
       </div>
     );
   }
 
   return (
-    <div className="h-full flex flex-col bg-card">
+    <motion.div 
+      variants={pageVariants}
+      initial="initial"
+      animate="animate"
+      exit="exit"
+      className="min-h-screen bg-background relative overflow-hidden"
+    >
+      {/* Background Effects - matching Index.tsx aesthetic */}
+      <div className="fixed inset-0 pointer-events-none">
+        {/* Subtle ambient glow */}
+        <div className="absolute inset-0 bg-gradient-to-b from-warm-glow/[0.02] via-transparent to-transparent" />
+        
+        {/* Vignette effect */}
+        <div 
+          className="absolute inset-0"
+          style={{
+            background: 'radial-gradient(ellipse 80% 60% at 50% 50%, transparent 40%, rgba(0,0,0,0.4) 100%)'
+          }}
+        />
+        
+        {/* Grain texture */}
+        <div 
+          className="absolute inset-0 opacity-[0.015]"
+          style={{
+            backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E")`,
+            backgroundRepeat: 'repeat'
+          }}
+        />
+      </div>
+
       {/* Fixed Header */}
-      <motion.div 
-        initial={{ opacity: 0, y: -10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.4, ease: [0.22, 0.03, 0.26, 1] }}
-        className="flex-shrink-0 bg-card/90 backdrop-blur-2xl border-b border-border/50"
+      <motion.header 
+        variants={headerVariants}
+        className="fixed top-0 left-0 right-0 z-50 px-4 py-4 bg-background/40 backdrop-blur-2xl border-b border-white/[0.06]"
       >
-        <div className="max-w-2xl mx-auto px-6 py-5 flex items-center justify-between">
+        <div className="max-w-2xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <motion.button
+            <Button
+              variant="ghost"
+              size="icon"
               onClick={handleCancel}
-              className="w-10 h-10 rounded-full bg-secondary/50 backdrop-blur-xl border border-border/50 flex items-center justify-center text-foreground/60 hover:text-foreground hover:border-border hover:bg-secondary/80 transition-all duration-300"
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              aria-label="Go back"
+              className="w-10 h-10 rounded-xl bg-white/[0.04] hover:bg-white/[0.08] text-white/60 hover:text-white/90 transition-all duration-300 border border-white/[0.06] hover:border-white/[0.1]"
             >
-              <ArrowLeft className="w-4 h-4" strokeWidth={2} />
-            </motion.button>
-            <h1 className="text-xl font-page-title font-normal text-foreground tracking-tight">
-              Settings
-            </h1>
+              <ArrowLeft className="w-5 h-5" strokeWidth={1.5} />
+            </Button>
+            <h1 className="text-xl font-page-title text-white/90 tracking-wide">Settings</h1>
           </div>
+          
           <SettingsConnectionBadge />
         </div>
-      </motion.div>
+      </motion.header>
 
-      {/* Scrollable Content */}
-      <motion.div 
-        variants={staggerContainer}
-        initial="hidden"
-        animate="show"
-        className="flex-1 overflow-y-auto min-h-0"
+      {/* Main Content */}
+      <motion.main 
+        variants={contentVariants}
+        className="pt-24 pb-32 px-4"
       >
-        <div className="max-w-2xl mx-auto px-6 py-8 pb-32">
-          <motion.div variants={itemVariants}>
-            <Tabs defaultValue="connection" className="w-full">
-              <TabsList className="w-full mb-8 p-1.5 bg-secondary/30 border border-border/30 rounded-2xl">
+        <div className="max-w-2xl mx-auto">
+          <Tabs defaultValue="connection" className="w-full">
+            <motion.div
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.4, delay: 0.15, ease: [0.16, 1, 0.3, 1] as const }}
+            >
+              <TabsList className="w-full mb-6 bg-white/[0.03] backdrop-blur-xl border border-white/[0.06] p-1.5 rounded-2xl">
                 <TabsTrigger 
                   value="connection" 
-                  className="flex-1 gap-2 data-[state=active]:bg-secondary data-[state=active]:shadow-lg rounded-xl py-3"
+                  className="flex-1 gap-2 rounded-xl py-2.5 text-sm font-light data-[state=active]:bg-white/[0.08] data-[state=active]:text-white data-[state=active]:shadow-none text-white/50 transition-all duration-300"
                 >
                   <Plug className="w-4 h-4" strokeWidth={1.5} />
                   Connection
                 </TabsTrigger>
                 <TabsTrigger 
                   value="devices" 
-                  className="flex-1 gap-2 data-[state=active]:bg-secondary data-[state=active]:shadow-lg rounded-xl py-3"
+                  className="flex-1 gap-2 rounded-xl py-2.5 text-sm font-light data-[state=active]:bg-white/[0.08] data-[state=active]:text-white data-[state=active]:shadow-none text-white/50 transition-all duration-300"
                 >
                   <Cpu className="w-4 h-4" strokeWidth={1.5} />
                   Devices
                 </TabsTrigger>
               </TabsList>
-              
+            </motion.div>
+
+            <AnimatePresence mode="wait">
               <TabsContent value="connection" className="mt-0">
                 <ConnectionTab
                   baseUrl={baseUrl}
@@ -276,7 +383,7 @@ const Settings = () => {
                   onEntitiesFetched={setAllEntities}
                 />
               </TabsContent>
-              
+
               <TabsContent value="devices" className="mt-0">
                 <DevicesTab
                   devicesMapping={localDevicesMapping}
@@ -287,52 +394,53 @@ const Settings = () => {
                   isLoading={isLoadingEntities}
                 />
               </TabsContent>
-            </Tabs>
-          </motion.div>
+            </AnimatePresence>
+          </Tabs>
         </div>
-      </motion.div>
+      </motion.main>
 
-      {/* Fixed Footer - Floating Save Bar */}
+      {/* Floating Save Bar */}
       <AnimatePresence>
         {isDirty && (
-          <motion.div 
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 20 }}
-            transition={{ duration: 0.3, ease: [0.22, 0.03, 0.26, 1] }}
-            className="absolute bottom-6 left-1/2 -translate-x-1/2 z-50"
+          <motion.div
+            variants={floatBarVariants}
+            initial="initial"
+            animate="animate"
+            exit="exit"
+            className="fixed bottom-6 left-4 right-4 z-50"
           >
-            <div className="flex items-center gap-3 px-4 py-3 bg-secondary/95 backdrop-blur-2xl border border-border/50 rounded-2xl shadow-2xl shadow-black/30">
-              <span className="text-sm text-foreground/70 font-light px-2">Unsaved changes</span>
-              <div className="w-px h-6 bg-border/50" />
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={handleCancel}
-                className="text-foreground/60 hover:text-foreground hover:bg-secondary/80"
-              >
-                Discard
-              </Button>
-              <Button
-                onClick={handleSave}
-                disabled={!isFormValid || isSaving}
-                size="sm"
-                className="bg-warm-glow hover:bg-warm-glow/90 text-primary-foreground font-medium px-6 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
-              >
-                {isSaving ? (
-                  <>
-                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                    Saving...
-                  </>
-                ) : (
-                  "Save"
-                )}
-              </Button>
+            <div className="max-w-2xl mx-auto">
+              <div className="flex items-center justify-between gap-4 px-5 py-4 rounded-2xl bg-white/[0.06] backdrop-blur-2xl border border-white/[0.08] shadow-2xl shadow-black/30">
+                <span className="text-sm text-white/70 font-light">Unsaved changes</span>
+                <div className="flex items-center gap-3">
+                  <Button
+                    variant="ghost"
+                    onClick={handleCancel}
+                    className="h-9 px-4 text-sm font-light text-white/60 hover:text-white hover:bg-white/[0.06] rounded-xl transition-all duration-300"
+                  >
+                    Discard
+                  </Button>
+                  <Button
+                    onClick={handleSave}
+                    disabled={!isFormValid || isSaving}
+                    className="h-9 px-5 text-sm font-light bg-warm-glow/90 hover:bg-warm-glow text-black rounded-xl transition-all duration-300 disabled:opacity-40"
+                  >
+                    {isSaving ? (
+                      <>
+                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                        Saving...
+                      </>
+                    ) : (
+                      "Save"
+                    )}
+                  </Button>
+                </div>
+              </div>
             </div>
           </motion.div>
         )}
       </AnimatePresence>
-    </div>
+    </motion.div>
   );
 };
 
