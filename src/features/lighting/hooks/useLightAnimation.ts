@@ -83,12 +83,12 @@ export const useLightAnimation = (
       const wasOn = currentValue > 0;
       
       if (isOn !== wasOn) {
-        // Toggle on/off - smooth dramatic animation with gentle easing
+        // Toggle on/off - smooth animation
         duration = isOn ? SEQUENCES.lightControl.turnOnDuration : SEQUENCES.lightControl.turnOffDuration;
-        // Use gentle easing for smoother, more organic feel
+        // Optimized easing curves
         ease = isOn 
-          ? [0.22, 0.68, 0.35, 1.0] as Easing  // Smooth accelerate then ease out for turn on
-          : [0.32, 0.0, 0.67, 0.0] as Easing;  // Gentle deceleration for turn off
+          ? [0.16, 0.7, 0.3, 1.0] as Easing   // Smooth ease-out for turn on
+          : [0.4, 0.0, 0.2, 1.0] as Easing;   // Quick start, smooth end for turn off
       } else {
         // Slider adjustment - responsive animation
         duration = SEQUENCES.lightControl.sliderDuration;
