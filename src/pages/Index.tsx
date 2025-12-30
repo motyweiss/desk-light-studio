@@ -9,6 +9,7 @@ import { useLighting } from "@/features/lighting";
 import { useAppLoad } from "@/contexts/AppLoadContext";
 import { usePageLoadSequence, LOAD_EASE } from "@/hooks/usePageLoadSequence";
 import { LOAD_SEQUENCE } from "@/constants/loadingSequence";
+import { useLoadState } from "@/layouts/RootLayout";
 
 // Import primary desk image for preloading
 import desk000 from "@/assets/desk-000.png";
@@ -16,6 +17,7 @@ import desk000 from "@/assets/desk-000.png";
 const Index = () => {
   const { hasInitiallyLoaded, setInitiallyLoaded } = useAppLoad();
   const [isOverlayComplete, setIsOverlayComplete] = useState(hasInitiallyLoaded);
+  const { setShowMediaPlayer, setShowHeader } = useLoadState();
   
   const climate = useClimate();
   const { lights, setLightIntensity, isConnected } = useLighting();
@@ -27,12 +29,22 @@ const Index = () => {
     showSkeleton, 
     showData,
     showMediaPlayer,
+    showHeader,
     onOverlayExitComplete,
   } = usePageLoadSequence({
     overlayComplete: isOverlayComplete,
     isConnected,
     isDataLoaded: climate.isLoaded,
   });
+
+  // Sync load state with RootLayout
+  useEffect(() => {
+    setShowMediaPlayer(showMediaPlayer);
+  }, [showMediaPlayer, setShowMediaPlayer]);
+
+  useEffect(() => {
+    setShowHeader(showHeader);
+  }, [showHeader, setShowHeader]);
 
   const [hoveredLight, setHoveredLight] = useState<string | null>(null);
 

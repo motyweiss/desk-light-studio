@@ -1,4 +1,4 @@
-import React, { ReactNode } from 'react';
+import React, { ReactNode, createContext, useContext, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
 import { MediaPlayerProvider, MediaPlayerUIProvider, useMediaPlayerUISafe } from '@/features/mediaPlayer';
@@ -7,12 +7,27 @@ import { TopNavigationBar } from '@/components/navigation/TopNavigationBar';
 import { useHAConnection } from '@/contexts/HAConnectionContext';
 import { PAGE_TRANSITIONS } from '@/lib/animations/tokens';
 import { LOAD_SEQUENCE } from '@/constants/loadingSequence';
-import { usePageLoadSequence } from '@/hooks/usePageLoadSequence';
-import { useClimate } from '@/features/climate';
 
 interface RootLayoutProps {
   children: ReactNode;
 }
+
+// Context for sharing load state between Index and RootLayout
+interface LoadStateContextValue {
+  showMediaPlayer: boolean;
+  showHeader: boolean;
+  setShowMediaPlayer: (show: boolean) => void;
+  setShowHeader: (show: boolean) => void;
+}
+
+const LoadStateContext = createContext<LoadStateContextValue>({
+  showMediaPlayer: false,
+  showHeader: false,
+  setShowMediaPlayer: () => {},
+  setShowHeader: () => {},
+});
+
+export const useLoadState = () => useContext(LoadStateContext);
 
 // Inner component that uses the UI context
 const RootLayoutContent = ({ children }: RootLayoutProps) => {
@@ -20,19 +35,11 @@ const RootLayoutContent = ({ children }: RootLayoutProps) => {
   const { entityMapping, isConnected, isLoading: isConnecting, reconnect, connectionStatus } = useHAConnection();
   const isReconnecting = connectionStatus === 'connecting';
   const { isVisible } = useMediaPlayerUISafe();
-  const climate = useClimate();
+  const { showMediaPlayer, showHeader } = useLoadState();
 
   const isSettingsPage = location.pathname === '/settings';
 
-  // Use page load sequence for media player visibility
-  const { showMediaPlayer, showHeader, showContent } = usePageLoadSequence({
-    overlayComplete: true, // RootLayout assumes overlay is managed by Index
-    isConnected,
-    isDataLoaded: climate.isLoaded,
-  });
-
   // Bottom padding to ensure content doesn't get hidden behind the player
-  // Player height (64px minimized) + bottom offset (16px) + comfortable buffer (56px)
   const bottomPadding = isSettingsPage ? 0 : 136;
 
   return (
@@ -41,7 +48,7 @@ const RootLayoutContent = ({ children }: RootLayoutProps) => {
     >
       {/* Content */}
       <div className="relative z-10 h-full flex flex-col overflow-hidden">
-        {/* Global Top Navigation Bar - Fixed at top (hidden on mobile and settings page) */}
+        {/* Global Top Navigation Bar */}
         <AnimatePresence>
           {!isSettingsPage && showHeader && (
             <TopNavigationBar
@@ -54,7 +61,7 @@ const RootLayoutContent = ({ children }: RootLayoutProps) => {
           )}
         </AnimatePresence>
 
-        {/* Page Content with AnimatePresence for smooth transitions */}
+        {/* Page Content */}
         <div 
           className={`flex-1 overflow-auto ${!isSettingsPage ? 'pt-[56px] md:pt-[68px]' : 'pt-0'}`}
           style={{ paddingBottom: bottomPadding }}
@@ -80,7 +87,7 @@ const RootLayoutContent = ({ children }: RootLayoutProps) => {
           </AnimatePresence>
         </div>
 
-        {/* Global Media Player - Fixed at bottom with entry animation (hidden on settings page) */}
+        {/* Global Media Player - entry from bottom */}
         <AnimatePresence>
           {!isSettingsPage && showMediaPlayer && (
             <motion.div
@@ -120,15 +127,19 @@ const RootLayoutContent = ({ children }: RootLayoutProps) => {
 
 export const RootLayout = ({ children }: RootLayoutProps) => {
   const { entityMapping, isConnected } = useHAConnection();
+  const [showMediaPlayer, setShowMediaPlayer] = useState(false);
+  const [showHeader, setShowHeader] = useState(false);
 
   return (
-    <MediaPlayerUIProvider>
-      <MediaPlayerProvider 
-        entityId={entityMapping?.mediaPlayer || ''} 
-        isConnected={isConnected}
-      >
-        <RootLayoutContent>{children}</RootLayoutContent>
-      </MediaPlayerProvider>
-    </MediaPlayerUIProvider>
+    <LoadStateContext.Provider value={{ showMediaPlayer, showHeader, setShowMediaPlayer, setShowHeader }}>
+      <MediaPlayerUIProvider>
+        <MediaPlayerProvider 
+          entityId={entityMapping?.mediaPlayer || ''} 
+          isConnected={isConnected}
+        >
+          <RootLayoutContent>{children}</RootLayoutContent>
+        </MediaPlayerProvider>
+      </MediaPlayerUIProvider>
+    </LoadStateContext.Provider>
   );
 };

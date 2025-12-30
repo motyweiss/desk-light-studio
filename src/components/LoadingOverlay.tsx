@@ -51,7 +51,7 @@ export const LoadingOverlay = ({ isLoading, onExitComplete }: LoadingOverlayProp
         >
           {/* Spinner container */}
           <div className="relative w-28 h-28">
-            {/* Rotating ring */}
+            {/* Single rotating ring */}
             <motion.div
               className="absolute inset-0 rounded-full"
               style={{
@@ -60,22 +60,6 @@ export const LoadingOverlay = ({ isLoading, onExitComplete }: LoadingOverlayProp
                 borderRightColor: 'rgba(255, 255, 255, 0.3)',
               }}
               animate={{ rotate: 360 }}
-              transition={{
-                duration: 1.2,
-                repeat: Infinity,
-                ease: "linear",
-              }}
-            />
-            
-            {/* Secondary rotating ring (opposite direction) */}
-            <motion.div
-              className="absolute inset-2 rounded-full"
-              style={{
-                border: '1.5px solid transparent',
-                borderTopColor: 'rgba(255, 255, 255, 0.4)',
-                borderLeftColor: 'rgba(255, 255, 255, 0.15)',
-              }}
-              animate={{ rotate: -360 }}
               transition={{
                 duration: 1.8,
                 repeat: Infinity,
