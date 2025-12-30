@@ -191,8 +191,11 @@ export const LightingProvider: React.FC<{ children: React.ReactNode }> = ({ chil
             // Ignore external updates during grace period after user change
             const isInGracePeriod = (now - light.lastUserChangeTime) < USER_CHANGE_GRACE_PERIOD;
             
-            // Don't update if pending, in grace period, or same value
-            if (light.isPending || isInGracePeriod || light.confirmedValue === newIntensity) return prev;
+            // Don't update if pending or in grace period
+            if (light.isPending || isInGracePeriod) return prev;
+            
+            // Don't update if same value (within 2% tolerance)
+            if (Math.abs(light.confirmedValue - newIntensity) < 2) return prev;
             
             logger.light(lightId, `WebSocket: ${newIntensity}%`);
             
@@ -201,6 +204,7 @@ export const LightingProvider: React.FC<{ children: React.ReactNode }> = ({ chil
               [lightId]: {
                 ...light,
                 targetValue: newIntensity,
+                displayValue: newIntensity, // Also update displayValue for UI sync
                 confirmedValue: newIntensity,
                 source: 'external',
               }
@@ -267,27 +271,30 @@ export const LightingProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         clearTimeout(existingTimer);
       }
 
-      const currentLight = lights[lightId];
-      const currentValue = currentLight.targetValue;
+      const currentValue = lights[lightId].targetValue;
       const delay = Math.abs(value - currentValue) > 50 ? 0 : 300;
       
       const timer = setTimeout(async () => {
-        // Prevent duplicate API calls for the same value within 500ms
-        const now = Date.now();
-        if (value === currentLight.lastSentValue && (now - currentLight.lastSentTime) < 500) {
-          logger.light(lightId, `Skipping duplicate call for ${value}%`);
-          setLights(prev => ({
+        // Get current state at execution time (not closure time)
+        setLights(prev => {
+          const currentLight = prev[lightId];
+          
+          // Prevent duplicate API calls for the same value within 500ms
+          const nowTime = Date.now();
+          if (value === currentLight.lastSentValue && (nowTime - currentLight.lastSentTime) < 500) {
+            logger.light(lightId, `Skipping duplicate call for ${value}%`);
+            return {
+              ...prev,
+              [lightId]: { ...currentLight, isPending: false }
+            };
+          }
+          
+          // Update lastSentValue before API call
+          return {
             ...prev,
-            [lightId]: { ...prev[lightId], isPending: false }
-          }));
-          return;
-        }
-        
-        // Update lastSentValue before API call
-        setLights(prev => ({
-          ...prev,
-          [lightId]: { ...prev[lightId], lastSentValue: value, lastSentTime: now }
-        }));
+            [lightId]: { ...currentLight, lastSentValue: value, lastSentTime: nowTime }
+          };
+        });
         
         logger.light(lightId, `Setting to ${value}% via ${entityId}`);
         
@@ -298,25 +305,26 @@ export const LightingProvider: React.FC<{ children: React.ReactNode }> = ({ chil
             await lightsAPI.setBrightness(entityId, value);
           }
           
-          setTimeout(() => {
-            setLights(prev => ({
-              ...prev,
-              [lightId]: {
-                ...prev[lightId],
-                confirmedValue: value,
-                isPending: false,
-              }
-            }));
-            markSuccessfulSync();
-          }, 200);
+          // Confirm value after successful API call
+          setLights(prev => ({
+            ...prev,
+            [lightId]: {
+              ...prev[lightId],
+              confirmedValue: value,
+              isPending: false,
+            }
+          }));
+          markSuccessfulSync();
         } catch (error) {
           logger.error(`Failed to set ${lightId}`, error);
           
+          // Rollback to confirmed value on error
           setLights(prev => ({
             ...prev,
             [lightId]: {
               ...prev[lightId],
               targetValue: prev[lightId].confirmedValue,
+              displayValue: prev[lightId].confirmedValue,
               isPending: false,
             }
           }));
