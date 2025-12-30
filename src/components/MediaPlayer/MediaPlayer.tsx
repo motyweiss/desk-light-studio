@@ -20,7 +20,7 @@ import { MusicParticles } from './MusicParticles';
 // Fixed heights for organic growth animation
 const CONTAINER_HEIGHTS = {
   minimized: 64,
-  expanded: 260,
+  expanded: 280,
 } as const;
 
 // Spring-based animation for smooth, natural motion
@@ -127,15 +127,15 @@ export const MediaPlayer = () => {
   }), [isMinimized]);
 
   const paddingStyles = useMemo(() => ({
-    paddingLeft: isMinimized ? 8 : 24,
-    paddingRight: isMinimized ? 16 : 24,
-    paddingTop: isMinimized ? 8 : 20,
-    paddingBottom: isMinimized ? 8 : 20,
+    paddingLeft: isMinimized ? 8 : 28,
+    paddingRight: isMinimized ? 16 : 28,
+    paddingTop: isMinimized ? 8 : 24,
+    paddingBottom: isMinimized ? 8 : 24,
   }), [isMinimized]);
 
   const albumArtSize = useMemo(() => ({
-    width: isMinimized ? 48 : 80,
-    height: isMinimized ? 48 : 80,
+    width: isMinimized ? 48 : 72,
+    height: isMinimized ? 48 : 72,
   }), [isMinimized]);
 
   if (isLoading || !playerState) return null;
@@ -321,11 +321,9 @@ export const MediaPlayer = () => {
                 pointerEvents: isExpanded ? 'auto' : 'none',
               }}
               transition={transitions.content}
-              style={{ 
-                marginTop: 16,
-              }}
+              className="mt-6"
             >
-              <div className="space-y-4">
+              <div className="space-y-6">
                 {/* Progress Bar */}
                 {currentTrack && (
                   <div onClick={(e) => e.stopPropagation()}>
@@ -339,9 +337,13 @@ export const MediaPlayer = () => {
                   </div>
                 )}
 
-                {/* Bottom Row */}
-                <div className="flex items-center justify-between gap-4">
-                  <div className="flex-1 flex justify-center" onClick={(e) => e.stopPropagation()}>
+                {/* Bottom Row - Controls centered, Volume & Speaker on right */}
+                <div className="flex items-center">
+                  {/* Left spacer for balance */}
+                  <div className="flex-1" />
+                  
+                  {/* Centered Playback Controls */}
+                  <div className="flex justify-center" onClick={(e) => e.stopPropagation()}>
                     <PlaybackControls
                       isPlaying={playerState.isPlaying}
                       shuffle={playerState.shuffle}
@@ -353,8 +355,9 @@ export const MediaPlayer = () => {
                       onRepeatToggle={handleRepeatToggle}
                     />
                   </div>
-
-                  <div className="flex items-center gap-6" onClick={(e) => e.stopPropagation()}>
+                  
+                  {/* Right side - Volume & Speaker */}
+                  <div className="flex-1 flex items-center justify-end gap-5" onClick={(e) => e.stopPropagation()}>
                     <VolumeControl
                       volume={playerState.volume}
                       isMuted={playerState.isMuted}
