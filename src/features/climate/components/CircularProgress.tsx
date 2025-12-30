@@ -169,7 +169,7 @@ export const CircularProgress = ({
           }}
           initial={{ opacity: 0 }}
           animate={{ 
-            opacity: isShowingSkeleton ? 0 : 0.5,
+            opacity: isShowingSkeleton ? 0 : 0.7,
           }}
           transition={{
             duration: 0.5,
