@@ -373,28 +373,26 @@ const Settings = () => {
               </TabsList>
             </motion.div>
 
-            <AnimatePresence mode="wait">
-              <TabsContent value="connection" className="mt-0">
-                <ConnectionTab
-                  baseUrl={baseUrl}
-                  accessToken={accessToken}
-                  onBaseUrlChange={setBaseUrl}
-                  onAccessTokenChange={setAccessToken}
-                  onEntitiesFetched={setAllEntities}
-                />
-              </TabsContent>
+            <TabsContent value="connection" className="mt-0">
+              <ConnectionTab
+                baseUrl={baseUrl}
+                accessToken={accessToken}
+                onBaseUrlChange={setBaseUrl}
+                onAccessTokenChange={setAccessToken}
+                onEntitiesFetched={setAllEntities}
+              />
+            </TabsContent>
 
-              <TabsContent value="devices" className="mt-0">
-                <DevicesTab
-                  devicesMapping={localDevicesMapping}
-                  entities={allEntities}
-                  onAddDevice={handleAddDevice}
-                  onUpdateDevice={handleUpdateDevice}
-                  onRemoveDevice={handleRemoveDevice}
-                  isLoading={isLoadingEntities}
-                />
-              </TabsContent>
-            </AnimatePresence>
+            <TabsContent value="devices" className="mt-0">
+              <DevicesTab
+                devicesMapping={localDevicesMapping}
+                entities={allEntities}
+                onAddDevice={handleAddDevice}
+                onUpdateDevice={handleUpdateDevice}
+                onRemoveDevice={handleRemoveDevice}
+                isLoading={isLoadingEntities}
+              />
+            </TabsContent>
           </Tabs>
         </div>
       </motion.main>
