@@ -77,8 +77,8 @@ export const useMediaPlayerSync = (config: UseMediaPlayerSyncConfig): UseMediaPl
       volume: Math.round((attrs.volume_level || 0) * 100),
       isMuted: attrs.is_volume_muted || false,
       currentTrack: {
-        title: attrs.media_title || 'Unknown',
-        artist: attrs.media_artist || 'Unknown Artist',
+        title: attrs.media_title || null,
+        artist: attrs.media_artist || null,
         album: attrs.media_album_name || '',
         albumArt: attrs.entity_picture || null,
         duration: attrs.media_duration || 0,
