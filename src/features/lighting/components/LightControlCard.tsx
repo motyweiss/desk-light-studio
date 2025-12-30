@@ -81,6 +81,14 @@ export const LightControlCard = ({
   // Show slider only when light is on
   const showSlider = isOn;
   
+  // Dynamic icon color based on intensity
+  const iconColor = displayNumber > 0 
+    ? `hsl(44 92% ${Math.max(52, 62 - (100 - displayNumber) * 0.1)}%)`
+    : 'rgba(255, 255, 255, 0.35)';
+  
+  // Dynamic glow intensity
+  const glowIntensity = displayNumber > 30 ? displayNumber / 100 : 0;
+  
   useMotionValueEvent(displayValue, "change", (latest) => {
     setDisplayNumber(Math.round(latest));
   });
@@ -183,6 +191,10 @@ export const LightControlCard = ({
 
   const handleSliderChange = useCallback((values: number[]) => {
     const newValue = values[0];
+    
+    // Immediate visual update for responsiveness
+    setDisplayNumber(newValue);
+    
     if (Math.abs(newValue - displayNumber) >= 10) {
       triggerHaptic();
     }
@@ -304,17 +316,22 @@ export const LightControlCard = ({
               ease: "easeInOut"
             } : crossfadeTransition}
           />
-          {/* Real icon */}
+          {/* Real icon with dynamic glow */}
           <motion.div
             className="absolute inset-0 flex items-center justify-center"
             initial={false}
             animate={{
               opacity: isLoading ? 0 : 1,
               filter: isLoading ? 'blur(4px)' : 'blur(0px)',
-              color: isOn ? 'hsl(44 92% 62%)' : 'rgba(255, 255, 255, 0.35)',
-              scale: isOn ? 1.05 : 1,
+              color: iconColor,
+              scale: 1 + (displayNumber / 100) * 0.08,
             }}
             transition={iconTransition}
+            style={{
+              filter: glowIntensity > 0 
+                ? `drop-shadow(0 0 ${8 * glowIntensity}px rgba(221, 175, 76, ${0.4 * glowIntensity}))`
+                : 'none',
+            }}
           >
             <IconComponent className="w-6 h-6 md:w-7 md:h-7" />
           </motion.div>
@@ -440,8 +457,12 @@ export const LightControlCard = ({
             animate={{ 
               opacity: isOn && !isLoading ? 1 : 0,
               y: isOn && !isLoading ? 0 : 3,
+              scale: isPending ? [1, 1.01, 1] : 1,
             }}
-            transition={sliderEntranceTransition}
+            transition={isPending ? {
+              ...sliderEntranceTransition,
+              scale: { duration: 1, repeat: Infinity, ease: "easeInOut" }
+            } : sliderEntranceTransition}
             style={{ pointerEvents: isOn ? 'auto' : 'none' }}
           >
             <Slider
