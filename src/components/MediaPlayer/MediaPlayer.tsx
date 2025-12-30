@@ -294,7 +294,7 @@ export const MediaPlayer = () => {
                   animate={{ opacity: 1, scale: 1 }}
                   exit={{ opacity: 0, scale: 0.9 }}
                   transition={transitions.content}
-                  style={{ flexShrink: 0 }}
+                  style={{ flexShrink: 0, marginTop: -2 }}
                 >
                   <div onClick={(e) => e.stopPropagation()}>
                     <PlaybackControls
