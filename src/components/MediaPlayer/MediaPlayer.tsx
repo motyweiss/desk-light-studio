@@ -127,8 +127,8 @@ export const MediaPlayer = () => {
   }), [isMinimized]);
 
   const paddingStyles = useMemo(() => ({
-    paddingLeft: isMinimized ? 8 : 24,
-    paddingRight: isMinimized ? 16 : 24,
+    paddingLeft: isMinimized ? 10 : 24,
+    paddingRight: isMinimized ? 10 : 24,
     paddingTop: isMinimized ? 8 : 20,
     paddingBottom: isMinimized ? 8 : 12,
   }), [isMinimized]);
@@ -211,7 +211,7 @@ export const MediaPlayer = () => {
               transition={transitions.layout}
             >
               {/* Album Art + Track Info */}
-              <div className="flex items-center gap-4 min-w-0 flex-1">
+              <div className="flex items-center gap-3 min-w-0 flex-1">
                 {/* Album Art */}
                 <motion.div
                   className="relative flex-shrink-0 rounded-full overflow-hidden bg-white/8"
