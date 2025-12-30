@@ -1,4 +1,3 @@
-import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import officeChairIcon from "@/assets/office-chair.svg";
 import { LOAD_SEQUENCE } from "@/constants/loadingSequence";
@@ -9,33 +8,9 @@ interface LoadingOverlayProps {
 }
 
 export const LoadingOverlay = ({ isLoading, onExitComplete }: LoadingOverlayProps) => {
-  const [minTimeElapsed, setMinTimeElapsed] = useState(false);
-  const [shouldShow, setShouldShow] = useState(isLoading);
-
-  // Ensure minimum display time of 2 seconds
-  useEffect(() => {
-    if (isLoading) {
-      setMinTimeElapsed(false);
-      setShouldShow(true);
-      
-      const timer = setTimeout(() => {
-        setMinTimeElapsed(true);
-      }, LOAD_SEQUENCE.spinner.minDuration);
-
-      return () => clearTimeout(timer);
-    }
-  }, [isLoading]);
-
-  // Only hide when both conditions are met
-  useEffect(() => {
-    if (!isLoading && minTimeElapsed) {
-      setShouldShow(false);
-    }
-  }, [isLoading, minTimeElapsed]);
-
   return (
     <AnimatePresence onExitComplete={onExitComplete}>
-      {shouldShow && (
+      {isLoading && (
         <motion.div
           className="fixed inset-0 z-50 flex items-center justify-center bg-background"
           initial={{ opacity: 1, scale: 1, filter: 'blur(0px)' }}

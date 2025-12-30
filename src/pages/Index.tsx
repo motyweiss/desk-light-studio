@@ -48,27 +48,34 @@ const Index = () => {
 
   const [hoveredLight, setHoveredLight] = useState<string | null>(null);
 
-  // Preload image and complete overlay
+  // Preload image and complete overlay after minimum spinner duration
   useEffect(() => {
     if (hasInitiallyLoaded) {
       setIsOverlayComplete(true);
       return;
     }
 
-    const timeout = setTimeout(() => {
+    let minTimeElapsed = false;
+    let imageLoaded = false;
+    
+    const complete = () => {
       setIsOverlayComplete(true);
       setInitiallyLoaded();
-    }, 600);
+    };
+
+    const minTimer = setTimeout(() => {
+      minTimeElapsed = true;
+      if (imageLoaded) complete();
+    }, LOAD_SEQUENCE.spinner.minDuration);
 
     const img = new Image();
     img.src = desk000;
     img.onload = () => {
-      clearTimeout(timeout);
-      setIsOverlayComplete(true);
-      setInitiallyLoaded();
+      imageLoaded = true;
+      if (minTimeElapsed) complete();
     };
     
-    return () => clearTimeout(timeout);
+    return () => clearTimeout(minTimer);
   }, [hasInitiallyLoaded, setInitiallyLoaded]);
 
   // Master switch
