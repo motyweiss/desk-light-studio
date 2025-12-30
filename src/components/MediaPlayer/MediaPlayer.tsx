@@ -14,19 +14,25 @@ import { MusicParticles } from './MusicParticles';
 
 // ============================================
 // UNIFIED ANIMATION SYSTEM
-// Perfect synchronization between all elements
+// Container grows organically, content fades in after
 // ============================================
+
+// Fixed heights for organic growth animation
+const CONTAINER_HEIGHTS = {
+  minimized: 64,
+  expanded: 260,
+} as const;
 
 // Spring-based animation for smooth, natural motion
 const SPRING = {
-  // Soft spring for container morphing
-  layout: { type: 'spring', stiffness: 280, damping: 30, mass: 1 },
+  // Soft spring for container morphing - the main growth animation
+  layout: { type: 'spring', stiffness: 260, damping: 28, mass: 1 },
   // Slightly stiffer for content
   content: { type: 'spring', stiffness: 350, damping: 35, mass: 0.8 },
 } as const;
 
 const DURATION = {
-  content: 0.3,
+  content: 0.25,
 } as const;
 
 const EASE = {
@@ -36,12 +42,13 @@ const EASE = {
 const createTransitions = (isExpanding: boolean) => ({
   // Spring for smooth container morphing
   layout: SPRING.layout,
-  // Content with small delay when expanding
+  // Content with delay when expanding (appears after container starts growing)
   content: {
     duration: DURATION.content,
     ease: EASE.content,
-    delay: isExpanding ? 0.12 : 0,
+    delay: isExpanding ? 0.15 : 0,
   },
+  // For internal layout changes
   layoutDelayed: SPRING.layout,
 });
 
@@ -111,8 +118,9 @@ export const MediaPlayer = () => {
   // Get transitions for current direction
   const transitions = useMemo(() => createTransitions(isExpanded), [isExpanded]);
 
-  // Memoized styles
+  // Memoized styles - container grows with fixed height values
   const containerStyles = useMemo(() => ({
+    height: isMinimized ? CONTAINER_HEIGHTS.minimized : CONTAINER_HEIGHTS.expanded,
     borderRadius: isMinimized ? 9999 : 24,
     maxWidth: isMinimized ? 420 : 672,
     backgroundColor: isMinimized ? 'rgba(255, 255, 255, 0.12)' : 'rgba(255, 255, 255, 0.18)',
@@ -300,18 +308,19 @@ export const MediaPlayer = () => {
               )}
             </motion.div>
 
-            {/* Expanded Controls */}
-            {isExpanded && (
-              <motion.div
-                initial={{ opacity: 0, scale: 0.96, y: -10 }}
-                animate={{ opacity: 1, scale: 1, y: 0 }}
-                exit={{ opacity: 0, scale: 0.96, y: -10 }}
-                transition={transitions.content}
-                style={{ 
-                  transformOrigin: 'top center',
-                  marginTop: 16,
-                }}
-              >
+            {/* Expanded Controls - fade in after container grows */}
+            <motion.div
+              initial={false}
+              animate={{
+                opacity: isExpanded ? 1 : 0,
+                y: isExpanded ? 0 : -8,
+                pointerEvents: isExpanded ? 'auto' : 'none',
+              }}
+              transition={transitions.content}
+              style={{ 
+                marginTop: 16,
+              }}
+            >
               <div className="space-y-4">
                 {/* Progress Bar */}
                 {currentTrack && (
@@ -361,7 +370,6 @@ export const MediaPlayer = () => {
                 </div>
               </div>
             </motion.div>
-            )}
           </motion.div>
         </motion.div>
       </motion.div>
