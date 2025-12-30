@@ -181,9 +181,9 @@ const Index = () => {
                 { id: 'mouse', name: "Magic Mouse", batteryLevel: 78, isCharging: false, icon: 'mouse' as const },
               ]}
               lights={[
-                { id: "deskLamp", label: "Desk Lamp", intensity: lights.deskLamp.targetValue, isPending: lights.deskLamp.isPending, onChange: createLightHandler('deskLamp') },
-                { id: "monitorLight", label: "Monitor Light", intensity: lights.monitorLight.targetValue, isPending: lights.monitorLight.isPending, onChange: createLightHandler('monitorLight') },
-                { id: "spotlight", label: "Spotlight", intensity: lights.spotlight.targetValue, isPending: lights.spotlight.isPending, onChange: createLightHandler('spotlight') },
+                { id: "deskLamp", label: "Desk Lamp", intensity: lights.deskLamp.targetValue, isPending: lights.deskLamp.isPending, animationSource: lights.deskLamp.source, onChange: createLightHandler('deskLamp') },
+                { id: "monitorLight", label: "Monitor Light", intensity: lights.monitorLight.targetValue, isPending: lights.monitorLight.isPending, animationSource: lights.monitorLight.source, onChange: createLightHandler('monitorLight') },
+                { id: "spotlight", label: "Spotlight", intensity: lights.spotlight.targetValue, isPending: lights.spotlight.isPending, animationSource: lights.spotlight.source, onChange: createLightHandler('spotlight') },
               ]}
               masterSwitchOn={allLightsOn}
               onMasterToggle={handleMasterToggle}

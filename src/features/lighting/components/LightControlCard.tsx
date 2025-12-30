@@ -13,6 +13,7 @@ interface LightControlCardProps {
   isPending?: boolean;
   hasError?: boolean;
   isLoading?: boolean;
+  animationSource?: 'user' | 'external' | 'initial';
   onChange: (intensity: number) => void;
   onHover: (lightId: string | null) => void;
   onRetry?: () => void;
@@ -56,6 +57,7 @@ export const LightControlCard = ({
   isPending = false,
   hasError = false,
   isLoading = false,
+  animationSource = 'initial',
   onChange, 
   onHover,
   onRetry 
@@ -93,12 +95,15 @@ export const LightControlCard = ({
     setDisplayNumber(Math.round(latest));
   });
   
-  // Sync with external intensity changes
+  // Sync with external intensity changes - ONLY when source is external
   useEffect(() => {
-    if (!userInteractingRef.current && Math.abs(displayValue.get() - intensity) > 0.5) {
+    // Skip if user is interacting or if the change originated from user action
+    if (userInteractingRef.current || animationSource === 'user') return;
+    
+    if (Math.abs(displayValue.get() - intensity) > 0.5) {
       animateTo(intensity, 'external');
     }
-  }, [intensity, displayValue, animateTo]);
+  }, [intensity, animationSource, displayValue, animateTo]);
   
   // Auto-collapse after inactivity (only for manual expansion when light is off)
   useEffect(() => {
