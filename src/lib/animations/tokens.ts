@@ -196,9 +196,9 @@ export const SPRINGS = {
 
 export const PAGE_TRANSITIONS = {
   /** Duration for page transitions */
-  duration: 0.45,
+  duration: 0.5,
   /** Easing curve for page transitions */
-  ease: EASE.entrance,
+  ease: [0.16, 1, 0.3, 1] as const,
   /** Scale values for enter/exit */
   scale: {
     /** Scale on enter (starts slightly smaller) */
@@ -206,11 +206,21 @@ export const PAGE_TRANSITIONS = {
     /** Scale on exit (shrinks slightly) */
     exit: 0.98,
   },
+  /** Blur values for enter/exit (px) */
+  blur: {
+    enter: 8,
+    exit: 6,
+  },
+  /** Y offset for enter/exit */
+  y: {
+    enter: 12,
+    exit: -8,
+  },
   /** Overlay exit animation */
   overlay: {
     duration: 0.5,
     ease: EASE.gentle,
-    scale: 1.02, // Slight zoom out effect
+    scale: 1.02,
   },
 } as const;
 

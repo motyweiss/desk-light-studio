@@ -12,35 +12,7 @@ import { homeAssistant, type HAEntity } from "@/services/homeAssistant";
 import { useToast } from "@/hooks/use-toast";
 import { DeviceConfig } from "@/types/settings";
 
-// Animation variants matching Index.tsx
-const pageVariants = {
-  initial: { 
-    opacity: 0, 
-    scale: 0.97,
-    filter: "blur(8px)"
-  },
-  animate: { 
-    opacity: 1, 
-    scale: 1,
-    filter: "blur(0px)",
-    transition: {
-      duration: 0.6,
-      ease: [0.16, 1, 0.3, 1] as const,
-      staggerChildren: 0.06,
-      delayChildren: 0.1
-    }
-  },
-  exit: {
-    opacity: 0,
-    scale: 0.98,
-    filter: "blur(6px)",
-    transition: {
-      duration: 0.35,
-      ease: [0.4, 0, 0.2, 1] as const
-    }
-  }
-};
-
+// Internal animation variants (RootLayout handles page enter/exit)
 const headerVariants = {
   initial: { 
     opacity: 0, 
@@ -53,6 +25,7 @@ const headerVariants = {
     filter: "blur(0px)",
     transition: {
       duration: 0.5,
+      delay: 0.1,
       ease: [0.16, 1, 0.3, 1] as const
     }
   }
@@ -70,6 +43,7 @@ const contentVariants = {
     filter: "blur(0px)",
     transition: {
       duration: 0.5,
+      delay: 0.15, // Slightly after header
       ease: [0.16, 1, 0.3, 1] as const
     }
   }
@@ -291,13 +265,7 @@ const Settings = () => {
   }
 
   return (
-    <motion.div 
-      variants={pageVariants}
-      initial="initial"
-      animate="animate"
-      exit="exit"
-      className="min-h-screen bg-background relative overflow-hidden"
-    >
+    <div className="min-h-screen bg-background relative overflow-hidden">
       {/* Background Effects - matching Index.tsx aesthetic */}
       <div className="fixed inset-0 pointer-events-none">
         {/* Subtle ambient glow */}
@@ -324,6 +292,8 @@ const Settings = () => {
       {/* Fixed Header */}
       <motion.header 
         variants={headerVariants}
+        initial="initial"
+        animate="animate"
         className="fixed top-0 left-0 right-0 z-50 px-4 py-4 bg-background/40 backdrop-blur-2xl border-b border-white/[0.06]"
       >
         <div className="max-w-2xl mx-auto flex items-center justify-between">
@@ -346,6 +316,8 @@ const Settings = () => {
       {/* Main Content */}
       <motion.main 
         variants={contentVariants}
+        initial="initial"
+        animate="animate"
         className="pt-24 pb-32 px-4"
       >
         <div className="max-w-2xl mx-auto">
@@ -438,7 +410,7 @@ const Settings = () => {
           </motion.div>
         )}
       </AnimatePresence>
-    </motion.div>
+    </div>
   );
 };
 

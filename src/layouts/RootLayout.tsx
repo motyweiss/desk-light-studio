@@ -73,9 +73,24 @@ const RootLayoutContent = ({ children }: RootLayoutProps) => {
           <AnimatePresence mode="wait" initial={false}>
             <motion.div
               key={location.pathname}
-              initial={{ opacity: 0, scale: PAGE_TRANSITIONS.scale.enter }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: PAGE_TRANSITIONS.scale.exit }}
+              initial={{ 
+                opacity: 0, 
+                scale: PAGE_TRANSITIONS.scale.enter,
+                y: PAGE_TRANSITIONS.y.enter,
+                filter: `blur(${PAGE_TRANSITIONS.blur.enter}px)`,
+              }}
+              animate={{ 
+                opacity: 1, 
+                scale: 1,
+                y: 0,
+                filter: 'blur(0px)',
+              }}
+              exit={{ 
+                opacity: 0, 
+                scale: PAGE_TRANSITIONS.scale.exit,
+                y: PAGE_TRANSITIONS.y.exit,
+                filter: `blur(${PAGE_TRANSITIONS.blur.exit}px)`,
+              }}
               transition={{
                 duration: PAGE_TRANSITIONS.duration,
                 ease: PAGE_TRANSITIONS.ease,
@@ -83,7 +98,7 @@ const RootLayoutContent = ({ children }: RootLayoutProps) => {
               className="w-full h-full"
               style={{ 
                 transformOrigin: 'center center',
-                willChange: 'opacity, transform',
+                willChange: 'opacity, transform, filter',
               }}
             >
               {children}
