@@ -128,7 +128,7 @@ export const RoomInfoPanel = ({
             delay: elements.devices.delay,
           }}
         >
-          <div className="flex flex-row items-center justify-start gap-10">
+          <div className="flex flex-row items-center justify-start gap-7">
             {devices.map((device, index) => {
               const DeviceIcon = device.icon === 'headphones' 
                 ? AirPodsMaxIcon 

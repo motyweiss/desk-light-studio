@@ -76,19 +76,14 @@ serve(async (req) => {
     const haUrl = `${haConfig.base_url}${path}`;
     console.log(`[HA Proxy] Proxying ${method} request to: ${haUrl}`);
 
-    // Make the request to Home Assistant with retry logic
-    // More retries for TLS/connection errors (common with Nabu Casa cloud)
+    // Make the request to Home Assistant with retry logic (3 attempts with exponential backoff)
     let haResponse: Response;
     let lastError: Error | null = null;
-    const maxRetries = 5;
-    const backoffDelays = [300, 600, 1200, 2000, 3000];
+    const maxRetries = 3;
+    const backoffDelays = [500, 1000, 2000];
     
     for (let attempt = 0; attempt < maxRetries; attempt++) {
       try {
-        // Add timeout with AbortController
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 15000); // 15s timeout
-        
         haResponse = await fetch(haUrl, {
           method,
           headers: {
@@ -96,22 +91,17 @@ serve(async (req) => {
             'Content-Type': 'application/json',
           },
           body: data ? JSON.stringify(data) : undefined,
-          signal: controller.signal,
         });
-        
-        clearTimeout(timeoutId);
         lastError = null;
         break;
       } catch (fetchError) {
         lastError = fetchError as Error;
         const errorMessage = lastError.message || '';
-        const isTlsError = errorMessage.includes('tls') || errorMessage.includes('handshake') || errorMessage.includes('eof') || errorMessage.includes('certificate');
-        const isConnectionError = errorMessage.includes('Connection refused') || errorMessage.includes('connect error');
-        const isTransient = isTlsError || isConnectionError || lastError.name === 'AbortError';
+        const isTlsError = errorMessage.includes('tls') || errorMessage.includes('handshake') || errorMessage.includes('eof');
         
-        // Log silently for transient errors (expected with Nabu Casa), otherwise log as error
-        if (isTransient) {
-          console.log(`[HA Proxy] Retry ${attempt + 1}/${maxRetries} for ${path}: ${errorMessage.substring(0, 50)}`);
+        // Log silently for TLS errors (expected with Nabu Casa), otherwise log as error
+        if (isTlsError) {
+          console.log(`[HA Proxy] TLS retry ${attempt + 1}/${maxRetries} for: ${path}`);
         } else {
           console.error(`[HA Proxy] Fetch attempt ${attempt + 1}/${maxRetries} failed:`, fetchError);
         }
@@ -123,10 +113,8 @@ serve(async (req) => {
     }
     
     if (lastError) {
-      const errorMsg = lastError.message || 'Network connection lost';
-      console.log(`[HA Proxy] All ${maxRetries} retries exhausted for ${path}: ${errorMsg.substring(0, 100)}`);
       return new Response(
-        JSON.stringify({ error: errorMsg, code: 'HA_CONNECTION_ERROR' }),
+        JSON.stringify({ error: lastError.message, code: 'HA_CONNECTION_ERROR' }),
         { status: 503, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }

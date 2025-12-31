@@ -1,26 +1,12 @@
 import React, { createContext, useContext, useState, useCallback, useEffect, useRef } from 'react';
+import { websocketService } from '@/api/homeAssistant';
+import { lights as lightsAPI } from '@/api/homeAssistant';
 import { useHAConnection } from '@/contexts/HAConnectionContext';
+import { connectionManager } from '@/services/ConnectionManager';
 import { useToast } from '@/hooks/use-toast';
 import { usePolling } from '@/shared/hooks';
 import { logger } from '@/shared/utils/logger';
 import type { AnimationSource } from '@/constants/animations';
-
-// Lazy-loaded services to avoid circular dependencies
-let websocketService: any = null;
-let lightsAPI: any = null;
-let connectionManager: any = null;
-
-const loadServices = async () => {
-  if (!websocketService) {
-    const haModule = await import('@/api/homeAssistant');
-    websocketService = haModule.websocketService;
-    lightsAPI = haModule.lights;
-  }
-  if (!connectionManager) {
-    const connModule = await import('@/services/ConnectionManager');
-    connectionManager = connModule.connectionManager;
-  }
-};
 
 interface LightState {
   targetValue: number;
@@ -65,7 +51,6 @@ export const LightingProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   const { config, entityMapping, isConnected: haConnected, connectionMode, markSuccessfulSync } = useHAConnection();
   const { toast } = useToast();
   
-  const [servicesReady, setServicesReady] = useState(false);
   const [connectionType, setConnectionType] = useState<'websocket' | 'polling' | 'disconnected'>('disconnected');
   const [pollingEnabled, setPollingEnabled] = useState(false);
   const [lights, setLights] = useState<LightingContextValue['lights']>({
@@ -81,16 +66,6 @@ export const LightingProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   const debounceTimersRef = useRef<Map<string, NodeJS.Timeout>>(new Map());
   const wsSubscriptionsRef = useRef<Array<() => void>>([]);
 
-  // Load services on mount
-  useEffect(() => {
-    loadServices().then(() => {
-      setServicesReady(true);
-      logger.connection('Lighting services loaded');
-    }).catch(err => {
-      logger.error('Failed to load lighting services', err);
-    });
-  }, []);
-
   // Map light IDs to entity IDs
   const getLightEntity = useCallback((lightId: 'spotlight' | 'deskLamp' | 'monitorLight') => {
     if (!entityMapping) return null;
@@ -104,7 +79,7 @@ export const LightingProvider: React.FC<{ children: React.ReactNode }> = ({ chil
 
   // Fetch light states from API - uses batch fetch for efficiency
   const fetchLightStates = useCallback(async () => {
-    if (!entityMapping || !lightsAPI) return;
+    if (!entityMapping) return;
 
     const lightIds: Array<'spotlight' | 'deskLamp' | 'monitorLight'> = ['spotlight', 'deskLamp', 'monitorLight'];
     
@@ -195,7 +170,7 @@ export const LightingProvider: React.FC<{ children: React.ReactNode }> = ({ chil
 
   // Subscribe to WebSocket updates when in websocket mode
   useEffect(() => {
-    if (!servicesReady || !haConnected || !entityMapping || connectionMode !== 'websocket' || !websocketService) {
+    if (!haConnected || !entityMapping || connectionMode !== 'websocket') {
       return;
     }
 
@@ -256,7 +231,7 @@ export const LightingProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       wsSubscriptionsRef.current.forEach(unsub => unsub());
       wsSubscriptionsRef.current = [];
     };
-  }, [servicesReady, haConnected, entityMapping, connectionMode, getLightEntity, fetchLightStates, markSuccessfulSync]);
+  }, [haConnected, entityMapping, connectionMode, getLightEntity, fetchLightStates, markSuccessfulSync]);
 
   // Set light intensity
   const setLightIntensity = useCallback(async (
@@ -271,7 +246,7 @@ export const LightingProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     }
 
     // Check if lights API is ready before attempting to send commands
-    if (source === 'user' && (!lightsAPI || !lightsAPI.isReady())) {
+    if (source === 'user' && !lightsAPI.isReady()) {
       logger.error(`Cannot control ${lightId} - Home Assistant not configured`);
       toast({
         title: 'Not connected',
@@ -373,7 +348,7 @@ export const LightingProvider: React.FC<{ children: React.ReactNode }> = ({ chil
 
   // Reconnect function - delegates to ConnectionManager
   const reconnect = useCallback(async () => {
-    if (!config || !connectionManager) return;
+    if (!config) return;
 
     try {
       logger.connection('LightingContext: Reconnect requested');
