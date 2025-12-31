@@ -123,8 +123,10 @@ serve(async (req) => {
     }
     
     if (lastError) {
+      const errorMsg = lastError.message || 'Network connection lost';
+      console.log(`[HA Proxy] All ${maxRetries} retries exhausted for ${path}: ${errorMsg.substring(0, 100)}`);
       return new Response(
-        JSON.stringify({ error: lastError.message, code: 'HA_CONNECTION_ERROR' }),
+        JSON.stringify({ error: errorMsg, code: 'HA_CONNECTION_ERROR' }),
         { status: 503, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
