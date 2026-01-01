@@ -34,7 +34,7 @@ const WIZARD_STEPS: Omit<WizardStep, 'status'>[] = [
   { id: 'connect', label: 'Connecting', AnimatedIcon: AnimatedPlugIcon },
   { id: 'auth', label: 'Authenticating', AnimatedIcon: AnimatedKeyIcon },
   { id: 'devices', label: 'Loading devices', AnimatedIcon: AnimatedLampIcon },
-  { id: 'sync', label: 'Syncing', AnimatedIcon: AnimatedSparklesIcon },
+  { id: 'sync', label: 'Analyzing', AnimatedIcon: AnimatedSparklesIcon },
 ];
 
 // =============================================================================
