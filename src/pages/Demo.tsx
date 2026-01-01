@@ -253,34 +253,96 @@ const Demo = () => {
       transition={getContentTransition(true)}
       className="flex flex-col items-center justify-center py-10 space-y-6"
     >
-      {/* Error Icon */}
+      {/* Error Icon - matching success style */}
       <motion.div 
-        className="w-16 h-16 rounded-full bg-red-500/12 flex items-center justify-center"
-        initial={{ scale: 0.7, opacity: 0 }}
+        className="relative w-24 h-24"
+        initial={{ scale: 0.8, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
-        transition={{ duration: 0.4, ease: EASE.bounce }}
+        transition={{ duration: 0.5, ease: EASE.bounce }}
       >
-        <motion.div
-          initial={{ rotate: -90, opacity: 0 }}
-          animate={{ rotate: 0, opacity: 1 }}
-          transition={{ duration: 0.35, delay: 0.15, ease: EASE.apple }}
+        {/* Circular progress */}
+        <motion.svg
+          className="absolute inset-0 w-full h-full -rotate-90"
+          viewBox="0 0 96 96"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.3 }}
         >
-          <X className="w-8 h-8 text-red-400" />
+          <circle
+            cx="48"
+            cy="48"
+            r="44"
+            fill="none"
+            stroke="hsl(0 30% 20% / 0.2)"
+            strokeWidth="3"
+          />
+          <motion.circle
+            cx="48"
+            cy="48"
+            r="44"
+            fill="none"
+            stroke="hsl(0 65% 55%)"
+            strokeWidth="3"
+            strokeLinecap="round"
+            initial={{ pathLength: 0 }}
+            animate={{ pathLength: 1 }}
+            transition={{
+              duration: 1.2,
+              ease: EASE.out,
+              delay: 0.15,
+            }}
+          />
+        </motion.svg>
+        
+        {/* Inner circle + X icon */}
+        <motion.div 
+          className="absolute inset-3 rounded-full bg-red-500/10 flex items-center justify-center"
+          initial={{ opacity: 0, scale: 0.5 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.4, delay: 0.1, ease: EASE.apple }}
+        >
+          <motion.svg
+            width="32"
+            height="32"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2.5"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            className="text-red-400"
+            initial={{ opacity: 0, scale: 0.3 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.4, delay: 1.0, ease: EASE.bounce }}
+          >
+            <motion.path
+              d="M18 6L6 18"
+              initial={{ pathLength: 0 }}
+              animate={{ pathLength: 1 }}
+              transition={{ duration: 0.25, delay: 1.1, ease: EASE.apple }}
+            />
+            <motion.path
+              d="M6 6L18 18"
+              initial={{ pathLength: 0 }}
+              animate={{ pathLength: 1 }}
+              transition={{ duration: 0.25, delay: 1.25, ease: EASE.apple }}
+            />
+          </motion.svg>
         </motion.div>
       </motion.div>
 
       {/* Error Text */}
       <motion.div
-        className="text-center space-y-2"
+        className="text-center space-y-1"
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.4, delay: 0.2, ease: EASE.apple }}
+        transition={{ duration: 0.4, delay: 1.4, ease: EASE.apple }}
       >
         <h2 className="text-xl font-light text-white/90 tracking-wide">
           Unable to connect
         </h2>
-        <p className="text-sm text-white/45 max-w-[280px] mx-auto leading-relaxed">
-          {"We couldn't authenticate with the provided Home Assistant URL or token."}
+        <p className="text-sm text-white/50">
+          {"We couldn't authenticate with the provided credentials."}
         </p>
       </motion.div>
 
@@ -288,7 +350,7 @@ const Demo = () => {
       <motion.div
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.4, delay: 0.35, ease: EASE.apple }}
+        transition={{ duration: 0.4, delay: 1.55, ease: EASE.apple }}
       >
         <button
           onClick={handleRetry}
