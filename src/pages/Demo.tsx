@@ -359,9 +359,24 @@ const Demo = () => {
         variants={iconVariants}
         className="flex justify-center"
       >
-        <div className="w-16 h-16 rounded-[18px] bg-white shadow-lg shadow-black/20 flex items-center justify-center">
+        <motion.div 
+          className="w-16 h-16 rounded-[18px] bg-white shadow-lg shadow-black/20 flex items-center justify-center"
+          animate={connectionStatus === 'connecting' ? {
+            scale: [1, 1.05, 1],
+            boxShadow: [
+              '0 10px 15px -3px rgba(0, 0, 0, 0.2)',
+              '0 10px 25px -3px rgba(255, 188, 0, 0.3)',
+              '0 10px 15px -3px rgba(0, 0, 0, 0.2)',
+            ],
+          } : {}}
+          transition={connectionStatus === 'connecting' ? {
+            duration: 1.5,
+            repeat: Infinity,
+            ease: EASE.smooth,
+          } : {}}
+        >
           <HomeAssistantIcon className="w-8 h-8 text-[hsl(28_15%_12%)]" />
-        </div>
+        </motion.div>
       </motion.div>
 
       <motion.div variants={itemVariants} className="text-center space-y-2">
