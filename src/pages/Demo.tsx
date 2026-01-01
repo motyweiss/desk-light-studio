@@ -545,7 +545,7 @@ const Demo = () => {
       <LayoutGroup>
         <motion.div
           layout
-          className="relative z-10 w-full max-w-md bg-[#302A23] backdrop-blur-[60px] outline outline-[8px] outline-white/10 rounded-3xl p-10 overflow-hidden"
+          className="relative z-10 w-full max-w-md bg-[#302A23] backdrop-blur-[60px] outline outline-[8px] outline-white/10 rounded-3xl p-10 overflow-hidden shadow-[0_25px_60px_-15px_rgba(0,0,0,0.35),0_10px_25px_-10px_rgba(0,0,0,0.2)]"
           initial={prefersReducedMotion ? REDUCED.card.initial : ANIM.card.initial}
           animate={prefersReducedMotion ? REDUCED.card.animate : ANIM.card.animate}
           transition={LAYOUT_TRANSITION}
