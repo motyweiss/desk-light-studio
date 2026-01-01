@@ -228,17 +228,8 @@ const Demo = () => {
         transition={getContentTransition(true)}
         className="space-y-6"
       >
-        {/* Icon - same as form */}
-        <motion.div 
-          className="flex justify-center"
-          initial={{ opacity: 0, scale: 0.4, y: -20, rotate: -180 }}
-          animate={{ opacity: 1, scale: 1, y: 0, rotate: 0 }}
-          transition={{
-            duration: 0.65,
-            delay: 0.1,
-            ease: EASE.bounce,
-          }}
-        >
+        {/* Icon - no entry animation, persists from form */}
+        <div className="flex justify-center">
           <motion.div 
             className="w-16 h-16 rounded-[18px] bg-white shadow-lg shadow-black/20 flex items-center justify-center"
             animate={!prefersReducedMotion ? {
@@ -257,7 +248,7 @@ const Demo = () => {
           >
             <HomeAssistantIcon className="w-8 h-8 text-[#302A23]" />
           </motion.div>
-        </motion.div>
+        </div>
 
         {/* Title */}
         <motion.div
