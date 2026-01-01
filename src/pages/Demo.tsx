@@ -307,7 +307,7 @@ const Demo = () => {
         </div>
 
         {/* Step dots */}
-        <div className="flex items-center gap-2.5 mt-8">
+        <div className="flex items-center gap-3 mt-8">
           {steps.map((step) => {
             const isActive = step.status === 'active';
             const isCompleted = step.status === 'completed';
@@ -315,17 +315,29 @@ const Demo = () => {
             return (
               <motion.div
                 key={step.id}
-                className={`
-                  rounded-full transition-all duration-400
-                  ${isActive 
-                    ? 'w-6 h-1.5 bg-amber-400' 
-                    : isCompleted
-                    ? 'w-1.5 h-1.5 bg-amber-400/60'
-                    : 'w-1.5 h-1.5 bg-white/15'
-                  }
-                `}
-                layout
-                transition={{ duration: 0.3 }}
+                className="rounded-full bg-white/10"
+                initial={false}
+                animate={{
+                  width: isActive ? 28 : 6,
+                  height: 6,
+                  backgroundColor: isActive 
+                    ? 'rgb(251 191 36)' 
+                    : isCompleted 
+                    ? 'rgba(251, 191, 36, 0.5)' 
+                    : 'rgba(255, 255, 255, 0.12)',
+                }}
+                transition={{
+                  width: { 
+                    type: 'spring', 
+                    stiffness: 180, 
+                    damping: 22,
+                    mass: 0.8
+                  },
+                  backgroundColor: { 
+                    duration: 0.5, 
+                    ease: [0.25, 0.46, 0.45, 0.94] 
+                  },
+                }}
               />
             );
           })}
