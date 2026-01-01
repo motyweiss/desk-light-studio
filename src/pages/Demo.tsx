@@ -231,21 +231,44 @@ const Demo = () => {
         {/* Icon - no entry animation, persists from form */}
         <div className="flex justify-center">
           <div className="relative">
-            {/* Breathing ring */}
+            {/* Outer breathing ring */}
             <motion.div
-              className="absolute inset-0 rounded-[18px] border-2 border-white/40"
+              className="absolute inset-0 rounded-[20px] border-[3px] border-white/50"
               animate={!prefersReducedMotion ? {
-                scale: [1, 1.15, 1],
-                opacity: [0.4, 0.15, 0.4],
+                scale: [1, 1.35, 1],
+                opacity: [0.5, 0, 0.5],
               } : {}}
               transition={{
-                duration: 2.2,
+                duration: 2.5,
                 repeat: Infinity,
-                ease: EASE.smooth,
+                ease: [0.4, 0, 0.2, 1],
               }}
             />
+            {/* Inner breathing ring - offset timing */}
+            <motion.div
+              className="absolute inset-0 rounded-[20px] border-2 border-white/30"
+              animate={!prefersReducedMotion ? {
+                scale: [1, 1.2, 1],
+                opacity: [0.4, 0.1, 0.4],
+              } : {}}
+              transition={{
+                duration: 2.5,
+                repeat: Infinity,
+                ease: [0.4, 0, 0.2, 1],
+                delay: 0.4,
+              }}
+            />
+            {/* Icon container with subtle pulse */}
             <motion.div 
               className="relative w-16 h-16 rounded-[18px] bg-white shadow-lg shadow-black/20 flex items-center justify-center"
+              animate={!prefersReducedMotion ? {
+                scale: [1, 1.02, 1],
+              } : {}}
+              transition={{
+                duration: 2.5,
+                repeat: Infinity,
+                ease: [0.4, 0, 0.2, 1],
+              }}
             >
               <HomeAssistantIcon className="w-8 h-8 text-[#302A23]" />
             </motion.div>
