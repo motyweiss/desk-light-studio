@@ -233,29 +233,29 @@ const Demo = () => {
           <div className="relative">
             {/* Outer breathing ring */}
             <motion.div
-              className="absolute inset-0 rounded-[20px] border-[3px] border-white/50"
+              className="absolute inset-0 rounded-[20px] border border-white/30"
               animate={!prefersReducedMotion ? {
-                scale: [1, 1.35, 1],
-                opacity: [0.5, 0, 0.5],
+                scale: [1, 1.4, 1],
+                opacity: [0.35, 0, 0.35],
               } : {}}
               transition={{
-                duration: 2.5,
+                duration: 2.8,
                 repeat: Infinity,
                 ease: [0.4, 0, 0.2, 1],
               }}
             />
             {/* Inner breathing ring - offset timing */}
             <motion.div
-              className="absolute inset-0 rounded-[20px] border-2 border-white/30"
+              className="absolute inset-0 rounded-[20px] border border-white/20"
               animate={!prefersReducedMotion ? {
-                scale: [1, 1.2, 1],
-                opacity: [0.4, 0.1, 0.4],
+                scale: [1, 1.25, 1],
+                opacity: [0.3, 0.05, 0.3],
               } : {}}
               transition={{
-                duration: 2.5,
+                duration: 2.8,
                 repeat: Infinity,
                 ease: [0.4, 0, 0.2, 1],
-                delay: 0.4,
+                delay: 0.5,
               }}
             />
             {/* Icon container with subtle pulse */}
