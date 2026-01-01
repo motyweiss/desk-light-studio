@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence, LayoutGroup } from 'framer-motion';
 import { Eye, EyeOff, RefreshCw, ExternalLink, ArrowLeft, X } from 'lucide-react';
 import { HomeAssistantIcon } from '@/components/icons/HomeAssistantIcon';
 import { useNavigate } from 'react-router-dom';
@@ -20,6 +20,14 @@ type ConnectionStatus = 'idle' | 'connecting' | 'success' | 'error';
 // ANIMATION CONFIGURATION - Clean, consistent, elegant
 // =============================================================================
 
+// Layout transition for card size changes
+const LAYOUT_TRANSITION = {
+  type: 'spring' as const,
+  stiffness: 280,
+  damping: 28,
+  mass: 0.9,
+};
+
 const ANIM = {
   // Card entrance - gentle and refined
   card: {
@@ -31,10 +39,25 @@ const ANIM = {
     },
   },
   
-  // Content crossfade - symmetric, smooth
+  // Content crossfade - orchestrated timing
   content: {
-    duration: TIMING.medium,
-    ease: EASE.smooth,
+    exit: {
+      opacity: 0,
+      scale: 0.98,
+      transition: {
+        duration: 0.2,
+        ease: EASE.smooth,
+      },
+    },
+    enter: {
+      opacity: 1,
+      scale: 1,
+      transition: {
+        duration: 0.25,
+        ease: EASE.smooth,
+        delay: 0.05, // Small delay after exit completes
+      },
+    },
   },
   
   // Icon - subtle scale entrance
@@ -218,13 +241,15 @@ const Demo = () => {
   const SuccessContent = () => (
     <motion.div
       key="success"
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      transition={contentTransition}
+      layout
+      initial={{ opacity: 0, scale: 0.98 }}
+      animate={{ opacity: 1, scale: 1 }}
+      exit={ANIM.content.exit}
+      transition={ANIM.content.enter.transition}
       className="space-y-6 text-center py-8"
     >
       <motion.div 
+        layout
         className="flex justify-center"
         initial={ANIM.statusIcon.initial}
         animate={ANIM.statusIcon.animate}
@@ -253,6 +278,7 @@ const Demo = () => {
       </motion.div>
 
       <motion.div
+        layout
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 0.12, duration: TIMING.fast, ease: EASE.smooth }}
@@ -263,6 +289,7 @@ const Demo = () => {
       </motion.div>
 
       <motion.div 
+        layout
         className="h-0.5 bg-white/8 rounded-full overflow-hidden mx-auto max-w-[180px]"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
@@ -284,13 +311,15 @@ const Demo = () => {
   const ErrorContent = () => (
     <motion.div
       key="error"
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      transition={contentTransition}
+      layout
+      initial={{ opacity: 0, scale: 0.98 }}
+      animate={{ opacity: 1, scale: 1 }}
+      exit={ANIM.content.exit}
+      transition={ANIM.content.enter.transition}
       className="space-y-6 text-center py-8"
     >
       <motion.div 
+        layout
         className="flex justify-center"
         initial={ANIM.statusIcon.initial}
         animate={ANIM.statusIcon.animate}
@@ -308,6 +337,7 @@ const Demo = () => {
       </motion.div>
 
       <motion.div
+        layout
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 0.1, duration: TIMING.fast, ease: EASE.smooth }}
@@ -321,6 +351,7 @@ const Demo = () => {
       </motion.div>
 
       <motion.div
+        layout
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 0.18, duration: TIMING.fast, ease: EASE.smooth }}
@@ -345,14 +376,16 @@ const Demo = () => {
     return (
       <motion.div
         key="form"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
-        transition={contentTransition}
+        layout
+        initial={{ opacity: 0, scale: 0.98 }}
+        animate={{ opacity: 1, scale: 1 }}
+        exit={ANIM.content.exit}
+        transition={ANIM.content.enter.transition}
         className="space-y-6"
       >
         {/* Icon */}
         <motion.div 
+          layout
           className="flex justify-center"
           initial={ANIM.icon.initial}
           animate={ANIM.icon.animate}
@@ -372,6 +405,7 @@ const Demo = () => {
 
         {/* Header */}
         <motion.div 
+          layout
           className="text-center space-y-2"
           initial={ANIM.item.initial}
           animate={ANIM.item.animate}
@@ -387,6 +421,7 @@ const Demo = () => {
 
         {/* Separator */}
         <motion.div 
+          layout
           className="h-px bg-white/10 origin-left mx-4"
           initial={ANIM.separator.initial}
           animate={ANIM.separator.animate}
@@ -395,6 +430,7 @@ const Demo = () => {
 
         {/* Form Fields */}
         <motion.div 
+          layout
           className="space-y-5"
           initial={ANIM.item.initial}
           animate={ANIM.item.animate}
@@ -446,6 +482,7 @@ const Demo = () => {
 
         {/* Connect Button */}
         <motion.div
+          layout
           initial={ANIM.item.initial}
           animate={ANIM.item.animate}
           transition={{ ...ANIM.item.transition, delay: ANIM.stagger.delay + ANIM.stagger.children * 3 }}
@@ -468,6 +505,7 @@ const Demo = () => {
 
         {/* Help Link */}
         <motion.div 
+          layout
           className="text-center"
           initial={ANIM.item.initial}
           animate={ANIM.item.animate}
@@ -504,18 +542,21 @@ const Demo = () => {
       </motion.button>
 
       {/* Main Card */}
-      <motion.div
-        className="relative z-10 w-full max-w-md bg-[#302A23] backdrop-blur-[60px] outline outline-[8px] outline-white/10 rounded-3xl p-10 overflow-hidden"
-        initial={prefersReducedMotion ? REDUCED.card.initial : ANIM.card.initial}
-        animate={prefersReducedMotion ? REDUCED.card.animate : ANIM.card.animate}
-        transition={prefersReducedMotion ? REDUCED.card.transition : ANIM.card.transition}
-      >
-        <AnimatePresence mode="wait" initial={false}>
-          {connectionStatus === 'success' && <SuccessContent />}
-          {connectionStatus === 'error' && <ErrorContent />}
-          {(connectionStatus === 'idle' || connectionStatus === 'connecting') && <FormContent />}
-        </AnimatePresence>
-      </motion.div>
+      <LayoutGroup>
+        <motion.div
+          layout
+          className="relative z-10 w-full max-w-md bg-[#302A23] backdrop-blur-[60px] outline outline-[8px] outline-white/10 rounded-3xl p-10 overflow-hidden"
+          initial={prefersReducedMotion ? REDUCED.card.initial : ANIM.card.initial}
+          animate={prefersReducedMotion ? REDUCED.card.animate : ANIM.card.animate}
+          transition={LAYOUT_TRANSITION}
+        >
+          <AnimatePresence mode="wait" initial={false}>
+            {connectionStatus === 'success' && <SuccessContent />}
+            {connectionStatus === 'error' && <ErrorContent />}
+            {(connectionStatus === 'idle' || connectionStatus === 'connecting') && <FormContent />}
+          </AnimatePresence>
+        </motion.div>
+      </LayoutGroup>
     </div>
   );
 };
