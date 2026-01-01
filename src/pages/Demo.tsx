@@ -202,8 +202,8 @@ const Demo = () => {
         return () => clearTimeout(timer);
       }
 
-      // Progress to next step after delay - slower timing
-      const stepDuration = 1400 + Math.random() * 300; // ~1.4-1.7s per step
+      // Progress to next step after delay - relaxed timing
+      const stepDuration = 2000 + Math.random() * 400; // ~2-2.4s per step
       const timer = setTimeout(() => {
         setSteps(prev => prev.map((step, index) => {
           if (index === currentStepIndex) {
