@@ -623,12 +623,12 @@ const Demo = () => {
         transition={{ duration: 0.3 }}
         className="space-y-6"
       >
-        {/* Icon */}
+        {/* Icon - Frosted Glass Style */}
         <motion.div 
           className="flex justify-center"
         >
           <motion.div 
-            className="w-16 h-16 rounded-[18px] bg-gradient-to-br from-white via-white to-neutral-200 shadow-lg shadow-black/20 flex items-center justify-center origin-center"
+            className="relative w-20 h-20 origin-center"
             initial={{ opacity: 0, scale: 0, filter: 'blur(8px)' }}
             animate={{ opacity: 1, scale: 1, filter: 'blur(0px)' }}
             exit={{ 
@@ -651,7 +651,22 @@ const Demo = () => {
               filter: { duration: 0.3, delay: STAGGER.icon },
             }}
           >
-            <HomeAssistantIcon className="w-8 h-8 text-[#302A23]" />
+            {/* Outer glow layer */}
+            <div className="absolute inset-0 rounded-[22px] bg-white/5 blur-xl" />
+            
+            {/* Third layer - outermost frosted */}
+            <div className="absolute inset-0 rounded-[22px] bg-gradient-to-br from-white/10 via-white/5 to-white/10 backdrop-blur-sm border border-white/10" />
+            
+            {/* Second layer - middle frosted */}
+            <div className="absolute inset-2 rounded-[18px] bg-gradient-to-br from-white/20 via-white/10 to-white/15 backdrop-blur-md border border-white/15 shadow-lg shadow-black/10" />
+            
+            {/* Inner layer - main frosted glass */}
+            <div className="absolute inset-4 rounded-[14px] bg-gradient-to-br from-white/40 via-white/25 to-white/30 backdrop-blur-xl border border-white/30 shadow-inner shadow-white/10 flex items-center justify-center">
+              <HomeAssistantIcon className="w-6 h-6 text-white/80 drop-shadow-sm" />
+            </div>
+            
+            {/* Highlight reflection */}
+            <div className="absolute top-1 left-1 right-4 h-3 rounded-t-[20px] bg-gradient-to-b from-white/15 to-transparent" />
           </motion.div>
         </motion.div>
 
