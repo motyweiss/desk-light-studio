@@ -350,43 +350,6 @@ const Demo = () => {
                     ease: EASE.apple,
                   }}
                 >
-                  {/* Status Icon */}
-                  <div className="w-6 h-6 flex items-center justify-center flex-shrink-0">
-                    {isCompleted && (
-                      <motion.div
-                        initial={{ scale: 0 }}
-                        animate={{ scale: 1 }}
-                        transition={{ duration: 0.3, ease: EASE.bounce }}
-                        className="w-5 h-5 rounded-full bg-emerald-500/25 flex items-center justify-center"
-                      >
-                        <motion.svg
-                          width="12"
-                          height="12"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          stroke="currentColor"
-                          strokeWidth="3"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          className="text-emerald-400"
-                        >
-                          <motion.path
-                            d="M5 12l5 5L20 7"
-                            initial={{ pathLength: 0 }}
-                            animate={{ pathLength: 1 }}
-                            transition={{ duration: 0.25, ease: EASE.apple }}
-                          />
-                        </motion.svg>
-                      </motion.div>
-                    )}
-                    {isActive && (
-                      <div className="w-5 h-5 rounded-full border border-amber-400/60" />
-                    )}
-                    {isPending && (
-                      <div className="w-5 h-5 rounded-full border border-white/20" />
-                    )}
-                  </div>
-
                   {/* Step Icon */}
                   <StepIcon 
                     className={`w-4 h-4 flex-shrink-0 transition-colors duration-300 ${
