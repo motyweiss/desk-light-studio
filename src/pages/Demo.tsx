@@ -210,10 +210,10 @@ const Demo = () => {
         return () => clearTimeout(timer);
       }
 
-      // Progress to next step after delay
-      const stepDuration = 1400 + Math.random() * 300; // ~1.4-1.7s per step
+      // Progress to next step after delay - longer duration for each step
+      const stepDuration = 2400 + Math.random() * 400; // ~2.4-2.8s per step
       
-      // First mark current step as completed (show green checkmark)
+      // First mark current step as completed
       const completeTimer = setTimeout(() => {
         setSteps(prev => prev.map((step, index) => {
           if (index === currentStepIndex) {
@@ -223,7 +223,7 @@ const Demo = () => {
         }));
       }, stepDuration);
       
-      // Then after a soft delay, move up and activate next step
+      // Then after a soft delay, activate next step
       const moveTimer = setTimeout(() => {
         setSteps(prev => prev.map((step, index) => {
           if (index === currentStepIndex + 1) {
@@ -232,7 +232,7 @@ const Demo = () => {
           return step;
         }));
         setCurrentStepIndex(prev => prev + 1);
-      }, stepDuration + 400); // 400ms delay after green appears
+      }, stepDuration + 600); // 600ms delay for smoother transition
 
       return () => {
         clearTimeout(completeTimer);
@@ -263,11 +263,11 @@ const Demo = () => {
               return (
                 <motion.div
                   key={step.id}
-                  initial={{ opacity: 0, x: 40, filter: 'blur(4px)' }}
-                  animate={{ opacity: 1, x: 0, filter: 'blur(0px)' }}
-                  exit={{ opacity: 0, x: -40, filter: 'blur(4px)' }}
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
                   transition={{ 
-                    duration: 0.9, 
+                    duration: 1.2, 
                     ease: [0.25, 0.46, 0.45, 0.94],
                   }}
                   className="flex flex-col items-center text-center"
@@ -276,7 +276,7 @@ const Demo = () => {
                   <div className="relative mb-6" style={{ padding: '24px' }}>
                     {/* Outer pulse ring - slower, gentler */}
                     <motion.div
-                      className="absolute rounded-[32px] border border-amber-400/20"
+                      className="absolute rounded-[32px] border border-amber-400/15"
                       style={{ 
                         top: '8px', 
                         left: '8px', 
@@ -284,11 +284,11 @@ const Demo = () => {
                         bottom: '8px',
                       }}
                       animate={!prefersReducedMotion ? {
-                        scale: [1, 1.25, 1],
-                        opacity: [0.4, 0, 0.4],
+                        scale: [1, 1.2, 1],
+                        opacity: [0.3, 0, 0.3],
                       } : {}}
                       transition={{
-                        duration: 3.5,
+                        duration: 4,
                         repeat: Infinity,
                         ease: "easeInOut",
                       }}
@@ -303,42 +303,42 @@ const Demo = () => {
                         bottom: '8px',
                       }}
                       animate={!prefersReducedMotion ? {
-                        scale: [1, 1.4, 1],
-                        opacity: [0.25, 0, 0.25],
+                        scale: [1, 1.35, 1],
+                        opacity: [0.2, 0, 0.2],
                       } : {}}
                       transition={{
-                        duration: 3.5,
+                        duration: 4,
                         repeat: Infinity,
                         ease: "easeInOut",
-                        delay: 0.8,
+                        delay: 1,
                       }}
                     />
                     
                     {/* Icon container */}
                     <motion.div
-                      className="relative w-28 h-28 rounded-[28px] border border-white/[0.12] bg-white/[0.03] backdrop-blur-sm flex items-center justify-center"
+                      className="relative w-28 h-28 rounded-[28px] border border-white/[0.1] bg-white/[0.02] backdrop-blur-sm flex items-center justify-center"
                       animate={!prefersReducedMotion ? {
-                        scale: [1, 1.015, 1],
+                        scale: [1, 1.01, 1],
                       } : {}}
                       transition={{
-                        duration: 3,
+                        duration: 3.5,
                         repeat: Infinity,
                         ease: "easeInOut",
                       }}
                     >
                       <AnimatedIcon 
                         className="w-12 h-12 text-amber-400/90"
-                        delay={0.3}
+                        delay={0.4}
                       />
                     </motion.div>
                   </div>
 
-                  {/* Step Label - shorter, cleaner */}
+                  {/* Step Label - fade only */}
                   <motion.p
-                    className="text-base font-light text-white/80 tracking-widest uppercase"
-                    initial={{ opacity: 0, y: 8 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.7, delay: 0.4, ease: [0.25, 0.46, 0.45, 0.94] }}
+                    className="text-base font-light text-white/70 tracking-widest uppercase"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ duration: 1, delay: 0.5, ease: "easeOut" }}
                   >
                     {step.label}
                   </motion.p>
