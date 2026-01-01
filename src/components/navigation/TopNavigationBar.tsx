@@ -1,9 +1,11 @@
+import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
-import { Settings as SettingsIcon } from 'lucide-react';
+import { Settings as SettingsIcon, Zap } from 'lucide-react';
 import { ConnectionStatusIndicator } from '@/components/ConnectionStatusIndicator';
 import { HomeAssistantIcon } from '@/components/icons/HomeAssistantIcon';
 import { ClimateIndicators } from '@/features/climate/components/ClimateIndicators';
+import { DemoConnectionModal } from '@/components/settings/DemoConnectionModal';
 import { LOAD_SEQUENCE } from '@/constants/loadingSequence';
 import {
   Tooltip,
@@ -27,6 +29,7 @@ export const TopNavigationBar = ({
   onReconnectClick,
 }: TopNavigationBarProps) => {
   const navigate = useNavigate();
+  const [showConnectionModal, setShowConnectionModal] = useState(false);
   
   const headerConfig = LOAD_SEQUENCE.header;
   const ease = headerConfig.ease;
@@ -107,6 +110,23 @@ export const TopNavigationBar = ({
                 inline={true}
               />
             </div>
+
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <motion.button
+                  onClick={() => setShowConnectionModal(true)}
+                  className="w-9 h-9 md:w-10 md:h-10 rounded-lg flex items-center justify-center text-amber-400 hover:text-amber-300 transition-colors hover:bg-amber-500/10"
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  aria-label="Quick Connect"
+                >
+                  <Zap className="w-4 h-4 md:w-5 md:h-5" strokeWidth={1.5} />
+                </motion.button>
+              </TooltipTrigger>
+              <TooltipContent side="bottom">
+                <p>Quick Connect</p>
+              </TooltipContent>
+            </Tooltip>
             
             <Tooltip>
               <TooltipTrigger asChild>
@@ -124,6 +144,11 @@ export const TopNavigationBar = ({
                 <p>Settings</p>
               </TooltipContent>
             </Tooltip>
+
+            <DemoConnectionModal 
+              open={showConnectionModal} 
+              onOpenChange={setShowConnectionModal} 
+            />
           </motion.div>
         </div>
       </div>
