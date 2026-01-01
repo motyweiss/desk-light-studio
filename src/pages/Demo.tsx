@@ -265,9 +265,12 @@ const Demo = () => {
       >
         <div className="relative w-24 h-24">
           {/* Circular progress ring */}
-          <svg
+          <motion.svg
             className="absolute inset-0 w-full h-full -rotate-90"
             viewBox="0 0 96 96"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.3 }}
           >
             {/* Background circle - subtle */}
             <circle
@@ -287,21 +290,23 @@ const Demo = () => {
               stroke="hsl(160 55% 50%)"
               strokeWidth="3"
               strokeLinecap="round"
-              initial={{ pathLength: 0, opacity: 0 }}
-              animate={{ pathLength: 1, opacity: 1 }}
+              initial={{ pathLength: 0 }}
+              animate={{ pathLength: 1 }}
               transition={{
-                pathLength: {
-                  duration: 1.8,
-                  ease: [0.16, 1, 0.3, 1], // Smooth ease-out with soft ending
-                  delay: 0.2,
-                },
-                opacity: { duration: 0.3, delay: 0.15 },
+                duration: 1.8,
+                ease: [0.16, 1, 0.3, 1],
+                delay: 0.2,
               }}
             />
-          </svg>
+          </motion.svg>
           
           {/* Inner circle with checkmark */}
-          <div className="absolute inset-3 rounded-full bg-emerald-500/12 flex items-center justify-center">
+          <motion.div 
+            className="absolute inset-3 rounded-full bg-emerald-500/12 flex items-center justify-center"
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.4, delay: 0.1, ease: [0.25, 0.46, 0.45, 0.94] }}
+          >
             <motion.svg
               width="32"
               height="32"
@@ -316,7 +321,7 @@ const Demo = () => {
               animate={{ opacity: 1, scale: 1 }}
               transition={{ 
                 duration: 0.4, 
-                delay: 1.6, // Appears near end of circle fill
+                delay: 1.6,
                 ease: [0.34, 1.56, 0.64, 1],
               }}
             >
@@ -331,7 +336,7 @@ const Demo = () => {
                 }}
               />
             </motion.svg>
-          </div>
+          </motion.div>
         </div>
       </motion.div>
 
