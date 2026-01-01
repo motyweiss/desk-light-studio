@@ -153,14 +153,7 @@ const Demo = () => {
   };
 
   return (
-    <div className="min-h-screen relative flex items-center justify-center p-4">
-      {/* Background - same as main page */}
-      <div 
-        className="fixed inset-0 bg-cover bg-center bg-no-repeat"
-        style={{ backgroundImage: 'url(/bg.png)' }}
-      />
-      <div className="fixed inset-0 bg-black/40" />
-
+    <div className="min-h-screen relative flex items-center justify-center p-4 bg-[#A59587]">
       {/* Back button */}
       <motion.button
         onClick={() => navigate(-1)}
