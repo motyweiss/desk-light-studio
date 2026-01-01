@@ -550,20 +550,41 @@ const Demo = () => {
             ease: [0.25, 0.46, 0.45, 0.94],
           }}
         >
-          <Button
+          <motion.button
             onClick={handleTestConnection}
             disabled={isConnecting || !baseUrl || !accessToken}
-            className="w-full h-12 rounded-xl bg-[#FFBC00] hover:bg-[#FFD040] border-0 text-black font-medium uppercase tracking-[0.2em] transition-all duration-300 disabled:opacity-35 disabled:bg-[#FFBC00]/40"
+            className="relative w-full h-12 rounded-xl bg-[#FFBC00] border-0 text-black font-medium uppercase tracking-[0.2em] disabled:opacity-35 disabled:bg-[#FFBC00]/40 overflow-hidden"
+            whileHover={!isConnecting && baseUrl && accessToken ? { 
+              scale: 1.02,
+              boxShadow: '0 0 30px rgba(255, 188, 0, 0.4), 0 10px 40px -10px rgba(255, 188, 0, 0.5)',
+            } : {}}
+            whileTap={!isConnecting && baseUrl && accessToken ? { scale: 0.98 } : {}}
+            transition={{
+              type: 'spring',
+              stiffness: 400,
+              damping: 25,
+            }}
           >
-            {isConnecting ? (
-              <>
-                <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
-                <span className="tracking-[0.15em]">Connecting...</span>
-              </>
-            ) : (
-              'CONNECT'
-            )}
-          </Button>
+            {/* Shimmer effect on hover */}
+            <motion.div
+              className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent -translate-x-full"
+              initial={false}
+              whileHover={{ translateX: '200%' }}
+              transition={{ duration: 0.6, ease: 'easeInOut' }}
+            />
+            
+            {/* Button content */}
+            <span className="relative z-10 flex items-center justify-center">
+              {isConnecting ? (
+                <>
+                  <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
+                  <span className="tracking-[0.15em]">Connecting...</span>
+                </>
+              ) : (
+                'CONNECT'
+              )}
+            </span>
+          </motion.button>
         </motion.div>
 
         {/* Help Link */}
