@@ -394,9 +394,6 @@ const Demo = () => {
               transition={{ duration: 0.5, ease: EASE.smooth }}
             />
           </div>
-          <p className="text-xs text-white/40 text-center mt-3 tracking-wide">
-            {Math.round(progress)}% complete
-          </p>
         </motion.div>
       </motion.div>
     );
