@@ -88,9 +88,9 @@ const Demo = () => {
         <ArrowLeft className="w-5 h-5" />
       </motion.button>
 
-      {/* Main Card */}
+      {/* Main Card - soft milky frosted glass */}
       <motion.div
-        className="relative z-10 w-full max-w-md bg-white/[0.06] backdrop-blur-[48px] border border-white/[0.08] rounded-3xl p-8 shadow-[0_32px_80px_rgba(0,0,0,0.5)]"
+        className="relative z-10 w-full max-w-md bg-white/[0.03] backdrop-blur-[60px] border border-white/[0.05] rounded-3xl p-8 shadow-[0_8px_32px_rgba(0,0,0,0.12)]"
         initial={{ opacity: 0, scale: 0.92, y: 30 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
         transition={{ 
