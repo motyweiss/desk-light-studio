@@ -392,16 +392,6 @@ const Demo = () => {
           })}
         </motion.div>
 
-        {/* Progress text */}
-        <motion.p
-          className="text-sm text-white/50 font-light mt-6 tracking-wide"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.4 }}
-        >
-          Step {currentStepIndex + 1} of {WIZARD_STEPS.length}
-        </motion.p>
-
       </motion.div>
     );
   };
