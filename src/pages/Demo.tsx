@@ -550,54 +550,20 @@ const Demo = () => {
             ease: [0.25, 0.46, 0.45, 0.94],
           }}
         >
-          <motion.button
+          <Button
             onClick={handleTestConnection}
             disabled={isConnecting || !baseUrl || !accessToken}
-            className="group relative w-full h-12 rounded-xl bg-[#FFBC00] border-0 text-black font-medium uppercase tracking-[0.2em] disabled:opacity-35 disabled:bg-[#FFBC00]/40 overflow-hidden cursor-pointer disabled:cursor-not-allowed"
-            whileTap={!isConnecting && baseUrl && accessToken ? { scale: 0.98 } : {}}
-            transition={{
-              type: 'spring',
-              stiffness: 400,
-              damping: 25,
-            }}
+            className="w-full h-12 rounded-xl bg-[#FFBC00] hover:bg-[#FFD040] border-0 text-black font-medium uppercase tracking-[0.2em] transition-colors duration-200 disabled:opacity-35 disabled:bg-[#FFBC00]/40"
           >
-            {/* Arrow that slides in from left */}
-            <motion.span
-              className="absolute left-0 top-0 bottom-0 flex items-center justify-center w-full"
-              initial={{ x: '-100%' }}
-              whileHover={{ x: '0%' }}
-              transition={{ duration: 0.3, ease: [0.25, 0.46, 0.45, 0.94] }}
-            >
-              <svg 
-                className="w-5 h-5" 
-                viewBox="0 0 24 24" 
-                fill="none" 
-                stroke="currentColor" 
-                strokeWidth="2.5" 
-                strokeLinecap="round" 
-                strokeLinejoin="round"
-              >
-                <path d="M5 12h14M12 5l7 7-7 7" />
-              </svg>
-            </motion.span>
-            
-            {/* Button text that slides out to right */}
-            <motion.span 
-              className="relative z-10 flex items-center justify-center"
-              initial={{ x: '0%' }}
-              whileHover={{ x: '100%' }}
-              transition={{ duration: 0.3, ease: [0.25, 0.46, 0.45, 0.94] }}
-            >
-              {isConnecting ? (
-                <>
-                  <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
-                  <span className="tracking-[0.15em]">Connecting...</span>
-                </>
-              ) : (
-                'CONNECT'
-              )}
-            </motion.span>
-          </motion.button>
+            {isConnecting ? (
+              <>
+                <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
+                <span className="tracking-[0.15em]">Connecting...</span>
+              </>
+            ) : (
+              'CONNECT'
+            )}
+          </Button>
         </motion.div>
 
         {/* Help Link */}
