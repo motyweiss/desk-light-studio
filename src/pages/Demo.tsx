@@ -31,10 +31,10 @@ type WizardStep = {
 };
 
 const WIZARD_STEPS: Omit<WizardStep, 'status'>[] = [
-  { id: 'connect', label: 'Reaching your smart home...', AnimatedIcon: AnimatedPlugIcon },
-  { id: 'auth', label: 'Verifying access credentials...', AnimatedIcon: AnimatedKeyIcon },
-  { id: 'devices', label: 'Found 24 devices in 5 rooms...', AnimatedIcon: AnimatedLampIcon },
-  { id: 'sync', label: 'Analyzing usage patterns...', AnimatedIcon: AnimatedSparklesIcon },
+  { id: 'connect', label: 'Connecting', AnimatedIcon: AnimatedPlugIcon },
+  { id: 'auth', label: 'Authenticating', AnimatedIcon: AnimatedKeyIcon },
+  { id: 'devices', label: 'Loading devices', AnimatedIcon: AnimatedLampIcon },
+  { id: 'sync', label: 'Syncing', AnimatedIcon: AnimatedSparklesIcon },
 ];
 
 // =============================================================================
@@ -263,83 +263,82 @@ const Demo = () => {
               return (
                 <motion.div
                   key={step.id}
-                  initial={{ opacity: 0, x: 80, filter: 'blur(8px)' }}
+                  initial={{ opacity: 0, x: 40, filter: 'blur(4px)' }}
                   animate={{ opacity: 1, x: 0, filter: 'blur(0px)' }}
-                  exit={{ opacity: 0, x: -80, filter: 'blur(8px)' }}
+                  exit={{ opacity: 0, x: -40, filter: 'blur(4px)' }}
                   transition={{ 
-                    duration: 0.6, 
-                    ease: EASE.out,
+                    duration: 0.9, 
+                    ease: [0.25, 0.46, 0.45, 0.94],
                   }}
                   className="flex flex-col items-center text-center"
                 >
                   {/* Large Icon Container with space for rings */}
-                  <div className="relative mb-8" style={{ padding: '20px' }}>
-                    {/* Outer pulse ring */}
+                  <div className="relative mb-6" style={{ padding: '24px' }}>
+                    {/* Outer pulse ring - slower, gentler */}
                     <motion.div
-                      className="absolute rounded-[32px] border-2 border-amber-400/25"
+                      className="absolute rounded-[32px] border border-amber-400/20"
                       style={{ 
-                        top: '4px', 
-                        left: '4px', 
-                        right: '4px', 
-                        bottom: '4px',
+                        top: '8px', 
+                        left: '8px', 
+                        right: '8px', 
+                        bottom: '8px',
                       }}
                       animate={!prefersReducedMotion ? {
-                        scale: [1, 1.35, 1],
-                        opacity: [0.5, 0, 0.5],
+                        scale: [1, 1.25, 1],
+                        opacity: [0.4, 0, 0.4],
                       } : {}}
                       transition={{
-                        duration: 2.8,
+                        duration: 3.5,
                         repeat: Infinity,
                         ease: "easeInOut",
                       }}
                     />
-                    {/* Second pulse ring */}
+                    {/* Second pulse ring - even slower */}
                     <motion.div
-                      className="absolute rounded-[32px] border border-white/15"
+                      className="absolute rounded-[32px] border border-white/10"
                       style={{ 
-                        top: '4px', 
-                        left: '4px', 
-                        right: '4px', 
-                        bottom: '4px',
+                        top: '8px', 
+                        left: '8px', 
+                        right: '8px', 
+                        bottom: '8px',
                       }}
                       animate={!prefersReducedMotion ? {
-                        scale: [1, 1.5, 1],
-                        opacity: [0.3, 0, 0.3],
+                        scale: [1, 1.4, 1],
+                        opacity: [0.25, 0, 0.25],
                       } : {}}
                       transition={{
-                        duration: 2.8,
+                        duration: 3.5,
                         repeat: Infinity,
                         ease: "easeInOut",
-                        delay: 0.5,
+                        delay: 0.8,
                       }}
                     />
                     
                     {/* Icon container */}
                     <motion.div
-                      className="relative w-28 h-28 rounded-[28px] border border-amber-400/25 bg-gradient-to-br from-amber-400/[0.08] to-transparent backdrop-blur-sm flex items-center justify-center"
+                      className="relative w-28 h-28 rounded-[28px] border border-white/[0.12] bg-white/[0.03] backdrop-blur-sm flex items-center justify-center"
                       animate={!prefersReducedMotion ? {
-                        scale: [1, 1.02, 1],
+                        scale: [1, 1.015, 1],
                       } : {}}
                       transition={{
-                        duration: 2.5,
+                        duration: 3,
                         repeat: Infinity,
                         ease: "easeInOut",
                       }}
                     >
-                      {/* Animated Icon - draws itself */}
                       <AnimatedIcon 
-                        className="w-14 h-14 text-amber-400"
-                        delay={0.2}
+                        className="w-12 h-12 text-amber-400/90"
+                        delay={0.3}
                       />
                     </motion.div>
                   </div>
 
-                  {/* Step Label */}
+                  {/* Step Label - shorter, cleaner */}
                   <motion.p
-                    className="text-xl font-light text-white/90 tracking-wide max-w-[280px] leading-relaxed"
-                    initial={{ opacity: 0, y: 12 }}
+                    className="text-base font-light text-white/80 tracking-widest uppercase"
+                    initial={{ opacity: 0, y: 8 }}
                     animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.5, delay: 0.3, ease: EASE.apple }}
+                    transition={{ duration: 0.7, delay: 0.4, ease: [0.25, 0.46, 0.45, 0.94] }}
                   >
                     {step.label}
                   </motion.p>
