@@ -553,11 +553,7 @@ const Demo = () => {
           <motion.button
             onClick={handleTestConnection}
             disabled={isConnecting || !baseUrl || !accessToken}
-            className="relative w-full h-12 rounded-xl bg-[#FFBC00] border-0 text-black font-medium uppercase tracking-[0.2em] disabled:opacity-35 disabled:bg-[#FFBC00]/40 overflow-hidden"
-            whileHover={!isConnecting && baseUrl && accessToken ? { 
-              scale: 1.02,
-              boxShadow: '0 0 30px rgba(255, 188, 0, 0.4), 0 10px 40px -10px rgba(255, 188, 0, 0.5)',
-            } : {}}
+            className="group relative w-full h-12 rounded-xl bg-[#FFBC00] border-0 text-black font-medium uppercase tracking-[0.2em] disabled:opacity-35 disabled:bg-[#FFBC00]/40 overflow-hidden cursor-pointer disabled:cursor-not-allowed"
             whileTap={!isConnecting && baseUrl && accessToken ? { scale: 0.98 } : {}}
             transition={{
               type: 'spring',
@@ -565,16 +561,33 @@ const Demo = () => {
               damping: 25,
             }}
           >
-            {/* Shimmer effect on hover */}
-            <motion.div
-              className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent -translate-x-full"
-              initial={false}
-              whileHover={{ translateX: '200%' }}
-              transition={{ duration: 0.6, ease: 'easeInOut' }}
-            />
+            {/* Arrow that slides in from left */}
+            <motion.span
+              className="absolute left-0 top-0 bottom-0 flex items-center justify-center w-full"
+              initial={{ x: '-100%' }}
+              whileHover={{ x: '0%' }}
+              transition={{ duration: 0.3, ease: [0.25, 0.46, 0.45, 0.94] }}
+            >
+              <svg 
+                className="w-5 h-5" 
+                viewBox="0 0 24 24" 
+                fill="none" 
+                stroke="currentColor" 
+                strokeWidth="2.5" 
+                strokeLinecap="round" 
+                strokeLinejoin="round"
+              >
+                <path d="M5 12h14M12 5l7 7-7 7" />
+              </svg>
+            </motion.span>
             
-            {/* Button content */}
-            <span className="relative z-10 flex items-center justify-center">
+            {/* Button text that slides out to right */}
+            <motion.span 
+              className="relative z-10 flex items-center justify-center"
+              initial={{ x: '0%' }}
+              whileHover={{ x: '100%' }}
+              transition={{ duration: 0.3, ease: [0.25, 0.46, 0.45, 0.94] }}
+            >
               {isConnecting ? (
                 <>
                   <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
@@ -583,7 +596,7 @@ const Demo = () => {
               ) : (
                 'CONNECT'
               )}
-            </span>
+            </motion.span>
           </motion.button>
         </motion.div>
 
