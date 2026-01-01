@@ -328,7 +328,7 @@ const Demo = () => {
                     >
                       <AnimatedIcon 
                         className="w-12 h-12 text-amber-400/90"
-                        delay={0.4}
+                        delay={0.15}
                       />
                     </motion.div>
                   </div>
