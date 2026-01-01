@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Plug, Key, Eye, EyeOff, RefreshCw, ExternalLink, ArrowLeft } from 'lucide-react';
+import { Plug, Eye, EyeOff, RefreshCw, ExternalLink, ArrowLeft } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -167,7 +167,7 @@ const Demo = () => {
 
       {/* Main Card - dark frosted glass for contrast on warm bg */}
       <motion.div
-        className="relative z-10 w-full max-w-md bg-[#1a1816]/90 backdrop-blur-[60px] border border-black/10 rounded-3xl p-8 shadow-[0_12px_40px_rgba(0,0,0,0.25)] overflow-hidden"
+        className="relative z-10 w-full max-w-md bg-[#1a1816]/90 backdrop-blur-[60px] border border-black/10 rounded-3xl p-8 overflow-hidden"
         variants={cardVariants}
         initial="hidden"
         animate="visible"
@@ -196,15 +196,6 @@ const Demo = () => {
             <p className="text-sm text-white/50">
               Enter your instance URL and access token
             </p>
-          </motion.div>
-
-          {/* Token Help */}
-          <motion.div 
-            variants={itemVariants}
-            className="flex items-center justify-center gap-2 text-xs text-white/40"
-          >
-            <Key className="w-3.5 h-3.5" />
-            <span>To get a token: Profile → Security → Long-lived access tokens</span>
           </motion.div>
 
           {/* Separator */}
@@ -293,9 +284,9 @@ const Demo = () => {
               href="https://www.home-assistant.io/docs/authentication/#your-account-profile"
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-1.5 text-xs text-white/30 hover:text-white/50 transition-colors"
+              className="inline-flex items-center gap-2 text-sm text-white/40 hover:text-white/60 transition-colors"
             >
-              <ExternalLink className="w-3 h-3" />
+              <ExternalLink className="w-4 h-4" />
               How to create an access token
             </a>
           </motion.div>
