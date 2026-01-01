@@ -237,126 +237,184 @@ const Demo = () => {
     return (
       <motion.div
         key="connecting"
-        initial={{ opacity: 0, scale: 0.97, y: 8 }}
-        animate={{ opacity: 1, scale: 1, y: 0 }}
-        exit={{ opacity: 0, scale: 0.98, y: -8, filter: 'blur(6px)' }}
+        initial={{ opacity: 0, scale: 0.97 }}
+        animate={{ opacity: 1, scale: 1 }}
+        exit={{ opacity: 0, scale: 0.98, filter: 'blur(6px)' }}
         transition={getContentTransition(true)}
-        className="flex items-center gap-8"
+        className="space-y-8"
       >
-        {/* Large Animated Icon - Left Side */}
-        <motion.div 
-          className="flex-shrink-0"
-          initial={{ opacity: 0, scale: 0.8 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.5, ease: EASE.out }}
+        {/* Header */}
+        <motion.div
+          className="text-center"
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4, ease: EASE.apple }}
         >
-          <div className="relative">
-            {/* Outer breathing ring */}
-            <motion.div
-              className="absolute inset-0 rounded-[24px] border border-white/15"
-              animate={!prefersReducedMotion ? {
-                scale: [1, 1.15, 1],
-                opacity: [0.2, 0, 0.2],
-              } : {}}
-              transition={{
-                duration: 3,
-                repeat: Infinity,
-                ease: "easeInOut",
-              }}
-            />
-            {/* Icon container - hollow glass */}
-            <div className="relative w-28 h-28 rounded-[24px] border border-white/[0.12] backdrop-blur-sm flex items-center justify-center">
-              <HomeAssistantIcon 
-                className="w-16 h-16 text-white/70" 
-                animated={true}
-                animationDelay={0.2}
-              />
-            </div>
-          </div>
+          <h1 className="text-xl font-light text-white/90 tracking-wide">
+            Setting up your smart home
+          </h1>
         </motion.div>
 
-        {/* Content - Right Side */}
-        <div className="flex-1 space-y-5">
-          {/* Title */}
-          <motion.div
-            initial={{ opacity: 0, x: 12 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.4, delay: 0.15, ease: EASE.apple }}
-          >
-            <h1 className="text-lg font-light text-white/90 tracking-wide">
-              Connecting to Home Assistant
-            </h1>
-          </motion.div>
-
-          {/* Progress Bar */}
-          <motion.div
-            initial={{ opacity: 0, scaleX: 0 }}
-            animate={{ opacity: 1, scaleX: 1 }}
-            transition={{ duration: 0.4, delay: 0.25, ease: EASE.out }}
-            style={{ transformOrigin: 'left' }}
-          >
-            <div className="h-1 bg-white/10 rounded-full overflow-hidden">
-              <motion.div
-                className="h-full bg-gradient-to-r from-amber-400 to-amber-500 rounded-full"
-                initial={{ width: 0 }}
-                animate={{ width: `${progress}%` }}
-                transition={{ duration: 0.5, ease: EASE.smooth }}
-              />
-            </div>
-          </motion.div>
-
-          {/* Horizontal Steps */}
-          <motion.div 
-            className="flex flex-wrap gap-x-4 gap-y-2"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.35 }}
-          >
+        {/* Steps Grid - Large Icons */}
+        <div className="grid grid-cols-2 gap-4">
+          <AnimatePresence mode="popLayout">
             {steps.map((step, index) => {
               const StepIcon = step.icon;
               const isActive = step.status === 'active';
               const isCompleted = step.status === 'completed';
+              const isPending = step.status === 'pending';
+              const isRevealed = !isPending;
               
               return (
                 <motion.div
                   key={step.id}
-                  className="flex items-center gap-1.5"
-                  initial={{ opacity: 0, x: 8 }}
+                  layout
+                  initial={{ opacity: 0, scale: 0.8, y: 20 }}
                   animate={{ 
-                    opacity: isActive ? 1 : isCompleted ? 0.6 : 0.3,
-                    x: 0,
+                    opacity: isRevealed ? 1 : 0.15,
+                    scale: isActive ? 1.02 : 1,
+                    y: 0,
                   }}
                   transition={{
-                    duration: 0.35,
-                    delay: 0.4 + index * 0.08,
-                    ease: EASE.apple,
+                    layout: { duration: 0.4, ease: EASE.apple },
+                    opacity: { duration: 0.5, ease: EASE.smooth },
+                    scale: { duration: 0.4, ease: EASE.apple },
+                    y: { duration: 0.5, delay: index * 0.1, ease: EASE.out },
                   }}
+                  className={`
+                    relative p-5 rounded-2xl 
+                    border transition-colors duration-500
+                    ${isActive 
+                      ? 'border-amber-400/40 bg-amber-400/[0.06]' 
+                      : isCompleted
+                      ? 'border-amber-400/20 bg-white/[0.02]'
+                      : 'border-white/[0.08] bg-white/[0.02]'
+                    }
+                  `}
                 >
-                  <StepIcon 
-                    className={`w-3.5 h-3.5 flex-shrink-0 transition-colors duration-300 ${
-                      isCompleted 
-                        ? 'text-amber-400' 
-                        : isActive
-                        ? 'text-amber-400'
-                        : 'text-white/40'
-                    }`}
-                  />
-                  <span
-                    className={`text-xs font-light tracking-wide whitespace-nowrap transition-colors duration-300 ${
-                      isCompleted 
-                        ? 'text-amber-400/80' 
-                        : isActive
-                        ? 'text-white/90'
-                        : 'text-white/40'
-                    }`}
-                  >
-                    {step.label}
-                  </span>
+                  {/* Active glow */}
+                  {isActive && (
+                    <motion.div
+                      className="absolute inset-0 rounded-2xl bg-amber-400/10"
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: [0.5, 0.2, 0.5] }}
+                      transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+                    />
+                  )}
+
+                  <div className="relative flex flex-col items-center text-center space-y-3">
+                    {/* Large Icon Container */}
+                    <motion.div
+                      className={`
+                        w-14 h-14 rounded-xl flex items-center justify-center
+                        border backdrop-blur-sm
+                        ${isActive 
+                          ? 'border-amber-400/30 bg-amber-400/10' 
+                          : isCompleted
+                          ? 'border-amber-400/20 bg-amber-400/5'
+                          : 'border-white/10 bg-white/5'
+                        }
+                      `}
+                      animate={isActive && !prefersReducedMotion ? {
+                        scale: [1, 1.05, 1],
+                      } : {}}
+                      transition={{
+                        duration: 2,
+                        repeat: Infinity,
+                        ease: "easeInOut",
+                      }}
+                    >
+                      {/* Icon with drawing animation for active */}
+                      <motion.div
+                        initial={isActive ? { scale: 0.5, opacity: 0 } : {}}
+                        animate={{ scale: 1, opacity: 1 }}
+                        transition={{ 
+                          duration: 0.5, 
+                          ease: EASE.bounce,
+                          delay: isActive ? 0.2 : 0,
+                        }}
+                      >
+                        <StepIcon 
+                          className={`w-7 h-7 ${
+                            isCompleted 
+                              ? 'text-amber-400' 
+                              : isActive
+                              ? 'text-amber-400'
+                              : 'text-white/30'
+                          }`}
+                          strokeWidth={1.5}
+                        />
+                      </motion.div>
+                    </motion.div>
+
+                    {/* Label */}
+                    <motion.span
+                      className={`
+                        text-sm font-light tracking-wide leading-snug
+                        ${isCompleted 
+                          ? 'text-amber-400/80' 
+                          : isActive
+                          ? 'text-white/90'
+                          : 'text-white/30'
+                        }
+                      `}
+                      initial={{ opacity: 0, y: 5 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.4, delay: 0.15 }}
+                    >
+                      {step.label}
+                    </motion.span>
+
+                    {/* Completed checkmark */}
+                    {isCompleted && (
+                      <motion.div
+                        className="absolute -top-2 -right-2 w-6 h-6 rounded-full bg-amber-400 flex items-center justify-center"
+                        initial={{ scale: 0, opacity: 0 }}
+                        animate={{ scale: 1, opacity: 1 }}
+                        transition={{ duration: 0.3, ease: EASE.bounce }}
+                      >
+                        <svg className="w-3.5 h-3.5 text-[#302A23]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                          <motion.path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            d="M5 13l4 4L19 7"
+                            initial={{ pathLength: 0 }}
+                            animate={{ pathLength: 1 }}
+                            transition={{ duration: 0.3, delay: 0.1 }}
+                          />
+                        </svg>
+                      </motion.div>
+                    )}
+                  </div>
                 </motion.div>
               );
             })}
-          </motion.div>
+          </AnimatePresence>
         </div>
+
+        {/* Progress Bar */}
+        <motion.div
+          className="px-2"
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4, delay: 0.3, ease: EASE.out }}
+        >
+          <div className="h-1.5 bg-white/10 rounded-full overflow-hidden">
+            <motion.div
+              className="h-full bg-gradient-to-r from-amber-400 via-amber-500 to-amber-400 rounded-full"
+              initial={{ width: 0 }}
+              animate={{ width: `${progress}%` }}
+              transition={{ duration: 0.6, ease: EASE.smooth }}
+              style={{
+                backgroundSize: '200% 100%',
+              }}
+            />
+          </div>
+          <div className="flex justify-between mt-2 text-[11px] text-white/40 font-light">
+            <span>Connecting...</span>
+            <span>{Math.round(progress)}%</span>
+          </div>
+        </motion.div>
 
       </motion.div>
     );
