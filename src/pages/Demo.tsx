@@ -165,9 +165,9 @@ const Demo = () => {
         <ArrowLeft className="w-5 h-5" />
       </motion.button>
 
-      {/* Main Card - soft milky frosted glass */}
+      {/* Main Card - dark frosted glass for contrast on warm bg */}
       <motion.div
-        className="relative z-10 w-full max-w-md bg-white/[0.03] backdrop-blur-[60px] border border-white/[0.05] rounded-3xl p-8 shadow-[0_8px_32px_rgba(0,0,0,0.12)] overflow-hidden"
+        className="relative z-10 w-full max-w-md bg-[#1a1816]/90 backdrop-blur-[60px] border border-black/10 rounded-3xl p-8 shadow-[0_12px_40px_rgba(0,0,0,0.25)] overflow-hidden"
         variants={cardVariants}
         initial="hidden"
         animate="visible"
@@ -210,7 +210,7 @@ const Demo = () => {
           {/* Separator */}
           <motion.div 
             variants={separatorVariants}
-            className="h-px bg-white/[0.06] origin-left" 
+            className="h-px bg-white/10 origin-left" 
           />
 
           {/* Form Fields */}
@@ -225,7 +225,7 @@ const Demo = () => {
                 value={baseUrl}
                 onChange={(e) => setBaseUrl(e.target.value)}
                 placeholder="https://your-instance.ui.nabu.casa"
-                className="bg-white/[0.04] border-white/[0.08] rounded-xl h-12 text-white placeholder:text-white/30 focus:border-amber-500/50 focus:ring-amber-500/20"
+                className="bg-white/[0.06] border-white/10 rounded-xl h-12 text-white placeholder:text-white/40 focus:border-amber-500/50 focus:ring-amber-500/20"
               />
               <p className="text-xs text-white/30">
                 Your Home Assistant instance URL
@@ -243,7 +243,7 @@ const Demo = () => {
                   value={accessToken}
                   onChange={(e) => setAccessToken(e.target.value)}
                   placeholder="eyJ0eX..."
-                  className="bg-white/[0.04] border-white/[0.08] rounded-xl h-12 text-white placeholder:text-white/30 focus:border-amber-500/50 focus:ring-amber-500/20 pr-12"
+                  className="bg-white/[0.06] border-white/10 rounded-xl h-12 text-white placeholder:text-white/40 focus:border-amber-500/50 focus:ring-amber-500/20 pr-12"
                 />
                 <button
                   type="button"
@@ -268,7 +268,7 @@ const Demo = () => {
             <Button
               onClick={handleTestConnection}
               disabled={isTesting || !baseUrl || !accessToken}
-              className="w-full h-12 rounded-xl bg-white/[0.08] hover:bg-white/[0.12] border border-white/[0.08] text-white font-light transition-all duration-200 disabled:opacity-40"
+              className="w-full h-12 rounded-xl bg-white/10 hover:bg-white/15 border border-white/10 text-white font-light transition-all duration-200 disabled:opacity-40"
             >
               {isTesting ? (
                 <>
