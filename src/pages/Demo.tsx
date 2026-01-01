@@ -280,16 +280,15 @@ const Demo = () => {
               stroke="hsl(160 60% 55%)"
               strokeWidth="4"
               strokeLinecap="round"
-              initial={{ pathLength: 0 }}
-              animate={{ pathLength: 1 }}
+              initial={{ pathLength: 0, opacity: 0 }}
+              animate={{ pathLength: 1, opacity: 1 }}
               transition={{
-                duration: 2.2,
-                ease: [0.4, 0, 0.2, 1],
-                delay: 0.3,
-              }}
-              style={{
-                strokeDasharray: '226.19',
-                strokeDashoffset: '0',
+                pathLength: {
+                  duration: 2.2,
+                  ease: [0.4, 0, 0.2, 1],
+                  delay: 0.3,
+                },
+                opacity: { duration: 0.2, delay: 0.2 },
               }}
             />
           </svg>
