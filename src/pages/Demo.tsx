@@ -273,12 +273,9 @@ const Demo = () => {
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.25, duration: 0.4, ease: EASE.out }}
       >
-        <h2 className="text-xl font-light text-white/90 tracking-wide mb-2">
+        <h2 className="text-xl font-light text-white/90 tracking-wide">
           Connected Successfully
         </h2>
-        <p className="text-sm text-white/45">
-          Resetting demo...
-        </p>
       </motion.div>
 
       <motion.div 
@@ -479,7 +476,7 @@ const Demo = () => {
       <AnimatePresence mode="wait">
         <motion.div
           key={cardKey}
-          className="relative z-10 w-full max-w-md bg-[#1a1816]/92 backdrop-blur-[60px] border border-white/[0.04] rounded-3xl p-8 overflow-hidden"
+          className="relative z-10 w-full max-w-md bg-[#1a1816]/92 backdrop-blur-[60px] border-[8px] border-white/10 rounded-3xl p-8 overflow-hidden"
           variants={cardVariants}
           initial="hidden"
           animate="visible"
