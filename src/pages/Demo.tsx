@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Plug, Eye, EyeOff, RefreshCw, ExternalLink, ArrowLeft } from 'lucide-react';
+import { Eye, EyeOff, RefreshCw, ExternalLink, ArrowLeft } from 'lucide-react';
+import { HomeAssistantIcon } from '@/components/icons/HomeAssistantIcon';
 import { useNavigate } from 'react-router-dom';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -183,8 +184,8 @@ const Demo = () => {
             variants={iconVariants}
             className="flex justify-center"
           >
-            <div className="w-14 h-14 rounded-2xl bg-amber-500/10 flex items-center justify-center">
-              <Plug className="w-7 h-7 text-amber-400" />
+            <div className="w-14 h-14 rounded-2xl bg-white/10 flex items-center justify-center">
+              <HomeAssistantIcon className="w-7 h-7 text-white/80" />
             </div>
           </motion.div>
 
