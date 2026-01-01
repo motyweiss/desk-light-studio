@@ -1,7 +1,13 @@
-import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
+import { useState, useEffect, useMemo, useCallback, useRef, ComponentType } from 'react';
 import { motion, AnimatePresence, LayoutGroup } from 'framer-motion';
-import { Eye, EyeOff, RefreshCw, ExternalLink, X, Wifi, KeyRound, LayoutGrid, Sparkles, LucideIcon } from 'lucide-react';
+import { Eye, EyeOff, RefreshCw, ExternalLink, X } from 'lucide-react';
 import { HomeAssistantIcon } from '@/components/icons/HomeAssistantIcon';
+import { 
+  AnimatedPlugIcon, 
+  AnimatedKeyIcon, 
+  AnimatedLampIcon, 
+  AnimatedSparklesIcon 
+} from '@/components/icons/AnimatedStepIcons';
 import { useNavigate } from 'react-router-dom';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -15,18 +21,20 @@ import { useReducedMotion } from '@/hooks/useReducedMotion';
 
 type ConnectionStatus = 'idle' | 'connecting' | 'success' | 'error';
 
+type AnimatedIconComponent = ComponentType<{ className?: string; delay?: number }>;
+
 type WizardStep = {
   id: string;
   label: string;
-  icon: LucideIcon;
+  AnimatedIcon: AnimatedIconComponent;
   status: 'pending' | 'active' | 'completed';
 };
 
 const WIZARD_STEPS: Omit<WizardStep, 'status'>[] = [
-  { id: 'connect', label: 'Reaching your smart home...', icon: Wifi },
-  { id: 'auth', label: 'Verifying access credentials...', icon: KeyRound },
-  { id: 'devices', label: 'Found 24 devices in 5 rooms...', icon: LayoutGrid },
-  { id: 'sync', label: 'Analyzing usage patterns...', icon: Sparkles },
+  { id: 'connect', label: 'Reaching your smart home...', AnimatedIcon: AnimatedPlugIcon },
+  { id: 'auth', label: 'Verifying access credentials...', AnimatedIcon: AnimatedKeyIcon },
+  { id: 'devices', label: 'Found 24 devices in 5 rooms...', AnimatedIcon: AnimatedLampIcon },
+  { id: 'sync', label: 'Analyzing usage patterns...', AnimatedIcon: AnimatedSparklesIcon },
 ];
 
 // =============================================================================
@@ -241,13 +249,13 @@ const Demo = () => {
         animate={{ opacity: 1 }}
         exit={{ opacity: 0, filter: 'blur(6px)' }}
         transition={{ duration: 0.3 }}
-        className="flex flex-col items-center justify-center min-h-[320px]"
+        className="flex flex-col items-center justify-center py-6"
       >
-        {/* Centered Slider */}
-        <div className="relative w-full overflow-hidden">
+        {/* Centered Slider with padding for breathing rings */}
+        <div className="relative w-full py-8">
           <AnimatePresence mode="wait">
-            {steps.map((step, index) => {
-              const StepIcon = step.icon;
+            {steps.map((step) => {
+              const { AnimatedIcon } = step;
               const isActive = step.status === 'active';
               
               if (!isActive) return null;
@@ -255,80 +263,83 @@ const Demo = () => {
               return (
                 <motion.div
                   key={step.id}
-                  initial={{ opacity: 0, x: 60, scale: 0.9 }}
-                  animate={{ opacity: 1, x: 0, scale: 1 }}
-                  exit={{ opacity: 0, x: -60, scale: 0.9 }}
+                  initial={{ opacity: 0, x: 80, filter: 'blur(8px)' }}
+                  animate={{ opacity: 1, x: 0, filter: 'blur(0px)' }}
+                  exit={{ opacity: 0, x: -80, filter: 'blur(8px)' }}
                   transition={{ 
-                    duration: 0.5, 
+                    duration: 0.6, 
                     ease: EASE.out,
                   }}
-                  className="flex flex-col items-center text-center px-8"
+                  className="flex flex-col items-center text-center"
                 >
-                  {/* Large Icon Container */}
-                  <div className="relative mb-6">
+                  {/* Large Icon Container with space for rings */}
+                  <div className="relative mb-8" style={{ padding: '20px' }}>
                     {/* Outer pulse ring */}
                     <motion.div
-                      className="absolute inset-0 rounded-3xl border border-amber-400/30"
+                      className="absolute rounded-[32px] border-2 border-amber-400/25"
+                      style={{ 
+                        top: '4px', 
+                        left: '4px', 
+                        right: '4px', 
+                        bottom: '4px',
+                      }}
                       animate={!prefersReducedMotion ? {
-                        scale: [1, 1.25, 1],
-                        opacity: [0.4, 0, 0.4],
+                        scale: [1, 1.35, 1],
+                        opacity: [0.5, 0, 0.5],
                       } : {}}
                       transition={{
-                        duration: 2.5,
+                        duration: 2.8,
                         repeat: Infinity,
                         ease: "easeInOut",
                       }}
                     />
-                    {/* Second pulse ring - offset */}
+                    {/* Second pulse ring */}
                     <motion.div
-                      className="absolute inset-0 rounded-3xl border border-white/20"
+                      className="absolute rounded-[32px] border border-white/15"
+                      style={{ 
+                        top: '4px', 
+                        left: '4px', 
+                        right: '4px', 
+                        bottom: '4px',
+                      }}
                       animate={!prefersReducedMotion ? {
-                        scale: [1, 1.4, 1],
-                        opacity: [0.2, 0, 0.2],
+                        scale: [1, 1.5, 1],
+                        opacity: [0.3, 0, 0.3],
                       } : {}}
                       transition={{
-                        duration: 2.5,
+                        duration: 2.8,
                         repeat: Infinity,
                         ease: "easeInOut",
-                        delay: 0.4,
+                        delay: 0.5,
                       }}
                     />
                     
                     {/* Icon container */}
                     <motion.div
-                      className="relative w-24 h-24 rounded-3xl border border-amber-400/20 bg-gradient-to-br from-amber-400/10 to-transparent backdrop-blur-sm flex items-center justify-center"
+                      className="relative w-28 h-28 rounded-[28px] border border-amber-400/25 bg-gradient-to-br from-amber-400/[0.08] to-transparent backdrop-blur-sm flex items-center justify-center"
                       animate={!prefersReducedMotion ? {
-                        scale: [1, 1.03, 1],
+                        scale: [1, 1.02, 1],
                       } : {}}
                       transition={{
-                        duration: 2,
+                        duration: 2.5,
                         repeat: Infinity,
                         ease: "easeInOut",
                       }}
                     >
-                      <motion.div
-                        initial={{ scale: 0, rotate: -20 }}
-                        animate={{ scale: 1, rotate: 0 }}
-                        transition={{ 
-                          duration: 0.5, 
-                          ease: EASE.bounce,
-                          delay: 0.15,
-                        }}
-                      >
-                        <StepIcon 
-                          className="w-11 h-11 text-amber-400"
-                          strokeWidth={1.5}
-                        />
-                      </motion.div>
+                      {/* Animated Icon - draws itself */}
+                      <AnimatedIcon 
+                        className="w-14 h-14 text-amber-400"
+                        delay={0.2}
+                      />
                     </motion.div>
                   </div>
 
                   {/* Step Label */}
                   <motion.p
-                    className="text-lg font-light text-white/90 tracking-wide max-w-[240px]"
-                    initial={{ opacity: 0, y: 10 }}
+                    className="text-xl font-light text-white/90 tracking-wide max-w-[280px] leading-relaxed"
+                    initial={{ opacity: 0, y: 12 }}
                     animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.4, delay: 0.2, ease: EASE.apple }}
+                    transition={{ duration: 0.5, delay: 0.3, ease: EASE.apple }}
                   >
                     {step.label}
                   </motion.p>
@@ -340,37 +351,51 @@ const Demo = () => {
 
         {/* Step Indicators (dots) */}
         <motion.div 
-          className="flex items-center gap-2 mt-8"
+          className="flex items-center gap-3 mt-4"
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.3, duration: 0.4 }}
         >
-          {steps.map((step, index) => {
+          {steps.map((step) => {
             const isActive = step.status === 'active';
             const isCompleted = step.status === 'completed';
             
             return (
               <motion.div
                 key={step.id}
-                className={`
-                  rounded-full transition-all duration-500
-                  ${isActive 
-                    ? 'w-8 h-2 bg-amber-400' 
-                    : isCompleted
-                    ? 'w-2 h-2 bg-amber-400/60'
-                    : 'w-2 h-2 bg-white/20'
-                  }
-                `}
+                className="relative"
                 layout
-                transition={{ duration: 0.3, ease: EASE.apple }}
-              />
+                transition={{ duration: 0.4, ease: EASE.apple }}
+              >
+                {/* Active glow */}
+                {isActive && (
+                  <motion.div
+                    className="absolute inset-0 rounded-full bg-amber-400/40 blur-md"
+                    initial={{ scale: 0 }}
+                    animate={{ scale: 1.5 }}
+                    transition={{ duration: 0.3 }}
+                  />
+                )}
+                <motion.div
+                  className={`
+                    relative rounded-full transition-all duration-500
+                    ${isActive 
+                      ? 'w-10 h-2.5 bg-amber-400' 
+                      : isCompleted
+                      ? 'w-2.5 h-2.5 bg-amber-400/70'
+                      : 'w-2.5 h-2.5 bg-white/20'
+                    }
+                  `}
+                  layout
+                />
+              </motion.div>
             );
           })}
         </motion.div>
 
         {/* Progress text */}
         <motion.p
-          className="text-xs text-white/40 font-light mt-4"
+          className="text-sm text-white/50 font-light mt-6 tracking-wide"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.4 }}
