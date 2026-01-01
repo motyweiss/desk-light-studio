@@ -380,11 +380,7 @@ const Demo = () => {
                       </motion.div>
                     )}
                     {isActive && (
-                      <motion.div
-                        className="w-5 h-5 rounded-full border-2 border-amber-400/60 border-t-amber-400"
-                        animate={{ rotate: 360 }}
-                        transition={{ duration: 0.8, repeat: Infinity, ease: 'linear' }}
-                      />
+                      <div className="w-5 h-5 rounded-full border border-amber-400/60" />
                     )}
                     {isPending && (
                       <div className="w-5 h-5 rounded-full border border-white/20" />
