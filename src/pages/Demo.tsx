@@ -260,18 +260,15 @@ const Demo = () => {
             <Button
               onClick={handleTestConnection}
               disabled={isTesting || !baseUrl || !accessToken}
-              className="w-full h-12 rounded-xl bg-white/10 hover:bg-white/15 border border-white/10 text-white font-light transition-all duration-200 disabled:opacity-40"
+              className="w-full h-12 rounded-xl bg-amber-500 hover:bg-amber-400 border-0 text-black font-medium transition-all duration-200 disabled:opacity-40 disabled:bg-amber-500/50"
             >
               {isTesting ? (
                 <>
                   <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
-                  Testing...
+                  Connecting...
                 </>
               ) : (
-                <>
-                  <RefreshCw className="w-4 h-4 mr-2" />
-                  Test Connection
-                </>
+                'Connect'
               )}
             </Button>
           </motion.div>
