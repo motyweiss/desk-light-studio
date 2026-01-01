@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import { motion, AnimatePresence, LayoutGroup } from 'framer-motion';
-import { Eye, EyeOff, RefreshCw, ExternalLink, ArrowLeft, X } from 'lucide-react';
+import { Eye, EyeOff, RefreshCw, ExternalLink, ArrowLeft, X, Link, ShieldCheck, Cpu, Sparkles, LucideIcon } from 'lucide-react';
 import { HomeAssistantIcon } from '@/components/icons/HomeAssistantIcon';
 import { useNavigate } from 'react-router-dom';
 import { Input } from '@/components/ui/input';
@@ -18,16 +18,15 @@ type ConnectionStatus = 'idle' | 'connecting' | 'success' | 'error';
 type WizardStep = {
   id: string;
   label: string;
+  icon: LucideIcon;
   status: 'pending' | 'active' | 'completed';
 };
 
 const WIZARD_STEPS: Omit<WizardStep, 'status'>[] = [
-  { id: 'connect', label: 'Establishing secure connection...' },
-  { id: 'auth', label: 'Authenticating credentials...' },
-  { id: 'devices', label: 'Discovering devices & entities...' },
-  { id: 'rooms', label: 'Mapping rooms & areas...' },
-  { id: 'scenes', label: 'Loading automation scenes...' },
-  { id: 'sync', label: 'Syncing data & preferences...' },
+  { id: 'connect', label: 'Connecting...', icon: Link },
+  { id: 'auth', label: 'Authenticating...', icon: ShieldCheck },
+  { id: 'devices', label: 'Discovering devices...', icon: Cpu },
+  { id: 'sync', label: 'Syncing data...', icon: Sparkles },
 ];
 
 // =============================================================================
@@ -180,8 +179,8 @@ const Demo = () => {
         return () => clearTimeout(timer);
       }
 
-      // Progress to next step after delay
-      const stepDuration = 650 + Math.random() * 200; // Vary timing slightly
+      // Progress to next step after delay - slower timing
+      const stepDuration = 900 + Math.random() * 300; // Slower: ~0.9-1.2s per step
       const timer = setTimeout(() => {
         setSteps(prev => prev.map((step, index) => {
           if (index === currentStepIndex) {
@@ -266,78 +265,92 @@ const Demo = () => {
           animate={{ opacity: 1 }}
           transition={{ delay: 0.35 }}
         >
-          {steps.map((step, index) => (
-            <motion.div
-              key={step.id}
-              initial={{ opacity: 0, x: 20, filter: 'blur(4px)' }}
-              animate={{ 
-                opacity: step.status === 'pending' ? 0.35 : 1, 
-                x: 0, 
-                filter: 'blur(0px)' 
-              }}
-              transition={{
-                duration: 0.4,
-                delay: 0.4 + index * 0.08,
-                ease: EASE.apple,
-                opacity: { duration: 0.2 },
-              }}
-              className="flex items-center gap-3"
-            >
-              {/* Status Icon */}
-              <div className="w-6 h-6 flex items-center justify-center">
-                {step.status === 'completed' && (
-                  <motion.div
-                    initial={{ scale: 0, opacity: 0 }}
-                    animate={{ scale: 1, opacity: 1 }}
-                    transition={{ duration: 0.3, ease: EASE.bounce }}
-                    className="w-5 h-5 rounded-full bg-emerald-500/20 flex items-center justify-center"
-                  >
-                    <motion.svg
-                      width="12"
-                      height="12"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="3"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      className="text-emerald-400"
-                    >
-                      <motion.path
-                        d="M5 12l5 5L20 7"
-                        initial={{ pathLength: 0 }}
-                        animate={{ pathLength: 1 }}
-                        transition={{ duration: 0.25, ease: EASE.apple }}
-                      />
-                    </motion.svg>
-                  </motion.div>
-                )}
-                {step.status === 'active' && (
-                  <motion.div
-                    className="w-5 h-5 rounded-full border-2 border-amber-400/60 border-t-amber-400"
-                    animate={{ rotate: 360 }}
-                    transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
-                  />
-                )}
-                {step.status === 'pending' && (
-                  <div className="w-5 h-5 rounded-full border-2 border-white/15" />
-                )}
-              </div>
-
-              {/* Label */}
-              <motion.span
-                className={`text-sm font-light tracking-wide transition-colors duration-300 ${
-                  step.status === 'completed' 
-                    ? 'text-emerald-400/90' 
-                    : step.status === 'active'
-                    ? 'text-white/90'
-                    : 'text-white/35'
-                }`}
+          {steps.map((step, index) => {
+            const StepIcon = step.icon;
+            return (
+              <motion.div
+                key={step.id}
+                initial={{ opacity: 0, x: 20, filter: 'blur(4px)' }}
+                animate={{ 
+                  opacity: step.status === 'pending' ? 0.35 : 1, 
+                  x: 0, 
+                  filter: 'blur(0px)' 
+                }}
+                transition={{
+                  duration: 0.4,
+                  delay: 0.4 + index * 0.1,
+                  ease: EASE.apple,
+                  opacity: { duration: 0.2 },
+                }}
+                className="flex items-center gap-3"
               >
-                {step.label}
-              </motion.span>
-            </motion.div>
-          ))}
+                {/* Status Icon */}
+                <div className="w-7 h-7 flex items-center justify-center">
+                  {step.status === 'completed' && (
+                    <motion.div
+                      initial={{ scale: 0, opacity: 0 }}
+                      animate={{ scale: 1, opacity: 1 }}
+                      transition={{ duration: 0.3, ease: EASE.bounce }}
+                      className="w-6 h-6 rounded-full bg-emerald-500/20 flex items-center justify-center"
+                    >
+                      <motion.svg
+                        width="14"
+                        height="14"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="3"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        className="text-emerald-400"
+                      >
+                        <motion.path
+                          d="M5 12l5 5L20 7"
+                          initial={{ pathLength: 0 }}
+                          animate={{ pathLength: 1 }}
+                          transition={{ duration: 0.25, ease: EASE.apple }}
+                        />
+                      </motion.svg>
+                    </motion.div>
+                  )}
+                  {step.status === 'active' && (
+                    <motion.div
+                      className="w-6 h-6 rounded-full border-2 border-amber-400/60 border-t-amber-400"
+                      animate={{ rotate: 360 }}
+                      transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
+                    />
+                  )}
+                  {step.status === 'pending' && (
+                    <div className="w-6 h-6 rounded-full border-2 border-white/15" />
+                  )}
+                </div>
+
+                {/* Step Icon */}
+                <StepIcon 
+                  className={`w-4 h-4 transition-colors duration-300 ${
+                    step.status === 'completed' 
+                      ? 'text-emerald-400/80' 
+                      : step.status === 'active'
+                      ? 'text-white/80'
+                      : 'text-white/25'
+                  }`}
+                />
+
+                {/* Label */}
+                <motion.span
+                  className={`text-sm font-light tracking-wide transition-colors duration-300 ${
+                    step.status === 'completed' 
+                      ? 'text-emerald-400/90' 
+                      : step.status === 'active'
+                      ? 'text-white/90'
+                      : 'text-white/35'
+                  }`}
+                >
+                  {step.label}
+                </motion.span>
+              </motion.div>
+            );
+          })}
         </motion.div>
 
         {/* Progress Bar */}
