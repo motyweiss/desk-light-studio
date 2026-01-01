@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, useCallback } from 'react';
+import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { motion, AnimatePresence, LayoutGroup } from 'framer-motion';
 import { Eye, EyeOff, RefreshCw, ExternalLink, ArrowLeft, X, Link, ShieldCheck, Cpu, Sparkles, LucideIcon } from 'lucide-react';
 import { HomeAssistantIcon } from '@/components/icons/HomeAssistantIcon';
@@ -116,9 +116,12 @@ const Demo = () => {
     setIsValidConnection(isValidDemoUrl);
   }, [baseUrl, accessToken, toast]);
 
-  // Handle wizard completion
+  // Handle wizard completion - use ref to avoid dependency issues
+  const isValidConnectionRef = useRef(false);
+  isValidConnectionRef.current = isValidConnection;
+  
   const handleWizardComplete = useCallback(async () => {
-    if (isValidConnection) {
+    if (isValidConnectionRef.current) {
       setConnectionStatus('success');
       await saveConfig(baseUrl, accessToken);
       
@@ -126,11 +129,11 @@ const Demo = () => {
       setTimeout(() => {
         setFormKey(prev => prev + 1);
         setConnectionStatus('idle');
-      }, 3000);
+      }, 3500);
     } else {
       setConnectionStatus('error');
     }
-  }, [isValidConnection, baseUrl, accessToken, saveConfig]);
+  }, [baseUrl, accessToken, saveConfig]);
 
   const handleRetry = useCallback(() => {
     setFormKey(prev => prev + 1); // Trigger re-animation
@@ -413,31 +416,28 @@ const Demo = () => {
   };
 
   // ===========================================================================
-  // SUCCESS CONTENT
+  // SUCCESS CONTENT - memoized to prevent re-creation
   // ===========================================================================
-  const SuccessContent = () => (
+  const SuccessContent = useMemo(() => () => (
     <motion.div
       key="success"
-      initial={{ opacity: 0, scale: 0.95, y: 10 }}
-      animate={{ opacity: 1, scale: 1, y: 0 }}
-      exit={{ opacity: 0, scale: 0.98, y: -5, filter: 'blur(4px)' }}
-      transition={getContentTransition(true)}
+      initial={{ opacity: 0, scale: 0.96 }}
+      animate={{ opacity: 1, scale: 1 }}
+      exit={{ opacity: 0, scale: 0.98, filter: 'blur(4px)' }}
+      transition={{ duration: 0.35, ease: EASE.apple }}
       className="flex flex-col items-center justify-center py-10 space-y-6"
     >
       {/* Progress Ring with Checkmark */}
       <motion.div 
         className="relative w-24 h-24"
-        initial={{ scale: 0.8, opacity: 0 }}
+        initial={{ scale: 0.9, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
-        transition={{ duration: 0.5, ease: EASE.bounce }}
+        transition={{ duration: 0.4, ease: EASE.bounce }}
       >
         {/* Circular progress */}
-        <motion.svg
+        <svg
           className="absolute inset-0 w-full h-full -rotate-90"
           viewBox="0 0 96 96"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.3 }}
         >
           <circle
             cx="48"
@@ -458,19 +458,19 @@ const Demo = () => {
             initial={{ pathLength: 0 }}
             animate={{ pathLength: 1 }}
             transition={{
-              duration: 1.6,
+              duration: 1.2,
               ease: EASE.out,
-              delay: 0.15,
+              delay: 0.1,
             }}
           />
-        </motion.svg>
+        </svg>
         
         {/* Inner circle + checkmark */}
         <motion.div 
           className="absolute inset-3 rounded-full bg-emerald-500/10 flex items-center justify-center"
           initial={{ opacity: 0, scale: 0.5 }}
           animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.4, delay: 0.1, ease: EASE.apple }}
+          transition={{ duration: 0.35, delay: 0.05, ease: EASE.apple }}
         >
           <motion.svg
             width="32"
@@ -484,13 +484,13 @@ const Demo = () => {
             className="text-emerald-400"
             initial={{ opacity: 0, scale: 0.3 }}
             animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.4, delay: 1.4, ease: EASE.bounce }}
+            transition={{ duration: 0.35, delay: 1.0, ease: EASE.bounce }}
           >
             <motion.path
               d="M5 12l5 5L20 7"
               initial={{ pathLength: 0 }}
               animate={{ pathLength: 1 }}
-              transition={{ duration: 0.35, delay: 1.5, ease: EASE.apple }}
+              transition={{ duration: 0.3, delay: 1.1, ease: EASE.apple }}
             />
           </motion.svg>
         </motion.div>
@@ -499,9 +499,9 @@ const Demo = () => {
       {/* Success Text */}
       <motion.div
         className="text-center space-y-1"
-        initial={{ opacity: 0, y: 10 }}
+        initial={{ opacity: 0, y: 8 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.4, delay: 1.7, ease: EASE.apple }}
+        transition={{ duration: 0.35, delay: 1.3, ease: EASE.apple }}
       >
         <h2 className="text-xl font-light text-white/90 tracking-wide">
           {"You're all set!"}
@@ -511,34 +511,31 @@ const Demo = () => {
         </p>
       </motion.div>
     </motion.div>
-  );
+  ), []);
 
   // ===========================================================================
-  // ERROR CONTENT
+  // ERROR CONTENT - memoized to prevent re-creation
   // ===========================================================================
-  const ErrorContent = () => (
+  const ErrorContent = useMemo(() => () => (
     <motion.div
       key="error"
-      initial={{ opacity: 0, scale: 0.95, y: 10 }}
-      animate={{ opacity: 1, scale: 1, y: 0 }}
-      exit={{ opacity: 0, scale: 0.98, y: -5, filter: 'blur(4px)' }}
-      transition={getContentTransition(true)}
+      initial={{ opacity: 0, scale: 0.96 }}
+      animate={{ opacity: 1, scale: 1 }}
+      exit={{ opacity: 0, scale: 0.98, filter: 'blur(4px)' }}
+      transition={{ duration: 0.35, ease: EASE.apple }}
       className="flex flex-col items-center justify-center py-10 space-y-6"
     >
       {/* Error Icon - matching success style */}
       <motion.div 
         className="relative w-24 h-24"
-        initial={{ scale: 0.8, opacity: 0 }}
+        initial={{ scale: 0.9, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
-        transition={{ duration: 0.5, ease: EASE.bounce }}
+        transition={{ duration: 0.4, ease: EASE.bounce }}
       >
         {/* Circular progress */}
-        <motion.svg
+        <svg
           className="absolute inset-0 w-full h-full -rotate-90"
           viewBox="0 0 96 96"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.3 }}
         >
           <circle
             cx="48"
@@ -559,19 +556,19 @@ const Demo = () => {
             initial={{ pathLength: 0 }}
             animate={{ pathLength: 1 }}
             transition={{
-              duration: 1.2,
+              duration: 1.0,
               ease: EASE.out,
-              delay: 0.15,
+              delay: 0.1,
             }}
           />
-        </motion.svg>
+        </svg>
         
         {/* Inner circle + X icon */}
         <motion.div 
           className="absolute inset-3 rounded-full bg-red-500/10 flex items-center justify-center"
           initial={{ opacity: 0, scale: 0.5 }}
           animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.4, delay: 0.1, ease: EASE.apple }}
+          transition={{ duration: 0.35, delay: 0.05, ease: EASE.apple }}
         >
           <motion.svg
             width="32"
@@ -585,19 +582,19 @@ const Demo = () => {
             className="text-red-400"
             initial={{ opacity: 0, scale: 0.3 }}
             animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.4, delay: 1.0, ease: EASE.bounce }}
+            transition={{ duration: 0.35, delay: 0.8, ease: EASE.bounce }}
           >
             <motion.path
               d="M18 6L6 18"
               initial={{ pathLength: 0 }}
               animate={{ pathLength: 1 }}
-              transition={{ duration: 0.25, delay: 1.1, ease: EASE.apple }}
+              transition={{ duration: 0.2, delay: 0.9, ease: EASE.apple }}
             />
             <motion.path
               d="M6 6L18 18"
               initial={{ pathLength: 0 }}
               animate={{ pathLength: 1 }}
-              transition={{ duration: 0.25, delay: 1.25, ease: EASE.apple }}
+              transition={{ duration: 0.2, delay: 1.0, ease: EASE.apple }}
             />
           </motion.svg>
         </motion.div>
@@ -606,9 +603,9 @@ const Demo = () => {
       {/* Error Text */}
       <motion.div
         className="text-center space-y-1"
-        initial={{ opacity: 0, y: 10 }}
+        initial={{ opacity: 0, y: 8 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.4, delay: 1.4, ease: EASE.apple }}
+        transition={{ duration: 0.35, delay: 1.1, ease: EASE.apple }}
       >
         <h2 className="text-xl font-light text-white/90 tracking-wide">
           Unable to connect
@@ -620,9 +617,9 @@ const Demo = () => {
 
       {/* Retry Button */}
       <motion.div
-        initial={{ opacity: 0, y: 10 }}
+        initial={{ opacity: 0, y: 8 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.4, delay: 1.55, ease: EASE.apple }}
+        transition={{ duration: 0.35, delay: 1.25, ease: EASE.apple }}
       >
         <button
           onClick={handleRetry}
@@ -633,7 +630,7 @@ const Demo = () => {
         </button>
       </motion.div>
     </motion.div>
-  );
+  ), [handleRetry]);
 
   // ===========================================================================
   // FORM CONTENT
