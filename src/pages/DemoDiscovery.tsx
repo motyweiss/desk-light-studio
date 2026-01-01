@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { 
@@ -11,116 +11,94 @@ import {
   ChevronLeft,
   ChevronDown,
   Smartphone,
-  Headphones,
   Tv,
   Lamp,
   SunMedium,
-  MonitorSpeaker,
-  Scan,
-  Check
+  Check,
+  AlertCircle,
+  type LucideIcon
 } from "lucide-react";
 import { HomeAssistantIcon } from "@/components/icons/HomeAssistantIcon";
+import { useHAConnection } from "@/contexts/HAConnectionContext";
+import { haProxyClient } from "@/services/haProxyClient";
 
 // Animation constants
 const EASE = {
   apple: [0.25, 0.1, 0.25, 1] as const,
 };
 
-// Mock data for discovered devices
-const MOCK_ROOMS = [
-  { id: "all", name: "All", deviceCount: 24 },
-  { id: "office", name: "Office", deviceCount: 8 },
-  { id: "living", name: "Living Room", deviceCount: 6 },
-  { id: "bedroom", name: "Bedroom", deviceCount: 5 },
-  { id: "kitchen", name: "Kitchen", deviceCount: 5 },
-];
+interface HAEntity {
+  entity_id: string;
+  state: string;
+  attributes: {
+    friendly_name?: string;
+    device_class?: string;
+    unit_of_measurement?: string;
+    brightness?: number;
+    [key: string]: unknown;
+  };
+}
 
 interface Device {
   id: string;
   name: string;
   state: string;
-  room: string;
-  icon: React.ElementType;
+  entityId: string;
+  domain: string;
+  deviceClass?: string;
 }
 
-const MOCK_DEVICES = {
-  lights: [
-    { id: "l1", name: "Desk Lamp", state: "on", room: "office", icon: Lamp },
-    { id: "l2", name: "Monitor Light Bar", state: "on", room: "office", icon: SunMedium },
-    { id: "l3", name: "Ceiling Spotlight", state: "off", room: "office", icon: Lightbulb },
-    { id: "l4", name: "Floor Lamp", state: "on", room: "living", icon: Lamp },
-    { id: "l5", name: "Bedside Light", state: "off", room: "bedroom", icon: Lightbulb },
-  ] as Device[],
-  climate: [
-    { id: "c1", name: "Office Temperature", state: "23.5°C", room: "office", icon: Thermometer },
-    { id: "c2", name: "Office Humidity", state: "45%", room: "office", icon: Droplets },
-    { id: "c3", name: "Air Quality Index", state: "Good", room: "office", icon: Wind },
-    { id: "c4", name: "Living Room Temp", state: "22.1°C", room: "living", icon: Thermometer },
-    { id: "c5", name: "Bedroom Humidity", state: "52%", room: "bedroom", icon: Droplets },
-  ] as Device[],
-  sensors: [
-    { id: "s1", name: "iPhone 15 Pro", state: "87%", room: "office", icon: Smartphone },
-    { id: "s2", name: "AirPods Max", state: "64%", room: "office", icon: Headphones },
-    { id: "s3", name: "iPad Pro", state: "100%", room: "living", icon: Battery },
-  ] as Device[],
-  mediaPlayers: [
-    { id: "m1", name: "HomePod mini", state: "Playing", room: "office", icon: Speaker },
-    { id: "m2", name: "Apple TV 4K", state: "Idle", room: "living", icon: Tv },
-    { id: "m3", name: "Sonos One", state: "Idle", room: "living", icon: MonitorSpeaker },
-  ] as Device[],
-};
+interface CategoryData {
+  title: string;
+  icon: LucideIcon;
+  color: string;
+  bgColor: string;
+  borderColor: string;
+  devices: Device[];
+}
 
-const CATEGORY_CONFIG = {
-  lights: { 
-    title: "Lighting", 
-    icon: Lightbulb, 
-    color: "text-amber-400",
-    bgColor: "bg-amber-400/10",
-    borderColor: "border-amber-400/20"
-  },
-  climate: { 
-    title: "Climate", 
-    icon: Thermometer, 
-    color: "text-cyan-400",
-    bgColor: "bg-cyan-400/10",
-    borderColor: "border-cyan-400/20"
-  },
-  sensors: { 
-    title: "Devices", 
-    icon: Battery, 
-    color: "text-green-400",
-    bgColor: "bg-green-400/10",
-    borderColor: "border-green-400/20"
-  },
-  mediaPlayers: { 
-    title: "Media", 
-    icon: Speaker, 
-    color: "text-purple-400",
-    bgColor: "bg-purple-400/10",
-    borderColor: "border-purple-400/20"
-  },
-};
-
-// Scanning phase data
+// Scanning phase steps
 const SCAN_STEPS = [
-  { label: "Connecting to Home Assistant...", duration: 800 },
-  { label: "Discovering devices...", duration: 1200 },
-  { label: "Fetching entity states...", duration: 1000 },
-  { label: "Organizing by rooms...", duration: 600 },
+  "Connecting to Home Assistant",
+  "Fetching entities",
+  "Organizing devices",
 ];
+
+// Get icon for entity
+const getEntityIcon = (domain: string, deviceClass?: string): LucideIcon => {
+  if (domain === "light") {
+    if (deviceClass === "monitor") return SunMedium;
+    return Lamp;
+  }
+  if (domain === "sensor") {
+    if (deviceClass === "temperature") return Thermometer;
+    if (deviceClass === "humidity") return Droplets;
+    if (deviceClass === "pm25" || deviceClass === "aqi") return Wind;
+    if (deviceClass === "battery") return Battery;
+    return Thermometer;
+  }
+  if (domain === "media_player") return Speaker;
+  if (domain === "device_tracker") return Smartphone;
+  return Lightbulb;
+};
 
 // Device Card Component
 const DeviceCard = ({ 
   device, 
-  category,
+  categoryColor,
+  categoryBgColor,
+  categoryBorderColor,
   index 
 }: { 
   device: Device; 
-  category: keyof typeof CATEGORY_CONFIG;
+  categoryColor: string;
+  categoryBgColor: string;
+  categoryBorderColor: string;
   index: number;
 }) => {
-  const config = CATEGORY_CONFIG[category];
-  const isOn = device.state === "on" || device.state === "Playing";
+  const Icon = getEntityIcon(device.domain, device.deviceClass);
+  const isOn = device.state === "on" || device.state === "playing" || device.state === "home";
+  const isLight = device.domain === "light";
   
   return (
     <motion.div
@@ -129,7 +107,7 @@ const DeviceCard = ({
       exit={{ opacity: 0, y: -8 }}
       transition={{ 
         duration: 0.25, 
-        delay: index * 0.025,
+        delay: index * 0.02,
         ease: EASE.apple 
       }}
       className="
@@ -141,24 +119,24 @@ const DeviceCard = ({
     >
       <div className={`
         w-9 h-9 rounded-lg flex items-center justify-center
-        ${config.bgColor} ${config.borderColor} border
+        ${categoryBgColor} ${categoryBorderColor} border
       `}>
-        <device.icon className={`w-4 h-4 ${config.color}`} />
+        <Icon className={`w-4 h-4 ${categoryColor}`} />
       </div>
       
       <div className="flex-1 min-w-0">
         <div className="text-sm text-white/90 font-light truncate">
           {device.name}
         </div>
-        <div className="text-xs text-white/40 font-light">
-          {MOCK_ROOMS.find(r => r.id === device.room)?.name}
+        <div className="text-xs text-white/40 font-light truncate">
+          {device.entityId}
         </div>
       </div>
       
       <div className="flex items-center gap-2">
-        {category === "lights" && (
+        {isLight && (
           <div className={`
-            w-2 h-2 rounded-full
+            w-2 h-2 rounded-full transition-all duration-300
             ${isOn ? "bg-amber-400 shadow-[0_0_8px_rgba(251,191,36,0.6)]" : "bg-white/20"}
           `} />
         )}
@@ -166,7 +144,7 @@ const DeviceCard = ({
           text-xs font-light
           ${isOn ? "text-white/80" : "text-white/40"}
         `}>
-          {device.state === "on" ? "On" : device.state === "off" ? "Off" : device.state}
+          {device.state}
         </span>
       </div>
     </motion.div>
@@ -175,20 +153,17 @@ const DeviceCard = ({
 
 // Collapsible Category Section
 const CategorySection = ({ 
-  category, 
-  devices,
+  category,
   index,
   defaultOpen = false
 }: { 
-  category: keyof typeof CATEGORY_CONFIG; 
-  devices: Device[];
+  category: CategoryData;
   index: number;
   defaultOpen?: boolean;
 }) => {
   const [isOpen, setIsOpen] = useState(defaultOpen);
-  const config = CATEGORY_CONFIG[category];
   
-  if (devices.length === 0) return null;
+  if (category.devices.length === 0) return null;
   
   return (
     <motion.div
@@ -201,7 +176,6 @@ const CategorySection = ({
       }}
       className="overflow-hidden"
     >
-      {/* Header - Clickable */}
       <motion.button
         onClick={() => setIsOpen(!isOpen)}
         className="
@@ -215,16 +189,16 @@ const CategorySection = ({
         <div className="flex items-center gap-3">
           <div className={`
             w-8 h-8 rounded-lg flex items-center justify-center
-            ${config.bgColor}
+            ${category.bgColor}
           `}>
-            <config.icon className={`w-4 h-4 ${config.color}`} />
+            <category.icon className={`w-4 h-4 ${category.color}`} />
           </div>
           <div className="text-left">
             <h3 className="text-sm font-light text-white/90">
-              {config.title}
+              {category.title}
             </h3>
             <span className="text-xs text-white/40 font-light">
-              {devices.length} {devices.length === 1 ? "device" : "devices"}
+              {category.devices.length} {category.devices.length === 1 ? "device" : "devices"}
             </span>
           </div>
         </div>
@@ -237,7 +211,6 @@ const CategorySection = ({
         </motion.div>
       </motion.button>
       
-      {/* Devices List */}
       <AnimatePresence>
         {isOpen && (
           <motion.div
@@ -248,11 +221,13 @@ const CategorySection = ({
             className="overflow-hidden"
           >
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-2">
-              {devices.map((device, i) => (
+              {category.devices.map((device, i) => (
                 <DeviceCard 
                   key={device.id} 
                   device={device} 
-                  category={category}
+                  categoryColor={category.color}
+                  categoryBgColor={category.bgColor}
+                  categoryBorderColor={category.borderColor}
                   index={i} 
                 />
               ))}
@@ -265,132 +240,246 @@ const CategorySection = ({
 };
 
 // Scanning Phase Component
-const ScanningPhase = ({ onComplete }: { onComplete: () => void }) => {
+const ScanningPhase = ({ 
+  onComplete,
+  onError,
+  config 
+}: { 
+  onComplete: (entities: HAEntity[]) => void;
+  onError: (error: string) => void;
+  config: { baseUrl: string; accessToken: string } | null;
+}) => {
   const [currentStep, setCurrentStep] = useState(0);
-  const [progress, setProgress] = useState(0);
+  const [dots, setDots] = useState("");
   
+  // Animated dots
   useEffect(() => {
-    let timeout: NodeJS.Timeout;
-    
-    if (currentStep < SCAN_STEPS.length) {
-      const step = SCAN_STEPS[currentStep];
-      const startProgress = (currentStep / SCAN_STEPS.length) * 100;
-      const endProgress = ((currentStep + 1) / SCAN_STEPS.length) * 100;
-      
-      // Animate progress
-      const startTime = Date.now();
-      const animate = () => {
-        const elapsed = Date.now() - startTime;
-        const p = Math.min(elapsed / step.duration, 1);
-        setProgress(startProgress + (endProgress - startProgress) * p);
-        
-        if (p < 1) {
-          requestAnimationFrame(animate);
-        }
-      };
-      requestAnimationFrame(animate);
-      
-      timeout = setTimeout(() => {
-        setCurrentStep(prev => prev + 1);
-      }, step.duration);
-    } else {
-      // Complete
-      setTimeout(onComplete, 400);
-    }
-    
-    return () => clearTimeout(timeout);
-  }, [currentStep, onComplete]);
+    const interval = setInterval(() => {
+      setDots(prev => prev.length >= 3 ? "" : prev + ".");
+    }, 400);
+    return () => clearInterval(interval);
+  }, []);
   
-  const isComplete = currentStep >= SCAN_STEPS.length;
+  // Fetch entities
+  useEffect(() => {
+    const fetchEntities = async () => {
+      if (!config) {
+        onError("No Home Assistant configuration found");
+        return;
+      }
+      
+      // Step 1: Connecting
+      setCurrentStep(0);
+      await new Promise(r => setTimeout(r, 600));
+      
+      // Step 2: Fetching
+      setCurrentStep(1);
+      
+      try {
+        const { data, error } = await haProxyClient.get<HAEntity[]>("/api/states");
+        
+        if (error || !data) {
+          onError(error || "Failed to fetch entities");
+          return;
+        }
+        
+        // Step 3: Organizing
+        setCurrentStep(2);
+        await new Promise(r => setTimeout(r, 400));
+        
+        onComplete(data);
+      } catch (err) {
+        onError(err instanceof Error ? err.message : "Connection failed");
+      }
+    };
+    
+    fetchEntities();
+  }, [config, onComplete, onError]);
   
   return (
     <motion.div
-      initial={{ opacity: 0, scale: 0.96 }}
-      animate={{ opacity: 1, scale: 1 }}
-      exit={{ opacity: 0, scale: 0.96 }}
-      transition={{ duration: 0.4, ease: EASE.apple }}
-      className="flex flex-col items-center text-center py-12"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      transition={{ duration: 0.3, ease: EASE.apple }}
+      className="flex flex-col items-center text-center py-16"
     >
-      {/* Scanning Icon */}
-      <motion.div
-        animate={isComplete ? { scale: [1, 1.1, 1] } : { rotate: 360 }}
-        transition={isComplete 
-          ? { duration: 0.4, ease: EASE.apple }
-          : { duration: 2, repeat: Infinity, ease: "linear" }
-        }
-        className={`
-          w-16 h-16 rounded-2xl mb-6
-          flex items-center justify-center
-          ${isComplete ? "bg-green-500/20" : "bg-white/5"}
-          border ${isComplete ? "border-green-500/30" : "border-white/10"}
-        `}
-      >
-        {isComplete ? (
-          <Check className="w-8 h-8 text-green-400" />
-        ) : (
-          <Scan className="w-8 h-8 text-white/60" />
-        )}
-      </motion.div>
+      {/* Subtle pulsing ring */}
+      <div className="relative w-16 h-16 mb-8">
+        <motion.div
+          className="absolute inset-0 rounded-full border border-white/10"
+          animate={{ 
+            scale: [1, 1.3, 1],
+            opacity: [0.3, 0, 0.3],
+          }}
+          transition={{ 
+            duration: 2,
+            repeat: Infinity,
+            ease: "easeInOut",
+          }}
+        />
+        <motion.div
+          className="absolute inset-0 rounded-full border border-white/20"
+          animate={{ 
+            scale: [1, 1.15, 1],
+            opacity: [0.5, 0.1, 0.5],
+          }}
+          transition={{ 
+            duration: 2,
+            repeat: Infinity,
+            ease: "easeInOut",
+            delay: 0.3,
+          }}
+        />
+        <div className="absolute inset-0 rounded-full bg-white/5 flex items-center justify-center">
+          <HomeAssistantIcon className="w-7 h-7 text-[#18BCF2]/80" />
+        </div>
+      </div>
       
       {/* Status Text */}
       <motion.p
         key={currentStep}
-        initial={{ opacity: 0, y: 8 }}
+        initial={{ opacity: 0, y: 4 }}
         animate={{ opacity: 1, y: 0 }}
-        className="text-sm text-white/70 font-light mb-6"
+        transition={{ duration: 0.2 }}
+        className="text-sm text-white/60 font-light"
       >
-        {isComplete ? "Discovery complete!" : SCAN_STEPS[currentStep]?.label}
+        {SCAN_STEPS[currentStep]}{dots}
       </motion.p>
       
-      {/* Progress Bar */}
-      <div className="w-48 h-1 bg-white/10 rounded-full overflow-hidden">
-        <motion.div
-          className="h-full bg-white/60 rounded-full"
-          style={{ width: `${progress}%` }}
-          transition={{ duration: 0.1 }}
-        />
+      {/* Step indicators */}
+      <div className="flex items-center gap-2 mt-6">
+        {SCAN_STEPS.map((_, i) => (
+          <motion.div
+            key={i}
+            className={`
+              w-1.5 h-1.5 rounded-full transition-all duration-300
+              ${i <= currentStep ? "bg-white/50" : "bg-white/15"}
+            `}
+            animate={i === currentStep ? { scale: [1, 1.2, 1] } : {}}
+            transition={{ duration: 0.6, repeat: Infinity }}
+          />
+        ))}
       </div>
-      
-      {/* Device Count Preview */}
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: currentStep >= 2 ? 1 : 0 }}
-        className="mt-6 flex items-center gap-4 text-white/40 text-xs font-light"
-      >
-        {(Object.keys(CATEGORY_CONFIG) as Array<keyof typeof CATEGORY_CONFIG>).map((cat) => {
-          const config = CATEGORY_CONFIG[cat];
-          const count = MOCK_DEVICES[cat].length;
-          return (
-            <div key={cat} className="flex items-center gap-1">
-              <config.icon className={`w-3 h-3 ${config.color}`} />
-              <span>{count}</span>
-            </div>
-          );
-        })}
-      </motion.div>
     </motion.div>
   );
 };
 
+// Error State Component
+const ErrorState = ({ error, onRetry }: { error: string; onRetry: () => void }) => (
+  <motion.div
+    initial={{ opacity: 0 }}
+    animate={{ opacity: 1 }}
+    className="flex flex-col items-center text-center py-12"
+  >
+    <div className="w-14 h-14 rounded-2xl bg-red-500/10 border border-red-500/20 flex items-center justify-center mb-4">
+      <AlertCircle className="w-7 h-7 text-red-400" />
+    </div>
+    <p className="text-sm text-white/70 font-light mb-2">Connection Failed</p>
+    <p className="text-xs text-white/40 font-light mb-6 max-w-xs">{error}</p>
+    <button
+      onClick={onRetry}
+      className="px-4 py-2 rounded-lg bg-white/10 hover:bg-white/15 text-white/80 text-sm font-light transition-colors"
+    >
+      Try Again
+    </button>
+  </motion.div>
+);
+
 export default function DemoDiscovery() {
   const navigate = useNavigate();
-  const [phase, setPhase] = useState<"scanning" | "results">("scanning");
-  const [activeRoom, setActiveRoom] = useState("all");
+  const { config } = useHAConnection();
+  const [phase, setPhase] = useState<"scanning" | "results" | "error">("scanning");
+  const [error, setError] = useState<string>("");
+  const [categories, setCategories] = useState<CategoryData[]>([]);
+  const [totalDevices, setTotalDevices] = useState(0);
   
-  // Filter devices by room
-  const filterDevices = (devices: Device[]) => {
-    if (activeRoom === "all") return devices;
-    return devices.filter(d => d.room === activeRoom);
-  };
+  // Process entities into categories
+  const processEntities = useCallback((entities: HAEntity[]) => {
+    const lights: Device[] = [];
+    const climate: Device[] = [];
+    const media: Device[] = [];
+    const devices: Device[] = [];
+    
+    entities.forEach(entity => {
+      const [domain] = entity.entity_id.split(".");
+      const deviceClass = entity.attributes.device_class;
+      
+      const device: Device = {
+        id: entity.entity_id,
+        name: entity.attributes.friendly_name || entity.entity_id,
+        state: entity.state,
+        entityId: entity.entity_id,
+        domain,
+        deviceClass,
+      };
+      
+      // Categorize
+      if (domain === "light") {
+        lights.push(device);
+      } else if (domain === "sensor") {
+        if (deviceClass === "temperature" || deviceClass === "humidity" || 
+            deviceClass === "pm25" || deviceClass === "aqi" || deviceClass === "carbon_dioxide") {
+          climate.push(device);
+        } else if (deviceClass === "battery") {
+          devices.push(device);
+        }
+      } else if (domain === "media_player") {
+        media.push(device);
+      } else if (domain === "device_tracker") {
+        devices.push(device);
+      }
+    });
+    
+    const categoriesData: CategoryData[] = [
+      {
+        title: "Lighting",
+        icon: Lightbulb,
+        color: "text-amber-400",
+        bgColor: "bg-amber-400/10",
+        borderColor: "border-amber-400/20",
+        devices: lights.slice(0, 20), // Limit for performance
+      },
+      {
+        title: "Climate",
+        icon: Thermometer,
+        color: "text-cyan-400",
+        bgColor: "bg-cyan-400/10",
+        borderColor: "border-cyan-400/20",
+        devices: climate.slice(0, 15),
+      },
+      {
+        title: "Devices",
+        icon: Battery,
+        color: "text-green-400",
+        bgColor: "bg-green-400/10",
+        borderColor: "border-green-400/20",
+        devices: devices.slice(0, 15),
+      },
+      {
+        title: "Media",
+        icon: Speaker,
+        color: "text-purple-400",
+        bgColor: "bg-purple-400/10",
+        borderColor: "border-purple-400/20",
+        devices: media.slice(0, 10),
+      },
+    ].filter(c => c.devices.length > 0);
+    
+    setCategories(categoriesData);
+    setTotalDevices(categoriesData.reduce((sum, c) => sum + c.devices.length, 0));
+    setPhase("results");
+  }, []);
   
-  const filteredDevices = {
-    lights: filterDevices(MOCK_DEVICES.lights),
-    climate: filterDevices(MOCK_DEVICES.climate),
-    sensors: filterDevices(MOCK_DEVICES.sensors),
-    mediaPlayers: filterDevices(MOCK_DEVICES.mediaPlayers),
-  };
+  const handleError = useCallback((err: string) => {
+    setError(err);
+    setPhase("error");
+  }, []);
   
-  const totalDevices = Object.values(MOCK_DEVICES).flat().length;
+  const handleRetry = useCallback(() => {
+    setPhase("scanning");
+    setError("");
+  }, []);
 
   return (
     <div 
@@ -415,9 +504,9 @@ export default function DemoDiscovery() {
 
       {/* Main Card */}
       <motion.div
-        initial={{ opacity: 0, scale: 0.94 }}
+        initial={{ opacity: 0, scale: 0.96 }}
         animate={{ opacity: 1, scale: 1 }}
-        transition={{ duration: 0.5, ease: EASE.apple }}
+        transition={{ duration: 0.4, ease: EASE.apple }}
         className="
           w-full max-w-2xl mt-12 sm:mt-16
           rounded-3xl p-6 sm:p-8
@@ -428,106 +517,76 @@ export default function DemoDiscovery() {
       >
         {/* Header */}
         <motion.div
-          initial={{ opacity: 0, y: 10, filter: "blur(4px)" }}
-          animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
-          transition={{ duration: 0.5, delay: 0.15, ease: EASE.apple }}
-          className="flex flex-col items-center text-center mb-6"
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4, delay: 0.1, ease: EASE.apple }}
+          className="flex flex-col items-center text-center mb-4"
         >
-          <motion.div
-            initial={{ scale: 0.8, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            transition={{ duration: 0.4, delay: 0.1, ease: EASE.apple }}
-            className="
-              w-14 h-14 rounded-2xl mb-4
-              bg-gradient-to-br from-white via-white to-neutral-200
-              flex items-center justify-center
-              shadow-lg
-            "
-          >
-            <HomeAssistantIcon className="w-8 h-8 text-[#18BCF2]" />
-          </motion.div>
-          
-          <h1 className="text-xl sm:text-2xl font-light text-white/90 tracking-wide mb-1">
-            {phase === "scanning" ? "Discovering Devices" : "Your Smart Home"}
-          </h1>
           {phase === "results" && (
-            <motion.p
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              className="text-sm text-white/50 font-light"
-            >
-              {totalDevices} devices in {MOCK_ROOMS.length - 1} rooms
-            </motion.p>
+            <>
+              <motion.div
+                initial={{ scale: 0.8, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                transition={{ duration: 0.3, ease: EASE.apple }}
+                className="
+                  w-12 h-12 rounded-xl mb-4
+                  bg-green-500/15 border border-green-500/25
+                  flex items-center justify-center
+                "
+              >
+                <Check className="w-6 h-6 text-green-400" />
+              </motion.div>
+              
+              <h1 className="text-xl font-light text-white/90 tracking-wide mb-1">
+                Discovery Complete
+              </h1>
+              <p className="text-sm text-white/50 font-light">
+                Found {totalDevices} devices
+              </p>
+            </>
+          )}
+          
+          {phase === "scanning" && (
+            <h1 className="text-xl font-light text-white/90 tracking-wide">
+              Discovering Devices
+            </h1>
           )}
         </motion.div>
 
         <AnimatePresence mode="wait">
-          {phase === "scanning" ? (
+          {phase === "scanning" && (
             <ScanningPhase 
               key="scanning"
-              onComplete={() => setPhase("results")} 
+              config={config}
+              onComplete={processEntities}
+              onError={handleError}
             />
-          ) : (
+          )}
+          
+          {phase === "error" && (
+            <ErrorState 
+              key="error"
+              error={error}
+              onRetry={handleRetry}
+            />
+          )}
+          
+          {phase === "results" && (
             <motion.div
               key="results"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              transition={{ duration: 0.4, ease: EASE.apple }}
+              transition={{ duration: 0.3, ease: EASE.apple }}
             >
-              {/* Room Pills */}
-              <motion.div
-                initial={{ opacity: 0, y: 8 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.35, ease: EASE.apple }}
-                className="
-                  flex gap-1 overflow-x-auto pb-4 mb-4
-                  scrollbar-none -mx-2 px-2
-                "
-                style={{ scrollbarWidth: "none" }}
-              >
-                {MOCK_ROOMS.map((room, i) => (
-                  <motion.button
-                    key={room.id}
-                    initial={{ opacity: 0, x: -12 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ duration: 0.25, delay: i * 0.03, ease: EASE.apple }}
-                    onClick={() => setActiveRoom(room.id)}
-                    className={`
-                      relative px-4 py-2 rounded-full text-sm font-light whitespace-nowrap
-                      transition-colors duration-200
-                      ${activeRoom === room.id 
-                        ? "text-[#302A23]" 
-                        : "text-white/60 hover:text-white/80"
-                      }
-                    `}
-                  >
-                    {activeRoom === room.id && (
-                      <motion.div
-                        layoutId="activeRoom"
-                        className="absolute inset-0 bg-white rounded-full"
-                        transition={{ type: "spring", stiffness: 400, damping: 30 }}
-                      />
-                    )}
-                    <span className="relative z-10">
-                      {room.name}
-                      <span className={`ml-1.5 text-xs ${activeRoom === room.id ? "text-[#302A23]/60" : "text-white/40"}`}>
-                        {room.deviceCount}
-                      </span>
-                    </span>
-                  </motion.button>
-                ))}
-              </motion.div>
-
               {/* Divider */}
-              <div className="h-px bg-white/5 mb-4" />
+              <div className="h-px bg-white/5 my-4" />
 
-              {/* Categories - Collapsible */}
+              {/* Categories */}
               <div className="space-y-3">
-                {(Object.keys(CATEGORY_CONFIG) as Array<keyof typeof CATEGORY_CONFIG>).map((category, i) => (
+                {categories.map((category, i) => (
                   <CategorySection
-                    key={category}
+                    key={category.title}
                     category={category}
-                    devices={filteredDevices[category]}
                     index={i}
                     defaultOpen={i === 0}
                   />
@@ -538,7 +597,7 @@ export default function DemoDiscovery() {
               <motion.div
                 initial={{ opacity: 0, y: 12 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.35, delay: 0.4, ease: EASE.apple }}
+                transition={{ duration: 0.35, delay: 0.3, ease: EASE.apple }}
                 className="mt-6 pt-4 border-t border-white/5"
               >
                 <motion.button
@@ -566,22 +625,18 @@ export default function DemoDiscovery() {
         <motion.div
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4, delay: 0.5, ease: EASE.apple }}
+          transition={{ duration: 0.4, delay: 0.4, ease: EASE.apple }}
           className="
             mt-6 flex items-center gap-6
             text-white/40 text-xs font-light
           "
         >
-          {(Object.keys(CATEGORY_CONFIG) as Array<keyof typeof CATEGORY_CONFIG>).map((category) => {
-            const config = CATEGORY_CONFIG[category];
-            const count = MOCK_DEVICES[category].length;
-            return (
-              <div key={category} className="flex items-center gap-1.5">
-                <config.icon className={`w-3.5 h-3.5 ${config.color}`} />
-                <span>{count}</span>
-              </div>
-            );
-          })}
+          {categories.map((category) => (
+            <div key={category.title} className="flex items-center gap-1.5">
+              <category.icon className={`w-3.5 h-3.5 ${category.color}`} />
+              <span>{category.devices.length}</span>
+            </div>
+          ))}
         </motion.div>
       )}
     </div>
