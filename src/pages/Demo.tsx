@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import { motion, AnimatePresence, LayoutGroup } from 'framer-motion';
 import { Eye, EyeOff, RefreshCw, ExternalLink, ArrowLeft, X } from 'lucide-react';
 import { HomeAssistantIcon } from '@/components/icons/HomeAssistantIcon';
@@ -7,7 +7,6 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { useHAConnection } from '@/contexts/HAConnectionContext';
 import { useToast } from '@/hooks/use-toast';
-import { TIMING, EASE } from '@/lib/animations/tokens';
 import { useReducedMotion } from '@/hooks/useReducedMotion';
 
 // =============================================================================
@@ -17,164 +16,42 @@ import { useReducedMotion } from '@/hooks/useReducedMotion';
 type ConnectionStatus = 'idle' | 'connecting' | 'success' | 'error';
 
 // =============================================================================
-// ANIMATION CONFIGURATION - Clean, consistent, elegant
+// ANIMATION SYSTEM - Unified, elegant, Apple-inspired
 // =============================================================================
 
-// Layout transition for card size changes
-const LAYOUT_TRANSITION = {
-  type: 'spring' as const,
-  stiffness: 280,
-  damping: 28,
-  mass: 0.9,
-};
-
-const ANIM = {
-  // Card entrance - Apple-style cinematic reveal
-  card: {
-    initial: { opacity: 0, scale: 0.92, y: 40, filter: 'blur(10px)' },
-    animate: { opacity: 1, scale: 1, y: 0, filter: 'blur(0px)' },
-    transition: {
-      duration: 0.8,
-      ease: [0.25, 0.46, 0.45, 0.94], // Apple's signature easing
-      filter: { duration: 0.6 },
-    },
-  },
-  
-  // Content crossfade - orchestrated timing
-  content: {
-    exit: {
-      opacity: 0,
-      scale: 0.98,
-      transition: {
-        duration: 0.2,
-        ease: EASE.smooth,
-      },
-    },
-    enter: {
-      opacity: 1,
-      scale: 1,
-      transition: {
-        duration: 0.25,
-        ease: EASE.smooth,
-        delay: 0.05,
-      },
-    },
-  },
-  
-  // Icon - elegant drop with soft bounce
-  icon: {
-    initial: { opacity: 0, scale: 0.3, y: -30, rotate: -180 },
-    animate: { opacity: 1, scale: 1, y: 0, rotate: 0 },
-    transition: {
-      duration: 0.7,
-      delay: 0.35,
-      ease: [0.34, 1.56, 0.64, 1],
-      y: { duration: 0.6, ease: [0.22, 1, 0.36, 1] },
-      rotate: { duration: 0.6, ease: [0.34, 1.2, 0.64, 1] },
-    },
-  },
-  
-  // Form items - refined slide up with perfect timing
-  item: {
-    initial: { opacity: 0, y: 20 },
-    animate: { opacity: 1, y: 0 },
-    exit: { opacity: 0, y: -4 },
-    transition: {
-      duration: 0.5,
-      ease: [0.25, 0.46, 0.45, 0.94],
-    },
-  },
-  
-  // Stagger timing - orchestrated hierarchical reveal
-  stagger: {
-    icon: 0.35,
-    title: 0.55,
-    separator: 0.7,
-    field1: 0.85,
-    field2: 1.0,
-    button: 1.15,
-  },
-  
-  // Connecting pulse - subtle and calming
-  pulse: {
-    scale: [1, 1.025, 1] as number[],
-    boxShadow: [
-      '0 10px 15px -3px rgba(0, 0, 0, 0.2)',
-      '0 10px 20px -3px rgba(255, 188, 0, 0.25)',
-      '0 10px 15px -3px rgba(0, 0, 0, 0.2)',
-    ] as string[],
-    transition: {
-      duration: 2.2,
-      repeat: Infinity,
-      ease: EASE.smooth,
-    },
-  },
-  
-  // Success/error icon
-  statusIcon: {
-    initial: { scale: 0.85, opacity: 0 },
-    animate: { scale: 1, opacity: 1 },
-    transition: {
-      duration: TIMING.medium,
-      ease: EASE.gentle,
-    },
-  },
-  
-  // Checkmark path draw
-  checkmark: {
-    initial: { pathLength: 0, opacity: 0 },
-    animate: { pathLength: 1, opacity: 1 },
-    transition: {
-      pathLength: { duration: TIMING.slow, ease: EASE.out, delay: 0.1 },
-      opacity: { duration: TIMING.micro },
-    },
-  },
-  
-  // Progress bar
-  progress: {
-    initial: { width: '0%' },
-    animate: { width: '100%' },
-    transition: {
-      duration: 2.2,
-      delay: 0.25,
-      ease: EASE.smooth,
-    },
-  },
-  
-  // Separator line
-  separator: {
-    initial: { opacity: 0, scaleX: 0 },
-    animate: { opacity: 1, scaleX: 1 },
-    transition: {
-      duration: TIMING.medium,
-      ease: EASE.out,
-    },
-  },
-  
-  // Back button
-  backButton: {
-    initial: { opacity: 0, x: -12 },
-    animate: { opacity: 1, x: 0 },
-    transition: {
-      delay: 0.35,
-      duration: TIMING.medium,
-      ease: EASE.out,
-    },
-  },
+// Easing functions
+const EASE = {
+  apple: [0.25, 0.46, 0.45, 0.94] as const,
+  bounce: [0.34, 1.56, 0.64, 1] as const,
+  smooth: [0.4, 0, 0.2, 1] as const,
+  out: [0.16, 1, 0.3, 1] as const,
 } as const;
 
-// Reduced motion variants
-const REDUCED = {
-  content: {
-    duration: TIMING.micro,
-    ease: EASE.smooth,
-  },
-  card: {
-    initial: { opacity: 0 },
-    animate: { opacity: 1 },
-    transition: { duration: TIMING.fast },
-  },
+// Spring configurations
+const SPRING = {
+  card: { type: 'spring' as const, stiffness: 280, damping: 26, mass: 0.9 },
+  content: { type: 'spring' as const, stiffness: 320, damping: 30, mass: 0.8 },
+  gentle: { type: 'spring' as const, stiffness: 200, damping: 25, mass: 1 },
 } as const;
+
+// Stagger delays for hierarchical reveal
+const STAGGER = {
+  icon: 0.3,
+  title: 0.45,
+  separator: 0.55,
+  field1: 0.65,
+  field2: 0.8,
+  button: 0.95,
+  link: 1.1,
+} as const;
+
+// Content transition configurations based on direction
+const getContentTransition = (isEntering: boolean) => ({
+  opacity: { duration: 0.25, ease: EASE.smooth },
+  scale: { duration: 0.3, ease: EASE.apple },
+  y: { duration: 0.35, ease: EASE.apple },
+  filter: { duration: 0.25 },
+});
 
 // =============================================================================
 // COMPONENT
@@ -182,7 +59,7 @@ const REDUCED = {
 
 const Demo = () => {
   const navigate = useNavigate();
-  const { config, testConnection, saveConfig } = useHAConnection();
+  const { config, saveConfig } = useHAConnection();
   const { toast } = useToast();
   const prefersReducedMotion = useReducedMotion();
   
@@ -190,22 +67,16 @@ const Demo = () => {
   const [accessToken, setAccessToken] = useState('');
   const [showToken, setShowToken] = useState(false);
   const [connectionStatus, setConnectionStatus] = useState<ConnectionStatus>('idle');
-  const [errorMessage, setErrorMessage] = useState('');
+  const [formKey, setFormKey] = useState(0); // Key to trigger re-animation
 
-  // Animation config based on motion preference
-  const contentTransition = useMemo(() => 
-    prefersReducedMotion ? REDUCED.content : ANIM.content,
-    [prefersReducedMotion]
-  );
-
-  // Demo page: don't override the default demo URL from config
+  // Load access token from config
   useEffect(() => {
     if (config?.accessToken) {
       setAccessToken(config.accessToken);
     }
   }, [config]);
 
-  const handleTestConnection = async () => {
+  const handleTestConnection = useCallback(async () => {
     if (!baseUrl || !accessToken) {
       toast({
         title: 'Missing fields',
@@ -216,7 +87,6 @@ const Demo = () => {
     }
 
     setConnectionStatus('connecting');
-    setErrorMessage('');
     
     // Demo mode: Only https://ui.nabu.casa is valid
     const DEMO_VALID_URL = 'https://ui.nabu.casa';
@@ -229,19 +99,46 @@ const Demo = () => {
       setConnectionStatus('success');
       await saveConfig(baseUrl, accessToken);
       
+      // Return to idle after success animation
       setTimeout(() => {
+        setFormKey(prev => prev + 1); // Trigger re-animation
         setConnectionStatus('idle');
-      }, 2800);
+      }, 3000);
     } else {
       setConnectionStatus('error');
-      setErrorMessage('Invalid Home Assistant URL. Please use the correct instance URL.');
     }
-  };
+  }, [baseUrl, accessToken, toast, saveConfig]);
 
-  const handleRetry = () => {
+  const handleRetry = useCallback(() => {
+    setFormKey(prev => prev + 1); // Trigger re-animation
     setConnectionStatus('idle');
-    setErrorMessage('');
-  };
+  }, []);
+
+  // ===========================================================================
+  // ANIMATED FIELD COMPONENT
+  // ===========================================================================
+  const AnimatedField = useMemo(() => {
+    return ({ 
+      delay, 
+      children 
+    }: { 
+      delay: number; 
+      children: React.ReactNode;
+    }) => (
+      <motion.div
+        initial={{ opacity: 0, y: 16, filter: 'blur(4px)' }}
+        animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
+        transition={{
+          duration: 0.5,
+          delay,
+          ease: EASE.apple,
+          filter: { duration: 0.3, delay: delay + 0.1 },
+        }}
+      >
+        {children}
+      </motion.div>
+    );
+  }, []);
 
   // ===========================================================================
   // SUCCESS CONTENT
@@ -249,103 +146,90 @@ const Demo = () => {
   const SuccessContent = () => (
     <motion.div
       key="success"
-      layout
-      initial={{ opacity: 0, scale: 0.98 }}
-      animate={{ opacity: 1, scale: 1 }}
-      exit={ANIM.content.exit}
-      transition={ANIM.content.enter.transition}
-      className="space-y-6 text-center py-8"
+      initial={{ opacity: 0, scale: 0.95, y: 10 }}
+      animate={{ opacity: 1, scale: 1, y: 0 }}
+      exit={{ opacity: 0, scale: 0.98, y: -5, filter: 'blur(4px)' }}
+      transition={getContentTransition(true)}
+      className="flex flex-col items-center justify-center py-10 space-y-6"
     >
+      {/* Progress Ring with Checkmark */}
       <motion.div 
-        layout
-        className="flex justify-center"
-        initial={ANIM.statusIcon.initial}
-        animate={ANIM.statusIcon.animate}
-        transition={ANIM.statusIcon.transition}
+        className="relative w-24 h-24"
+        initial={{ scale: 0.8, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        transition={{ duration: 0.5, ease: EASE.bounce }}
       >
-        <div className="relative w-24 h-24">
-          {/* Circular progress ring */}
+        {/* Circular progress */}
+        <motion.svg
+          className="absolute inset-0 w-full h-full -rotate-90"
+          viewBox="0 0 96 96"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.3 }}
+        >
+          <circle
+            cx="48"
+            cy="48"
+            r="44"
+            fill="none"
+            stroke="hsl(160 30% 20% / 0.2)"
+            strokeWidth="3"
+          />
+          <motion.circle
+            cx="48"
+            cy="48"
+            r="44"
+            fill="none"
+            stroke="hsl(160 55% 50%)"
+            strokeWidth="3"
+            strokeLinecap="round"
+            initial={{ pathLength: 0 }}
+            animate={{ pathLength: 1 }}
+            transition={{
+              duration: 1.6,
+              ease: EASE.out,
+              delay: 0.15,
+            }}
+          />
+        </motion.svg>
+        
+        {/* Inner circle + checkmark */}
+        <motion.div 
+          className="absolute inset-3 rounded-full bg-emerald-500/10 flex items-center justify-center"
+          initial={{ opacity: 0, scale: 0.5 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.4, delay: 0.1, ease: EASE.apple }}
+        >
           <motion.svg
-            className="absolute inset-0 w-full h-full -rotate-90"
-            viewBox="0 0 96 96"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.3 }}
+            width="32"
+            height="32"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2.5"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            className="text-emerald-400"
+            initial={{ opacity: 0, scale: 0.3 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.4, delay: 1.4, ease: EASE.bounce }}
           >
-            {/* Background circle - subtle */}
-            <circle
-              cx="48"
-              cy="48"
-              r="44"
-              fill="none"
-              stroke="hsl(160 30% 20% / 0.25)"
-              strokeWidth="3"
-            />
-            {/* Animated progress circle */}
-            <motion.circle
-              cx="48"
-              cy="48"
-              r="44"
-              fill="none"
-              stroke="hsl(160 55% 50%)"
-              strokeWidth="3"
-              strokeLinecap="round"
+            <motion.path
+              d="M5 12l5 5L20 7"
               initial={{ pathLength: 0 }}
               animate={{ pathLength: 1 }}
-              transition={{
-                duration: 1.8,
-                ease: [0.16, 1, 0.3, 1],
-                delay: 0.2,
-              }}
+              transition={{ duration: 0.35, delay: 1.5, ease: EASE.apple }}
             />
           </motion.svg>
-          
-          {/* Inner circle with checkmark */}
-          <motion.div 
-            className="absolute inset-3 rounded-full bg-emerald-500/12 flex items-center justify-center"
-            initial={{ opacity: 0, scale: 0.8 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.4, delay: 0.1, ease: [0.25, 0.46, 0.45, 0.94] }}
-          >
-            <motion.svg
-              width="32"
-              height="32"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2.5"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              className="text-emerald-400"
-              initial={{ opacity: 0, scale: 0.5 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ 
-                duration: 0.4, 
-                delay: 1.6,
-                ease: [0.34, 1.56, 0.64, 1],
-              }}
-            >
-              <motion.path
-                d="M5 12l5 5L20 7"
-                initial={{ pathLength: 0 }}
-                animate={{ pathLength: 1 }}
-                transition={{
-                  duration: 0.4,
-                  delay: 1.7,
-                  ease: [0.25, 0.46, 0.45, 0.94],
-                }}
-              />
-            </motion.svg>
-          </motion.div>
-        </div>
+        </motion.div>
       </motion.div>
 
+      {/* Success Text */}
       <motion.div
-        layout
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 0.12, duration: TIMING.fast, ease: EASE.smooth }}
-        className="space-y-1"
+        className="text-center space-y-1"
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4, delay: 1.7, ease: EASE.apple }}
       >
         <h2 className="text-xl font-light text-white/90 tracking-wide">
           {"You're all set!"}
@@ -363,37 +247,34 @@ const Demo = () => {
   const ErrorContent = () => (
     <motion.div
       key="error"
-      layout
-      initial={{ opacity: 0, scale: 0.98 }}
-      animate={{ opacity: 1, scale: 1 }}
-      exit={ANIM.content.exit}
-      transition={ANIM.content.enter.transition}
-      className="space-y-6 text-center py-8"
+      initial={{ opacity: 0, scale: 0.95, y: 10 }}
+      animate={{ opacity: 1, scale: 1, y: 0 }}
+      exit={{ opacity: 0, scale: 0.98, y: -5, filter: 'blur(4px)' }}
+      transition={getContentTransition(true)}
+      className="flex flex-col items-center justify-center py-10 space-y-6"
     >
+      {/* Error Icon */}
       <motion.div 
-        layout
-        className="flex justify-center"
-        initial={ANIM.statusIcon.initial}
-        animate={ANIM.statusIcon.animate}
-        transition={ANIM.statusIcon.transition}
+        className="w-16 h-16 rounded-full bg-red-500/12 flex items-center justify-center"
+        initial={{ scale: 0.7, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        transition={{ duration: 0.4, ease: EASE.bounce }}
       >
-        <div className="w-16 h-16 rounded-full bg-red-500/15 flex items-center justify-center">
-          <motion.div
-            initial={{ rotate: -45, opacity: 0 }}
-            animate={{ rotate: 0, opacity: 1 }}
-            transition={{ duration: TIMING.fast, ease: EASE.gentle }}
-          >
-            <X className="w-8 h-8 text-red-400" />
-          </motion.div>
-        </div>
+        <motion.div
+          initial={{ rotate: -90, opacity: 0 }}
+          animate={{ rotate: 0, opacity: 1 }}
+          transition={{ duration: 0.35, delay: 0.15, ease: EASE.apple }}
+        >
+          <X className="w-8 h-8 text-red-400" />
+        </motion.div>
       </motion.div>
 
+      {/* Error Text */}
       <motion.div
-        layout
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 0.1, duration: TIMING.fast, ease: EASE.smooth }}
-        className="space-y-3"
+        className="text-center space-y-2"
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4, delay: 0.2, ease: EASE.apple }}
       >
         <h2 className="text-xl font-light text-white/90 tracking-wide">
           Unable to connect
@@ -403,11 +284,11 @@ const Demo = () => {
         </p>
       </motion.div>
 
+      {/* Retry Button */}
       <motion.div
-        layout
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 0.18, duration: TIMING.fast, ease: EASE.smooth }}
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4, delay: 0.35, ease: EASE.apple }}
       >
         <button
           onClick={handleRetry}
@@ -428,82 +309,68 @@ const Demo = () => {
     
     return (
       <motion.div
-        key="form"
-        layout
-        initial={{ opacity: 0, scale: 0.98 }}
-        animate={{ opacity: 1, scale: 1 }}
-        exit={ANIM.content.exit}
-        transition={ANIM.content.enter.transition}
+        key={`form-${formKey}`}
+        initial={{ opacity: 0, scale: 0.97, y: 8 }}
+        animate={{ opacity: 1, scale: 1, y: 0 }}
+        exit={{ opacity: 0, scale: 0.98, y: -8, filter: 'blur(6px)' }}
+        transition={getContentTransition(true)}
         className="space-y-6"
       >
         {/* Icon */}
         <motion.div 
-          layout
           className="flex justify-center"
-          initial={ANIM.icon.initial}
-          animate={ANIM.icon.animate}
-          transition={ANIM.icon.transition}
+          initial={{ opacity: 0, scale: 0.4, y: -20, rotate: -180 }}
+          animate={{ opacity: 1, scale: 1, y: 0, rotate: 0 }}
+          transition={{
+            duration: 0.65,
+            delay: STAGGER.icon,
+            ease: EASE.bounce,
+            y: { duration: 0.5, ease: EASE.out },
+            rotate: { duration: 0.55, ease: EASE.apple },
+          }}
         >
           <motion.div 
             className="w-16 h-16 rounded-[18px] bg-white shadow-lg shadow-black/20 flex items-center justify-center"
             animate={isConnecting && !prefersReducedMotion ? {
-              scale: ANIM.pulse.scale,
-              boxShadow: ANIM.pulse.boxShadow,
+              scale: [1, 1.03, 1],
+              boxShadow: [
+                '0 10px 15px -3px rgba(0, 0, 0, 0.2)',
+                '0 10px 25px -3px rgba(255, 188, 0, 0.3)',
+                '0 10px 15px -3px rgba(0, 0, 0, 0.2)',
+              ],
             } : {}}
-            transition={isConnecting ? ANIM.pulse.transition : {}}
+            transition={isConnecting ? {
+              duration: 2,
+              repeat: Infinity,
+              ease: EASE.smooth,
+            } : {}}
           >
-            <HomeAssistantIcon className="w-8 h-8 text-[hsl(28_15%_12%)]" />
+            <HomeAssistantIcon className="w-8 h-8 text-[#302A23]" />
           </motion.div>
         </motion.div>
 
-        {/* Header */}
-        <motion.div 
-          layout
-          className="text-center"
-          initial={{ opacity: 0, y: 15 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ 
-            duration: 0.5, 
-            delay: ANIM.stagger.title,
-            ease: [0.25, 0.46, 0.45, 0.94],
-          }}
-        >
-          <h1 className="text-xl font-light text-white/90 tracking-wide">
+        {/* Title */}
+        <AnimatedField delay={STAGGER.title}>
+          <h1 className="text-xl font-light text-white/90 tracking-wide text-center">
             Connect to your Home Assistant
           </h1>
-        </motion.div>
+        </AnimatedField>
 
         {/* Separator */}
         <motion.div 
-          layout
           className="h-px bg-white/10 origin-center mx-4"
           initial={{ opacity: 0, scaleX: 0 }}
           animate={{ opacity: 1, scaleX: 1 }}
           transition={{ 
-            duration: 0.6, 
-            delay: ANIM.stagger.separator,
-            ease: [0.25, 0.46, 0.45, 0.94],
+            duration: 0.5, 
+            delay: STAGGER.separator,
+            ease: EASE.out,
           }}
         />
 
-        {/* Form Fields */}
-        <motion.div 
-          layout
-          className="space-y-5"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: ANIM.stagger.field1 - 0.1 }}
-        >
-          <motion.div
-            className="space-y-2"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ 
-              duration: 0.5, 
-              delay: ANIM.stagger.field1,
-              ease: [0.25, 0.46, 0.45, 0.94],
-            }}
-          >
+        {/* Base URL Field */}
+        <AnimatedField delay={STAGGER.field1}>
+          <div className="space-y-2">
             <label className="text-xs font-medium text-white/55 uppercase tracking-wider">
               Base URL
             </label>
@@ -518,18 +385,12 @@ const Demo = () => {
             <p className="text-xs text-white/30">
               Your Home Assistant instance URL
             </p>
-          </motion.div>
+          </div>
+        </AnimatedField>
 
-          <motion.div
-            className="space-y-2"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ 
-              duration: 0.5, 
-              delay: ANIM.stagger.field2,
-              ease: [0.25, 0.46, 0.45, 0.94],
-            }}
-          >
+        {/* Access Token Field */}
+        <AnimatedField delay={STAGGER.field2}>
+          <div className="space-y-2">
             <label className="text-xs font-medium text-white/55 uppercase tracking-wider">
               Access Token
             </label>
@@ -553,20 +414,11 @@ const Demo = () => {
             <p className="text-xs text-white/30">
               Long-lived access token from your profile
             </p>
-          </motion.div>
-        </motion.div>
+          </div>
+        </AnimatedField>
 
         {/* Connect Button */}
-        <motion.div
-          layout
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ 
-            duration: 0.5, 
-            delay: ANIM.stagger.button,
-            ease: [0.25, 0.46, 0.45, 0.94],
-          }}
-        >
+        <AnimatedField delay={STAGGER.button}>
           <Button
             onClick={handleTestConnection}
             disabled={isConnecting || !baseUrl || !accessToken}
@@ -581,30 +433,22 @@ const Demo = () => {
               'CONNECT'
             )}
           </Button>
-        </motion.div>
+        </AnimatedField>
 
         {/* Help Link */}
-        <motion.div 
-          layout
-          className="text-center"
-          initial={{ opacity: 0, y: 15 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ 
-            duration: 0.5, 
-            delay: ANIM.stagger.button + 0.15,
-            ease: [0.25, 0.46, 0.45, 0.94],
-          }}
-        >
-          <a
-            href="https://www.home-assistant.io/docs/authentication/#your-account-profile"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 text-sm text-white/35 hover:text-white/55 transition-colors duration-300"
-          >
-            <ExternalLink className="w-4 h-4" />
-            How to create an access token
-          </a>
-        </motion.div>
+        <AnimatedField delay={STAGGER.link}>
+          <div className="text-center">
+            <a
+              href="https://www.home-assistant.io/docs/authentication/#your-account-profile"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 text-sm text-white/35 hover:text-white/55 transition-colors duration-300"
+            >
+              <ExternalLink className="w-4 h-4" />
+              How to create an access token
+            </a>
+          </div>
+        </AnimatedField>
       </motion.div>
     );
   };
@@ -618,9 +462,9 @@ const Demo = () => {
       <motion.button
         onClick={() => navigate(-1)}
         className="fixed top-6 left-6 z-10 p-3 rounded-xl bg-black/10 hover:bg-black/15 border border-black/5 text-white/70 hover:text-white/90 transition-all duration-300 backdrop-blur-md"
-        initial={ANIM.backButton.initial}
-        animate={ANIM.backButton.animate}
-        transition={ANIM.backButton.transition}
+        initial={{ opacity: 0, x: -15 }}
+        animate={{ opacity: 1, x: 0 }}
+        transition={{ duration: 0.5, delay: 0.4, ease: EASE.apple }}
       >
         <ArrowLeft className="w-5 h-5" />
       </motion.button>
@@ -630,9 +474,19 @@ const Demo = () => {
         <motion.div
           layout
           className="relative z-10 w-full max-w-md bg-[#302A23] backdrop-blur-[60px] outline outline-[8px] outline-white/10 rounded-3xl p-10 overflow-hidden shadow-[0_30px_70px_-15px_rgba(0,0,0,0.45),0_15px_30px_-10px_rgba(0,0,0,0.25)]"
-          initial={prefersReducedMotion ? REDUCED.card.initial : ANIM.card.initial}
-          animate={prefersReducedMotion ? REDUCED.card.animate : ANIM.card.animate}
-          transition={LAYOUT_TRANSITION}
+          initial={prefersReducedMotion ? { opacity: 0 } : { 
+            opacity: 0, 
+            scale: 0.9, 
+            y: 30, 
+            filter: 'blur(12px)' 
+          }}
+          animate={prefersReducedMotion ? { opacity: 1 } : { 
+            opacity: 1, 
+            scale: 1, 
+            y: 0, 
+            filter: 'blur(0px)' 
+          }}
+          transition={SPRING.card}
         >
           <AnimatePresence mode="wait" initial={false}>
             {connectionStatus === 'success' && <SuccessContent />}
