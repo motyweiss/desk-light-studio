@@ -283,10 +283,14 @@ const Demo = () => {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 0.12, duration: TIMING.fast, ease: EASE.smooth }}
+        className="space-y-1"
       >
         <h2 className="text-xl font-light text-white/90 tracking-wide">
-          Connected Successfully
+          {"You're all set!"}
         </h2>
+        <p className="text-sm text-white/50">
+          Home Assistant is now up and running.
+        </p>
       </motion.div>
 
       <motion.div 
