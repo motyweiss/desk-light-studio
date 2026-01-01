@@ -6,16 +6,13 @@ interface AnimatedIconProps {
   delay?: number;
 }
 
-// Soft, gentle easing
-const ease = [0.25, 0.46, 0.45, 0.94] as const;
-
 // Plug icon for connection step
 export const AnimatedPlugIcon = ({ className = "w-12 h-12", delay = 0 }: AnimatedIconProps) => {
   return (
     <motion.div
-      initial={{ scale: 0.8, opacity: 0 }}
-      animate={{ scale: 1, opacity: 1 }}
-      transition={{ delay, duration: 0.8, ease }}
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ delay, duration: 0.4, ease: "easeOut" }}
     >
       <Plug className={className} strokeWidth={1} />
     </motion.div>
@@ -26,9 +23,9 @@ export const AnimatedPlugIcon = ({ className = "w-12 h-12", delay = 0 }: Animate
 export const AnimatedKeyIcon = ({ className = "w-12 h-12", delay = 0 }: AnimatedIconProps) => {
   return (
     <motion.div
-      initial={{ scale: 0.8, opacity: 0 }}
-      animate={{ scale: 1, opacity: 1 }}
-      transition={{ delay, duration: 0.8, ease }}
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ delay, duration: 0.4, ease: "easeOut" }}
     >
       <KeyRound className={className} strokeWidth={1} />
     </motion.div>
@@ -39,9 +36,9 @@ export const AnimatedKeyIcon = ({ className = "w-12 h-12", delay = 0 }: Animated
 export const AnimatedLampIcon = ({ className = "w-12 h-12", delay = 0 }: AnimatedIconProps) => {
   return (
     <motion.div
-      initial={{ scale: 0.8, opacity: 0 }}
-      animate={{ scale: 1, opacity: 1 }}
-      transition={{ delay, duration: 0.8, ease }}
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ delay, duration: 0.4, ease: "easeOut" }}
     >
       <Lamp className={className} strokeWidth={1} />
     </motion.div>
@@ -52,9 +49,9 @@ export const AnimatedLampIcon = ({ className = "w-12 h-12", delay = 0 }: Animate
 export const AnimatedSparklesIcon = ({ className = "w-12 h-12", delay = 0 }: AnimatedIconProps) => {
   return (
     <motion.div
-      initial={{ scale: 0.8, opacity: 0 }}
-      animate={{ scale: 1, opacity: 1 }}
-      transition={{ delay, duration: 0.8, ease }}
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ delay, duration: 0.4, ease: "easeOut" }}
     >
       <Sparkles className={className} strokeWidth={1} />
     </motion.div>
