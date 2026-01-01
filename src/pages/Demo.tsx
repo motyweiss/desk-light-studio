@@ -651,22 +651,22 @@ const Demo = () => {
               filter: { duration: 0.3, delay: STAGGER.icon },
             }}
           >
-            {/* Outer glow layer */}
-            <div className="absolute inset-0 rounded-[22px] bg-white/5 blur-xl" />
+            {/* Subtle outer glow */}
+            <div className="absolute inset-0 rounded-[20px] bg-white/[0.03] blur-lg" />
             
-            {/* Third layer - outermost frosted */}
-            <div className="absolute inset-0 rounded-[22px] bg-gradient-to-br from-white/10 via-white/5 to-white/10 backdrop-blur-sm border border-white/10" />
+            {/* Outer layer - barely visible */}
+            <div className="absolute inset-0 rounded-[20px] bg-white/[0.04] backdrop-blur-[2px] border border-white/[0.06]" />
             
-            {/* Second layer - middle frosted */}
-            <div className="absolute inset-2 rounded-[18px] bg-gradient-to-br from-white/20 via-white/10 to-white/15 backdrop-blur-md border border-white/15 shadow-lg shadow-black/10" />
+            {/* Middle layer - soft frosted */}
+            <div className="absolute inset-1.5 rounded-[16px] bg-white/[0.08] backdrop-blur-sm border border-white/[0.08]" />
             
-            {/* Inner layer - main frosted glass */}
-            <div className="absolute inset-4 rounded-[14px] bg-gradient-to-br from-white/40 via-white/25 to-white/30 backdrop-blur-xl border border-white/30 shadow-inner shadow-white/10 flex items-center justify-center">
-              <HomeAssistantIcon className="w-6 h-6 text-white/80 drop-shadow-sm" />
+            {/* Inner layer - main glass */}
+            <div className="absolute inset-3 rounded-[12px] bg-gradient-to-br from-white/[0.15] via-white/[0.10] to-white/[0.12] backdrop-blur-md border border-white/[0.12] flex items-center justify-center">
+              <HomeAssistantIcon className="w-5 h-5 text-white/70" />
             </div>
             
-            {/* Highlight reflection */}
-            <div className="absolute top-1 left-1 right-4 h-3 rounded-t-[20px] bg-gradient-to-b from-white/15 to-transparent" />
+            {/* Soft top highlight */}
+            <div className="absolute top-0.5 left-2 right-2 h-2 rounded-t-[18px] bg-gradient-to-b from-white/[0.08] to-transparent" />
           </motion.div>
         </motion.div>
 
