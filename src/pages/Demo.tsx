@@ -237,86 +237,68 @@ const Demo = () => {
     return (
       <motion.div
         key="connecting"
-        initial={{ opacity: 0, scale: 0.97 }}
-        animate={{ opacity: 1, scale: 1 }}
-        exit={{ opacity: 0, scale: 0.98, filter: 'blur(6px)' }}
-        transition={getContentTransition(true)}
-        className="space-y-8"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0, filter: 'blur(6px)' }}
+        transition={{ duration: 0.3 }}
+        className="flex flex-col items-center justify-center min-h-[320px]"
       >
-        {/* Header */}
-        <motion.div
-          className="text-center"
-          initial={{ opacity: 0, y: -10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4, ease: EASE.apple }}
-        >
-          <h1 className="text-xl font-light text-white/90 tracking-wide">
-            Setting up your smart home
-          </h1>
-        </motion.div>
-
-        {/* Steps Grid - Large Icons */}
-        <div className="grid grid-cols-2 gap-4">
-          <AnimatePresence mode="popLayout">
+        {/* Centered Slider */}
+        <div className="relative w-full overflow-hidden">
+          <AnimatePresence mode="wait">
             {steps.map((step, index) => {
               const StepIcon = step.icon;
               const isActive = step.status === 'active';
-              const isCompleted = step.status === 'completed';
-              const isPending = step.status === 'pending';
-              const isRevealed = !isPending;
               
+              if (!isActive) return null;
+
               return (
                 <motion.div
                   key={step.id}
-                  layout
-                  initial={{ opacity: 0, scale: 0.8, y: 20 }}
-                  animate={{ 
-                    opacity: isRevealed ? 1 : 0.15,
-                    scale: isActive ? 1.02 : 1,
-                    y: 0,
+                  initial={{ opacity: 0, x: 60, scale: 0.9 }}
+                  animate={{ opacity: 1, x: 0, scale: 1 }}
+                  exit={{ opacity: 0, x: -60, scale: 0.9 }}
+                  transition={{ 
+                    duration: 0.5, 
+                    ease: EASE.out,
                   }}
-                  transition={{
-                    layout: { duration: 0.4, ease: EASE.apple },
-                    opacity: { duration: 0.5, ease: EASE.smooth },
-                    scale: { duration: 0.4, ease: EASE.apple },
-                    y: { duration: 0.5, delay: index * 0.1, ease: EASE.out },
-                  }}
-                  className={`
-                    relative p-5 rounded-2xl 
-                    border transition-colors duration-500
-                    ${isActive 
-                      ? 'border-amber-400/40 bg-amber-400/[0.06]' 
-                      : isCompleted
-                      ? 'border-amber-400/20 bg-white/[0.02]'
-                      : 'border-white/[0.08] bg-white/[0.02]'
-                    }
-                  `}
+                  className="flex flex-col items-center text-center px-8"
                 >
-                  {/* Active glow */}
-                  {isActive && (
+                  {/* Large Icon Container */}
+                  <div className="relative mb-6">
+                    {/* Outer pulse ring */}
                     <motion.div
-                      className="absolute inset-0 rounded-2xl bg-amber-400/10"
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: [0.5, 0.2, 0.5] }}
-                      transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+                      className="absolute inset-0 rounded-3xl border border-amber-400/30"
+                      animate={!prefersReducedMotion ? {
+                        scale: [1, 1.25, 1],
+                        opacity: [0.4, 0, 0.4],
+                      } : {}}
+                      transition={{
+                        duration: 2.5,
+                        repeat: Infinity,
+                        ease: "easeInOut",
+                      }}
                     />
-                  )}
-
-                  <div className="relative flex flex-col items-center text-center space-y-3">
-                    {/* Large Icon Container */}
+                    {/* Second pulse ring - offset */}
                     <motion.div
-                      className={`
-                        w-14 h-14 rounded-xl flex items-center justify-center
-                        border backdrop-blur-sm
-                        ${isActive 
-                          ? 'border-amber-400/30 bg-amber-400/10' 
-                          : isCompleted
-                          ? 'border-amber-400/20 bg-amber-400/5'
-                          : 'border-white/10 bg-white/5'
-                        }
-                      `}
-                      animate={isActive && !prefersReducedMotion ? {
-                        scale: [1, 1.05, 1],
+                      className="absolute inset-0 rounded-3xl border border-white/20"
+                      animate={!prefersReducedMotion ? {
+                        scale: [1, 1.4, 1],
+                        opacity: [0.2, 0, 0.2],
+                      } : {}}
+                      transition={{
+                        duration: 2.5,
+                        repeat: Infinity,
+                        ease: "easeInOut",
+                        delay: 0.4,
+                      }}
+                    />
+                    
+                    {/* Icon container */}
+                    <motion.div
+                      className="relative w-24 h-24 rounded-3xl border border-amber-400/20 bg-gradient-to-br from-amber-400/10 to-transparent backdrop-blur-sm flex items-center justify-center"
+                      animate={!prefersReducedMotion ? {
+                        scale: [1, 1.03, 1],
                       } : {}}
                       transition={{
                         duration: 2,
@@ -324,97 +306,77 @@ const Demo = () => {
                         ease: "easeInOut",
                       }}
                     >
-                      {/* Icon with drawing animation for active */}
                       <motion.div
-                        initial={isActive ? { scale: 0.5, opacity: 0 } : {}}
-                        animate={{ scale: 1, opacity: 1 }}
+                        initial={{ scale: 0, rotate: -20 }}
+                        animate={{ scale: 1, rotate: 0 }}
                         transition={{ 
                           duration: 0.5, 
                           ease: EASE.bounce,
-                          delay: isActive ? 0.2 : 0,
+                          delay: 0.15,
                         }}
                       >
                         <StepIcon 
-                          className={`w-7 h-7 ${
-                            isCompleted 
-                              ? 'text-amber-400' 
-                              : isActive
-                              ? 'text-amber-400'
-                              : 'text-white/30'
-                          }`}
+                          className="w-11 h-11 text-amber-400"
                           strokeWidth={1.5}
                         />
                       </motion.div>
                     </motion.div>
-
-                    {/* Label */}
-                    <motion.span
-                      className={`
-                        text-sm font-light tracking-wide leading-snug
-                        ${isCompleted 
-                          ? 'text-amber-400/80' 
-                          : isActive
-                          ? 'text-white/90'
-                          : 'text-white/30'
-                        }
-                      `}
-                      initial={{ opacity: 0, y: 5 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ duration: 0.4, delay: 0.15 }}
-                    >
-                      {step.label}
-                    </motion.span>
-
-                    {/* Completed checkmark */}
-                    {isCompleted && (
-                      <motion.div
-                        className="absolute -top-2 -right-2 w-6 h-6 rounded-full bg-amber-400 flex items-center justify-center"
-                        initial={{ scale: 0, opacity: 0 }}
-                        animate={{ scale: 1, opacity: 1 }}
-                        transition={{ duration: 0.3, ease: EASE.bounce }}
-                      >
-                        <svg className="w-3.5 h-3.5 text-[#302A23]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
-                          <motion.path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            d="M5 13l4 4L19 7"
-                            initial={{ pathLength: 0 }}
-                            animate={{ pathLength: 1 }}
-                            transition={{ duration: 0.3, delay: 0.1 }}
-                          />
-                        </svg>
-                      </motion.div>
-                    )}
                   </div>
+
+                  {/* Step Label */}
+                  <motion.p
+                    className="text-lg font-light text-white/90 tracking-wide max-w-[240px]"
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.4, delay: 0.2, ease: EASE.apple }}
+                  >
+                    {step.label}
+                  </motion.p>
                 </motion.div>
               );
             })}
           </AnimatePresence>
         </div>
 
-        {/* Progress Bar */}
-        <motion.div
-          className="px-2"
+        {/* Step Indicators (dots) */}
+        <motion.div 
+          className="flex items-center gap-2 mt-8"
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4, delay: 0.3, ease: EASE.out }}
+          transition={{ delay: 0.3, duration: 0.4 }}
         >
-          <div className="h-1.5 bg-white/10 rounded-full overflow-hidden">
-            <motion.div
-              className="h-full bg-gradient-to-r from-amber-400 via-amber-500 to-amber-400 rounded-full"
-              initial={{ width: 0 }}
-              animate={{ width: `${progress}%` }}
-              transition={{ duration: 0.6, ease: EASE.smooth }}
-              style={{
-                backgroundSize: '200% 100%',
-              }}
-            />
-          </div>
-          <div className="flex justify-between mt-2 text-[11px] text-white/40 font-light">
-            <span>Connecting...</span>
-            <span>{Math.round(progress)}%</span>
-          </div>
+          {steps.map((step, index) => {
+            const isActive = step.status === 'active';
+            const isCompleted = step.status === 'completed';
+            
+            return (
+              <motion.div
+                key={step.id}
+                className={`
+                  rounded-full transition-all duration-500
+                  ${isActive 
+                    ? 'w-8 h-2 bg-amber-400' 
+                    : isCompleted
+                    ? 'w-2 h-2 bg-amber-400/60'
+                    : 'w-2 h-2 bg-white/20'
+                  }
+                `}
+                layout
+                transition={{ duration: 0.3, ease: EASE.apple }}
+              />
+            );
+          })}
         </motion.div>
+
+        {/* Progress text */}
+        <motion.p
+          className="text-xs text-white/40 font-light mt-4"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.4 }}
+        >
+          Step {currentStepIndex + 1} of {WIZARD_STEPS.length}
+        </motion.p>
 
       </motion.div>
     );
