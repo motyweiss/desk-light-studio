@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence, LayoutGroup } from 'framer-motion';
 import { Eye, EyeOff, RefreshCw, ExternalLink, ArrowLeft, X } from 'lucide-react';
 import { HomeAssistantIcon } from '@/components/icons/HomeAssistantIcon';
 import { useNavigate } from 'react-router-dom';
@@ -11,7 +11,15 @@ import { useToast } from '@/hooks/use-toast';
 // Connection states
 type ConnectionStatus = 'idle' | 'connecting' | 'success' | 'error';
 
-// Refined easing curves
+// Unified timing constants
+const TIMING = {
+  fast: 0.25,
+  normal: 0.4,
+  slow: 0.6,
+  content: 0.35,
+};
+
+// Refined easing curves - no blur for performance
 const EASE = {
   smooth: [0.4, 0, 0.2, 1] as [number, number, number, number],
   gentle: [0.25, 0.1, 0.25, 1] as [number, number, number, number],
@@ -19,45 +27,55 @@ const EASE = {
   spring: [0.34, 1.4, 0.64, 1] as [number, number, number, number],
 };
 
-// Card container - smooth entrance with soft landing
+// Card entrance only - no exit animation, card stays stable
 const cardVariants = {
   hidden: { 
     opacity: 0, 
-    scale: 0.92,
-    y: 30,
-    filter: 'blur(8px)',
+    scale: 0.94,
+    y: 24,
   },
   visible: { 
     opacity: 1, 
     scale: 1,
     y: 0,
-    filter: 'blur(0px)',
     transition: {
-      duration: 0.8,
+      duration: 0.7,
       ease: EASE.gentle,
-      opacity: { duration: 0.5 },
-      filter: { duration: 0.6 },
     }
   },
-  exit: {
-    opacity: 0,
-    scale: 0.95,
-    y: -20,
-    filter: 'blur(6px)',
-    transition: {
-      duration: 0.4,
-      ease: EASE.smooth,
-    }
-  }
 };
 
-// Content stagger orchestration
+// Content transition - smooth crossfade
 const contentVariants = {
-  hidden: {},
-  visible: {
+  initial: { 
+    opacity: 0,
+    y: 12,
+  },
+  animate: { 
+    opacity: 1,
+    y: 0,
     transition: {
-      staggerChildren: 0.07,
-      delayChildren: 0.25,
+      duration: TIMING.content,
+      ease: EASE.out,
+    }
+  },
+  exit: { 
+    opacity: 0,
+    y: -8,
+    transition: {
+      duration: TIMING.fast,
+      ease: EASE.smooth,
+    }
+  },
+};
+
+// Stagger container for form items
+const staggerContainer = {
+  initial: {},
+  animate: {
+    transition: {
+      staggerChildren: 0.06,
+      delayChildren: 0.1,
     }
   },
   exit: {
@@ -68,98 +86,86 @@ const contentVariants = {
   }
 };
 
-// Individual items - subtle rise with fade
+// Individual items
 const itemVariants = {
-  hidden: { 
+  initial: { 
     opacity: 0, 
-    y: 12,
+    y: 10,
   },
-  visible: { 
+  animate: { 
     opacity: 1, 
     y: 0,
     transition: {
-      duration: 0.45,
+      duration: TIMING.content,
       ease: EASE.out,
     }
   },
   exit: {
     opacity: 0,
-    y: -8,
+    y: -6,
     transition: {
-      duration: 0.25,
+      duration: TIMING.fast,
       ease: EASE.smooth,
     }
   }
 };
 
-// Separator - smooth draw
-const separatorVariants = {
-  hidden: { 
-    opacity: 0,
-    scaleX: 0,
-  },
-  visible: { 
-    opacity: 1,
-    scaleX: 1,
-    transition: {
-      duration: 0.5,
-      ease: EASE.out,
-    }
-  },
-};
-
-// Icon - playful spring entrance
+// Icon entrance
 const iconVariants = {
-  hidden: { 
+  initial: { 
     opacity: 0, 
-    scale: 0.6,
+    scale: 0.7,
   },
-  visible: { 
+  animate: { 
     opacity: 1, 
     scale: 1,
     transition: {
-      duration: 0.5,
+      duration: TIMING.normal,
       ease: EASE.spring,
     }
   },
 };
 
-// Status states - shared transition config
-const stateTransition = {
-  enter: {
-    duration: 0.5,
-    ease: EASE.gentle,
+// Separator draw
+const separatorVariants = {
+  initial: { 
+    opacity: 0,
+    scaleX: 0,
   },
-  exit: {
-    duration: 0.35,
-    ease: EASE.smooth,
-  }
+  animate: { 
+    opacity: 1,
+    scaleX: 1,
+    transition: {
+      duration: TIMING.normal,
+      ease: EASE.out,
+    }
+  },
 };
 
-// Success checkmark draw
+// Success checkmark path
 const checkmarkVariants = {
-  hidden: { pathLength: 0, opacity: 0 },
-  visible: { 
+  initial: { pathLength: 0, opacity: 0 },
+  animate: { 
     pathLength: 1, 
     opacity: 1,
     transition: {
-      pathLength: { duration: 0.5, ease: EASE.out, delay: 0.15 },
-      opacity: { duration: 0.2 }
+      pathLength: { duration: 0.45, ease: EASE.out, delay: 0.1 },
+      opacity: { duration: 0.15 }
     }
   }
 };
 
 // Status icon container
 const statusIconVariants = {
-  hidden: { 
-    scale: 0.5, 
+  initial: { 
+    scale: 0.6, 
     opacity: 0,
   },
-  visible: { 
+  animate: { 
     scale: 1, 
     opacity: 1,
     transition: {
-      duration: 0.5,
+      duration: TIMING.normal,
       ease: EASE.spring,
     }
   },
@@ -175,8 +181,6 @@ const Demo = () => {
   const [showToken, setShowToken] = useState(false);
   const [connectionStatus, setConnectionStatus] = useState<ConnectionStatus>('idle');
   const [errorMessage, setErrorMessage] = useState('');
-  const [cardKey, setCardKey] = useState(0);
-  const [isResetting, setIsResetting] = useState(false);
 
   useEffect(() => {
     if (config) {
@@ -205,16 +209,10 @@ const Demo = () => {
         setConnectionStatus('success');
         await saveConfig(baseUrl, accessToken);
         
-        // Smooth reset sequence
-        setTimeout(() => {
-          setIsResetting(true);
-        }, 2000);
-        
+        // Reset to idle after success display
         setTimeout(() => {
           setConnectionStatus('idle');
-          setCardKey(prev => prev + 1);
-          setIsResetting(false);
-        }, 2400);
+        }, 2800);
       } else {
         setConnectionStatus('error');
         setErrorMessage(result.error || 'Could not connect to Home Assistant');
@@ -234,17 +232,17 @@ const Demo = () => {
   const SuccessContent = () => (
     <motion.div
       key="success"
-      initial={{ opacity: 0, y: 15 }}
-      animate={{ opacity: isResetting ? 0 : 1, y: isResetting ? -10 : 0, scale: isResetting ? 0.95 : 1 }}
-      exit={{ opacity: 0, y: -15, scale: 0.95 }}
-      transition={stateTransition.enter}
-      className="space-y-6 text-center py-6"
+      variants={contentVariants}
+      initial="initial"
+      animate="animate"
+      exit="exit"
+      className="space-y-6 text-center py-8"
     >
       <motion.div 
         className="flex justify-center"
         variants={statusIconVariants}
-        initial="hidden"
-        animate="visible"
+        initial="initial"
+        animate="animate"
       >
         <div className="w-16 h-16 rounded-full bg-emerald-500/15 flex items-center justify-center">
           <motion.svg
@@ -261,17 +259,17 @@ const Demo = () => {
             <motion.path
               d="M5 12l5 5L20 7"
               variants={checkmarkVariants}
-              initial="hidden"
-              animate="visible"
+              initial="initial"
+              animate="animate"
             />
           </motion.svg>
         </div>
       </motion.div>
 
       <motion.div
-        initial={{ opacity: 0, y: 8 }}
+        initial={{ opacity: 0, y: 6 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.25, duration: 0.4, ease: EASE.out }}
+        transition={{ delay: 0.15, duration: TIMING.content, ease: EASE.out }}
       >
         <h2 className="text-xl font-light text-white/90 tracking-wide">
           Connected Successfully
@@ -282,13 +280,13 @@ const Demo = () => {
         className="h-0.5 bg-white/8 rounded-full overflow-hidden mx-auto max-w-[180px]"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
-        transition={{ delay: 0.35 }}
+        transition={{ delay: 0.25 }}
       >
         <motion.div
           className="h-full bg-emerald-400/80 rounded-full"
           initial={{ width: '0%' }}
           animate={{ width: '100%' }}
-          transition={{ duration: 1.8, delay: 0.4, ease: EASE.out }}
+          transition={{ duration: 2.2, delay: 0.3, ease: EASE.out }}
         />
       </motion.div>
     </motion.div>
@@ -298,23 +296,23 @@ const Demo = () => {
   const ErrorContent = () => (
     <motion.div
       key="error"
-      initial={{ opacity: 0, y: 15 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: -15, scale: 0.95 }}
-      transition={stateTransition.enter}
-      className="space-y-6 text-center py-6"
+      variants={contentVariants}
+      initial="initial"
+      animate="animate"
+      exit="exit"
+      className="space-y-6 text-center py-8"
     >
       <motion.div 
         className="flex justify-center"
         variants={statusIconVariants}
-        initial="hidden"
-        animate="visible"
+        initial="initial"
+        animate="animate"
       >
         <div className="w-16 h-16 rounded-full bg-red-500/15 flex items-center justify-center">
           <motion.div
             initial={{ rotate: -90, opacity: 0 }}
             animate={{ rotate: 0, opacity: 1 }}
-            transition={{ duration: 0.4, ease: EASE.spring }}
+            transition={{ duration: TIMING.content, ease: EASE.spring }}
           >
             <X className="w-8 h-8 text-red-400" />
           </motion.div>
@@ -322,9 +320,9 @@ const Demo = () => {
       </motion.div>
 
       <motion.div
-        initial={{ opacity: 0, y: 8 }}
+        initial={{ opacity: 0, y: 6 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.2, duration: 0.4, ease: EASE.out }}
+        transition={{ delay: 0.12, duration: TIMING.content, ease: EASE.out }}
       >
         <h2 className="text-xl font-light text-white/90 tracking-wide mb-2">
           Connection Failed
@@ -335,9 +333,9 @@ const Demo = () => {
       </motion.div>
 
       <motion.div
-        initial={{ opacity: 0, y: 8 }}
+        initial={{ opacity: 0, y: 6 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.35, duration: 0.4, ease: EASE.out }}
+        transition={{ delay: 0.24, duration: TIMING.content, ease: EASE.out }}
       >
         <Button
           onClick={handleRetry}
@@ -354,9 +352,9 @@ const Demo = () => {
   const FormContent = () => (
     <motion.div
       key="form"
-      variants={contentVariants}
-      initial="hidden"
-      animate="visible"
+      variants={staggerContainer}
+      initial="initial"
+      animate="animate"
       exit="exit"
       className="space-y-6"
     >
@@ -467,28 +465,30 @@ const Demo = () => {
         className="fixed top-6 left-6 z-10 p-3 rounded-xl bg-black/10 hover:bg-black/15 border border-black/5 text-white/70 hover:text-white/90 transition-all duration-300 backdrop-blur-md"
         initial={{ opacity: 0, x: -15 }}
         animate={{ opacity: 1, x: 0 }}
-        transition={{ delay: 0.5, duration: 0.5, ease: EASE.out }}
+        transition={{ delay: 0.4, duration: 0.5, ease: EASE.out }}
       >
         <ArrowLeft className="w-5 h-5" />
       </motion.button>
 
-      {/* Main Card */}
-      <AnimatePresence mode="wait">
+      {/* Main Card - Stable container with layout animation for size changes */}
+      <LayoutGroup>
         <motion.div
-          key={cardKey}
+          layout
+          layoutId="connection-card"
           className="relative z-10 w-full max-w-md bg-[hsl(28_15%_12%)] backdrop-blur-[60px] outline outline-[8px] outline-white/10 rounded-3xl p-10 overflow-hidden"
           variants={cardVariants}
           initial="hidden"
           animate="visible"
-          exit="exit"
+          transition={{ layout: { duration: TIMING.normal, ease: EASE.gentle } }}
+          style={{ willChange: 'transform' }}
         >
-          <AnimatePresence mode="wait">
+          <AnimatePresence mode="wait" initial={false}>
             {connectionStatus === 'success' && <SuccessContent />}
             {connectionStatus === 'error' && <ErrorContent />}
             {(connectionStatus === 'idle' || connectionStatus === 'connecting') && <FormContent />}
           </AnimatePresence>
         </motion.div>
-      </AnimatePresence>
+      </LayoutGroup>
     </div>
   );
 };
