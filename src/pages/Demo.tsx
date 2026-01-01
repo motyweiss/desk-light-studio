@@ -275,7 +275,7 @@ const Demo = () => {
             />
             {/* Icon container with subtle pulse */}
             <motion.div 
-              className="relative w-16 h-16 rounded-[18px] bg-white shadow-lg shadow-black/20 flex items-center justify-center"
+              className="relative w-16 h-16 rounded-[18px] bg-gradient-to-br from-white via-white to-neutral-200 shadow-lg shadow-black/20 flex items-center justify-center"
               animate={!prefersReducedMotion ? {
                 scale: [1, 1.02, 1],
               } : {}}
@@ -628,7 +628,7 @@ const Demo = () => {
           className="flex justify-center"
         >
           <motion.div 
-            className="w-16 h-16 rounded-[18px] bg-white shadow-lg shadow-black/20 flex items-center justify-center origin-center"
+            className="w-16 h-16 rounded-[18px] bg-gradient-to-br from-white via-white to-neutral-200 shadow-lg shadow-black/20 flex items-center justify-center origin-center"
             initial={{ opacity: 0, scale: 0, filter: 'blur(8px)' }}
             animate={{ opacity: 1, scale: 1, filter: 'blur(0px)' }}
             exit={{ 
