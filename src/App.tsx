@@ -36,13 +36,13 @@ const App = () => (
                       {/* Auth page outside RootLayout for clean UI */}
                       <Route path="/auth" element={<Auth />} />
                       
-                      {/* Demo page - standalone */}
-                      <Route path="/demo" element={<ProtectedRoute><Demo /></ProtectedRoute>} />
+                      {/* Demo player - standalone */}
                       <Route path="/demo/player" element={<ProtectedRoute><MediaPlayerDemo /></ProtectedRoute>} />
                       
                       {/* All other pages inside RootLayout */}
                       <Route element={<RootLayout><Outlet /></RootLayout>}>
                         <Route path="/" element={<ProtectedRoute><Index /></ProtectedRoute>} />
+                        <Route path="/demo" element={<ProtectedRoute><><Index /><Demo /></></ProtectedRoute>} />
                         <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
                         <Route path="/design-system" element={<ProtectedRoute><DesignSystem /></ProtectedRoute>} />
                       </Route>
