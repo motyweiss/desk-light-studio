@@ -48,23 +48,28 @@ const SPRING = {
   gentle: { type: 'spring' as const, stiffness: 200, damping: 25, mass: 1 },
 } as const;
 
-// Stagger delays for hierarchical reveal
+// Stagger delays for hierarchical reveal - refined timing
 const STAGGER = {
-  icon: 0.3,
-  title: 0.45,
-  separator: 0.55,
+  icon: 0.15,
+  title: 0.35,
+  separator: 0.5,
   field1: 0.65,
-  field2: 0.8,
-  button: 0.95,
-  link: 1.1,
+  field2: 0.85,
+  button: 1.05,
+  link: 1.2,
 } as const;
 
-// Content transition configurations based on direction
+// Exit stagger for smooth coordinated exit
+const EXIT_STAGGER = {
+  base: 0.03,
+} as const;
+
+// Content transition configurations
 const getContentTransition = (isEntering: boolean) => ({
-  opacity: { duration: 0.25, ease: EASE.smooth },
-  scale: { duration: 0.3, ease: EASE.apple },
-  y: { duration: 0.35, ease: EASE.apple },
-  filter: { duration: 0.25 },
+  opacity: { duration: isEntering ? 0.4 : 0.2, ease: EASE.smooth },
+  scale: { duration: isEntering ? 0.5 : 0.25, ease: EASE.apple },
+  y: { duration: isEntering ? 0.5 : 0.25, ease: EASE.apple },
+  filter: { duration: isEntering ? 0.35 : 0.15 },
 });
 
 // =============================================================================
@@ -138,19 +143,34 @@ const Demo = () => {
   const AnimatedField = useMemo(() => {
     return ({ 
       delay, 
-      children 
+      children,
+      exitDelay = 0,
     }: { 
       delay: number; 
       children: React.ReactNode;
+      exitDelay?: number;
     }) => (
       <motion.div
-        initial={{ opacity: 0, y: 16, filter: 'blur(4px)' }}
-        animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
+        initial={{ opacity: 0, y: 24, filter: 'blur(8px)', scale: 0.95 }}
+        animate={{ opacity: 1, y: 0, filter: 'blur(0px)', scale: 1 }}
+        exit={{ 
+          opacity: 0, 
+          y: -12, 
+          filter: 'blur(4px)', 
+          scale: 0.98,
+          transition: { 
+            duration: 0.2, 
+            delay: exitDelay,
+            ease: EASE.smooth 
+          }
+        }}
         transition={{
-          duration: 0.5,
+          duration: 0.6,
           delay,
           ease: EASE.apple,
-          filter: { duration: 0.3, delay: delay + 0.1 },
+          opacity: { duration: 0.4, delay },
+          filter: { duration: 0.5, delay: delay + 0.05 },
+          scale: { duration: 0.5, delay, ease: EASE.bounce },
         }}
       >
         {children}
@@ -606,51 +626,87 @@ const Demo = () => {
     return (
       <motion.div
         key={`form-${formKey}`}
-        initial={{ opacity: 0, scale: 0.97, y: 8 }}
-        animate={{ opacity: 1, scale: 1, y: 0 }}
-        exit={{ opacity: 0, scale: 0.98, y: -8, filter: 'blur(6px)' }}
-        transition={getContentTransition(true)}
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        transition={{ duration: 0.3 }}
         className="space-y-6"
       >
         {/* Icon */}
         <motion.div 
           className="flex justify-center"
-          initial={{ opacity: 0, scale: 0.4, y: -20, rotate: -180 }}
-          animate={{ opacity: 1, scale: 1, y: 0, rotate: 0 }}
+          initial={{ opacity: 0, scale: 0.3, y: -30, filter: 'blur(10px)' }}
+          animate={{ opacity: 1, scale: 1, y: 0, filter: 'blur(0px)' }}
+          exit={{ 
+            opacity: 0, 
+            scale: 0.8, 
+            y: -15, 
+            filter: 'blur(6px)',
+            transition: { duration: 0.25, ease: EASE.smooth }
+          }}
           transition={{
-            duration: 0.65,
+            duration: 0.7,
             delay: STAGGER.icon,
             ease: EASE.bounce,
-            y: { duration: 0.5, ease: EASE.out },
-            rotate: { duration: 0.55, ease: EASE.apple },
+            opacity: { duration: 0.5, delay: STAGGER.icon },
+            filter: { duration: 0.5, delay: STAGGER.icon + 0.1 },
           }}
         >
-          <div className="w-16 h-16 rounded-[18px] bg-white shadow-lg shadow-black/20 flex items-center justify-center">
+          <motion.div 
+            className="w-16 h-16 rounded-[18px] bg-white shadow-lg shadow-black/20 flex items-center justify-center"
+            initial={{ rotate: -180 }}
+            animate={{ rotate: 0 }}
+            transition={{
+              duration: 0.6,
+              delay: STAGGER.icon,
+              ease: EASE.apple,
+            }}
+          >
             <HomeAssistantIcon className="w-8 h-8 text-[#302A23]" />
-          </div>
+          </motion.div>
         </motion.div>
 
         {/* Title */}
-        <AnimatedField delay={STAGGER.title}>
+        <motion.div
+          initial={{ opacity: 0, y: 20, filter: 'blur(8px)' }}
+          animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
+          exit={{ 
+            opacity: 0, 
+            y: -10, 
+            filter: 'blur(4px)',
+            transition: { duration: 0.2, delay: EXIT_STAGGER.base, ease: EASE.smooth }
+          }}
+          transition={{
+            duration: 0.6,
+            delay: STAGGER.title,
+            ease: EASE.apple,
+            filter: { duration: 0.5, delay: STAGGER.title + 0.05 },
+          }}
+        >
           <h1 className="text-xl font-light text-white/90 tracking-wide text-center">
             Connect to your Home Assistant
           </h1>
-        </AnimatedField>
+        </motion.div>
 
         {/* Separator */}
         <motion.div 
           className="h-px bg-white/10 origin-center mx-4"
           initial={{ opacity: 0, scaleX: 0 }}
           animate={{ opacity: 1, scaleX: 1 }}
+          exit={{ 
+            opacity: 0, 
+            scaleX: 0,
+            transition: { duration: 0.2, delay: EXIT_STAGGER.base * 2, ease: EASE.smooth }
+          }}
           transition={{ 
-            duration: 0.5, 
+            duration: 0.6, 
             delay: STAGGER.separator,
             ease: EASE.out,
           }}
         />
 
         {/* Base URL Field */}
-        <AnimatedField delay={STAGGER.field1}>
+        <AnimatedField delay={STAGGER.field1} exitDelay={EXIT_STAGGER.base * 3}>
           <div className="space-y-2">
             <label className="text-xs font-medium text-white/55 uppercase tracking-wider">
               Base URL
@@ -669,7 +725,7 @@ const Demo = () => {
         </AnimatedField>
 
         {/* Access Token Field */}
-        <AnimatedField delay={STAGGER.field2}>
+        <AnimatedField delay={STAGGER.field2} exitDelay={EXIT_STAGGER.base * 4}>
           <div className="space-y-2">
             <label className="text-xs font-medium text-white/55 uppercase tracking-wider">
               Access Token
@@ -697,7 +753,7 @@ const Demo = () => {
         </AnimatedField>
 
         {/* Connect Button */}
-        <AnimatedField delay={STAGGER.button}>
+        <AnimatedField delay={STAGGER.button} exitDelay={EXIT_STAGGER.base * 5}>
           <Button
             onClick={handleTestConnection}
             disabled={!baseUrl || !accessToken}
@@ -708,7 +764,7 @@ const Demo = () => {
         </AnimatedField>
 
         {/* Help Link */}
-        <AnimatedField delay={STAGGER.link}>
+        <AnimatedField delay={STAGGER.link} exitDelay={EXIT_STAGGER.base * 6}>
           <div className="text-center">
             <a
               href="https://www.home-assistant.io/docs/authentication/#your-account-profile"
