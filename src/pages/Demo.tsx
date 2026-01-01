@@ -178,7 +178,7 @@ const Demo = () => {
   const { toast } = useToast();
   const prefersReducedMotion = useReducedMotion();
   
-  const [baseUrl, setBaseUrl] = useState('');
+  const [baseUrl, setBaseUrl] = useState('https://ui.nabu.casa');
   const [accessToken, setAccessToken] = useState('');
   const [showToken, setShowToken] = useState(false);
   const [connectionStatus, setConnectionStatus] = useState<ConnectionStatus>('idle');
@@ -210,23 +210,23 @@ const Demo = () => {
     setConnectionStatus('connecting');
     setErrorMessage('');
     
-    try {
-      const result = await testConnection(baseUrl, accessToken);
+    // Demo mode: Only https://ui.nabu.casa is valid
+    const DEMO_VALID_URL = 'https://ui.nabu.casa';
+    const isValidDemoUrl = baseUrl.trim().replace(/\/$/, '') === DEMO_VALID_URL;
+    
+    // Simulate connection delay
+    await new Promise(resolve => setTimeout(resolve, 2200));
+    
+    if (isValidDemoUrl) {
+      setConnectionStatus('success');
+      await saveConfig(baseUrl, accessToken);
       
-      if (result.success) {
-        setConnectionStatus('success');
-        await saveConfig(baseUrl, accessToken);
-        
-        setTimeout(() => {
-          setConnectionStatus('idle');
-        }, 2800);
-      } else {
-        setConnectionStatus('error');
-        setErrorMessage(result.error || 'Could not connect to Home Assistant');
-      }
-    } catch {
+      setTimeout(() => {
+        setConnectionStatus('idle');
+      }, 2800);
+    } else {
       setConnectionStatus('error');
-      setErrorMessage('An unexpected error occurred');
+      setErrorMessage('Invalid Home Assistant URL. Please use the correct instance URL.');
     }
   };
 
