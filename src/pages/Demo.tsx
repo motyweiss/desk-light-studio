@@ -727,7 +727,7 @@ const Demo = () => {
               value={baseUrl}
               onChange={(e) => setBaseUrl(e.target.value)}
               placeholder="https://your-instance.ui.nabu.casa"
-              className="bg-white/[0.05] border-white/8 rounded-xl h-12 text-white placeholder:text-white/35 focus:border-amber-500/40 focus:ring-amber-500/15 transition-all duration-300"
+              className="bg-white/[0.05] border-white/10 rounded-xl h-12 text-white placeholder:text-white/35 focus-visible:ring-amber-500/25 focus-visible:border-amber-500/50 transition-all duration-300"
             />
             <p className="text-xs text-white/30">
               Your Home Assistant instance URL
@@ -747,7 +747,7 @@ const Demo = () => {
                 value={accessToken}
                 onChange={(e) => setAccessToken(e.target.value)}
                 placeholder="eyJ0eX..."
-                className="bg-white/[0.05] border-white/8 rounded-xl h-12 text-white placeholder:text-white/35 focus:border-amber-500/40 focus:ring-amber-500/15 pr-12 transition-all duration-300"
+                className="bg-white/[0.05] border-white/10 rounded-xl h-12 text-white placeholder:text-white/35 focus-visible:ring-amber-500/25 focus-visible:border-amber-500/50 pr-12 transition-all duration-300"
               />
               <button
                 type="button"
