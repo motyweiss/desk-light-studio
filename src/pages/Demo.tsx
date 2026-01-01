@@ -380,7 +380,7 @@ const Demo = () => {
 
       <motion.div 
         variants={separatorVariants}
-        className="h-px bg-white/8 origin-left" 
+        className="h-px bg-white/10 origin-left mx-4" 
       />
 
       <motion.div variants={itemVariants} className="space-y-5">
