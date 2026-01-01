@@ -29,13 +29,14 @@ const LAYOUT_TRANSITION = {
 };
 
 const ANIM = {
-  // Card entrance - gentle and refined
+  // Card entrance - Apple-style cinematic reveal
   card: {
-    initial: { opacity: 0, scale: 0.97, y: 20 },
-    animate: { opacity: 1, scale: 1, y: 0 },
+    initial: { opacity: 0, scale: 0.92, y: 40, filter: 'blur(10px)' },
+    animate: { opacity: 1, scale: 1, y: 0, filter: 'blur(0px)' },
     transition: {
-      duration: TIMING.slow,
-      ease: EASE.gentle,
+      duration: 0.8,
+      ease: [0.25, 0.46, 0.45, 0.94], // Apple's signature easing
+      filter: { duration: 0.6 },
     },
   },
   
@@ -55,37 +56,43 @@ const ANIM = {
       transition: {
         duration: 0.25,
         ease: EASE.smooth,
-        delay: 0.05, // Small delay after exit completes
+        delay: 0.05,
       },
     },
   },
   
-  // Icon - roll in with subtle bounce
+  // Icon - elegant drop with soft bounce
   icon: {
-    initial: { opacity: 0, scale: 0.5, rotate: -180 },
-    animate: { opacity: 1, scale: 1, rotate: 0 },
+    initial: { opacity: 0, scale: 0.3, y: -30, rotate: -180 },
+    animate: { opacity: 1, scale: 1, y: 0, rotate: 0 },
     transition: {
-      duration: 0.6,
-      ease: [0.34, 1.56, 0.64, 1], // Bounce easing
-      rotate: { duration: 0.5, ease: [0.34, 1.2, 0.64, 1] },
+      duration: 0.7,
+      delay: 0.35,
+      ease: [0.34, 1.56, 0.64, 1],
+      y: { duration: 0.6, ease: [0.22, 1, 0.36, 1] },
+      rotate: { duration: 0.6, ease: [0.34, 1.2, 0.64, 1] },
     },
   },
   
-  // Form items - simple fade with minimal y
+  // Form items - refined slide up with perfect timing
   item: {
-    initial: { opacity: 0, y: 12 },
+    initial: { opacity: 0, y: 20 },
     animate: { opacity: 1, y: 0 },
     exit: { opacity: 0, y: -4 },
     transition: {
-      duration: TIMING.fast,
-      ease: EASE.smooth,
+      duration: 0.5,
+      ease: [0.25, 0.46, 0.45, 0.94],
     },
   },
   
-  // Stagger timing - hierarchical reveal
+  // Stagger timing - orchestrated hierarchical reveal
   stagger: {
-    children: 0.08,
-    delay: 0.15,
+    icon: 0.35,
+    title: 0.55,
+    separator: 0.7,
+    field1: 0.85,
+    field2: 1.0,
+    button: 1.15,
   },
   
   // Connecting pulse - subtle and calming
@@ -435,10 +442,14 @@ const Demo = () => {
         {/* Header */}
         <motion.div 
           layout
-          className="text-center space-y-2"
-          initial={ANIM.item.initial}
-          animate={ANIM.item.animate}
-          transition={{ ...ANIM.item.transition, delay: ANIM.stagger.delay }}
+          className="text-center"
+          initial={{ opacity: 0, y: 15 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ 
+            duration: 0.5, 
+            delay: ANIM.stagger.title,
+            ease: [0.25, 0.46, 0.45, 0.94],
+          }}
         >
           <h1 className="text-xl font-light text-white/90 tracking-wide">
             Connect to your Home Assistant
@@ -448,25 +459,33 @@ const Demo = () => {
         {/* Separator */}
         <motion.div 
           layout
-          className="h-px bg-white/10 origin-left mx-4"
-          initial={ANIM.separator.initial}
-          animate={ANIM.separator.animate}
-          transition={{ ...ANIM.separator.transition, delay: ANIM.stagger.delay + ANIM.stagger.children }}
+          className="h-px bg-white/10 origin-center mx-4"
+          initial={{ opacity: 0, scaleX: 0 }}
+          animate={{ opacity: 1, scaleX: 1 }}
+          transition={{ 
+            duration: 0.6, 
+            delay: ANIM.stagger.separator,
+            ease: [0.25, 0.46, 0.45, 0.94],
+          }}
         />
 
-        {/* Form Fields - each field gets its own stagger */}
+        {/* Form Fields */}
         <motion.div 
           layout
           className="space-y-5"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          transition={{ delay: ANIM.stagger.delay + ANIM.stagger.children * 2 }}
+          transition={{ delay: ANIM.stagger.field1 - 0.1 }}
         >
           <motion.div
             className="space-y-2"
-            initial={ANIM.item.initial}
-            animate={ANIM.item.animate}
-            transition={{ ...ANIM.item.transition, delay: ANIM.stagger.delay + ANIM.stagger.children * 2.5 }}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ 
+              duration: 0.5, 
+              delay: ANIM.stagger.field1,
+              ease: [0.25, 0.46, 0.45, 0.94],
+            }}
           >
             <label className="text-xs font-medium text-white/55 uppercase tracking-wider">
               Base URL
@@ -486,9 +505,13 @@ const Demo = () => {
 
           <motion.div
             className="space-y-2"
-            initial={ANIM.item.initial}
-            animate={ANIM.item.animate}
-            transition={{ ...ANIM.item.transition, delay: ANIM.stagger.delay + ANIM.stagger.children * 3.5 }}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ 
+              duration: 0.5, 
+              delay: ANIM.stagger.field2,
+              ease: [0.25, 0.46, 0.45, 0.94],
+            }}
           >
             <label className="text-xs font-medium text-white/55 uppercase tracking-wider">
               Access Token
@@ -519,9 +542,13 @@ const Demo = () => {
         {/* Connect Button */}
         <motion.div
           layout
-          initial={ANIM.item.initial}
-          animate={ANIM.item.animate}
-          transition={{ ...ANIM.item.transition, delay: ANIM.stagger.delay + ANIM.stagger.children * 3 }}
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ 
+            duration: 0.5, 
+            delay: ANIM.stagger.button,
+            ease: [0.25, 0.46, 0.45, 0.94],
+          }}
         >
           <Button
             onClick={handleTestConnection}
@@ -543,9 +570,13 @@ const Demo = () => {
         <motion.div 
           layout
           className="text-center"
-          initial={ANIM.item.initial}
-          animate={ANIM.item.animate}
-          transition={{ ...ANIM.item.transition, delay: ANIM.stagger.delay + ANIM.stagger.children * 4 }}
+          initial={{ opacity: 0, y: 15 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ 
+            duration: 0.5, 
+            delay: ANIM.stagger.button + 0.15,
+            ease: [0.25, 0.46, 0.45, 0.94],
+          }}
         >
           <a
             href="https://www.home-assistant.io/docs/authentication/#your-account-profile"
