@@ -42,7 +42,12 @@ const App = () => (
                       {/* All other pages inside RootLayout */}
                       <Route element={<RootLayout><Outlet /></RootLayout>}>
                         <Route path="/" element={<ProtectedRoute><Index /></ProtectedRoute>} />
-                        <Route path="/demo" element={<ProtectedRoute><><Index /><Demo /></></ProtectedRoute>} />
+                        <Route path="/demo" element={
+                          <ProtectedRoute>
+                            <Index />
+                            <Demo />
+                          </ProtectedRoute>
+                        } />
                         <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
                         <Route path="/design-system" element={<ProtectedRoute><DesignSystem /></ProtectedRoute>} />
                       </Route>
