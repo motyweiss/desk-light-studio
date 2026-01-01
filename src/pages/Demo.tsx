@@ -349,67 +349,40 @@ const Demo = () => {
               return (
                 <motion.div
                   key={step.id}
-                  className={`flex items-center gap-3 h-10 px-4 ${
-                    isActive ? 'bg-gradient-to-r from-transparent via-amber-400/10 to-transparent bg-[length:200%_100%]' : ''
-                  }`}
+                  className="flex items-center gap-3 h-10 px-4"
                   animate={{
                     opacity: isActive ? 1 : isCompleted ? 0.5 : 0.25,
                     scale: isActive ? 1.05 : 1,
                     filter: isActive ? 'blur(0px)' : `blur(${Math.abs(distanceFromActive) * 1}px)`,
-                    backgroundPosition: isActive ? ['0% 50%', '100% 50%', '0% 50%'] : '0% 50%',
                   }}
                   transition={{
                     duration: 0.4,
                     ease: EASE.apple,
-                    backgroundPosition: {
-                      duration: 2.5,
-                      repeat: Infinity,
-                      ease: 'easeInOut',
-                    },
                   }}
                 >
                   {/* Step Icon */}
-                  <motion.div
-                    animate={isActive ? {
-                      opacity: [0.7, 1, 0.7],
-                    } : {}}
-                    transition={{
-                      duration: 2,
-                      repeat: Infinity,
-                      ease: 'easeInOut',
-                    }}
-                  >
-                    <StepIcon 
-                      className={`w-4 h-4 flex-shrink-0 ${
-                        isCompleted 
-                          ? 'text-amber-400/70' 
-                          : isActive
-                          ? 'text-amber-400'
-                          : 'text-white/30'
-                      }`}
-                    />
-                  </motion.div>
+                  <StepIcon 
+                    className={`w-4 h-4 flex-shrink-0 transition-colors duration-300 ${
+                      isCompleted 
+                        ? 'text-amber-400/70' 
+                        : isActive
+                        ? 'text-amber-400'
+                        : 'text-white/30'
+                    }`}
+                  />
 
                   {/* Label */}
-                  <motion.span
-                    className={`text-sm font-light tracking-wide whitespace-nowrap ${
+                  <span
+                    className={`text-sm font-light tracking-wide whitespace-nowrap transition-colors duration-300 ${
                       isCompleted 
                         ? 'text-amber-400/70' 
                         : isActive
                         ? 'text-white'
                         : 'text-white/30'
                     }`}
-                    animate={isActive ? {
-                      opacity: [0.85, 1, 0.85],
-                    } : {}}
-                    transition={{
-                      duration: 2,
-                      repeat: Infinity,
-                      ease: 'easeInOut',
-                    }}
                   >
                     {step.label}
-                  </motion.span>
+                  </span>
                 </motion.div>
               );
             })}
