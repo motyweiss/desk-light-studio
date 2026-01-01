@@ -202,8 +202,8 @@ const Demo = () => {
         return () => clearTimeout(timer);
       }
 
-      // Progress to next step after delay - relaxed timing
-      const stepDuration = 2000 + Math.random() * 400; // ~2-2.4s per step
+      // Progress to next step after delay
+      const stepDuration = 1400 + Math.random() * 300; // ~1.4-1.7s per step
       
       // First mark current step as completed (show green checkmark)
       const completeTimer = setTimeout(() => {
@@ -224,7 +224,7 @@ const Demo = () => {
           return step;
         }));
         setCurrentStepIndex(prev => prev + 1);
-      }, stepDuration + 600); // 600ms delay after green appears
+      }, stepDuration + 400); // 400ms delay after green appears
 
       return () => {
         clearTimeout(completeTimer);
