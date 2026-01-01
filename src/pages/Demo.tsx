@@ -204,20 +204,32 @@ const Demo = () => {
 
       // Progress to next step after delay - relaxed timing
       const stepDuration = 2000 + Math.random() * 400; // ~2-2.4s per step
-      const timer = setTimeout(() => {
+      
+      // First mark current step as completed (show green checkmark)
+      const completeTimer = setTimeout(() => {
         setSteps(prev => prev.map((step, index) => {
           if (index === currentStepIndex) {
             return { ...step, status: 'completed' };
           }
+          return step;
+        }));
+      }, stepDuration);
+      
+      // Then after a soft delay, move up and activate next step
+      const moveTimer = setTimeout(() => {
+        setSteps(prev => prev.map((step, index) => {
           if (index === currentStepIndex + 1) {
             return { ...step, status: 'active' };
           }
           return step;
         }));
         setCurrentStepIndex(prev => prev + 1);
-      }, stepDuration);
+      }, stepDuration + 600); // 600ms delay after green appears
 
-      return () => clearTimeout(timer);
+      return () => {
+        clearTimeout(completeTimer);
+        clearTimeout(moveTimer);
+      };
     }, [currentStepIndex]);
 
     const progress = ((currentStepIndex) / WIZARD_STEPS.length) * 100;
@@ -313,8 +325,8 @@ const Demo = () => {
             className="absolute inset-x-0 flex flex-col items-center justify-start pt-10"
             animate={{ y: -currentStepIndex * 40 }}
             transition={{ 
-              duration: 0.6, 
-              ease: [0.32, 0.72, 0, 1],
+              duration: 0.8, 
+              ease: [0.22, 1, 0.36, 1], // Soft ease-out
             }}
           >
             {steps.map((step, index) => {
