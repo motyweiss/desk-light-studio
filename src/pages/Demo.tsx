@@ -69,24 +69,35 @@ const Demo = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[hsl(30_8%_8%)] flex items-center justify-center p-4">
+    <div className="min-h-screen relative flex items-center justify-center p-4">
+      {/* Background - same as main page */}
+      <div 
+        className="fixed inset-0 bg-cover bg-center bg-no-repeat"
+        style={{ backgroundImage: 'url(/bg.png)' }}
+      />
+      <div className="fixed inset-0 bg-black/40" />
+
       {/* Back button */}
       <motion.button
         onClick={() => navigate(-1)}
-        className="fixed top-6 left-6 p-3 rounded-xl bg-white/[0.04] hover:bg-white/[0.08] border border-white/[0.06] text-white/60 hover:text-white/90 transition-all"
+        className="fixed top-6 left-6 z-10 p-3 rounded-xl bg-white/[0.04] hover:bg-white/[0.08] border border-white/[0.06] text-white/60 hover:text-white/90 transition-all backdrop-blur-md"
         initial={{ opacity: 0, x: -20 }}
         animate={{ opacity: 1, x: 0 }}
-        transition={{ delay: 0.2 }}
+        transition={{ delay: 0.3, duration: 0.5, ease: [0.22, 0.03, 0.26, 1] }}
       >
         <ArrowLeft className="w-5 h-5" />
       </motion.button>
 
       {/* Main Card */}
       <motion.div
-        className="w-full max-w-md bg-white/[0.06] backdrop-blur-[48px] border border-white/[0.08] rounded-3xl p-8 shadow-[0_32px_80px_rgba(0,0,0,0.5)]"
-        initial={{ opacity: 0, scale: 0.95, y: 20 }}
+        className="relative z-10 w-full max-w-md bg-white/[0.06] backdrop-blur-[48px] border border-white/[0.08] rounded-3xl p-8 shadow-[0_32px_80px_rgba(0,0,0,0.5)]"
+        initial={{ opacity: 0, scale: 0.92, y: 30 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
-        transition={{ duration: 0.5, ease: [0.22, 0.03, 0.26, 1] }}
+        transition={{ 
+          duration: 0.6, 
+          ease: [0.22, 0.03, 0.26, 1],
+          delay: 0.1 
+        }}
       >
         <motion.div
           className="space-y-6"
