@@ -243,15 +243,15 @@ const Demo = () => {
         transition={getContentTransition(true)}
         className="space-y-6"
       >
-        {/* Icon - no entry animation, persists from form */}
+        {/* Icon - hollow glass style matching form */}
         <div className="flex justify-center">
           <div className="relative">
             {/* Outer breathing ring */}
             <motion.div
-              className="absolute inset-0 rounded-[20px] border border-white/30"
+              className="absolute inset-0 rounded-[18px] border border-white/20"
               animate={!prefersReducedMotion ? {
-                scale: [1, 1.4, 1],
-                opacity: [0.35, 0, 0.35],
+                scale: [1, 1.3, 1],
+                opacity: [0.3, 0, 0.3],
               } : {}}
               transition={{
                 duration: 2.8,
@@ -259,23 +259,9 @@ const Demo = () => {
                 ease: [0.4, 0, 0.2, 1],
               }}
             />
-            {/* Inner breathing ring - offset timing */}
-            <motion.div
-              className="absolute inset-0 rounded-[20px] border border-white/20"
-              animate={!prefersReducedMotion ? {
-                scale: [1, 1.25, 1],
-                opacity: [0.3, 0.05, 0.3],
-              } : {}}
-              transition={{
-                duration: 2.8,
-                repeat: Infinity,
-                ease: [0.4, 0, 0.2, 1],
-                delay: 0.5,
-              }}
-            />
-            {/* Icon container with subtle pulse */}
+            {/* Icon container - hollow glass */}
             <motion.div 
-              className="relative w-16 h-16 rounded-[18px] bg-gradient-to-br from-white via-white to-neutral-200 shadow-lg shadow-black/20 flex items-center justify-center"
+              className="relative w-16 h-16 rounded-[18px] border border-white/[0.15] backdrop-blur-sm flex items-center justify-center"
               animate={!prefersReducedMotion ? {
                 scale: [1, 1.02, 1],
               } : {}}
@@ -285,7 +271,7 @@ const Demo = () => {
                 ease: [0.4, 0, 0.2, 1],
               }}
             >
-              <HomeAssistantIcon className="w-8 h-8 text-[#302A23]" />
+              <HomeAssistantIcon className="w-8 h-8 text-white/60" />
             </motion.div>
           </div>
         </div>
@@ -628,7 +614,7 @@ const Demo = () => {
           className="flex justify-center"
         >
           <motion.div 
-            className="w-16 h-16 rounded-[18px] bg-white/[0.08] backdrop-blur-md border border-white/[0.12] flex items-center justify-center origin-center"
+            className="w-16 h-16 rounded-[18px] border border-white/[0.15] backdrop-blur-sm flex items-center justify-center origin-center"
             initial={{ opacity: 0, scale: 0, filter: 'blur(8px)' }}
             animate={{ opacity: 1, scale: 1, filter: 'blur(0px)' }}
             exit={{ 
@@ -651,7 +637,7 @@ const Demo = () => {
               filter: { duration: 0.3, delay: STAGGER.icon },
             }}
           >
-            <HomeAssistantIcon className="w-8 h-8 text-white/70" />
+            <HomeAssistantIcon className="w-8 h-8 text-white/60" />
           </motion.div>
         </motion.div>
 
