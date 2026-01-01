@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { motion, AnimatePresence, LayoutGroup } from 'framer-motion';
-import { Eye, EyeOff, RefreshCw, ExternalLink, ArrowLeft, X, Wifi, KeyRound, LayoutGrid, Sparkles, LucideIcon } from 'lucide-react';
+import { Eye, EyeOff, RefreshCw, ExternalLink, X, Wifi, KeyRound, LayoutGrid, Sparkles, LucideIcon } from 'lucide-react';
 import { HomeAssistantIcon } from '@/components/icons/HomeAssistantIcon';
 import { useNavigate } from 'react-router-dom';
 import { Input } from '@/components/ui/input';
@@ -775,17 +775,6 @@ const Demo = () => {
   // ===========================================================================
   return (
     <div className="min-h-screen relative flex items-center justify-center p-4 bg-[#A59587]">
-      {/* Back button */}
-      <motion.button
-        onClick={() => navigate(-1)}
-        className="fixed top-6 left-6 z-10 p-3 rounded-xl bg-black/10 hover:bg-black/15 border border-black/5 text-white/70 hover:text-white/90 transition-all duration-300 backdrop-blur-md"
-        initial={{ opacity: 0, x: -15 }}
-        animate={{ opacity: 1, x: 0 }}
-        transition={{ duration: 0.5, delay: 0.4, ease: EASE.apple }}
-      >
-        <ArrowLeft className="w-5 h-5" />
-      </motion.button>
-
       {/* Main Card */}
       <LayoutGroup>
         <motion.div
