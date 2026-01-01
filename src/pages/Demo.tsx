@@ -245,11 +245,11 @@ const Demo = () => {
     return (
       <motion.div
         key="connecting"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
-        transition={{ duration: 0.4 }}
-        className="flex flex-col items-center justify-center"
+        initial={{ opacity: 0, scale: 0.96 }}
+        animate={{ opacity: 1, scale: 1 }}
+        exit={{ opacity: 0, scale: 0.98, filter: 'blur(4px)' }}
+        transition={{ duration: 0.35, ease: EASE.apple }}
+        className="flex flex-col items-center justify-center py-10"
       >
         {/* Centered Slider */}
         <div className="relative w-full">
@@ -267,7 +267,7 @@ const Demo = () => {
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}
                   transition={{ duration: 0.8, ease: "easeOut" }}
-                  className="flex flex-col items-center text-center py-8"
+                  className="flex flex-col items-center text-center"
                 >
                   {/* Icon Container */}
                   <div className="relative mb-8">
@@ -345,11 +345,11 @@ const Demo = () => {
       animate={{ opacity: 1, scale: 1 }}
       exit={{ opacity: 0, scale: 0.98, filter: 'blur(4px)' }}
       transition={{ duration: 0.35, ease: EASE.apple }}
-      className="flex flex-col items-center justify-center py-10 space-y-6"
+      className="flex flex-col items-center justify-center py-10"
     >
       {/* Progress Ring with Checkmark */}
       <motion.div 
-        className="relative w-24 h-24"
+        className="relative w-24 h-24 mb-8"
         initial={{ scale: 0.9, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
         transition={{ duration: 0.4, ease: EASE.bounce }}
@@ -443,11 +443,11 @@ const Demo = () => {
       animate={{ opacity: 1, scale: 1 }}
       exit={{ opacity: 0, scale: 0.98, filter: 'blur(4px)' }}
       transition={{ duration: 0.35, ease: EASE.apple }}
-      className="flex flex-col items-center justify-center py-10 space-y-6"
+      className="flex flex-col items-center justify-center py-10"
     >
       {/* Error Icon - matching success style */}
       <motion.div 
-        className="relative w-24 h-24"
+        className="relative w-24 h-24 mb-8"
         initial={{ scale: 0.9, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
         transition={{ duration: 0.4, ease: EASE.bounce }}
