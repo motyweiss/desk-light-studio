@@ -263,48 +263,48 @@ const Demo = () => {
         animate={ANIM.statusIcon.animate}
         transition={ANIM.statusIcon.transition}
       >
-        <div className="relative w-20 h-20">
+        <div className="relative w-24 h-24">
           {/* Circular progress ring */}
           <svg
             className="absolute inset-0 w-full h-full -rotate-90"
-            viewBox="0 0 80 80"
+            viewBox="0 0 96 96"
           >
-            {/* Background circle */}
+            {/* Background circle - subtle */}
             <circle
-              cx="40"
-              cy="40"
-              r="36"
+              cx="48"
+              cy="48"
+              r="44"
               fill="none"
-              stroke="hsl(160 40% 25% / 0.3)"
-              strokeWidth="4"
+              stroke="hsl(160 30% 20% / 0.25)"
+              strokeWidth="3"
             />
             {/* Animated progress circle */}
             <motion.circle
-              cx="40"
-              cy="40"
-              r="36"
+              cx="48"
+              cy="48"
+              r="44"
               fill="none"
-              stroke="hsl(160 60% 55%)"
-              strokeWidth="4"
+              stroke="hsl(160 55% 50%)"
+              strokeWidth="3"
               strokeLinecap="round"
               initial={{ pathLength: 0, opacity: 0 }}
               animate={{ pathLength: 1, opacity: 1 }}
               transition={{
                 pathLength: {
-                  duration: 2.2,
-                  ease: [0.4, 0, 0.2, 1],
-                  delay: 0.3,
+                  duration: 1.8,
+                  ease: [0.16, 1, 0.3, 1], // Smooth ease-out with soft ending
+                  delay: 0.2,
                 },
-                opacity: { duration: 0.2, delay: 0.2 },
+                opacity: { duration: 0.3, delay: 0.15 },
               }}
             />
           </svg>
           
           {/* Inner circle with checkmark */}
-          <div className="absolute inset-2 rounded-full bg-emerald-500/15 flex items-center justify-center">
+          <div className="absolute inset-3 rounded-full bg-emerald-500/12 flex items-center justify-center">
             <motion.svg
-              width="28"
-              height="28"
+              width="32"
+              height="32"
               viewBox="0 0 24 24"
               fill="none"
               stroke="currentColor"
@@ -312,12 +312,23 @@ const Demo = () => {
               strokeLinecap="round"
               strokeLinejoin="round"
               className="text-emerald-400"
+              initial={{ opacity: 0, scale: 0.5 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ 
+                duration: 0.4, 
+                delay: 1.6, // Appears near end of circle fill
+                ease: [0.34, 1.56, 0.64, 1],
+              }}
             >
               <motion.path
                 d="M5 12l5 5L20 7"
-                initial={ANIM.checkmark.initial}
-                animate={ANIM.checkmark.animate}
-                transition={ANIM.checkmark.transition}
+                initial={{ pathLength: 0 }}
+                animate={{ pathLength: 1 }}
+                transition={{
+                  duration: 0.4,
+                  delay: 1.7,
+                  ease: [0.25, 0.46, 0.45, 0.94],
+                }}
               />
             </motion.svg>
           </div>
