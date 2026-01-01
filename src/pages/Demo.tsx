@@ -241,130 +241,113 @@ const Demo = () => {
         animate={{ opacity: 1, scale: 1, y: 0 }}
         exit={{ opacity: 0, scale: 0.98, y: -8, filter: 'blur(6px)' }}
         transition={getContentTransition(true)}
-        className="space-y-6"
+        className="flex items-center gap-8"
       >
-        {/* Icon - hollow glass style matching form */}
-        <div className="flex justify-center">
+        {/* Large Animated Icon - Left Side */}
+        <motion.div 
+          className="flex-shrink-0"
+          initial={{ opacity: 0, scale: 0.8 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.5, ease: EASE.out }}
+        >
           <div className="relative">
             {/* Outer breathing ring */}
             <motion.div
-              className="absolute inset-0 rounded-[18px] border border-white/20"
+              className="absolute inset-0 rounded-[24px] border border-white/15"
               animate={!prefersReducedMotion ? {
-                scale: [1, 1.3, 1],
-                opacity: [0.3, 0, 0.3],
+                scale: [1, 1.15, 1],
+                opacity: [0.2, 0, 0.2],
               } : {}}
               transition={{
-                duration: 2.8,
+                duration: 3,
                 repeat: Infinity,
-                ease: [0.4, 0, 0.2, 1],
+                ease: "easeInOut",
               }}
             />
             {/* Icon container - hollow glass */}
-            <motion.div 
-              className="relative w-16 h-16 rounded-[18px] border border-white/[0.15] backdrop-blur-sm flex items-center justify-center"
-              animate={!prefersReducedMotion ? {
-                scale: [1, 1.02, 1],
-              } : {}}
-              transition={{
-                duration: 2.5,
-                repeat: Infinity,
-                ease: [0.4, 0, 0.2, 1],
-              }}
-            >
-              <HomeAssistantIcon className="w-8 h-8 text-white/60" />
-            </motion.div>
-          </div>
-        </div>
-
-        {/* Title */}
-        <motion.div
-          initial={{ opacity: 0, y: 16, filter: 'blur(4px)' }}
-          animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
-          transition={{ duration: 0.5, delay: 0.2, ease: EASE.apple }}
-        >
-          <h1 className="text-xl font-light text-white/90 tracking-wide text-center">
-            Connecting to Home Assistant
-          </h1>
-        </motion.div>
-
-        {/* Progress Bar */}
-        <motion.div
-          className="mx-4"
-          initial={{ opacity: 0, scaleX: 0 }}
-          animate={{ opacity: 1, scaleX: 1 }}
-          transition={{ duration: 0.5, delay: 0.3, ease: EASE.out }}
-          style={{ transformOrigin: 'center' }}
-        >
-          <div className="h-1 bg-white/10 rounded-full overflow-hidden">
-            <motion.div
-              className="h-full bg-gradient-to-r from-amber-400 to-amber-500 rounded-full"
-              initial={{ width: 0 }}
-              animate={{ width: `${progress}%` }}
-              transition={{ duration: 0.5, ease: EASE.smooth }}
-            />
+            <div className="relative w-28 h-28 rounded-[24px] border border-white/[0.12] backdrop-blur-sm flex items-center justify-center">
+              <HomeAssistantIcon 
+                className="w-16 h-16 text-white/70" 
+                animated={true}
+                animationDelay={0.2}
+              />
+            </div>
           </div>
         </motion.div>
 
-        {/* Carousel-style Checklist */}
-        <motion.div 
-          className="relative h-32 overflow-hidden"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.35 }}
-        >
-          {/* Gradient masks for fade effect */}
-          <div className="absolute inset-x-0 top-0 h-8 bg-gradient-to-b from-[#302A23] to-transparent z-10 pointer-events-none" />
-          <div className="absolute inset-x-0 bottom-0 h-8 bg-gradient-to-t from-[#302A23] to-transparent z-10 pointer-events-none" />
-          
-          {/* Steps container - animated vertically */}
+        {/* Content - Right Side */}
+        <div className="flex-1 space-y-5">
+          {/* Title */}
           <motion.div
-            className="absolute inset-x-0 flex flex-col items-center justify-start pt-10"
-            animate={{ y: -currentStepIndex * 40 }}
-            transition={{ 
-              duration: 0.45, 
-              ease: [0.22, 1, 0.36, 1], // Soft ease-out
-            }}
+            initial={{ opacity: 0, x: 12 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.4, delay: 0.15, ease: EASE.apple }}
+          >
+            <h1 className="text-lg font-light text-white/90 tracking-wide">
+              Connecting to Home Assistant
+            </h1>
+          </motion.div>
+
+          {/* Progress Bar */}
+          <motion.div
+            initial={{ opacity: 0, scaleX: 0 }}
+            animate={{ opacity: 1, scaleX: 1 }}
+            transition={{ duration: 0.4, delay: 0.25, ease: EASE.out }}
+            style={{ transformOrigin: 'left' }}
+          >
+            <div className="h-1 bg-white/10 rounded-full overflow-hidden">
+              <motion.div
+                className="h-full bg-gradient-to-r from-amber-400 to-amber-500 rounded-full"
+                initial={{ width: 0 }}
+                animate={{ width: `${progress}%` }}
+                transition={{ duration: 0.5, ease: EASE.smooth }}
+              />
+            </div>
+          </motion.div>
+
+          {/* Horizontal Steps */}
+          <motion.div 
+            className="flex flex-wrap gap-x-4 gap-y-2"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.35 }}
           >
             {steps.map((step, index) => {
               const StepIcon = step.icon;
               const isActive = step.status === 'active';
               const isCompleted = step.status === 'completed';
-              const isPending = step.status === 'pending';
-              const distanceFromActive = index - currentStepIndex;
               
               return (
                 <motion.div
                   key={step.id}
-                  className="flex items-center gap-3 h-10 px-4"
-                  animate={{
-                    opacity: isActive ? 1 : isCompleted ? 0.5 : 0.25,
-                    scale: isActive ? 1.05 : 1,
-                    filter: isActive ? 'blur(0px)' : `blur(${Math.abs(distanceFromActive) * 1}px)`,
+                  className="flex items-center gap-1.5"
+                  initial={{ opacity: 0, x: 8 }}
+                  animate={{ 
+                    opacity: isActive ? 1 : isCompleted ? 0.6 : 0.3,
+                    x: 0,
                   }}
                   transition={{
-                    duration: 0.4,
+                    duration: 0.35,
+                    delay: 0.4 + index * 0.08,
                     ease: EASE.apple,
                   }}
                 >
-                  {/* Step Icon */}
                   <StepIcon 
-                    className={`w-4 h-4 flex-shrink-0 transition-colors duration-300 ${
+                    className={`w-3.5 h-3.5 flex-shrink-0 transition-colors duration-300 ${
                       isCompleted 
-                        ? 'text-amber-400/70' 
+                        ? 'text-amber-400' 
                         : isActive
                         ? 'text-amber-400'
-                        : 'text-white/30'
+                        : 'text-white/40'
                     }`}
                   />
-
-                  {/* Label */}
                   <span
-                    className={`text-sm font-light tracking-wide whitespace-nowrap transition-colors duration-300 ${
+                    className={`text-xs font-light tracking-wide whitespace-nowrap transition-colors duration-300 ${
                       isCompleted 
-                        ? 'text-amber-400/70' 
+                        ? 'text-amber-400/80' 
                         : isActive
-                        ? 'text-white'
-                        : 'text-white/30'
+                        ? 'text-white/90'
+                        : 'text-white/40'
                     }`}
                   >
                     {step.label}
@@ -373,7 +356,7 @@ const Demo = () => {
               );
             })}
           </motion.div>
-        </motion.div>
+        </div>
 
       </motion.div>
     );
