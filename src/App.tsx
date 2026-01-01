@@ -15,6 +15,7 @@ import { OfflineIndicator } from "./components/OfflineIndicator";
 import Index from "./pages/Index";
 import Settings from "./pages/Settings";
 import DesignSystem from "./pages/DesignSystem";
+import Demo from "./pages/Demo";
 import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
 
@@ -33,6 +34,9 @@ const App = () => (
                     <Routes>
                       {/* Auth page outside RootLayout for clean UI */}
                       <Route path="/auth" element={<Auth />} />
+                      
+                      {/* Demo page - standalone */}
+                      <Route path="/demo" element={<ProtectedRoute><Demo /></ProtectedRoute>} />
                       
                       {/* All other pages inside RootLayout */}
                       <Route element={<RootLayout><Outlet /></RootLayout>}>
