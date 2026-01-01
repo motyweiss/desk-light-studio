@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Eye, EyeOff, RefreshCw, ExternalLink, ArrowLeft, X } from 'lucide-react';
 import { HomeAssistantIcon } from '@/components/icons/HomeAssistantIcon';
@@ -7,177 +7,165 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { useHAConnection } from '@/contexts/HAConnectionContext';
 import { useToast } from '@/hooks/use-toast';
+import { TIMING, EASE } from '@/lib/animations/tokens';
+import { useReducedMotion } from '@/hooks/useReducedMotion';
 
-// Connection states
+// =============================================================================
+// TYPES
+// =============================================================================
+
 type ConnectionStatus = 'idle' | 'connecting' | 'success' | 'error';
 
-// Unified timing constants
-const TIMING = {
-  fast: 0.25,
-  normal: 0.4,
-  slow: 0.6,
-  content: 0.35,
-};
+// =============================================================================
+// ANIMATION CONFIGURATION - Clean, consistent, elegant
+// =============================================================================
 
-// Refined easing curves - no blur for performance
-const EASE = {
-  smooth: [0.4, 0, 0.2, 1] as [number, number, number, number],
-  gentle: [0.25, 0.1, 0.25, 1] as [number, number, number, number],
-  out: [0, 0, 0.2, 1] as [number, number, number, number],
-  spring: [0.34, 1.4, 0.64, 1] as [number, number, number, number],
-};
-
-// Card entrance only - no exit animation, card stays stable
-const cardVariants = {
-  hidden: { 
-    opacity: 0, 
-    scale: 0.94,
-    y: 24,
-  },
-  visible: { 
-    opacity: 1, 
-    scale: 1,
-    y: 0,
+const ANIM = {
+  // Card entrance - gentle and refined
+  card: {
+    initial: { opacity: 0, scale: 0.97, y: 20 },
+    animate: { opacity: 1, scale: 1, y: 0 },
     transition: {
-      duration: 0.7,
+      duration: TIMING.slow,
       ease: EASE.gentle,
-    }
+    },
   },
-};
-
-// Content transition - simple fade only, no movement
-const contentVariants = {
-  initial: { 
-    opacity: 0,
+  
+  // Content crossfade - symmetric, smooth
+  content: {
+    duration: TIMING.medium,
+    ease: EASE.smooth,
   },
-  animate: { 
-    opacity: 1,
+  
+  // Icon - subtle scale entrance
+  icon: {
+    initial: { opacity: 0, scale: 0.85 },
+    animate: { opacity: 1, scale: 1 },
     transition: {
-      duration: TIMING.normal,
-      ease: EASE.smooth,
-    }
+      duration: TIMING.medium,
+      ease: EASE.gentle,
+    },
   },
-  exit: { 
-    opacity: 0,
-    transition: {
-      duration: TIMING.fast,
-      ease: EASE.smooth,
-    }
-  },
-};
-
-// Stagger container for form items
-const staggerContainer = {
-  initial: {},
-  animate: {
-    transition: {
-      staggerChildren: 0.06,
-      delayChildren: 0.1,
-    }
-  },
-  exit: {
-    transition: {
-      staggerChildren: 0.03,
-      staggerDirection: -1,
-    }
-  }
-};
-
-// Individual items
-const itemVariants = {
-  initial: { 
-    opacity: 0, 
-    y: 10,
-  },
-  animate: { 
-    opacity: 1, 
-    y: 0,
-    transition: {
-      duration: TIMING.content,
-      ease: EASE.out,
-    }
-  },
-  exit: {
-    opacity: 0,
-    y: -6,
+  
+  // Form items - simple fade with minimal y
+  item: {
+    initial: { opacity: 0, y: 8 },
+    animate: { opacity: 1, y: 0 },
+    exit: { opacity: 0, y: -4 },
     transition: {
       duration: TIMING.fast,
       ease: EASE.smooth,
-    }
-  }
-};
-
-// Icon entrance
-const iconVariants = {
-  initial: { 
-    opacity: 0, 
-    scale: 0.7,
+    },
   },
-  animate: { 
-    opacity: 1, 
-    scale: 1,
+  
+  // Stagger timing
+  stagger: {
+    children: 0.04,
+    delay: 0.08,
+  },
+  
+  // Connecting pulse - subtle and calming
+  pulse: {
+    scale: [1, 1.025, 1] as number[],
+    boxShadow: [
+      '0 10px 15px -3px rgba(0, 0, 0, 0.2)',
+      '0 10px 20px -3px rgba(255, 188, 0, 0.25)',
+      '0 10px 15px -3px rgba(0, 0, 0, 0.2)',
+    ] as string[],
     transition: {
-      duration: TIMING.normal,
-      ease: EASE.spring,
-    }
+      duration: 2.2,
+      repeat: Infinity,
+      ease: EASE.smooth,
+    },
   },
-};
-
-// Separator draw
-const separatorVariants = {
-  initial: { 
-    opacity: 0,
-    scaleX: 0,
-  },
-  animate: { 
-    opacity: 1,
-    scaleX: 1,
+  
+  // Success/error icon
+  statusIcon: {
+    initial: { scale: 0.85, opacity: 0 },
+    animate: { scale: 1, opacity: 1 },
     transition: {
-      duration: TIMING.normal,
+      duration: TIMING.medium,
+      ease: EASE.gentle,
+    },
+  },
+  
+  // Checkmark path draw
+  checkmark: {
+    initial: { pathLength: 0, opacity: 0 },
+    animate: { pathLength: 1, opacity: 1 },
+    transition: {
+      pathLength: { duration: TIMING.slow, ease: EASE.out, delay: 0.1 },
+      opacity: { duration: TIMING.micro },
+    },
+  },
+  
+  // Progress bar
+  progress: {
+    initial: { width: '0%' },
+    animate: { width: '100%' },
+    transition: {
+      duration: 2.2,
+      delay: 0.25,
+      ease: EASE.smooth,
+    },
+  },
+  
+  // Separator line
+  separator: {
+    initial: { opacity: 0, scaleX: 0 },
+    animate: { opacity: 1, scaleX: 1 },
+    transition: {
+      duration: TIMING.medium,
       ease: EASE.out,
-    }
+    },
   },
-};
-
-// Success checkmark path
-const checkmarkVariants = {
-  initial: { pathLength: 0, opacity: 0 },
-  animate: { 
-    pathLength: 1, 
-    opacity: 1,
+  
+  // Back button
+  backButton: {
+    initial: { opacity: 0, x: -12 },
+    animate: { opacity: 1, x: 0 },
     transition: {
-      pathLength: { duration: 0.45, ease: EASE.out, delay: 0.1 },
-      opacity: { duration: 0.15 }
-    }
-  }
-};
+      delay: 0.35,
+      duration: TIMING.medium,
+      ease: EASE.out,
+    },
+  },
+} as const;
 
-// Status icon container
-const statusIconVariants = {
-  initial: { 
-    scale: 0.6, 
-    opacity: 0,
+// Reduced motion variants
+const REDUCED = {
+  content: {
+    duration: TIMING.micro,
+    ease: EASE.smooth,
   },
-  animate: { 
-    scale: 1, 
-    opacity: 1,
-    transition: {
-      duration: TIMING.normal,
-      ease: EASE.spring,
-    }
+  card: {
+    initial: { opacity: 0 },
+    animate: { opacity: 1 },
+    transition: { duration: TIMING.fast },
   },
-};
+} as const;
+
+// =============================================================================
+// COMPONENT
+// =============================================================================
 
 const Demo = () => {
   const navigate = useNavigate();
   const { config, testConnection, saveConfig } = useHAConnection();
   const { toast } = useToast();
+  const prefersReducedMotion = useReducedMotion();
   
   const [baseUrl, setBaseUrl] = useState('');
   const [accessToken, setAccessToken] = useState('');
   const [showToken, setShowToken] = useState(false);
   const [connectionStatus, setConnectionStatus] = useState<ConnectionStatus>('idle');
   const [errorMessage, setErrorMessage] = useState('');
+
+  // Animation config based on motion preference
+  const contentTransition = useMemo(() => 
+    prefersReducedMotion ? REDUCED.content : ANIM.content,
+    [prefersReducedMotion]
+  );
 
   useEffect(() => {
     if (config) {
@@ -206,7 +194,6 @@ const Demo = () => {
         setConnectionStatus('success');
         await saveConfig(baseUrl, accessToken);
         
-        // Reset to idle after success display
         setTimeout(() => {
           setConnectionStatus('idle');
         }, 2800);
@@ -214,7 +201,7 @@ const Demo = () => {
         setConnectionStatus('error');
         setErrorMessage(result.error || 'Could not connect to Home Assistant');
       }
-    } catch (error) {
+    } catch {
       setConnectionStatus('error');
       setErrorMessage('An unexpected error occurred');
     }
@@ -225,21 +212,23 @@ const Demo = () => {
     setErrorMessage('');
   };
 
-  // Success State
+  // ===========================================================================
+  // SUCCESS CONTENT
+  // ===========================================================================
   const SuccessContent = () => (
     <motion.div
       key="success"
-      variants={contentVariants}
-      initial="initial"
-      animate="animate"
-      exit="exit"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      transition={contentTransition}
       className="space-y-6 text-center py-8"
     >
       <motion.div 
         className="flex justify-center"
-        variants={statusIconVariants}
-        initial="initial"
-        animate="animate"
+        initial={ANIM.statusIcon.initial}
+        animate={ANIM.statusIcon.animate}
+        transition={ANIM.statusIcon.transition}
       >
         <div className="w-16 h-16 rounded-full bg-emerald-500/15 flex items-center justify-center">
           <motion.svg
@@ -255,18 +244,18 @@ const Demo = () => {
           >
             <motion.path
               d="M5 12l5 5L20 7"
-              variants={checkmarkVariants}
-              initial="initial"
-              animate="animate"
+              initial={ANIM.checkmark.initial}
+              animate={ANIM.checkmark.animate}
+              transition={ANIM.checkmark.transition}
             />
           </motion.svg>
         </div>
       </motion.div>
 
       <motion.div
-        initial={{ opacity: 0, y: 6 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.15, duration: TIMING.content, ease: EASE.out }}
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 0.12, duration: TIMING.fast, ease: EASE.smooth }}
       >
         <h2 className="text-xl font-light text-white/90 tracking-wide">
           Connected Successfully
@@ -277,39 +266,41 @@ const Demo = () => {
         className="h-0.5 bg-white/8 rounded-full overflow-hidden mx-auto max-w-[180px]"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
-        transition={{ delay: 0.25 }}
+        transition={{ delay: 0.2 }}
       >
         <motion.div
           className="h-full bg-emerald-400/80 rounded-full"
-          initial={{ width: '0%' }}
-          animate={{ width: '100%' }}
-          transition={{ duration: 2.2, delay: 0.3, ease: EASE.out }}
+          initial={ANIM.progress.initial}
+          animate={ANIM.progress.animate}
+          transition={ANIM.progress.transition}
         />
       </motion.div>
     </motion.div>
   );
 
-  // Error State
+  // ===========================================================================
+  // ERROR CONTENT
+  // ===========================================================================
   const ErrorContent = () => (
     <motion.div
       key="error"
-      variants={contentVariants}
-      initial="initial"
-      animate="animate"
-      exit="exit"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      transition={contentTransition}
       className="space-y-6 text-center py-8"
     >
       <motion.div 
         className="flex justify-center"
-        variants={statusIconVariants}
-        initial="initial"
-        animate="animate"
+        initial={ANIM.statusIcon.initial}
+        animate={ANIM.statusIcon.animate}
+        transition={ANIM.statusIcon.transition}
       >
         <div className="w-16 h-16 rounded-full bg-red-500/15 flex items-center justify-center">
           <motion.div
-            initial={{ rotate: -90, opacity: 0 }}
+            initial={{ rotate: -45, opacity: 0 }}
             animate={{ rotate: 0, opacity: 1 }}
-            transition={{ duration: TIMING.content, ease: EASE.spring }}
+            transition={{ duration: TIMING.fast, ease: EASE.gentle }}
           >
             <X className="w-8 h-8 text-red-400" />
           </motion.div>
@@ -317,9 +308,9 @@ const Demo = () => {
       </motion.div>
 
       <motion.div
-        initial={{ opacity: 0, y: 6 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.12, duration: TIMING.content, ease: EASE.out }}
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 0.1, duration: TIMING.fast, ease: EASE.smooth }}
       >
         <h2 className="text-xl font-light text-white/90 tracking-wide mb-2">
           Connection Failed
@@ -330,9 +321,9 @@ const Demo = () => {
       </motion.div>
 
       <motion.div
-        initial={{ opacity: 0, y: 6 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.24, duration: TIMING.content, ease: EASE.out }}
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 0.18, duration: TIMING.fast, ease: EASE.smooth }}
       >
         <Button
           onClick={handleRetry}
@@ -345,157 +336,186 @@ const Demo = () => {
     </motion.div>
   );
 
-  // Form State
-  const FormContent = () => (
-    <motion.div
-      key="form"
-      variants={staggerContainer}
-      initial="initial"
-      animate="animate"
-      exit="exit"
-      className="space-y-6"
-    >
-      <motion.div 
-        variants={iconVariants}
-        className="flex justify-center"
+  // ===========================================================================
+  // FORM CONTENT
+  // ===========================================================================
+  const FormContent = () => {
+    const isConnecting = connectionStatus === 'connecting';
+    
+    return (
+      <motion.div
+        key="form"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        transition={contentTransition}
+        className="space-y-6"
       >
+        {/* Icon */}
         <motion.div 
-          className="w-16 h-16 rounded-[18px] bg-white shadow-lg shadow-black/20 flex items-center justify-center"
-          animate={connectionStatus === 'connecting' ? {
-            scale: [1, 1.05, 1],
-            boxShadow: [
-              '0 10px 15px -3px rgba(0, 0, 0, 0.2)',
-              '0 10px 25px -3px rgba(255, 188, 0, 0.3)',
-              '0 10px 15px -3px rgba(0, 0, 0, 0.2)',
-            ],
-          } : {}}
-          transition={connectionStatus === 'connecting' ? {
-            duration: 1.5,
-            repeat: Infinity,
-            ease: EASE.smooth,
-          } : {}}
+          className="flex justify-center"
+          initial={ANIM.icon.initial}
+          animate={ANIM.icon.animate}
+          transition={ANIM.icon.transition}
         >
-          <HomeAssistantIcon className="w-8 h-8 text-[hsl(28_15%_12%)]" />
+          <motion.div 
+            className="w-16 h-16 rounded-[18px] bg-white shadow-lg shadow-black/20 flex items-center justify-center"
+            animate={isConnecting && !prefersReducedMotion ? {
+              scale: ANIM.pulse.scale,
+              boxShadow: ANIM.pulse.boxShadow,
+            } : {}}
+            transition={isConnecting ? ANIM.pulse.transition : {}}
+          >
+            <HomeAssistantIcon className="w-8 h-8 text-[hsl(28_15%_12%)]" />
+          </motion.div>
+        </motion.div>
+
+        {/* Header */}
+        <motion.div 
+          className="text-center space-y-2"
+          initial={ANIM.item.initial}
+          animate={ANIM.item.animate}
+          transition={{ ...ANIM.item.transition, delay: ANIM.stagger.delay }}
+        >
+          <h1 className="text-xl font-light text-white/90 tracking-wide">
+            Connect to your Home Assistant
+          </h1>
+          <p className="text-sm text-white/45">
+            Enter your instance URL and access token
+          </p>
+        </motion.div>
+
+        {/* Separator */}
+        <motion.div 
+          className="h-px bg-white/10 origin-left mx-4"
+          initial={ANIM.separator.initial}
+          animate={ANIM.separator.animate}
+          transition={{ ...ANIM.separator.transition, delay: ANIM.stagger.delay + ANIM.stagger.children }}
+        />
+
+        {/* Form Fields */}
+        <motion.div 
+          className="space-y-5"
+          initial={ANIM.item.initial}
+          animate={ANIM.item.animate}
+          transition={{ ...ANIM.item.transition, delay: ANIM.stagger.delay + ANIM.stagger.children * 2 }}
+        >
+          <div className="space-y-2">
+            <label className="text-xs font-medium text-white/55 uppercase tracking-wider">
+              Base URL
+            </label>
+            <Input
+              type="url"
+              value={baseUrl}
+              onChange={(e) => setBaseUrl(e.target.value)}
+              placeholder="https://your-instance.ui.nabu.casa"
+              disabled={isConnecting}
+              className="bg-white/[0.05] border-white/8 rounded-xl h-12 text-white placeholder:text-white/35 focus:border-amber-500/40 focus:ring-amber-500/15 disabled:opacity-50 transition-all duration-300"
+            />
+            <p className="text-xs text-white/30">
+              Your Home Assistant instance URL
+            </p>
+          </div>
+
+          <div className="space-y-2">
+            <label className="text-xs font-medium text-white/55 uppercase tracking-wider">
+              Access Token
+            </label>
+            <div className="relative">
+              <Input
+                type={showToken ? 'text' : 'password'}
+                value={accessToken}
+                onChange={(e) => setAccessToken(e.target.value)}
+                placeholder="eyJ0eX..."
+                disabled={isConnecting}
+                className="bg-white/[0.05] border-white/8 rounded-xl h-12 text-white placeholder:text-white/35 focus:border-amber-500/40 focus:ring-amber-500/15 pr-12 disabled:opacity-50 transition-all duration-300"
+              />
+              <button
+                type="button"
+                onClick={() => setShowToken(!showToken)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 p-1.5 rounded-lg text-white/35 hover:text-white/60 hover:bg-white/5 transition-all duration-200"
+              >
+                {showToken ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+              </button>
+            </div>
+            <p className="text-xs text-white/30">
+              Long-lived access token from your profile
+            </p>
+          </div>
+        </motion.div>
+
+        {/* Connect Button */}
+        <motion.div
+          initial={ANIM.item.initial}
+          animate={ANIM.item.animate}
+          transition={{ ...ANIM.item.transition, delay: ANIM.stagger.delay + ANIM.stagger.children * 3 }}
+        >
+          <Button
+            onClick={handleTestConnection}
+            disabled={isConnecting || !baseUrl || !accessToken}
+            className="w-full h-12 rounded-xl bg-[#FFBC00] hover:bg-[#FFD040] border-0 text-black font-medium uppercase tracking-[0.2em] transition-all duration-300 disabled:opacity-35 disabled:bg-[#FFBC00]/40"
+          >
+            {isConnecting ? (
+              <>
+                <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
+                <span className="tracking-[0.15em]">Connecting...</span>
+              </>
+            ) : (
+              'CONNECT'
+            )}
+          </Button>
+        </motion.div>
+
+        {/* Help Link */}
+        <motion.div 
+          className="text-center"
+          initial={ANIM.item.initial}
+          animate={ANIM.item.animate}
+          transition={{ ...ANIM.item.transition, delay: ANIM.stagger.delay + ANIM.stagger.children * 4 }}
+        >
+          <a
+            href="https://www.home-assistant.io/docs/authentication/#your-account-profile"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-2 text-sm text-white/35 hover:text-white/55 transition-colors duration-300"
+          >
+            <ExternalLink className="w-4 h-4" />
+            How to create an access token
+          </a>
         </motion.div>
       </motion.div>
+    );
+  };
 
-      <motion.div variants={itemVariants} className="text-center space-y-2">
-        <h1 className="text-xl font-light text-white/90 tracking-wide">
-          Connect to your Home Assistant
-        </h1>
-        <p className="text-sm text-white/45">
-          Enter your instance URL and access token
-        </p>
-      </motion.div>
-
-      <motion.div 
-        variants={separatorVariants}
-        className="h-px bg-white/10 origin-left mx-4" 
-      />
-
-      <motion.div variants={itemVariants} className="space-y-5">
-        <div className="space-y-2">
-          <label className="text-xs font-medium text-white/55 uppercase tracking-wider">
-            Base URL
-          </label>
-          <Input
-            type="url"
-            value={baseUrl}
-            onChange={(e) => setBaseUrl(e.target.value)}
-            placeholder="https://your-instance.ui.nabu.casa"
-            disabled={connectionStatus === 'connecting'}
-            className="bg-white/[0.05] border-white/8 rounded-xl h-12 text-white placeholder:text-white/35 focus:border-amber-500/40 focus:ring-amber-500/15 disabled:opacity-50 transition-all duration-300"
-          />
-          <p className="text-xs text-white/30">
-            Your Home Assistant instance URL
-          </p>
-        </div>
-
-        <div className="space-y-2">
-          <label className="text-xs font-medium text-white/55 uppercase tracking-wider">
-            Access Token
-          </label>
-          <div className="relative">
-            <Input
-              type={showToken ? 'text' : 'password'}
-              value={accessToken}
-              onChange={(e) => setAccessToken(e.target.value)}
-              placeholder="eyJ0eX..."
-              disabled={connectionStatus === 'connecting'}
-              className="bg-white/[0.05] border-white/8 rounded-xl h-12 text-white placeholder:text-white/35 focus:border-amber-500/40 focus:ring-amber-500/15 pr-12 disabled:opacity-50 transition-all duration-300"
-            />
-            <button
-              type="button"
-              onClick={() => setShowToken(!showToken)}
-              className="absolute right-3 top-1/2 -translate-y-1/2 p-1.5 rounded-lg text-white/35 hover:text-white/60 hover:bg-white/5 transition-all duration-200"
-            >
-              {showToken ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-            </button>
-          </div>
-          <p className="text-xs text-white/30">
-            Long-lived access token from your profile
-          </p>
-        </div>
-      </motion.div>
-
-      <motion.div variants={itemVariants}>
-        <Button
-          onClick={handleTestConnection}
-          disabled={connectionStatus === 'connecting' || !baseUrl || !accessToken}
-          className="w-full h-12 rounded-xl bg-[#FFBC00] hover:bg-[#FFD040] border-0 text-black font-medium uppercase tracking-[0.2em] transition-all duration-300 disabled:opacity-35 disabled:bg-[#FFBC00]/40"
-        >
-          {connectionStatus === 'connecting' ? (
-            <>
-              <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
-              <span className="tracking-[0.15em]">Connecting...</span>
-            </>
-          ) : (
-            'CONNECT'
-          )}
-        </Button>
-      </motion.div>
-
-      <motion.div variants={itemVariants} className="text-center">
-        <a
-          href="https://www.home-assistant.io/docs/authentication/#your-account-profile"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="inline-flex items-center gap-2 text-sm text-white/35 hover:text-white/55 transition-colors duration-300"
-        >
-          <ExternalLink className="w-4 h-4" />
-          How to create an access token
-        </a>
-      </motion.div>
-    </motion.div>
-  );
-
+  // ===========================================================================
+  // MAIN RENDER
+  // ===========================================================================
   return (
     <div className="min-h-screen relative flex items-center justify-center p-4 bg-[#A59587]">
       {/* Back button */}
       <motion.button
         onClick={() => navigate(-1)}
         className="fixed top-6 left-6 z-10 p-3 rounded-xl bg-black/10 hover:bg-black/15 border border-black/5 text-white/70 hover:text-white/90 transition-all duration-300 backdrop-blur-md"
-        initial={{ opacity: 0, x: -15 }}
-        animate={{ opacity: 1, x: 0 }}
-        transition={{ delay: 0.4, duration: 0.5, ease: EASE.out }}
+        initial={ANIM.backButton.initial}
+        animate={ANIM.backButton.animate}
+        transition={ANIM.backButton.transition}
       >
         <ArrowLeft className="w-5 h-5" />
       </motion.button>
 
-      {/* Main Card - Stable container with layout animation for size changes */}
+      {/* Main Card */}
       <motion.div
-          className="relative z-10 w-full max-w-md bg-[hsl(28_15%_12%)] backdrop-blur-[60px] outline outline-[8px] outline-white/10 rounded-3xl p-10 overflow-hidden"
-          variants={cardVariants}
-          initial="hidden"
-          animate="visible"
-          style={{ willChange: 'transform' }}
-        >
-          <AnimatePresence mode="wait" initial={false}>
-            {connectionStatus === 'success' && <SuccessContent />}
-            {connectionStatus === 'error' && <ErrorContent />}
-            {(connectionStatus === 'idle' || connectionStatus === 'connecting') && <FormContent />}
-          </AnimatePresence>
-        </motion.div>
+        className="relative z-10 w-full max-w-md bg-[hsl(28_15%_12%)] backdrop-blur-[60px] outline outline-[8px] outline-white/10 rounded-3xl p-10 overflow-hidden"
+        initial={prefersReducedMotion ? REDUCED.card.initial : ANIM.card.initial}
+        animate={prefersReducedMotion ? REDUCED.card.animate : ANIM.card.animate}
+        transition={prefersReducedMotion ? REDUCED.card.transition : ANIM.card.transition}
+      >
+        <AnimatePresence mode="wait" initial={false}>
+          {connectionStatus === 'success' && <SuccessContent />}
+          {connectionStatus === 'error' && <ErrorContent />}
+          {(connectionStatus === 'idle' || connectionStatus === 'connecting') && <FormContent />}
+        </AnimatePresence>
+      </motion.div>
     </div>
   );
 };
