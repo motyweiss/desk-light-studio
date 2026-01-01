@@ -60,19 +60,20 @@ const ANIM = {
     },
   },
   
-  // Icon - subtle scale entrance
+  // Icon - roll in with subtle bounce
   icon: {
-    initial: { opacity: 0, scale: 0.85 },
-    animate: { opacity: 1, scale: 1 },
+    initial: { opacity: 0, scale: 0.5, rotate: -180 },
+    animate: { opacity: 1, scale: 1, rotate: 0 },
     transition: {
-      duration: TIMING.medium,
-      ease: EASE.gentle,
+      duration: 0.6,
+      ease: [0.34, 1.56, 0.64, 1], // Bounce easing
+      rotate: { duration: 0.5, ease: [0.34, 1.2, 0.64, 1] },
     },
   },
   
   // Form items - simple fade with minimal y
   item: {
-    initial: { opacity: 0, y: 8 },
+    initial: { opacity: 0, y: 12 },
     animate: { opacity: 1, y: 0 },
     exit: { opacity: 0, y: -4 },
     transition: {
@@ -81,10 +82,10 @@ const ANIM = {
     },
   },
   
-  // Stagger timing
+  // Stagger timing - hierarchical reveal
   stagger: {
-    children: 0.04,
-    delay: 0.08,
+    children: 0.08,
+    delay: 0.15,
   },
   
   // Connecting pulse - subtle and calming
@@ -428,15 +429,20 @@ const Demo = () => {
           transition={{ ...ANIM.separator.transition, delay: ANIM.stagger.delay + ANIM.stagger.children }}
         />
 
-        {/* Form Fields */}
+        {/* Form Fields - each field gets its own stagger */}
         <motion.div 
           layout
           className="space-y-5"
-          initial={ANIM.item.initial}
-          animate={ANIM.item.animate}
-          transition={{ ...ANIM.item.transition, delay: ANIM.stagger.delay + ANIM.stagger.children * 2 }}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: ANIM.stagger.delay + ANIM.stagger.children * 2 }}
         >
-          <div className="space-y-2">
+          <motion.div
+            className="space-y-2"
+            initial={ANIM.item.initial}
+            animate={ANIM.item.animate}
+            transition={{ ...ANIM.item.transition, delay: ANIM.stagger.delay + ANIM.stagger.children * 2.5 }}
+          >
             <label className="text-xs font-medium text-white/55 uppercase tracking-wider">
               Base URL
             </label>
@@ -451,9 +457,14 @@ const Demo = () => {
             <p className="text-xs text-white/30">
               Your Home Assistant instance URL
             </p>
-          </div>
+          </motion.div>
 
-          <div className="space-y-2">
+          <motion.div
+            className="space-y-2"
+            initial={ANIM.item.initial}
+            animate={ANIM.item.animate}
+            transition={{ ...ANIM.item.transition, delay: ANIM.stagger.delay + ANIM.stagger.children * 3.5 }}
+          >
             <label className="text-xs font-medium text-white/55 uppercase tracking-wider">
               Access Token
             </label>
@@ -477,7 +488,7 @@ const Demo = () => {
             <p className="text-xs text-white/30">
               Long-lived access token from your profile
             </p>
-          </div>
+          </motion.div>
         </motion.div>
 
         {/* Connect Button */}
