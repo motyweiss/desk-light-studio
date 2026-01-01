@@ -364,8 +364,8 @@ const Demo = () => {
         variants={iconVariants}
         className="flex justify-center"
       >
-        <div className="w-14 h-14 rounded-2xl bg-white/8 flex items-center justify-center">
-          <HomeAssistantIcon className="w-7 h-7 text-white/75" />
+        <div className="w-16 h-16 rounded-[18px] bg-gradient-to-b from-white/12 to-white/5 shadow-lg shadow-black/20 flex items-center justify-center border border-white/10">
+          <HomeAssistantIcon className="w-8 h-8 text-white/80" />
         </div>
       </motion.div>
 
