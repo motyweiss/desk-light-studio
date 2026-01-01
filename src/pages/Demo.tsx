@@ -354,7 +354,7 @@ const Demo = () => {
                   <StepIcon 
                     className={`w-4 h-4 flex-shrink-0 transition-colors duration-300 ${
                       isCompleted 
-                        ? 'text-emerald-400/70' 
+                        ? 'text-amber-400/70' 
                         : isActive
                         ? 'text-amber-400'
                         : 'text-white/30'
@@ -365,7 +365,7 @@ const Demo = () => {
                   <span
                     className={`text-sm font-light tracking-wide whitespace-nowrap transition-colors duration-300 ${
                       isCompleted 
-                        ? 'text-emerald-400/70' 
+                        ? 'text-amber-400/70' 
                         : isActive
                         ? 'text-white'
                         : 'text-white/30'
