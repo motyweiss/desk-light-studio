@@ -401,9 +401,6 @@ const Demo = () => {
         <p className="text-sm text-white/45 max-w-[280px] mx-auto leading-relaxed">
           {"We couldn't authenticate with the provided Home Assistant URL or token."}
         </p>
-        <p className="text-sm text-white/35 max-w-[280px] mx-auto leading-relaxed">
-          Please review your settings and try again.
-        </p>
       </motion.div>
 
       <motion.div
