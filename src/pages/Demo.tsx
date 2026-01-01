@@ -519,26 +519,11 @@ const Demo = () => {
   // MAIN RENDER
   // ===========================================================================
   return (
-    <motion.div 
-      className="fixed inset-0 z-50 flex items-center justify-center p-4"
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      transition={{ duration: 0.3, ease: EASE.apple }}
-    >
-      {/* Frosted glass backdrop */}
-      <motion.div 
-        className="absolute inset-0 bg-[#A59587]/70 backdrop-blur-xl"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ duration: 0.4, ease: EASE.apple }}
-        onClick={() => navigate('/')}
-      />
-
-      {/* Close button */}
+    <div className="min-h-screen relative flex items-center justify-center p-4 bg-[#A59587]">
+      {/* Back button */}
       <motion.button
-        onClick={() => navigate('/')}
-        className="fixed top-6 left-6 z-10 p-3 rounded-xl bg-black/10 hover:bg-black/20 border border-white/10 text-white/80 hover:text-white transition-all duration-300 backdrop-blur-md"
+        onClick={() => navigate(-1)}
+        className="fixed top-6 left-6 z-10 p-3 rounded-xl bg-black/10 hover:bg-black/15 border border-black/5 text-white/70 hover:text-white/90 transition-all duration-300 backdrop-blur-md"
         initial={{ opacity: 0, x: -15 }}
         animate={{ opacity: 1, x: 0 }}
         transition={{ duration: 0.5, delay: 0.4, ease: EASE.apple }}
@@ -572,7 +557,7 @@ const Demo = () => {
           </AnimatePresence>
         </motion.div>
       </LayoutGroup>
-    </motion.div>
+    </div>
   );
 };
 
