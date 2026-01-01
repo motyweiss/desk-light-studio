@@ -190,10 +190,10 @@ const Demo = () => {
     [prefersReducedMotion]
   );
 
+  // Demo page: don't override the default demo URL from config
   useEffect(() => {
-    if (config) {
-      setBaseUrl(config.baseUrl || '');
-      setAccessToken(config.accessToken || '');
+    if (config?.accessToken) {
+      setAccessToken(config.accessToken);
     }
   }, [config]);
 
