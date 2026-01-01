@@ -23,10 +23,10 @@ type WizardStep = {
 };
 
 const WIZARD_STEPS: Omit<WizardStep, 'status'>[] = [
-  { id: 'connect', label: 'Connecting...', icon: Link },
-  { id: 'auth', label: 'Authenticating...', icon: ShieldCheck },
-  { id: 'devices', label: 'Discovering devices...', icon: Cpu },
-  { id: 'sync', label: 'Syncing data...', icon: Sparkles },
+  { id: 'connect', label: 'מתחבר לבית החכם שלך...', icon: Link },
+  { id: 'auth', label: 'מאמת הרשאות גישה...', icon: ShieldCheck },
+  { id: 'devices', label: 'מגלה 24 מכשירים ב-5 חדרים...', icon: Cpu },
+  { id: 'sync', label: 'מנתח דפוסי שימוש...', icon: Sparkles },
 ];
 
 // =============================================================================
