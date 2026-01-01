@@ -230,24 +230,26 @@ const Demo = () => {
       >
         {/* Icon - no entry animation, persists from form */}
         <div className="flex justify-center">
-          <motion.div 
-            className="w-16 h-16 rounded-[18px] bg-white shadow-lg shadow-black/20 flex items-center justify-center"
-            animate={!prefersReducedMotion ? {
-              scale: [1, 1.03, 1],
-              boxShadow: [
-                '0 10px 15px -3px rgba(0, 0, 0, 0.2)',
-                '0 10px 25px -3px rgba(255, 188, 0, 0.3)',
-                '0 10px 15px -3px rgba(0, 0, 0, 0.2)',
-              ],
-            } : {}}
-            transition={{
-              duration: 2,
-              repeat: Infinity,
-              ease: EASE.smooth,
-            }}
-          >
-            <HomeAssistantIcon className="w-8 h-8 text-[#302A23]" />
-          </motion.div>
+          <div className="relative">
+            {/* Breathing ring */}
+            <motion.div
+              className="absolute inset-0 rounded-[18px] border-2 border-white/40"
+              animate={!prefersReducedMotion ? {
+                scale: [1, 1.15, 1],
+                opacity: [0.4, 0.15, 0.4],
+              } : {}}
+              transition={{
+                duration: 2.2,
+                repeat: Infinity,
+                ease: EASE.smooth,
+              }}
+            />
+            <motion.div 
+              className="relative w-16 h-16 rounded-[18px] bg-white shadow-lg shadow-black/20 flex items-center justify-center"
+            >
+              <HomeAssistantIcon className="w-8 h-8 text-[#302A23]" />
+            </motion.div>
+          </div>
         </div>
 
         {/* Title */}
