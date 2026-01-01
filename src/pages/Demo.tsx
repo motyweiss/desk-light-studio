@@ -256,25 +256,65 @@ const Demo = () => {
         animate={ANIM.statusIcon.animate}
         transition={ANIM.statusIcon.transition}
       >
-        <div className="w-16 h-16 rounded-full bg-emerald-500/15 flex items-center justify-center">
-          <motion.svg
-            width="32"
-            height="32"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2.5"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            className="text-emerald-400"
+        <div className="relative w-20 h-20">
+          {/* Circular progress ring */}
+          <svg
+            className="absolute inset-0 w-full h-full -rotate-90"
+            viewBox="0 0 80 80"
           >
-            <motion.path
-              d="M5 12l5 5L20 7"
-              initial={ANIM.checkmark.initial}
-              animate={ANIM.checkmark.animate}
-              transition={ANIM.checkmark.transition}
+            {/* Background circle */}
+            <circle
+              cx="40"
+              cy="40"
+              r="36"
+              fill="none"
+              stroke="hsl(160 40% 25% / 0.3)"
+              strokeWidth="4"
             />
-          </motion.svg>
+            {/* Animated progress circle */}
+            <motion.circle
+              cx="40"
+              cy="40"
+              r="36"
+              fill="none"
+              stroke="hsl(160 60% 55%)"
+              strokeWidth="4"
+              strokeLinecap="round"
+              initial={{ pathLength: 0 }}
+              animate={{ pathLength: 1 }}
+              transition={{
+                duration: 2.2,
+                ease: [0.4, 0, 0.2, 1],
+                delay: 0.3,
+              }}
+              style={{
+                strokeDasharray: '226.19',
+                strokeDashoffset: '0',
+              }}
+            />
+          </svg>
+          
+          {/* Inner circle with checkmark */}
+          <div className="absolute inset-2 rounded-full bg-emerald-500/15 flex items-center justify-center">
+            <motion.svg
+              width="28"
+              height="28"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              className="text-emerald-400"
+            >
+              <motion.path
+                d="M5 12l5 5L20 7"
+                initial={ANIM.checkmark.initial}
+                animate={ANIM.checkmark.animate}
+                transition={ANIM.checkmark.transition}
+              />
+            </motion.svg>
+          </div>
         </div>
       </motion.div>
 
@@ -291,21 +331,6 @@ const Demo = () => {
         <p className="text-sm text-white/50">
           Home Assistant is now up and running.
         </p>
-      </motion.div>
-
-      <motion.div 
-        layout
-        className="h-0.5 bg-white/8 rounded-full overflow-hidden mx-auto max-w-[180px]"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 0.2 }}
-      >
-        <motion.div
-          className="h-full bg-emerald-400/80 rounded-full"
-          initial={ANIM.progress.initial}
-          animate={ANIM.progress.animate}
-          transition={ANIM.progress.transition}
-        />
       </motion.div>
     </motion.div>
   );
