@@ -628,7 +628,7 @@ const Demo = () => {
           className="flex justify-center"
         >
           <motion.div 
-            className="relative w-20 h-20 origin-center"
+            className="relative w-16 h-16 origin-center"
             initial={{ opacity: 0, scale: 0, filter: 'blur(8px)' }}
             animate={{ opacity: 1, scale: 1, filter: 'blur(0px)' }}
             exit={{ 
@@ -651,22 +651,15 @@ const Demo = () => {
               filter: { duration: 0.3, delay: STAGGER.icon },
             }}
           >
-            {/* Subtle outer glow */}
-            <div className="absolute inset-0 rounded-[20px] bg-white/[0.03] blur-lg" />
+            {/* Outer square - frosted glass */}
+            <div className="absolute inset-0 rounded-[16px] bg-white/[0.08] backdrop-blur-md border border-white/[0.10]" />
             
-            {/* Outer layer - barely visible */}
-            <div className="absolute inset-0 rounded-[20px] bg-white/[0.04] backdrop-blur-[2px] border border-white/[0.06]" />
-            
-            {/* Middle layer - soft frosted */}
-            <div className="absolute inset-1.5 rounded-[16px] bg-white/[0.08] backdrop-blur-sm border border-white/[0.08]" />
-            
-            {/* Inner layer - main glass */}
-            <div className="absolute inset-3 rounded-[12px] bg-gradient-to-br from-white/[0.15] via-white/[0.10] to-white/[0.12] backdrop-blur-md border border-white/[0.12] flex items-center justify-center">
-              <HomeAssistantIcon className="w-5 h-5 text-white/70" />
+            {/* Inner icon container - same glass effect */}
+            <div className="absolute inset-0 flex items-center justify-center">
+              <div className="w-8 h-8 rounded-[10px] bg-white/[0.08] backdrop-blur-md border border-white/[0.10] flex items-center justify-center">
+                <HomeAssistantIcon className="w-4 h-4 text-white/70" />
+              </div>
             </div>
-            
-            {/* Soft top highlight */}
-            <div className="absolute top-0.5 left-2 right-2 h-2 rounded-t-[18px] bg-gradient-to-b from-white/[0.08] to-transparent" />
           </motion.div>
         </motion.div>
 
