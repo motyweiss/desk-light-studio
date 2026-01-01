@@ -505,7 +505,7 @@ const Demo = () => {
 
       {/* Main Card */}
       <motion.div
-        className="relative z-10 w-full max-w-md bg-[hsl(28_15%_12%)] backdrop-blur-[60px] outline outline-[8px] outline-white/10 rounded-3xl p-10 overflow-hidden"
+        className="relative z-10 w-full max-w-md bg-[#302A23] backdrop-blur-[60px] outline outline-[8px] outline-white/10 rounded-3xl p-10 overflow-hidden"
         initial={prefersReducedMotion ? REDUCED.card.initial : ANIM.card.initial}
         animate={prefersReducedMotion ? REDUCED.card.animate : ANIM.card.animate}
         transition={prefersReducedMotion ? REDUCED.card.transition : ANIM.card.transition}
