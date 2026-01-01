@@ -301,13 +301,23 @@ const Demo = () => {
           </h1>
         </motion.div>
 
-        {/* Separator */}
-        <motion.div 
-          className="h-px bg-white/10 origin-center mx-4"
+        {/* Progress Bar */}
+        <motion.div
+          className="mx-4"
           initial={{ opacity: 0, scaleX: 0 }}
           animate={{ opacity: 1, scaleX: 1 }}
           transition={{ duration: 0.5, delay: 0.3, ease: EASE.out }}
-        />
+          style={{ transformOrigin: 'center' }}
+        >
+          <div className="h-1 bg-white/10 rounded-full overflow-hidden">
+            <motion.div
+              className="h-full bg-gradient-to-r from-amber-400 to-amber-500 rounded-full"
+              initial={{ width: 0 }}
+              animate={{ width: `${progress}%` }}
+              transition={{ duration: 0.5, ease: EASE.smooth }}
+            />
+          </div>
+        </motion.div>
 
         {/* Carousel-style Checklist */}
         <motion.div 
@@ -379,22 +389,6 @@ const Demo = () => {
           </motion.div>
         </motion.div>
 
-        {/* Progress Bar */}
-        <motion.div
-          className="pt-2"
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.6, duration: 0.4, ease: EASE.apple }}
-        >
-          <div className="h-1 bg-white/10 rounded-full overflow-hidden">
-            <motion.div
-              className="h-full bg-gradient-to-r from-amber-400 to-amber-500 rounded-full"
-              initial={{ width: 0 }}
-              animate={{ width: `${progress}%` }}
-              transition={{ duration: 0.5, ease: EASE.smooth }}
-            />
-          </div>
-        </motion.div>
       </motion.div>
     );
   };
