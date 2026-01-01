@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { motion, AnimatePresence, LayoutGroup } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Eye, EyeOff, RefreshCw, ExternalLink, ArrowLeft, X } from 'lucide-react';
 import { HomeAssistantIcon } from '@/components/icons/HomeAssistantIcon';
 import { useNavigate } from 'react-router-dom';
@@ -45,23 +45,20 @@ const cardVariants = {
   },
 };
 
-// Content transition - smooth crossfade
+// Content transition - simple fade only, no movement
 const contentVariants = {
   initial: { 
     opacity: 0,
-    y: 12,
   },
   animate: { 
     opacity: 1,
-    y: 0,
     transition: {
-      duration: TIMING.content,
-      ease: EASE.out,
+      duration: TIMING.normal,
+      ease: EASE.smooth,
     }
   },
   exit: { 
     opacity: 0,
-    y: -8,
     transition: {
       duration: TIMING.fast,
       ease: EASE.smooth,
@@ -471,15 +468,11 @@ const Demo = () => {
       </motion.button>
 
       {/* Main Card - Stable container with layout animation for size changes */}
-      <LayoutGroup>
-        <motion.div
-          layout
-          layoutId="connection-card"
+      <motion.div
           className="relative z-10 w-full max-w-md bg-[hsl(28_15%_12%)] backdrop-blur-[60px] outline outline-[8px] outline-white/10 rounded-3xl p-10 overflow-hidden"
           variants={cardVariants}
           initial="hidden"
           animate="visible"
-          transition={{ layout: { duration: TIMING.normal, ease: EASE.gentle } }}
           style={{ willChange: 'transform' }}
         >
           <AnimatePresence mode="wait" initial={false}>
@@ -488,7 +481,6 @@ const Demo = () => {
             {(connectionStatus === 'idle' || connectionStatus === 'connecting') && <FormContent />}
           </AnimatePresence>
         </motion.div>
-      </LayoutGroup>
     </div>
   );
 };
