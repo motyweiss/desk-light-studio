@@ -270,7 +270,7 @@ const Demo = () => {
                   className="flex flex-col items-center text-center"
                 >
                   {/* Icon Container */}
-                  <div className="relative mb-8">
+                  <div className="relative mb-10">
                     {/* Breathing ring */}
                     <motion.div
                       className="absolute -inset-4 rounded-[28px] border border-white/10"
@@ -307,7 +307,7 @@ const Demo = () => {
         </div>
 
         {/* Step dots */}
-        <div className="flex items-center gap-2 mt-2">
+        <div className="flex items-center gap-2.5 mt-8">
           {steps.map((step) => {
             const isActive = step.status === 'active';
             const isCompleted = step.status === 'completed';
