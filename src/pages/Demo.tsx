@@ -335,7 +335,7 @@ const Demo = () => {
             className="absolute inset-x-0 flex flex-col items-center justify-start pt-10"
             animate={{ y: -currentStepIndex * 40 }}
             transition={{ 
-              duration: 0.8, 
+              duration: 0.45, 
               ease: [0.22, 1, 0.36, 1], // Soft ease-out
             }}
           >
