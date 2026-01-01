@@ -476,7 +476,7 @@ const Demo = () => {
       <AnimatePresence mode="wait">
         <motion.div
           key={cardKey}
-          className="relative z-10 w-full max-w-md bg-card backdrop-blur-[60px] outline outline-[8px] outline-white/10 rounded-3xl p-8 overflow-hidden"
+          className="relative z-10 w-full max-w-md bg-[hsl(30_19%_18%)] backdrop-blur-[60px] outline outline-[8px] outline-white/10 rounded-3xl p-8 overflow-hidden"
           variants={cardVariants}
           initial="hidden"
           animate="visible"
