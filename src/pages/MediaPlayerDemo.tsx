@@ -90,10 +90,7 @@ const MediaPlayerDemo = () => {
 
   return (
     <div 
-      className="min-h-screen flex items-center justify-center p-4"
-      style={{ 
-        background: 'linear-gradient(180deg, hsl(30 15% 12%) 0%, hsl(28 18% 8%) 100%)',
-      }}
+      className="min-h-screen flex items-center justify-center p-4 bg-[#A59587]"
     >
       {/* Player Container - expands from center */}
       <motion.div
