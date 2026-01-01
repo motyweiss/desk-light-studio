@@ -414,7 +414,7 @@ const Demo = () => {
           <Button
             onClick={handleTestConnection}
             disabled={connectionStatus === 'connecting' || !baseUrl || !accessToken}
-            className="w-full h-12 rounded-xl bg-[#FFBC00] hover:bg-[#FFD040] border-0 text-black font-semibold uppercase tracking-wide transition-all duration-200 disabled:opacity-40 disabled:bg-[#FFBC00]/50"
+            className="w-full h-12 rounded-xl bg-[#FFBC00] hover:bg-[#FFD040] border-0 text-black font-medium uppercase tracking-[0.2em] transition-all duration-200 disabled:opacity-40 disabled:bg-[#FFBC00]/50"
           >
             {connectionStatus === 'connecting' ? (
               <>
