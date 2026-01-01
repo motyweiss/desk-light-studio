@@ -6,17 +6,18 @@ interface AnimatedIconProps {
   delay?: number;
 }
 
-const ease = [0.16, 1, 0.3, 1] as const;
+// Soft, gentle easing
+const ease = [0.25, 0.46, 0.45, 0.94] as const;
 
 // Plug icon for connection step
 export const AnimatedPlugIcon = ({ className = "w-12 h-12", delay = 0 }: AnimatedIconProps) => {
   return (
     <motion.div
-      initial={{ scale: 0, opacity: 0 }}
+      initial={{ scale: 0.8, opacity: 0 }}
       animate={{ scale: 1, opacity: 1 }}
-      transition={{ delay, duration: 0.5, ease }}
+      transition={{ delay, duration: 0.8, ease }}
     >
-      <Plug className={className} strokeWidth={1.5} />
+      <Plug className={className} strokeWidth={1} />
     </motion.div>
   );
 };
@@ -25,11 +26,11 @@ export const AnimatedPlugIcon = ({ className = "w-12 h-12", delay = 0 }: Animate
 export const AnimatedKeyIcon = ({ className = "w-12 h-12", delay = 0 }: AnimatedIconProps) => {
   return (
     <motion.div
-      initial={{ scale: 0, opacity: 0 }}
+      initial={{ scale: 0.8, opacity: 0 }}
       animate={{ scale: 1, opacity: 1 }}
-      transition={{ delay, duration: 0.5, ease }}
+      transition={{ delay, duration: 0.8, ease }}
     >
-      <KeyRound className={className} strokeWidth={1.5} />
+      <KeyRound className={className} strokeWidth={1} />
     </motion.div>
   );
 };
@@ -38,11 +39,11 @@ export const AnimatedKeyIcon = ({ className = "w-12 h-12", delay = 0 }: Animated
 export const AnimatedLampIcon = ({ className = "w-12 h-12", delay = 0 }: AnimatedIconProps) => {
   return (
     <motion.div
-      initial={{ scale: 0, opacity: 0 }}
+      initial={{ scale: 0.8, opacity: 0 }}
       animate={{ scale: 1, opacity: 1 }}
-      transition={{ delay, duration: 0.5, ease }}
+      transition={{ delay, duration: 0.8, ease }}
     >
-      <Lamp className={className} strokeWidth={1.5} />
+      <Lamp className={className} strokeWidth={1} />
     </motion.div>
   );
 };
@@ -51,11 +52,11 @@ export const AnimatedLampIcon = ({ className = "w-12 h-12", delay = 0 }: Animate
 export const AnimatedSparklesIcon = ({ className = "w-12 h-12", delay = 0 }: AnimatedIconProps) => {
   return (
     <motion.div
-      initial={{ scale: 0, opacity: 0 }}
+      initial={{ scale: 0.8, opacity: 0 }}
       animate={{ scale: 1, opacity: 1 }}
-      transition={{ delay, duration: 0.5, ease }}
+      transition={{ delay, duration: 0.8, ease }}
     >
-      <Sparkles className={className} strokeWidth={1.5} />
+      <Sparkles className={className} strokeWidth={1} />
     </motion.div>
   );
 };
