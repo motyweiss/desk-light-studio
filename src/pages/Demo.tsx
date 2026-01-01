@@ -635,31 +635,29 @@ const Demo = () => {
         {/* Icon */}
         <motion.div 
           className="flex justify-center"
-          initial={{ opacity: 0, scale: 0.3, y: -30, filter: 'blur(10px)' }}
-          animate={{ opacity: 1, scale: 1, y: 0, filter: 'blur(0px)' }}
-          exit={{ 
-            opacity: 0, 
-            scale: 0.8, 
-            y: -15, 
-            filter: 'blur(6px)',
-            transition: { duration: 0.25, ease: EASE.smooth }
-          }}
-          transition={{
-            duration: 0.7,
-            delay: STAGGER.icon,
-            ease: EASE.bounce,
-            opacity: { duration: 0.5, delay: STAGGER.icon },
-            filter: { duration: 0.5, delay: STAGGER.icon + 0.1 },
-          }}
         >
           <motion.div 
-            className="w-16 h-16 rounded-[18px] bg-white shadow-lg shadow-black/20 flex items-center justify-center"
-            initial={{ rotate: -180 }}
-            animate={{ rotate: 0 }}
+            className="w-16 h-16 rounded-[18px] bg-white shadow-lg shadow-black/20 flex items-center justify-center origin-center"
+            initial={{ opacity: 0, scale: 0, filter: 'blur(8px)' }}
+            animate={{ opacity: 1, scale: 1, filter: 'blur(0px)' }}
+            exit={{ 
+              opacity: 0, 
+              scale: 0.5, 
+              filter: 'blur(4px)',
+              transition: { duration: 0.2, ease: EASE.smooth }
+            }}
             transition={{
-              duration: 0.6,
+              duration: 0.45,
               delay: STAGGER.icon,
-              ease: EASE.apple,
+              scale: { 
+                type: 'spring', 
+                stiffness: 400, 
+                damping: 15, 
+                mass: 0.8,
+                delay: STAGGER.icon 
+              },
+              opacity: { duration: 0.25, delay: STAGGER.icon },
+              filter: { duration: 0.3, delay: STAGGER.icon },
             }}
           >
             <HomeAssistantIcon className="w-8 h-8 text-[#302A23]" />
