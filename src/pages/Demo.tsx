@@ -804,9 +804,9 @@ const Demo = () => {
           className="relative z-10 w-full max-w-md bg-[#302A23] backdrop-blur-[60px] outline outline-[8px] outline-white/10 rounded-3xl p-10 overflow-hidden shadow-[0_30px_70px_-15px_rgba(0,0,0,0.45),0_15px_30px_-10px_rgba(0,0,0,0.25)]"
           initial={prefersReducedMotion ? { opacity: 0 } : { 
             opacity: 0, 
-            scale: 0.9, 
-            y: 30, 
-            filter: 'blur(12px)' 
+            scale: 0.92, 
+            y: 40, 
+            filter: 'blur(15px)' 
           }}
           animate={prefersReducedMotion ? { opacity: 1 } : { 
             opacity: 1, 
@@ -814,9 +814,15 @@ const Demo = () => {
             y: 0, 
             filter: 'blur(0px)' 
           }}
-          transition={SPRING.card}
+          transition={{
+            duration: 0.7,
+            ease: EASE.apple,
+            opacity: { duration: 0.5 },
+            scale: { duration: 0.6, ease: EASE.bounce },
+            filter: { duration: 0.6 },
+          }}
         >
-          <AnimatePresence mode="wait" initial={false}>
+          <AnimatePresence mode="wait">
             {connectionStatus === 'success' && <SuccessContent />}
             {connectionStatus === 'error' && <ErrorContent />}
             {connectionStatus === 'connecting' && <ConnectingContent />}
