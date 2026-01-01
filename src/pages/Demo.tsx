@@ -48,28 +48,28 @@ const SPRING = {
   gentle: { type: 'spring' as const, stiffness: 200, damping: 25, mass: 1 },
 } as const;
 
-// Stagger delays for hierarchical reveal - refined timing
+// Stagger delays for hierarchical reveal - faster timing
 const STAGGER = {
-  icon: 0.15,
-  title: 0.35,
-  separator: 0.5,
-  field1: 0.65,
-  field2: 0.85,
-  button: 1.05,
-  link: 1.2,
+  icon: 0.1,
+  title: 0.22,
+  separator: 0.32,
+  field1: 0.42,
+  field2: 0.55,
+  button: 0.68,
+  link: 0.8,
 } as const;
 
 // Exit stagger for smooth coordinated exit
 const EXIT_STAGGER = {
-  base: 0.03,
+  base: 0.02,
 } as const;
 
 // Content transition configurations
 const getContentTransition = (isEntering: boolean) => ({
-  opacity: { duration: isEntering ? 0.4 : 0.2, ease: EASE.smooth },
-  scale: { duration: isEntering ? 0.5 : 0.25, ease: EASE.apple },
-  y: { duration: isEntering ? 0.5 : 0.25, ease: EASE.apple },
-  filter: { duration: isEntering ? 0.35 : 0.15 },
+  opacity: { duration: isEntering ? 0.3 : 0.15, ease: EASE.smooth },
+  scale: { duration: isEntering ? 0.35 : 0.2, ease: EASE.apple },
+  y: { duration: isEntering ? 0.35 : 0.2, ease: EASE.apple },
+  filter: { duration: isEntering ? 0.25 : 0.12 },
 });
 
 // =============================================================================
@@ -815,11 +815,11 @@ const Demo = () => {
             filter: 'blur(0px)' 
           }}
           transition={{
-            duration: 0.7,
+            duration: 0.5,
             ease: EASE.apple,
-            opacity: { duration: 0.5 },
-            scale: { duration: 0.6, ease: EASE.bounce },
-            filter: { duration: 0.6 },
+            opacity: { duration: 0.35 },
+            scale: { duration: 0.45, ease: EASE.bounce },
+            filter: { duration: 0.4 },
           }}
         >
           <AnimatePresence mode="wait">
