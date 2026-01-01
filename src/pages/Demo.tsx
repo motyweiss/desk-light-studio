@@ -7,9 +7,93 @@ import { Button } from '@/components/ui/button';
 import { useHAConnection } from '@/contexts/HAConnectionContext';
 import { useToast } from '@/hooks/use-toast';
 
+// Orchestrated animation timing
+const TIMING = {
+  card: { delay: 0.1, duration: 0.7 },
+  content: { stagger: 0.08, delayStart: 0.35 },
+  ease: [0.22, 0.03, 0.26, 1] as const,
+};
+
+// Card container animation - starts compact and expands
+const cardVariants = {
+  hidden: { 
+    opacity: 0, 
+    scale: 0.88,
+    y: 40,
+  },
+  visible: { 
+    opacity: 1, 
+    scale: 1,
+    y: 0,
+    transition: {
+      duration: TIMING.card.duration,
+      delay: TIMING.card.delay,
+      ease: TIMING.ease,
+    }
+  },
+};
+
+// Content wrapper - orchestrates children
+const contentVariants = {
+  hidden: {},
+  visible: {
+    transition: {
+      staggerChildren: TIMING.content.stagger,
+      delayChildren: TIMING.content.delayStart,
+    }
+  },
+};
+
+// Individual item animations with height expansion feel
 const itemVariants = {
-  hidden: { opacity: 0, y: 12 },
-  visible: { opacity: 1, y: 0 },
+  hidden: { 
+    opacity: 0, 
+    y: 16,
+    filter: 'blur(4px)',
+  },
+  visible: { 
+    opacity: 1, 
+    y: 0,
+    filter: 'blur(0px)',
+    transition: {
+      duration: 0.5,
+      ease: TIMING.ease,
+    }
+  },
+};
+
+// Separator line draws in
+const separatorVariants = {
+  hidden: { 
+    opacity: 0,
+    scaleX: 0,
+  },
+  visible: { 
+    opacity: 1,
+    scaleX: 1,
+    transition: {
+      duration: 0.6,
+      ease: TIMING.ease,
+    }
+  },
+};
+
+// Icon container with subtle pulse
+const iconVariants = {
+  hidden: { 
+    opacity: 0, 
+    scale: 0.5,
+    rotate: -10,
+  },
+  visible: { 
+    opacity: 1, 
+    scale: 1,
+    rotate: 0,
+    transition: {
+      duration: 0.6,
+      ease: [0.34, 1.56, 0.64, 1] as [number, number, number, number],
+    }
+  },
 };
 
 const Demo = () => {
@@ -90,24 +174,20 @@ const Demo = () => {
 
       {/* Main Card - soft milky frosted glass */}
       <motion.div
-        className="relative z-10 w-full max-w-md bg-white/[0.03] backdrop-blur-[60px] border border-white/[0.05] rounded-3xl p-8 shadow-[0_8px_32px_rgba(0,0,0,0.12)]"
-        initial={{ opacity: 0, scale: 0.92, y: 30 }}
-        animate={{ opacity: 1, scale: 1, y: 0 }}
-        transition={{ 
-          duration: 0.6, 
-          ease: [0.22, 0.03, 0.26, 1],
-          delay: 0.1 
-        }}
+        className="relative z-10 w-full max-w-md bg-white/[0.03] backdrop-blur-[60px] border border-white/[0.05] rounded-3xl p-8 shadow-[0_8px_32px_rgba(0,0,0,0.12)] overflow-hidden"
+        variants={cardVariants}
+        initial="hidden"
+        animate="visible"
       >
         <motion.div
           className="space-y-6"
+          variants={contentVariants}
           initial="hidden"
           animate="visible"
-          transition={{ staggerChildren: 0.06, delayChildren: 0.15 }}
         >
           {/* Icon */}
           <motion.div 
-            variants={itemVariants}
+            variants={iconVariants}
             className="flex justify-center"
           >
             <div className="w-14 h-14 rounded-2xl bg-amber-500/10 flex items-center justify-center">
@@ -136,8 +216,8 @@ const Demo = () => {
 
           {/* Separator */}
           <motion.div 
-            variants={itemVariants}
-            className="h-px bg-white/[0.06]" 
+            variants={separatorVariants}
+            className="h-px bg-white/[0.06] origin-left" 
           />
 
           {/* Form Fields */}
