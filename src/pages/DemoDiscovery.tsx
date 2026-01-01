@@ -64,6 +64,24 @@ const SCAN_STEPS = [
   "Organizing devices",
 ];
 
+// Mock entities for demo fallback
+const MOCK_ENTITIES: HAEntity[] = [
+  { entity_id: "light.living_room", state: "on", attributes: { friendly_name: "Living Room Light", brightness: 255 } },
+  { entity_id: "light.bedroom", state: "off", attributes: { friendly_name: "Bedroom Light" } },
+  { entity_id: "light.kitchen", state: "on", attributes: { friendly_name: "Kitchen Light", brightness: 180 } },
+  { entity_id: "light.desk_lamp", state: "on", attributes: { friendly_name: "Desk Lamp", brightness: 200 } },
+  { entity_id: "light.monitor_light", state: "on", attributes: { friendly_name: "Monitor Light Bar", brightness: 150 } },
+  { entity_id: "sensor.living_room_temperature", state: "22.5", attributes: { friendly_name: "Living Room Temperature", device_class: "temperature", unit_of_measurement: "°C" } },
+  { entity_id: "sensor.bedroom_temperature", state: "21.0", attributes: { friendly_name: "Bedroom Temperature", device_class: "temperature", unit_of_measurement: "°C" } },
+  { entity_id: "sensor.living_room_humidity", state: "45", attributes: { friendly_name: "Living Room Humidity", device_class: "humidity", unit_of_measurement: "%" } },
+  { entity_id: "sensor.air_quality", state: "Good", attributes: { friendly_name: "Air Quality Index", device_class: "aqi" } },
+  { entity_id: "sensor.iphone_battery", state: "87", attributes: { friendly_name: "iPhone 15 Pro", device_class: "battery", unit_of_measurement: "%" } },
+  { entity_id: "sensor.airpods_battery", state: "64", attributes: { friendly_name: "AirPods Max", device_class: "battery", unit_of_measurement: "%" } },
+  { entity_id: "media_player.spotify", state: "playing", attributes: { friendly_name: "Spotify" } },
+  { entity_id: "media_player.homepod", state: "idle", attributes: { friendly_name: "HomePod mini" } },
+  { entity_id: "media_player.apple_tv", state: "standby", attributes: { friendly_name: "Apple TV 4K" } },
+];
+
 // Get icon for entity
 const getEntityIcon = (domain: string, deviceClass?: string): LucideIcon => {
   if (domain === "light") {
@@ -263,11 +281,6 @@ const ScanningPhase = ({
   // Fetch entities
   useEffect(() => {
     const fetchEntities = async () => {
-      if (!config) {
-        onError("No Home Assistant configuration found");
-        return;
-      }
-      
       // Step 1: Connecting
       setCurrentStep(0);
       await new Promise(r => setTimeout(r, 600));
@@ -276,20 +289,34 @@ const ScanningPhase = ({
       setCurrentStep(1);
       
       try {
-        const { data, error } = await haProxyClient.get<HAEntity[]>("/api/states");
-        
-        if (error || !data) {
-          onError(error || "Failed to fetch entities");
-          return;
+        // Try real connection first if config exists
+        if (config) {
+          const { data, error } = await haProxyClient.get<HAEntity[]>("/api/states");
+          
+          if (!error && data && data.length > 0) {
+            // Step 3: Organizing
+            setCurrentStep(2);
+            await new Promise(r => setTimeout(r, 400));
+            onComplete(data);
+            return;
+          }
         }
+        
+        // Fallback to mock data for demo
+        console.log("[Demo Discovery] Using mock data for demo experience");
+        await new Promise(r => setTimeout(r, 800));
         
         // Step 3: Organizing
         setCurrentStep(2);
         await new Promise(r => setTimeout(r, 400));
         
-        onComplete(data);
+        onComplete(MOCK_ENTITIES);
       } catch (err) {
-        onError(err instanceof Error ? err.message : "Connection failed");
+        // Still fallback to mock on error
+        console.log("[Demo Discovery] Connection failed, using mock data");
+        setCurrentStep(2);
+        await new Promise(r => setTimeout(r, 400));
+        onComplete(MOCK_ENTITIES);
       }
     };
     
