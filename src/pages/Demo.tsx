@@ -147,6 +147,7 @@ const Demo = () => {
   const [showToken, setShowToken] = useState(false);
   const [connectionStatus, setConnectionStatus] = useState<ConnectionStatus>('idle');
   const [errorMessage, setErrorMessage] = useState('');
+  const [cardKey, setCardKey] = useState(0); // For re-triggering animations
 
   useEffect(() => {
     if (config) {
@@ -175,10 +176,11 @@ const Demo = () => {
         setConnectionStatus('success');
         await saveConfig(baseUrl, accessToken);
         
-        // Navigate after showing success state
+        // Reset and show again with animation after delay (demo mode)
         setTimeout(() => {
-          navigate('/');
-        }, 1500);
+          setConnectionStatus('idle');
+          setCardKey(prev => prev + 1); // Trigger card re-animation
+        }, 2500);
       } else {
         setConnectionStatus('error');
         setErrorMessage(result.error || 'Could not connect to Home Assistant');
@@ -245,7 +247,7 @@ const Demo = () => {
               Connected Successfully
             </h2>
             <p className="text-sm text-white/50">
-              Redirecting to dashboard...
+              Resetting demo...
             </p>
           </motion.div>
 
@@ -461,6 +463,7 @@ const Demo = () => {
 
       {/* Main Card */}
       <motion.div
+        key={cardKey}
         className="relative z-10 w-full max-w-md bg-[#1a1816]/90 backdrop-blur-[60px] border border-black/10 rounded-3xl p-8 overflow-hidden"
         variants={cardVariants}
         initial="hidden"
