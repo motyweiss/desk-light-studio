@@ -443,9 +443,6 @@ const Demo = () => {
           <h1 className="text-xl font-light text-white/90 tracking-wide">
             Connect to your Home Assistant
           </h1>
-          <p className="text-sm text-white/45">
-            Enter your instance URL and access token
-          </p>
         </motion.div>
 
         {/* Separator */}
