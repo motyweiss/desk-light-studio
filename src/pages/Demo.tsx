@@ -247,12 +247,12 @@ const Demo = () => {
         key="connecting"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
-        exit={{ opacity: 0, filter: 'blur(6px)' }}
-        transition={{ duration: 0.3 }}
-        className="flex flex-col items-center justify-center py-6"
+        exit={{ opacity: 0 }}
+        transition={{ duration: 0.4 }}
+        className="flex flex-col items-center justify-center"
       >
-        {/* Centered Slider with padding for breathing rings */}
-        <div className="relative w-full py-8">
+        {/* Centered Slider */}
+        <div className="relative w-full">
           <AnimatePresence mode="wait">
             {steps.map((step) => {
               const { AnimatedIcon } = step;
@@ -266,79 +266,37 @@ const Demo = () => {
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}
-                  transition={{ 
-                    duration: 1.2, 
-                    ease: [0.25, 0.46, 0.45, 0.94],
-                  }}
-                  className="flex flex-col items-center text-center"
+                  transition={{ duration: 0.8, ease: "easeOut" }}
+                  className="flex flex-col items-center text-center py-8"
                 >
-                  {/* Large Icon Container with space for rings */}
-                  <div className="relative mb-6" style={{ padding: '24px' }}>
-                    {/* Outer pulse ring - slower, gentler */}
+                  {/* Icon Container */}
+                  <div className="relative mb-8">
+                    {/* Breathing ring */}
                     <motion.div
-                      className="absolute rounded-[32px] border border-amber-400/15"
-                      style={{ 
-                        top: '8px', 
-                        left: '8px', 
-                        right: '8px', 
-                        bottom: '8px',
-                      }}
+                      className="absolute -inset-4 rounded-[28px] border border-white/10"
                       animate={!prefersReducedMotion ? {
-                        scale: [1, 1.2, 1],
+                        scale: [1, 1.15, 1],
                         opacity: [0.3, 0, 0.3],
                       } : {}}
                       transition={{
-                        duration: 4,
+                        duration: 3,
                         repeat: Infinity,
                         ease: "easeInOut",
-                      }}
-                    />
-                    {/* Second pulse ring - even slower */}
-                    <motion.div
-                      className="absolute rounded-[32px] border border-white/10"
-                      style={{ 
-                        top: '8px', 
-                        left: '8px', 
-                        right: '8px', 
-                        bottom: '8px',
-                      }}
-                      animate={!prefersReducedMotion ? {
-                        scale: [1, 1.35, 1],
-                        opacity: [0.2, 0, 0.2],
-                      } : {}}
-                      transition={{
-                        duration: 4,
-                        repeat: Infinity,
-                        ease: "easeInOut",
-                        delay: 1,
                       }}
                     />
                     
-                    {/* Icon container */}
-                    <motion.div
-                      className="relative w-28 h-28 rounded-[28px] border border-white/[0.1] bg-white/[0.02] backdrop-blur-sm flex items-center justify-center"
-                      animate={!prefersReducedMotion ? {
-                        scale: [1, 1.01, 1],
-                      } : {}}
-                      transition={{
-                        duration: 3.5,
-                        repeat: Infinity,
-                        ease: "easeInOut",
-                      }}
-                    >
-                      <AnimatedIcon 
-                        className="w-12 h-12 text-amber-400/90"
-                        delay={0.15}
-                      />
-                    </motion.div>
+                    {/* Icon box */}
+                    <div className="relative w-24 h-24 rounded-[22px] border border-white/[0.08] bg-white/[0.02] flex items-center justify-center">
+                      <AnimatedIcon className="w-10 h-10 text-amber-400/90" />
+                    </div>
                   </div>
 
-                  {/* Step Label - fade only */}
+                  {/* Label */}
                   <motion.p
-                    className="text-base font-light text-white/70 tracking-widest uppercase"
+                    className="text-sm font-light text-white/60 tracking-[0.2em] uppercase"
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
-                    transition={{ duration: 1, delay: 0.5, ease: "easeOut" }}
+                    transition={{ duration: 0.6, delay: 0.3 }}
                   >
                     {step.label}
                   </motion.p>
@@ -348,13 +306,8 @@ const Demo = () => {
           </AnimatePresence>
         </div>
 
-        {/* Step Indicators (dots) */}
-        <motion.div 
-          className="flex items-center gap-3 mt-4"
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.3, duration: 0.4 }}
-        >
+        {/* Step dots */}
+        <div className="flex items-center gap-2 mt-2">
           {steps.map((step) => {
             const isActive = step.status === 'active';
             const isCompleted = step.status === 'completed';
@@ -362,35 +315,21 @@ const Demo = () => {
             return (
               <motion.div
                 key={step.id}
-                className="relative"
+                className={`
+                  rounded-full transition-all duration-400
+                  ${isActive 
+                    ? 'w-6 h-1.5 bg-amber-400' 
+                    : isCompleted
+                    ? 'w-1.5 h-1.5 bg-amber-400/60'
+                    : 'w-1.5 h-1.5 bg-white/15'
+                  }
+                `}
                 layout
-                transition={{ duration: 0.4, ease: EASE.apple }}
-              >
-                {/* Active glow */}
-                {isActive && (
-                  <motion.div
-                    className="absolute inset-0 rounded-full bg-amber-400/40 blur-md"
-                    initial={{ scale: 0 }}
-                    animate={{ scale: 1.5 }}
-                    transition={{ duration: 0.3 }}
-                  />
-                )}
-                <motion.div
-                  className={`
-                    relative rounded-full transition-all duration-500
-                    ${isActive 
-                      ? 'w-10 h-2.5 bg-amber-400' 
-                      : isCompleted
-                      ? 'w-2.5 h-2.5 bg-amber-400/70'
-                      : 'w-2.5 h-2.5 bg-white/20'
-                    }
-                  `}
-                  layout
-                />
-              </motion.div>
+                transition={{ duration: 0.3 }}
+              />
             );
           })}
-        </motion.div>
+        </div>
 
       </motion.div>
     );
