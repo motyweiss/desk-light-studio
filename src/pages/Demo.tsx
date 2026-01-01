@@ -15,6 +15,21 @@ import { useReducedMotion } from '@/hooks/useReducedMotion';
 
 type ConnectionStatus = 'idle' | 'connecting' | 'success' | 'error';
 
+type WizardStep = {
+  id: string;
+  label: string;
+  status: 'pending' | 'active' | 'completed';
+};
+
+const WIZARD_STEPS: Omit<WizardStep, 'status'>[] = [
+  { id: 'connect', label: 'Establishing secure connection...' },
+  { id: 'auth', label: 'Authenticating credentials...' },
+  { id: 'devices', label: 'Discovering devices & entities...' },
+  { id: 'rooms', label: 'Mapping rooms & areas...' },
+  { id: 'scenes', label: 'Loading automation scenes...' },
+  { id: 'sync', label: 'Syncing data & preferences...' },
+];
+
 // =============================================================================
 // ANIMATION SYSTEM - Unified, elegant, Apple-inspired
 // =============================================================================
@@ -68,6 +83,7 @@ const Demo = () => {
   const [showToken, setShowToken] = useState(false);
   const [connectionStatus, setConnectionStatus] = useState<ConnectionStatus>('idle');
   const [formKey, setFormKey] = useState(0); // Key to trigger re-animation
+  const [isValidConnection, setIsValidConnection] = useState(false);
 
   // Load access token from config
   useEffect(() => {
@@ -92,22 +108,25 @@ const Demo = () => {
     const DEMO_VALID_URL = 'https://ui.nabu.casa';
     const isValidDemoUrl = baseUrl.trim().replace(/\/$/, '') === DEMO_VALID_URL;
     
-    // Simulate connection delay
-    await new Promise(resolve => setTimeout(resolve, 2200));
-    
-    if (isValidDemoUrl) {
+    // Store validation result for later use
+    setIsValidConnection(isValidDemoUrl);
+  }, [baseUrl, accessToken, toast]);
+
+  // Handle wizard completion
+  const handleWizardComplete = useCallback(async () => {
+    if (isValidConnection) {
       setConnectionStatus('success');
       await saveConfig(baseUrl, accessToken);
       
       // Return to idle after success animation
       setTimeout(() => {
-        setFormKey(prev => prev + 1); // Trigger re-animation
+        setFormKey(prev => prev + 1);
         setConnectionStatus('idle');
       }, 3000);
     } else {
       setConnectionStatus('error');
     }
-  }, [baseUrl, accessToken, toast, saveConfig]);
+  }, [isValidConnection, baseUrl, accessToken, saveConfig]);
 
   const handleRetry = useCallback(() => {
     setFormKey(prev => prev + 1); // Trigger re-animation
@@ -139,6 +158,210 @@ const Demo = () => {
       </motion.div>
     );
   }, []);
+
+  // ===========================================================================
+  // CONNECTING WIZARD CONTENT
+  // ===========================================================================
+  const ConnectingContent = () => {
+    const [steps, setSteps] = useState<WizardStep[]>(
+      WIZARD_STEPS.map((step, index) => ({
+        ...step,
+        status: index === 0 ? 'active' : 'pending',
+      }))
+    );
+    const [currentStepIndex, setCurrentStepIndex] = useState(0);
+
+    useEffect(() => {
+      if (currentStepIndex >= WIZARD_STEPS.length) {
+        // All steps completed, wait a moment then transition
+        const timer = setTimeout(() => {
+          handleWizardComplete();
+        }, 500);
+        return () => clearTimeout(timer);
+      }
+
+      // Progress to next step after delay
+      const stepDuration = 650 + Math.random() * 200; // Vary timing slightly
+      const timer = setTimeout(() => {
+        setSteps(prev => prev.map((step, index) => {
+          if (index === currentStepIndex) {
+            return { ...step, status: 'completed' };
+          }
+          if (index === currentStepIndex + 1) {
+            return { ...step, status: 'active' };
+          }
+          return step;
+        }));
+        setCurrentStepIndex(prev => prev + 1);
+      }, stepDuration);
+
+      return () => clearTimeout(timer);
+    }, [currentStepIndex]);
+
+    const progress = ((currentStepIndex) / WIZARD_STEPS.length) * 100;
+
+    return (
+      <motion.div
+        key="connecting"
+        initial={{ opacity: 0, scale: 0.97, y: 8 }}
+        animate={{ opacity: 1, scale: 1, y: 0 }}
+        exit={{ opacity: 0, scale: 0.98, y: -8, filter: 'blur(6px)' }}
+        transition={getContentTransition(true)}
+        className="space-y-6"
+      >
+        {/* Icon - same as form */}
+        <motion.div 
+          className="flex justify-center"
+          initial={{ opacity: 0, scale: 0.4, y: -20, rotate: -180 }}
+          animate={{ opacity: 1, scale: 1, y: 0, rotate: 0 }}
+          transition={{
+            duration: 0.65,
+            delay: 0.1,
+            ease: EASE.bounce,
+          }}
+        >
+          <motion.div 
+            className="w-16 h-16 rounded-[18px] bg-white shadow-lg shadow-black/20 flex items-center justify-center"
+            animate={!prefersReducedMotion ? {
+              scale: [1, 1.03, 1],
+              boxShadow: [
+                '0 10px 15px -3px rgba(0, 0, 0, 0.2)',
+                '0 10px 25px -3px rgba(255, 188, 0, 0.3)',
+                '0 10px 15px -3px rgba(0, 0, 0, 0.2)',
+              ],
+            } : {}}
+            transition={{
+              duration: 2,
+              repeat: Infinity,
+              ease: EASE.smooth,
+            }}
+          >
+            <HomeAssistantIcon className="w-8 h-8 text-[#302A23]" />
+          </motion.div>
+        </motion.div>
+
+        {/* Title */}
+        <motion.div
+          initial={{ opacity: 0, y: 16, filter: 'blur(4px)' }}
+          animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
+          transition={{ duration: 0.5, delay: 0.2, ease: EASE.apple }}
+        >
+          <h1 className="text-xl font-light text-white/90 tracking-wide text-center">
+            Connecting to Home Assistant
+          </h1>
+        </motion.div>
+
+        {/* Separator */}
+        <motion.div 
+          className="h-px bg-white/10 origin-center mx-4"
+          initial={{ opacity: 0, scaleX: 0 }}
+          animate={{ opacity: 1, scaleX: 1 }}
+          transition={{ duration: 0.5, delay: 0.3, ease: EASE.out }}
+        />
+
+        {/* Checklist */}
+        <motion.div 
+          className="space-y-3 py-2"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.35 }}
+        >
+          {steps.map((step, index) => (
+            <motion.div
+              key={step.id}
+              initial={{ opacity: 0, x: 20, filter: 'blur(4px)' }}
+              animate={{ 
+                opacity: step.status === 'pending' ? 0.35 : 1, 
+                x: 0, 
+                filter: 'blur(0px)' 
+              }}
+              transition={{
+                duration: 0.4,
+                delay: 0.4 + index * 0.08,
+                ease: EASE.apple,
+                opacity: { duration: 0.2 },
+              }}
+              className="flex items-center gap-3"
+            >
+              {/* Status Icon */}
+              <div className="w-6 h-6 flex items-center justify-center">
+                {step.status === 'completed' && (
+                  <motion.div
+                    initial={{ scale: 0, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    transition={{ duration: 0.3, ease: EASE.bounce }}
+                    className="w-5 h-5 rounded-full bg-emerald-500/20 flex items-center justify-center"
+                  >
+                    <motion.svg
+                      width="12"
+                      height="12"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="3"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      className="text-emerald-400"
+                    >
+                      <motion.path
+                        d="M5 12l5 5L20 7"
+                        initial={{ pathLength: 0 }}
+                        animate={{ pathLength: 1 }}
+                        transition={{ duration: 0.25, ease: EASE.apple }}
+                      />
+                    </motion.svg>
+                  </motion.div>
+                )}
+                {step.status === 'active' && (
+                  <motion.div
+                    className="w-5 h-5 rounded-full border-2 border-amber-400/60 border-t-amber-400"
+                    animate={{ rotate: 360 }}
+                    transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
+                  />
+                )}
+                {step.status === 'pending' && (
+                  <div className="w-5 h-5 rounded-full border-2 border-white/15" />
+                )}
+              </div>
+
+              {/* Label */}
+              <motion.span
+                className={`text-sm font-light tracking-wide transition-colors duration-300 ${
+                  step.status === 'completed' 
+                    ? 'text-emerald-400/90' 
+                    : step.status === 'active'
+                    ? 'text-white/90'
+                    : 'text-white/35'
+                }`}
+              >
+                {step.label}
+              </motion.span>
+            </motion.div>
+          ))}
+        </motion.div>
+
+        {/* Progress Bar */}
+        <motion.div
+          className="pt-2"
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.6, duration: 0.4, ease: EASE.apple }}
+        >
+          <div className="h-1.5 bg-white/10 rounded-full overflow-hidden">
+            <motion.div
+              className="h-full bg-gradient-to-r from-amber-400 to-amber-500 rounded-full"
+              initial={{ width: 0 }}
+              animate={{ width: `${progress}%` }}
+              transition={{ duration: 0.4, ease: EASE.smooth }}
+            />
+          </div>
+          <p className="text-xs text-white/40 text-center mt-3 tracking-wide">
+            {Math.round(progress)}% complete
+          </p>
+        </motion.div>
+      </motion.div>
+    );
+  };
 
   // ===========================================================================
   // SUCCESS CONTENT
@@ -367,8 +590,6 @@ const Demo = () => {
   // FORM CONTENT
   // ===========================================================================
   const FormContent = () => {
-    const isConnecting = connectionStatus === 'connecting';
-    
     return (
       <motion.div
         key={`form-${formKey}`}
@@ -391,24 +612,9 @@ const Demo = () => {
             rotate: { duration: 0.55, ease: EASE.apple },
           }}
         >
-          <motion.div 
-            className="w-16 h-16 rounded-[18px] bg-white shadow-lg shadow-black/20 flex items-center justify-center"
-            animate={isConnecting && !prefersReducedMotion ? {
-              scale: [1, 1.03, 1],
-              boxShadow: [
-                '0 10px 15px -3px rgba(0, 0, 0, 0.2)',
-                '0 10px 25px -3px rgba(255, 188, 0, 0.3)',
-                '0 10px 15px -3px rgba(0, 0, 0, 0.2)',
-              ],
-            } : {}}
-            transition={isConnecting ? {
-              duration: 2,
-              repeat: Infinity,
-              ease: EASE.smooth,
-            } : {}}
-          >
+          <div className="w-16 h-16 rounded-[18px] bg-white shadow-lg shadow-black/20 flex items-center justify-center">
             <HomeAssistantIcon className="w-8 h-8 text-[#302A23]" />
-          </motion.div>
+          </div>
         </motion.div>
 
         {/* Title */}
@@ -441,8 +647,7 @@ const Demo = () => {
               value={baseUrl}
               onChange={(e) => setBaseUrl(e.target.value)}
               placeholder="https://your-instance.ui.nabu.casa"
-              disabled={isConnecting}
-              className="bg-white/[0.05] border-white/8 rounded-xl h-12 text-white placeholder:text-white/35 focus:border-amber-500/40 focus:ring-amber-500/15 disabled:opacity-50 transition-all duration-300"
+              className="bg-white/[0.05] border-white/8 rounded-xl h-12 text-white placeholder:text-white/35 focus:border-amber-500/40 focus:ring-amber-500/15 transition-all duration-300"
             />
             <p className="text-xs text-white/30">
               Your Home Assistant instance URL
@@ -462,8 +667,7 @@ const Demo = () => {
                 value={accessToken}
                 onChange={(e) => setAccessToken(e.target.value)}
                 placeholder="eyJ0eX..."
-                disabled={isConnecting}
-                className="bg-white/[0.05] border-white/8 rounded-xl h-12 text-white placeholder:text-white/35 focus:border-amber-500/40 focus:ring-amber-500/15 pr-12 disabled:opacity-50 transition-all duration-300"
+                className="bg-white/[0.05] border-white/8 rounded-xl h-12 text-white placeholder:text-white/35 focus:border-amber-500/40 focus:ring-amber-500/15 pr-12 transition-all duration-300"
               />
               <button
                 type="button"
@@ -483,17 +687,10 @@ const Demo = () => {
         <AnimatedField delay={STAGGER.button}>
           <Button
             onClick={handleTestConnection}
-            disabled={isConnecting || !baseUrl || !accessToken}
+            disabled={!baseUrl || !accessToken}
             className="w-full h-12 rounded-xl bg-[#FFBC00] hover:bg-[#FFD040] border-0 text-black font-medium uppercase tracking-[0.2em] transition-colors duration-200 disabled:opacity-35 disabled:bg-[#FFBC00]/40"
           >
-            {isConnecting ? (
-              <>
-                <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
-                <span className="tracking-[0.15em]">Connecting...</span>
-              </>
-            ) : (
-              'CONNECT'
-            )}
+            CONNECT
           </Button>
         </AnimatedField>
 
@@ -553,7 +750,8 @@ const Demo = () => {
           <AnimatePresence mode="wait" initial={false}>
             {connectionStatus === 'success' && <SuccessContent />}
             {connectionStatus === 'error' && <ErrorContent />}
-            {(connectionStatus === 'idle' || connectionStatus === 'connecting') && <FormContent />}
+            {connectionStatus === 'connecting' && <ConnectingContent />}
+            {connectionStatus === 'idle' && <FormContent />}
           </AnimatePresence>
         </motion.div>
       </LayoutGroup>
