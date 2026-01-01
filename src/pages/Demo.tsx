@@ -393,12 +393,16 @@ const Demo = () => {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 0.1, duration: TIMING.fast, ease: EASE.smooth }}
+        className="space-y-3"
       >
-        <h2 className="text-xl font-light text-white/90 tracking-wide mb-2">
-          Connection Failed
+        <h2 className="text-xl font-light text-white/90 tracking-wide">
+          Unable to connect
         </h2>
-        <p className="text-sm text-white/45 max-w-[260px] mx-auto leading-relaxed">
-          {errorMessage}
+        <p className="text-sm text-white/45 max-w-[280px] mx-auto leading-relaxed">
+          {"We couldn't authenticate with the provided Home Assistant URL or token."}
+        </p>
+        <p className="text-sm text-white/35 max-w-[280px] mx-auto leading-relaxed">
+          Please review your settings and try again.
         </p>
       </motion.div>
 
@@ -408,13 +412,13 @@ const Demo = () => {
         animate={{ opacity: 1 }}
         transition={{ delay: 0.18, duration: TIMING.fast, ease: EASE.smooth }}
       >
-        <Button
+        <button
           onClick={handleRetry}
-          className="h-11 px-8 rounded-xl bg-white/8 hover:bg-white/12 border border-white/8 text-white/90 font-light transition-all duration-300"
+          className="h-11 px-8 rounded-xl bg-white/[0.06] hover:bg-white/[0.1] border border-white/[0.08] text-white/80 text-sm font-light tracking-wide transition-all duration-300 inline-flex items-center"
         >
-          <RefreshCw className="w-4 h-4 mr-2" />
+          <RefreshCw className="w-4 h-4 mr-2.5 opacity-60" />
           Try Again
-        </Button>
+        </button>
       </motion.div>
     </motion.div>
   );
