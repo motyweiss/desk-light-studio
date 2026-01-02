@@ -180,24 +180,34 @@ const Demo = () => {
   const isValidConnectionRef = useRef(false);
   isValidConnectionRef.current = isValidConnection;
   
+  const isPresentationModeRef = useRef(false);
+  isPresentationModeRef.current = isPresentationMode;
+  
   const handleWizardComplete = useCallback(async () => {
     if (isValidConnectionRef.current) {
       setConnectionStatus('success');
-      await saveConfig(baseUrl, accessToken);
+      
+      // Skip actual save in presentation mode
+      if (!isPresentationModeRef.current) {
+        await saveConfig(baseUrl, accessToken);
+      }
       
       // Return to idle after success animation
       setTimeout(() => {
         setFormKey(prev => prev + 1);
         setConnectionStatus('idle');
+        setIsPresentationMode(false);
       }, 3500);
     } else {
       setConnectionStatus('error');
+      setIsPresentationMode(false);
     }
   }, [baseUrl, accessToken, saveConfig]);
 
   const handleRetry = useCallback(() => {
     setFormKey(prev => prev + 1); // Trigger re-animation
     setConnectionStatus('idle');
+    setIsPresentationMode(false);
   }, []);
 
   // ===========================================================================
