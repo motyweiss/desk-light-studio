@@ -88,8 +88,6 @@ const Demo = () => {
   const [connectionStatus, setConnectionStatus] = useState<ConnectionStatus>('idle');
   const [formKey, setFormKey] = useState(0); // Key to trigger re-animation
   const [isValidConnection, setIsValidConnection] = useState(false);
-  const [isPresentationMode, setIsPresentationMode] = useState(false);
-  const presentationTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   // Load access token from config
   useEffect(() => {
@@ -97,64 +95,6 @@ const Demo = () => {
       setAccessToken(config.accessToken);
     }
   }, [config]);
-
-  // Presentation mode - auto-fill fields and connect
-  const startPresentation = useCallback(() => {
-    // Clear any existing timeouts first
-    if (presentationTimeoutRef.current) {
-      clearTimeout(presentationTimeoutRef.current);
-    }
-
-    // Only reset values, don't reset formKey to avoid re-animation conflicts
-    setBaseUrl('');
-    setAccessToken('');
-    setConnectionStatus('idle');
-    setIsPresentationMode(true);
-
-    // Typing animation values
-    const baseUrlValue = 'https://ui.nabu.casa';
-    const tokenValue = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJmOTk0YjJkNTg1';
-    let urlIndex = 0;
-    let tokenIndex = 0;
-
-    const typeUrl = () => {
-      if (urlIndex <= baseUrlValue.length) {
-        setBaseUrl(baseUrlValue.slice(0, urlIndex));
-        urlIndex++;
-        presentationTimeoutRef.current = setTimeout(typeUrl, 50 + Math.random() * 30);
-      } else {
-        // Pause after URL before typing token
-        presentationTimeoutRef.current = setTimeout(typeToken, 400);
-      }
-    };
-
-    const typeToken = () => {
-      if (tokenIndex <= tokenValue.length) {
-        setAccessToken(tokenValue.slice(0, tokenIndex));
-        tokenIndex++;
-        presentationTimeoutRef.current = setTimeout(typeToken, 25 + Math.random() * 20);
-      } else {
-        // Pause to let user see completed form, then trigger connect
-        presentationTimeoutRef.current = setTimeout(() => {
-          setIsValidConnection(true);
-          setConnectionStatus('connecting');
-        }, 800);
-      }
-    };
-
-    // Wait for form to be fully visible before starting to type
-    // Form animation takes ~1.1s (last stagger 0.48 + animation 0.6)
-    presentationTimeoutRef.current = setTimeout(typeUrl, 1200);
-  }, []);
-
-  // Cleanup presentation timeout on unmount
-  useEffect(() => {
-    return () => {
-      if (presentationTimeoutRef.current) {
-        clearTimeout(presentationTimeoutRef.current);
-      }
-    };
-  }, []);
 
   const handleTestConnection = useCallback(async () => {
     if (!baseUrl || !accessToken) {
@@ -180,37 +120,24 @@ const Demo = () => {
   const isValidConnectionRef = useRef(false);
   isValidConnectionRef.current = isValidConnection;
   
-  const isPresentationModeRef = useRef(false);
-  isPresentationModeRef.current = isPresentationMode;
-  
   const handleWizardComplete = useCallback(async () => {
     if (isValidConnectionRef.current) {
       setConnectionStatus('success');
-      
-      // Skip actual save in presentation mode
-      if (!isPresentationModeRef.current) {
-        await saveConfig(baseUrl, accessToken);
-      }
+      await saveConfig(baseUrl, accessToken);
       
       // Return to idle after success animation
       setTimeout(() => {
-        // Reset form for next presentation
-        setBaseUrl('');
-        setAccessToken('');
+        setFormKey(prev => prev + 1);
         setConnectionStatus('idle');
-        setIsPresentationMode(false);
       }, 3500);
     } else {
       setConnectionStatus('error');
-      setIsPresentationMode(false);
     }
   }, [baseUrl, accessToken, saveConfig]);
 
   const handleRetry = useCallback(() => {
-    setBaseUrl('');
-    setAccessToken('');
+    setFormKey(prev => prev + 1); // Trigger re-animation
     setConnectionStatus('idle');
-    setIsPresentationMode(false);
   }, []);
 
   // ===========================================================================
@@ -809,23 +736,13 @@ const Demo = () => {
             <label className="text-xs font-medium text-white/55 uppercase tracking-wider">
               Base URL
             </label>
-            <div className="relative">
-              <Input
-                type="url"
-                value={baseUrl}
-                onChange={(e) => setBaseUrl(e.target.value)}
-                placeholder="https://your-instance.ui.nabu.casa"
-                className="bg-white/[0.05] border-white/10 rounded-xl h-12 text-white placeholder:text-white/35 focus-visible:ring-amber-500/25 focus-visible:border-amber-500/50 transition-all duration-300"
-              />
-              {/* Typing cursor for presentation mode */}
-              {isPresentationMode && baseUrl.length > 0 && baseUrl.length < 21 && (
-                <motion.span
-                  className="absolute right-3 top-1/2 -translate-y-1/2 w-0.5 h-5 bg-amber-400"
-                  animate={{ opacity: [1, 0] }}
-                  transition={{ duration: 0.5, repeat: Infinity }}
-                />
-              )}
-            </div>
+            <Input
+              type="url"
+              value={baseUrl}
+              onChange={(e) => setBaseUrl(e.target.value)}
+              placeholder="https://your-instance.ui.nabu.casa"
+              className="bg-white/[0.05] border-white/10 rounded-xl h-12 text-white placeholder:text-white/35 focus-visible:ring-amber-500/25 focus-visible:border-amber-500/50 transition-all duration-300"
+            />
             <p className="text-xs text-white/30">
               Your Home Assistant instance URL
             </p>
@@ -853,14 +770,6 @@ const Demo = () => {
               >
                 {showToken ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
               </button>
-              {/* Typing cursor for presentation mode */}
-              {isPresentationMode && accessToken.length > 0 && accessToken.length < 60 && (
-                <motion.span
-                  className="absolute right-12 top-1/2 -translate-y-1/2 w-0.5 h-5 bg-amber-400"
-                  animate={{ opacity: [1, 0] }}
-                  transition={{ duration: 0.5, repeat: Infinity }}
-                />
-              )}
             </div>
             <p className="text-xs text-white/30">
               Long-lived access token from your profile
@@ -902,19 +811,6 @@ const Demo = () => {
   // ===========================================================================
   return (
     <div className="min-h-screen relative flex items-center justify-center p-4 bg-[#A59587]">
-      {/* Presentation Mode Button */}
-      <motion.button
-        onClick={startPresentation}
-        className="fixed top-6 right-6 z-50 px-4 py-2 rounded-xl bg-white/10 backdrop-blur-md border border-white/20 text-white/70 text-sm font-light tracking-wide hover:bg-white/15 hover:text-white/90 transition-all duration-300"
-        initial={{ opacity: 0, y: -10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 1, duration: 0.4, ease: EASE.apple }}
-        whileHover={{ scale: 1.02 }}
-        whileTap={{ scale: 0.98 }}
-      >
-        {isPresentationMode ? 'Replaying...' : 'הצגה'}
-      </motion.button>
-
       {/* Main Card */}
       <LayoutGroup>
         <motion.div
