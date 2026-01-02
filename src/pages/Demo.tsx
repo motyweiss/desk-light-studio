@@ -203,11 +203,9 @@ const Demo = () => {
       }
 
       if (currentStepIndex >= WIZARD_STEPS.length) {
-        // All steps completed, wait a moment then transition
-        const timer = setTimeout(() => {
-          handleWizardComplete();
-        }, 500);
-        return () => clearTimeout(timer);
+        // All steps completed, transition immediately
+        handleWizardComplete();
+        return;
       }
 
       // Progress to next step after delay
