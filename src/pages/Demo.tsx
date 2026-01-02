@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { motion, AnimatePresence, LayoutGroup } from 'framer-motion';
-import { Eye, EyeOff, RefreshCw, ExternalLink, X, Plug, KeyRound, LampDesk, BedDouble, Sparkles, LucideIcon } from 'lucide-react';
+import { Eye, EyeOff, RefreshCw, ExternalLink, X, Plug, KeyRound, LampDesk, BedDouble, Moon, Sparkles, LucideIcon } from 'lucide-react';
 import { HomeAssistantIcon } from '@/components/icons/HomeAssistantIcon';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -26,6 +26,7 @@ const WIZARD_STEPS: Omit<WizardStep, 'status'>[] = [
   { id: 'auth', label: 'Verifying access credentials...', icon: KeyRound },
   { id: 'devices', label: 'Found 24 devices...', icon: LampDesk },
   { id: 'rooms', label: 'Discovered 5 rooms...', icon: BedDouble },
+  { id: 'scenes', label: 'Loading 8 scenes...', icon: Moon },
   { id: 'sync', label: 'Analyzing usage patterns...', icon: Sparkles },
 ];
 
