@@ -1,8 +1,7 @@
 import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { motion, AnimatePresence, LayoutGroup } from 'framer-motion';
-import { Eye, EyeOff, RefreshCw, ExternalLink, ArrowLeft, X, Wifi, KeyRound, LayoutGrid, Sparkles, LucideIcon } from 'lucide-react';
+import { Eye, EyeOff, RefreshCw, ExternalLink, X, Wifi, KeyRound, LayoutGrid, Sparkles, LucideIcon } from 'lucide-react';
 import { HomeAssistantIcon } from '@/components/icons/HomeAssistantIcon';
-import { useNavigate } from 'react-router-dom';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { useHAConnection } from '@/contexts/HAConnectionContext';
@@ -77,7 +76,6 @@ const getContentTransition = (isEntering: boolean) => ({
 // =============================================================================
 
 const Demo = () => {
-  const navigate = useNavigate();
   const { config, saveConfig } = useHAConnection();
   const { toast } = useToast();
   const prefersReducedMotion = useReducedMotion();
