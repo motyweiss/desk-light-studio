@@ -192,8 +192,8 @@ const Demo = () => {
     const [currentStepIndex, setCurrentStepIndex] = useState(0);
 
     useEffect(() => {
-      // After first step completes, trigger error
-      if (currentStepIndex === 1) {
+      // After first step completes, trigger error if URL is invalid
+      if (currentStepIndex === 1 && !isValidConnectionRef.current) {
         const errorTimer = setTimeout(() => {
           setConnectionStatus('error');
         }, 300);
