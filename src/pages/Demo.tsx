@@ -88,6 +88,8 @@ const Demo = () => {
   const [connectionStatus, setConnectionStatus] = useState<ConnectionStatus>('idle');
   const [formKey, setFormKey] = useState(0); // Key to trigger re-animation
   const [isValidConnection, setIsValidConnection] = useState(false);
+  const [isPresentationMode, setIsPresentationMode] = useState(false);
+  const presentationTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   // Load access token from config
   useEffect(() => {
@@ -95,6 +97,64 @@ const Demo = () => {
       setAccessToken(config.accessToken);
     }
   }, [config]);
+
+  // Presentation mode - auto-fill fields and connect
+  const startPresentation = useCallback(() => {
+    // Reset to initial state
+    setBaseUrl('');
+    setAccessToken('');
+    setFormKey(prev => prev + 1);
+    setConnectionStatus('idle');
+    setIsPresentationMode(true);
+
+    // Clear any existing timeouts
+    if (presentationTimeoutRef.current) {
+      clearTimeout(presentationTimeoutRef.current);
+    }
+
+    // Typing animation for base URL
+    const baseUrlValue = 'https://ui.nabu.casa';
+    const tokenValue = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJmOTk0YjJkNTg1';
+    let urlIndex = 0;
+    let tokenIndex = 0;
+
+    const typeUrl = () => {
+      if (urlIndex <= baseUrlValue.length) {
+        setBaseUrl(baseUrlValue.slice(0, urlIndex));
+        urlIndex++;
+        presentationTimeoutRef.current = setTimeout(typeUrl, 45 + Math.random() * 25);
+      } else {
+        // Start typing token after URL is complete
+        presentationTimeoutRef.current = setTimeout(typeToken, 300);
+      }
+    };
+
+    const typeToken = () => {
+      if (tokenIndex <= tokenValue.length) {
+        setAccessToken(tokenValue.slice(0, tokenIndex));
+        tokenIndex++;
+        presentationTimeoutRef.current = setTimeout(typeToken, 20 + Math.random() * 15);
+      } else {
+        // Click connect after token is complete
+        presentationTimeoutRef.current = setTimeout(() => {
+          setIsValidConnection(true);
+          setConnectionStatus('connecting');
+        }, 600);
+      }
+    };
+
+    // Start typing after form animation completes
+    presentationTimeoutRef.current = setTimeout(typeUrl, 800);
+  }, []);
+
+  // Cleanup presentation timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (presentationTimeoutRef.current) {
+        clearTimeout(presentationTimeoutRef.current);
+      }
+    };
+  }, []);
 
   const handleTestConnection = useCallback(async () => {
     if (!baseUrl || !accessToken) {
@@ -811,6 +871,19 @@ const Demo = () => {
   // ===========================================================================
   return (
     <div className="min-h-screen relative flex items-center justify-center p-4 bg-[#A59587]">
+      {/* Presentation Mode Button */}
+      <motion.button
+        onClick={startPresentation}
+        className="fixed top-6 right-6 z-50 px-4 py-2 rounded-xl bg-white/10 backdrop-blur-md border border-white/20 text-white/70 text-sm font-light tracking-wide hover:bg-white/15 hover:text-white/90 transition-all duration-300"
+        initial={{ opacity: 0, y: -10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 1, duration: 0.4, ease: EASE.apple }}
+        whileHover={{ scale: 1.02 }}
+        whileTap={{ scale: 0.98 }}
+      >
+        {isPresentationMode ? 'Replaying...' : 'הצגה'}
+      </motion.button>
+
       {/* Main Card */}
       <LayoutGroup>
         <motion.div
