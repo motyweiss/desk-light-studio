@@ -291,7 +291,7 @@ const Demo = () => {
                 ease: [0.4, 0, 0.2, 1],
               }}
             >
-              <HomeAssistantIcon className="w-8 h-8 text-[#302A23]" animate={true} animationDelay={0.2} />
+              <HomeAssistantIcon className="w-8 h-8 text-[#302A23]" />
             </motion.div>
           </div>
         </div>
