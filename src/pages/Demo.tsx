@@ -358,16 +358,40 @@ const Demo = () => {
                     ease: EASE.apple,
                   }}
                 >
-                  {/* Step Icon */}
-                  <StepIcon 
-                    className={`w-4 h-4 flex-shrink-0 transition-colors duration-300 ${
-                      isCompleted 
-                        ? 'text-amber-400/70' 
-                        : isActive
-                        ? 'text-amber-400'
-                        : 'text-white/30'
-                    }`}
-                  />
+                  {/* Step Icon with drawing animation */}
+                  <motion.div
+                    className="relative w-4 h-4 flex-shrink-0"
+                    initial={isActive ? { scale: 0.8, opacity: 0 } : {}}
+                    animate={{ scale: 1, opacity: 1 }}
+                    transition={{ duration: 0.3, ease: EASE.apple }}
+                  >
+                    <StepIcon 
+                      className={`w-4 h-4 transition-colors duration-300 ${
+                        isCompleted 
+                          ? 'text-amber-400/70' 
+                          : isActive
+                          ? 'text-amber-400'
+                          : 'text-white/30'
+                      }`}
+                      strokeWidth={1.5}
+                      fill="none"
+                    />
+                    {/* Drawing animation overlay for active state */}
+                    {isActive && (
+                      <motion.div
+                        className="absolute inset-0 overflow-hidden"
+                        initial={{ clipPath: 'inset(0 100% 0 0)' }}
+                        animate={{ clipPath: 'inset(0 0% 0 0)' }}
+                        transition={{ duration: 0.6, ease: EASE.apple }}
+                      >
+                        <StepIcon 
+                          className="w-4 h-4 text-amber-400"
+                          strokeWidth={1.5}
+                          fill="none"
+                        />
+                      </motion.div>
+                    )}
+                  </motion.div>
 
                   {/* Label */}
                   <span
