@@ -17,6 +17,7 @@ import Settings from "./pages/Settings";
 import DesignSystem from "./pages/DesignSystem";
 import Demo from "./pages/Demo";
 import MediaPlayerDemo from "./pages/MediaPlayerDemo";
+import DeviceDiscoveryDemo from "./pages/DeviceDiscoveryDemo";
 import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
 
@@ -39,6 +40,7 @@ const App = () => (
                       {/* Demo page - standalone */}
                       <Route path="/demo" element={<ProtectedRoute><Demo /></ProtectedRoute>} />
                       <Route path="/demo/player" element={<ProtectedRoute><MediaPlayerDemo /></ProtectedRoute>} />
+                      <Route path="/demo/discovery" element={<ProtectedRoute><DeviceDiscoveryDemo /></ProtectedRoute>} />
                       
                       {/* All other pages inside RootLayout */}
                       <Route element={<RootLayout><Outlet /></RootLayout>}>
