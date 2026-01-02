@@ -318,52 +318,71 @@ const RoomSection = memo(({
 
 RoomSection.displayName = "RoomSection";
 
-// Radar Animation Component
+// Radar Animation Component - Apple-inspired elegant design
 const RadarAnimation = memo(() => (
-  <div className="relative w-32 h-32 mx-auto mb-6">
-    {/* Background circles */}
-    {[1, 2, 3].map((i) => (
+  <div className="relative w-28 h-28 mx-auto mb-8">
+    {/* Static concentric circles */}
+    {[0.35, 0.6, 0.85, 1].map((scale, i) => (
       <motion.div
         key={i}
-        className="absolute inset-0 rounded-full border border-primary/20"
-        style={{ scale: i * 0.3 + 0.1 }}
+        className="absolute inset-0 rounded-full border border-white/[0.08]"
+        style={{ transform: `scale(${scale})` }}
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: i * 0.1, duration: 0.5 }}
       />
     ))}
     
-    {/* Sweep effect */}
+    {/* Elegant sweep gradient */}
     <motion.div
-      className="absolute inset-0"
+      className="absolute inset-0 rounded-full overflow-hidden"
       animate={{ rotate: 360 }}
-      transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
+      transition={{ duration: 4, repeat: Infinity, ease: "linear" }}
     >
       <div 
-        className="absolute top-1/2 left-1/2 w-1/2 h-1 origin-left"
+        className="absolute inset-0"
         style={{
-          background: "linear-gradient(90deg, rgba(var(--primary-rgb), 0.8), transparent)",
-          transform: "translateY(-50%)",
+          background: `conic-gradient(
+            from 0deg,
+            transparent 0deg,
+            rgba(251, 191, 36, 0.15) 30deg,
+            rgba(251, 191, 36, 0.4) 60deg,
+            rgba(251, 191, 36, 0.15) 90deg,
+            transparent 120deg,
+            transparent 360deg
+          )`,
         }}
       />
     </motion.div>
     
-    {/* Center dot */}
-    <motion.div
-      className="absolute top-1/2 left-1/2 w-4 h-4 -translate-x-1/2 -translate-y-1/2 rounded-full bg-primary"
-      animate={{ scale: [1, 1.2, 1] }}
-      transition={{ duration: 1, repeat: Infinity }}
-    />
+    {/* Center icon container */}
+    <motion.div 
+      className="absolute inset-0 flex items-center justify-center"
+      initial={{ scale: 0.8, opacity: 0 }}
+      animate={{ scale: 1, opacity: 1 }}
+      transition={{ delay: 0.2, ...SPRING.gentle }}
+    >
+      <motion.div 
+        className="w-14 h-14 rounded-2xl bg-white shadow-lg shadow-black/20 flex items-center justify-center"
+        animate={{ scale: [1, 1.03, 1] }}
+        transition={{ duration: 2.5, repeat: Infinity, ease: [0.4, 0, 0.2, 1] }}
+      >
+        <Radar className="w-7 h-7 text-[#302A23]" strokeWidth={1.5} />
+      </motion.div>
+    </motion.div>
     
-    {/* Pulse rings */}
-    {[0, 1, 2].map((i) => (
+    {/* Soft pulse rings */}
+    {[0, 1].map((i) => (
       <motion.div
         key={i}
-        className="absolute inset-0 rounded-full border-2 border-primary"
-        initial={{ scale: 0.3, opacity: 0.8 }}
-        animate={{ scale: 1.2, opacity: 0 }}
+        className="absolute inset-0 rounded-full border border-amber-400/30"
+        initial={{ scale: 0.5, opacity: 0 }}
+        animate={{ scale: 1.1, opacity: [0.4, 0] }}
         transition={{ 
-          duration: 2, 
+          duration: 2.5, 
           repeat: Infinity, 
-          delay: i * 0.6,
-          ease: "easeOut"
+          delay: i * 1.2,
+          ease: [0.4, 0, 0.2, 1]
         }}
       />
     ))}
@@ -480,24 +499,31 @@ const DeviceDiscoveryDemo = () => {
   let deviceIndex = 0;
 
   return (
-    <div className="min-h-screen bg-[#2a2420] flex items-center justify-center p-4 overflow-hidden">
-      {/* Ambient background */}
-      <div className="fixed inset-0 pointer-events-none">
+    <div className="min-h-screen bg-[#302A23] flex items-center justify-center p-4 overflow-hidden">
+      {/* Ambient background - matching main demo */}
+      <div className="fixed inset-0 pointer-events-none overflow-hidden">
+        {/* Warm ambient glow - top left */}
         <motion.div
-          className="absolute top-1/4 left-1/4 w-[600px] h-[600px] rounded-full blur-[150px]"
-          style={{ background: "radial-gradient(circle, rgba(var(--primary-rgb), 0.08), transparent 70%)" }}
+          className="absolute -top-32 -left-32 w-[500px] h-[500px] rounded-full"
+          style={{ 
+            background: "radial-gradient(circle, rgba(251, 191, 36, 0.06), transparent 70%)",
+            filter: "blur(80px)"
+          }}
+          animate={{ 
+            scale: [1, 1.08, 1],
+            opacity: [0.6, 0.8, 0.6],
+          }}
+          transition={{ duration: 8, repeat: Infinity, ease: [0.4, 0, 0.2, 1] }}
+        />
+        {/* Subtle cool accent - bottom right */}
+        <motion.div
+          className="absolute -bottom-24 -right-24 w-[400px] h-[400px] rounded-full"
+          style={{ 
+            background: "radial-gradient(circle, rgba(120, 100, 80, 0.05), transparent 70%)",
+            filter: "blur(60px)"
+          }}
           animate={{ 
             scale: [1, 1.1, 1],
-            x: [0, 30, 0],
-            y: [0, -20, 0],
-          }}
-          transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }}
-        />
-        <motion.div
-          className="absolute bottom-1/4 right-1/4 w-[500px] h-[500px] rounded-full blur-[120px]"
-          style={{ background: "radial-gradient(circle, rgba(251,191,36,0.05), transparent 70%)" }}
-          animate={{ 
-            scale: [1, 1.15, 1],
             x: [0, -20, 0],
             y: [0, 30, 0],
           }}
@@ -545,33 +571,60 @@ const DeviceDiscoveryDemo = () => {
               {scanState === "idle" && (
                 <motion.div
                   key="idle"
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -20 }}
-                  transition={{ duration: 0.4, ease: EASE.smooth }}
-                  className="text-center py-8"
+                  initial={{ opacity: 0, scale: 0.97 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.98, filter: "blur(4px)" }}
+                  transition={{ duration: 0.5, ease: [0.25, 0.46, 0.45, 0.94] }}
+                  className="text-center py-10"
                 >
-                  <motion.div
-                    className="w-20 h-20 mx-auto mb-6 rounded-full bg-primary/5 flex items-center justify-center"
-                    animate={{ 
-                      boxShadow: ["0 0 0px rgba(var(--primary-rgb), 0)", "0 0 40px rgba(var(--primary-rgb), 0.2)", "0 0 0px rgba(var(--primary-rgb), 0)"]
-                    }}
-                    transition={{ duration: 3, repeat: Infinity }}
+                  {/* Idle radar icon */}
+                  <motion.div 
+                    className="relative w-24 h-24 mx-auto mb-8"
+                    initial={{ scale: 0.9, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    transition={{ delay: 0.1, duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
                   >
-                    <Radar className="w-10 h-10 text-primary/60" strokeWidth={1} />
+                    {/* Subtle rings */}
+                    {[0.4, 0.7, 1].map((scale, i) => (
+                      <motion.div
+                        key={i}
+                        className="absolute inset-0 rounded-full border border-white/[0.06]"
+                        style={{ transform: `scale(${scale})` }}
+                      />
+                    ))}
+                    {/* Center icon */}
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <motion.div 
+                        className="w-14 h-14 rounded-2xl bg-white shadow-lg shadow-black/20 flex items-center justify-center"
+                        animate={{ scale: [1, 1.02, 1] }}
+                        transition={{ duration: 3, repeat: Infinity, ease: [0.4, 0, 0.2, 1] }}
+                      >
+                        <Radar className="w-7 h-7 text-[#302A23]" strokeWidth={1.5} />
+                      </motion.div>
+                    </div>
                   </motion.div>
-                  <p className="text-muted-foreground/60 mb-6">
-                    Ready to discover smart devices on your network
-                  </p>
+                  
+                  <motion.p 
+                    className="text-white/50 font-light mb-8 text-sm"
+                    initial={{ opacity: 0, y: 8 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.2, duration: 0.4 }}
+                  >
+                    Ready to discover smart devices
+                  </motion.p>
+                  
                   <motion.div
+                    initial={{ opacity: 0, y: 12 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.3, duration: 0.5 }}
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
                   >
                     <Button 
                       onClick={startScanning}
-                      className="px-8 py-6 text-base rounded-2xl bg-primary hover:bg-primary/90"
+                      className="px-8 py-5 text-sm font-medium rounded-2xl bg-white text-[#302A23] hover:bg-white/90 shadow-lg shadow-black/20"
                     >
-                      <Radar className="w-5 h-5 mr-2" />
+                      <Radar className="w-4 h-4 mr-2" />
                       Start Scanning
                     </Button>
                   </motion.div>
@@ -582,39 +635,55 @@ const DeviceDiscoveryDemo = () => {
               {scanState === "scanning" && (
                 <motion.div
                   key="scanning"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                  transition={{ duration: 0.4 }}
+                  initial={{ opacity: 0, scale: 0.98 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.98, filter: "blur(4px)" }}
+                  transition={{ duration: 0.5, ease: [0.25, 0.46, 0.45, 0.94] }}
+                  className="py-4"
                 >
                   <RadarAnimation />
                   <DiscoveredCounter count={discoveredDevices.length} total={DEMO_DEVICES.length} />
                   
                   {/* Discovered devices preview */}
-                  <LayoutGroup>
-                    <div className="space-y-1 mt-4">
-                      <AnimatePresence>
-                        {discoveredDevices.slice(-4).map((device, i) => (
+                  <motion.div 
+                    className="space-y-2 mt-6"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ delay: 0.3 }}
+                  >
+                    <AnimatePresence mode="popLayout">
+                      {discoveredDevices.slice(-4).map((device, i) => {
+                        const Icon = getDeviceIcon(device.type);
+                        const fadeMultiplier = discoveredDevices.length > 3 ? 0.15 : 0;
+                        return (
                           <motion.div
                             key={device.id}
                             layout
-                            initial={{ opacity: 0, x: -30, scale: 0.8 }}
-                            animate={{ opacity: 1 - i * 0.2, x: 0, scale: 1 - i * 0.02 }}
-                            exit={{ opacity: 0, x: 30 }}
-                            transition={SPRING.gentle}
-                            className="flex items-center gap-3 px-3 py-2 rounded-xl bg-white/5 border border-white/5"
+                            initial={{ opacity: 0, y: 16, filter: "blur(8px)" }}
+                            animate={{ 
+                              opacity: 1 - (i * fadeMultiplier), 
+                              y: 0, 
+                              filter: "blur(0px)",
+                              scale: 1 - (i * 0.01)
+                            }}
+                            exit={{ opacity: 0, y: -8, filter: "blur(4px)" }}
+                            transition={{ 
+                              duration: 0.4, 
+                              ease: [0.25, 0.46, 0.45, 0.94],
+                              layout: { duration: 0.3 }
+                            }}
+                            className="flex items-center gap-3 px-4 py-3 rounded-xl bg-white/[0.04] border border-white/[0.06]"
                           >
-                            {(() => {
-                              const Icon = getDeviceIcon(device.type);
-                              return <Icon className="w-4 h-4 text-primary/60" strokeWidth={1.5} />;
-                            })()}
-                            <span className="text-sm text-foreground/70 truncate">{device.name}</span>
-                            <span className="text-xs text-muted-foreground/40 ml-auto">{device.room}</span>
+                            <div className="w-8 h-8 rounded-lg bg-white/[0.06] flex items-center justify-center">
+                              <Icon className="w-4 h-4 text-amber-400/70" strokeWidth={1.5} />
+                            </div>
+                            <span className="text-sm text-white/70 font-light truncate flex-1">{device.name}</span>
+                            <span className="text-xs text-white/30">{device.room}</span>
                           </motion.div>
-                        ))}
-                      </AnimatePresence>
-                    </div>
-                  </LayoutGroup>
+                        );
+                      })}
+                    </AnimatePresence>
+                  </motion.div>
                 </motion.div>
               )}
 
@@ -622,39 +691,50 @@ const DeviceDiscoveryDemo = () => {
               {scanState === "results" && (
                 <motion.div
                   key="results"
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -20 }}
-                  transition={{ duration: 0.5, ease: EASE.entrance }}
+                  initial={{ opacity: 0, scale: 0.98 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.98, filter: "blur(4px)" }}
+                  transition={{ duration: 0.5, ease: [0.25, 0.46, 0.45, 0.94] }}
                 >
                   {/* Search */}
-                  <div className="relative mb-4">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground/40" />
+                  <motion.div 
+                    className="relative mb-5"
+                    initial={{ opacity: 0, y: 12 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.1, duration: 0.4 }}
+                  >
+                    <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-white/30" />
                     <Input
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
                       placeholder="Search devices..."
-                      className="pl-10 bg-white/5 border-white/10 rounded-xl focus:border-primary/30"
+                      className="pl-11 py-3 bg-white/[0.04] border-white/[0.08] rounded-xl text-white placeholder:text-white/30 focus:border-amber-400/30 focus:bg-white/[0.06] transition-all duration-300"
                     />
-                  </div>
+                  </motion.div>
 
                   {/* Device list by room */}
                   <LayoutGroup>
-                    {Object.entries(devicesByRoom).map(([room, devices]) => {
+                    {Object.entries(devicesByRoom).map(([room, devices], roomIndex) => {
                       const startIdx = deviceIndex;
                       deviceIndex += devices.length;
                       return (
-                        <RoomSection
+                        <motion.div
                           key={room}
-                          room={room}
-                          devices={devices}
-                          addedDevices={addedDevices}
-                          onToggleDevice={toggleDevice}
-                          isExpanded={expandedRooms.has(room)}
-                          onToggleExpand={() => toggleRoom(room)}
-                          searchQuery={searchQuery}
-                          startIndex={startIdx}
-                        />
+                          initial={{ opacity: 0, y: 16 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ delay: 0.15 + roomIndex * 0.08, duration: 0.4 }}
+                        >
+                          <RoomSection
+                            room={room}
+                            devices={devices}
+                            addedDevices={addedDevices}
+                            onToggleDevice={toggleDevice}
+                            isExpanded={expandedRooms.has(room)}
+                            onToggleExpand={() => toggleRoom(room)}
+                            searchQuery={searchQuery}
+                            startIndex={startIdx}
+                          />
+                        </motion.div>
                       );
                     })}
                   </LayoutGroup>
@@ -666,18 +746,19 @@ const DeviceDiscoveryDemo = () => {
           {/* Footer */}
           {scanState === "results" && (
             <motion.div
-              initial={{ opacity: 0, y: 20 }}
+              initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.3, ...SPRING.gentle }}
-              className="p-4 border-t border-white/5 bg-black/20"
+              transition={{ delay: 0.4, duration: 0.5, ease: [0.25, 0.46, 0.45, 0.94] }}
+              className="p-5 border-t border-white/[0.06] bg-black/30"
             >
-              <div className="flex items-center justify-between mb-3">
-                <span className="text-sm text-muted-foreground/60">
+              <div className="flex items-center justify-between mb-4">
+                <span className="text-sm text-white/40 font-light">
                   <motion.span
                     key={addedDevices.size}
-                    initial={{ scale: 1.3 }}
-                    animate={{ scale: 1 }}
-                    className="text-foreground font-medium"
+                    initial={{ scale: 1.2, opacity: 0.5 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    transition={{ type: "spring", stiffness: 300, damping: 20 }}
+                    className="text-white font-medium"
                   >
                     {addedDevices.size}
                   </motion.span>
@@ -687,25 +768,25 @@ const DeviceDiscoveryDemo = () => {
                   variant="ghost"
                   size="sm"
                   onClick={reset}
-                  className="text-muted-foreground/60 hover:text-foreground"
+                  className="text-white/40 hover:text-white hover:bg-white/5 transition-all duration-200"
                 >
                   Reset
                 </Button>
               </div>
-              <div className="flex gap-2">
-                <motion.div className="flex-1" whileHover={{ scale: 1.01 }} whileTap={{ scale: 0.99 }}>
+              <div className="flex gap-3">
+                <motion.div className="flex-1" whileHover={{ scale: 1.01 }} whileTap={{ scale: 0.98 }}>
                   <Button
                     onClick={addAll}
                     variant="outline"
-                    className="w-full rounded-xl border-white/10 hover:bg-white/5"
+                    className="w-full py-5 rounded-xl border-white/10 bg-white/[0.03] hover:bg-white/[0.06] text-white/70 hover:text-white transition-all duration-200"
                     disabled={addedDevices.size === discoveredDevices.length}
                   >
                     Select All
                   </Button>
                 </motion.div>
-                <motion.div className="flex-1" whileHover={{ scale: 1.01 }} whileTap={{ scale: 0.99 }}>
+                <motion.div className="flex-1" whileHover={{ scale: 1.01 }} whileTap={{ scale: 0.98 }}>
                   <Button
-                    className="w-full rounded-xl bg-primary hover:bg-primary/90"
+                    className="w-full py-5 rounded-xl bg-white text-[#302A23] hover:bg-white/90 shadow-lg shadow-black/20 transition-all duration-200"
                     disabled={addedDevices.size === 0}
                   >
                     Add {addedDevices.size > 0 && `(${addedDevices.size})`}
